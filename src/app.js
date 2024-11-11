@@ -56,11 +56,11 @@ app.use(
 
 // Middleware de autenticação
 function Autenticado(req, res, next) {
-  if (req.session && req.session.user) {
-    return next();
-  } else {
-    res.redirect('/');
-  }
+    if (!req.session.user) {
+        console.log("Usuário não autenticado, redirecionando para login...");
+        return res.status(401).json({ error: 'Não autorizado' });
+    }
+    next();
 }
 
 app.use(express.json());
@@ -119,8 +119,15 @@ app.listen(PORT, () => {
 });
 
 app.get('/Relatorio', Autenticado, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'Relatorio.html'));
+    const filePath = path.join(__dirname, 'public', 'Relatorio.html');
+    console.log('Caminho do arquivo Relatorio:', filePath); // Verifique se o caminho está correto
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error('Erro ao enviar arquivo:', err);
+        }
+    });
 });
+
 
 app.get('/Usuarios', Autenticado, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'Usuarios.html'));
