@@ -358,7 +358,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	loadLaboratorios2();
 });
 
-
 function updatePaginationConsumos(totalPages, currentPage, startDate = '', endDate = '', laboratorio = 'todos') {
     const paginationDiv = document.getElementById('pagination2');
     paginationDiv.innerHTML = ''; 

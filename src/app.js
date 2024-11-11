@@ -1164,13 +1164,13 @@ app.get('/api/produtoPag', Autenticado, async (req, res) => {
 app.get('/api/tabelaregistraentradaInico', Autenticado, async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
-  
+
         // Validação do formato de data (YYYY-MM-DD)
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if ((startDate && !dateRegex.test(startDate)) || (endDate && !dateRegex.test(endDate))) {
             return res.status(400).json({ error: 'As datas devem estar no formato YYYY-MM-DD.' });
         }
-  
+
         let query = `
             SELECT 
                 r.id_entrada, 
@@ -1184,19 +1184,21 @@ app.get('/api/tabelaregistraentradaInico', Autenticado, async (req, res) => {
         
         const params = [];
         if (startDate && endDate) {
-            query += ' WHERE r.data_entrada BETWEEN ? AND ?';
+            query += ' WHERE r.data_entrada BETWEEN $1 AND $2'; // Usando placeholders do PostgreSQL
             params.push(startDate, endDate);
         }
-  
+
         query += ' ORDER BY r.data_entrada DESC';
-  
-        const [rows] = await pool.execute(query, params); // Usando pool
+
+        // Usando pool.query() para executar a consulta no PostgreSQL
+        const { rows } = await pool.query(query, params); // Correção aqui
+
         res.json(rows);
     } catch (error) {
         console.error('Erro ao buscar registros de entrada:', error);
         res.status(500).json({ error: 'Erro ao buscar registros de entrada' });
     }
-  });
+});
 
   app.get('/api/tabelaregistraentrada', Autenticado, async (req, res) => {
     try {
@@ -1346,7 +1348,6 @@ app.get('/api/tabelaregistraentradaInico', Autenticado, async (req, res) => {
         res.status(500).json({ error: 'Erro ao buscar registros de consumo' });
     }
   });
-
   app.post('/api/filter_records', Autenticado, async (req, res) => {
     try {
       const { startDate, endDate } = req.body; 
