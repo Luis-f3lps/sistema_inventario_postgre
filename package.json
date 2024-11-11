@@ -22,7 +22,8 @@
     "express-session": "^1.18.0",
     "pg": "^8.9.0",  
     "pdfkit": "^0.15.0",
-    "moment": "^2.29.1"
+    "moment": "^2.29.1",
+    "connect-pg-simple": "^7.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.3"
