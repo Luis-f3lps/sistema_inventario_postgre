@@ -1099,40 +1099,42 @@ app.get('/api/consumos', Autenticado, async (req, res) => {
   
   app.post('/api/atualizar-responsavel', Autenticado, async (req, res) => {
     const { idLaboratorio, usuarioEmail } = req.body;
-
+  
     if (!idLaboratorio || !usuarioEmail) {
-        return res.status(400).json({ error: 'ID do laboratório e email do responsável são obrigatórios.' });
+      return res.status(400).json({ error: 'ID do laboratório e email do responsável são obrigatórios.' });
     }
-
+  
     // Validação básica de formato de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(usuarioEmail)) {
-        return res.status(400).json({ error: 'Formato de email inválido.' });
+      return res.status(400).json({ error: 'Formato de email inválido.' });
     }
-
+  
     try {
-        // Verificar se o usuário existe
-        const [userRows] = await pool.execute('SELECT * FROM usuario WHERE email = ?', [usuarioEmail]);
-        if (userRows.length === 0) {
-            return res.status(404).json({ error: 'O email do usuário não existe.' });
-        }
-
-        // Atualizar o responsável do laboratório
-        const [result] = await pool.execute(
-            'UPDATE laboratorio SET usuario_email = ? WHERE id_laboratorio = ?',
-            [usuarioEmail, idLaboratorio]
-        );
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'Laboratório não encontrado.' });
-        }
-
-        res.json({ message: 'Responsável atualizado com sucesso', updatedResponsible: usuarioEmail });
+      // Verificar se o usuário existe
+      const userResult = await pool.query('SELECT * FROM usuario WHERE email = $1', [usuarioEmail]);
+      if (userResult.rows.length === 0) {
+        return res.status(404).json({ error: 'O email do usuário não existe.' });
+      }
+  
+      // Atualizar o responsável do laboratório
+      const result = await pool.query(
+        'UPDATE laboratorio SET usuario_email = $1 WHERE id_laboratorio = $2',
+        [usuarioEmail, idLaboratorio]
+      );
+  
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: 'Laboratório não encontrado.' });
+      }
+  
+      res.json({ message: 'Responsável atualizado com sucesso', updatedResponsible: usuarioEmail });
     } catch (error) {
-        console.error('Erro ao atualizar responsável:', error);
-        res.status(500).json({ error: 'Erro no servidor ao atualizar responsável.' });
+      console.error('Erro ao atualizar responsável:', error);
+      res.status(500).json({ error: 'Erro no servidor ao atualizar responsável.' });
     }
-});
+  });
+  
+
 
 app.get('/api/produtoPag', Autenticado, async (req, res) => {
     const { page = 1, limit = 20 } = req.query;
