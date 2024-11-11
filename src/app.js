@@ -967,24 +967,27 @@ app.get('/api/produtoPag', Autenticado, async (req, res) => {
   
 // Endpoint para registrar entrada
 app.post('/api/registrar_entrada', async (req, res) => {
-    const { id_produto, quantidade, data_entrada, descricao } = req.body;
-  
-    // Validação simples
-    if (!id_produto || !quantidade || !data_entrada) {
-        return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
-    }
-  
-    try {
-        const [result] = await pool.execute(
-            'INSERT INTO registro_entrada (id_produto, quantidade, data_entrada, descricao) VALUES (?, ?, ?, ?)', 
-            [id_produto, quantidade, data_entrada, descricao]
-        );
-        res.json({ message: 'Entrada registrada com sucesso!' });
-    } catch (error) {
-        console.error('Erro ao registrar entrada:', error);
-        res.status(500).json({ error: 'Erro ao registrar entrada.' });
-    }
-  });
+  const { id_produto, quantidade, data_entrada, descricao } = req.body;
+
+  // Validação simples
+  if (!id_produto || !quantidade || !data_entrada) {
+    return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+  }
+
+  try {
+    // Inserindo dados no banco de dados com PostgreSQL
+    const result = await pool.query(
+      'INSERT INTO registro_entrada (id_produto, quantidade, data_entrada, descricao) VALUES ($1, $2, $3, $4)',
+      [id_produto, quantidade, data_entrada, descricao]
+    );
+    
+    res.json({ message: 'Entrada registrada com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao registrar entrada:', error);
+    res.status(500).json({ error: 'Erro ao registrar entrada.' });
+  }
+});
+
   
   // Endpoint para registrar consumo
   app.post('/api/registrar_consumo', async (req, res) => {
@@ -994,20 +997,23 @@ app.post('/api/registrar_entrada', async (req, res) => {
   
     // Validação simples
     if (!data_consumo || !id_produto || !id_laboratorio || !quantidade) {
-        return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+      return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
     }
   
     try {
-        const [result] = await pool.execute(
-            'INSERT INTO registro_consumo (data_consumo, id_produto, id_laboratorio, quantidade, descricao) VALUES (?, ?, ?, ?, ?)', 
-            [data_consumo, id_produto, id_laboratorio, quantidade, descricao]
-        );
-        res.json({ message: 'Consumo registrado com sucesso!' });
+      // Inserindo dados no banco de dados com PostgreSQL
+      const result = await pool.query(
+        'INSERT INTO registro_consumo (data_consumo, id_produto, id_laboratorio, quantidade, descricao) VALUES ($1, $2, $3, $4, $5)',
+        [data_consumo, id_produto, id_laboratorio, quantidade, descricao]
+      );
+      
+      res.json({ message: 'Consumo registrado com sucesso!' });
     } catch (error) {
-        console.error('Erro ao registrar consumo:', error);
-        res.status(500).json({ error: 'Erro ao registrar consumo.' });
+      console.error('Erro ao registrar consumo:', error);
+      res.status(500).json({ error: 'Erro ao registrar consumo.' });
     }
   });
+  
   
 // Endpoint para buscar consumos
 
