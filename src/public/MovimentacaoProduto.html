@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="images/icone3.png" type="image/png">
+    <title>Inventário Produtos Químicos</title>
+    <link rel="stylesheet" href="css/style4.css">
+    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div id="header">
+        <nav>
+            <ul id="sidemenu">
+                <img src="images/logomenu.png" class="logo">
+                </br>
+                <li>
+                    <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
+                        <i class="fas fa-user"></i>
+                        <span id="user-name-text"></span>
+                    </span>
+                </li>
+                </br>
+                <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
+                <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
+                <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+                <!-- HTML para o menu de administração -->
+                <li class="submenu admin-menu" style="display: none;">
+                    <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
+                    <ul class="submenu-items">
+                        <li><a href="/Usuarios"><i class="fas fa-users"></i> Usuários</a></li>
+                        <li><a href="/Produto"><i class="fas fa-tags"></i> Produtos</a></li>
+                        <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Laboratórios</a></li>
+                    </ul>
+                </li>
+                </br>
+                <li class="logout">
+                    <a href="index.html" style="border-top: 1px solid;">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                    <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
+            </ul>
+            <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
+        </nav>
+        <div class="container">
+            <div id="about"> 
+                <div class="container">
+                    <div class="row">
+                        <div class="about-col-2">
+                            <h1 class="sub-title">Movimentação</h1>
+                            </br>
+                            <div class="tab-titles">
+                                <p class="tab-links active-link" onclick="opentab('Aba01')">Registrar Consumo</p>
+                                <p class="tab-links" onclick="opentab('Aba02')" style="display: none;">Registrar Entrada</p>
+                            </div>
+                            <div class="tab-contents active-tab" id="Aba01">
+                                <div class="form-container">
+                                    <h1>Registrar Consumo</h1>
+                                    </br>
+                                    <form id="consumo-form">
+                                        <div class="form-group">
+                                            <label for="sigla-select">Produto*:</label>
+                                            <select id="sigla-select" name="sigla" required>
+                                                <!-- siglas serão carregados  -->
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="quantidade">Quantidade*:</label>
+                                            <input type="number" id="quantidade" name="quantidade" required> g/ml
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="laboratorio-select">Laboratório*:</label>
+                                            <select id="laboratorio-select" name="laboratorio">
+                                                <!-- Laboratórios serão carregados  -->
+                                            </select>        
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="data_consumo">Data de Consumo*:</label>
+                                            <input type="date" id="data_consumo" name="data_consumo" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="descricao_comsumo">Descrição*:</label>
+                                            <input type="text" id="descricao_comsumo" name="descricao_comsumo" maxlength="120" placeholder="Ex: Novo Frasco" required>
+                                        </div>                                        
+                                        <button type="submit">Registrar</button>
+                                    </form>  
+                                </div>
+                            </div>
+                            <div class="tab-contents" id="Aba02">
+                                <div class="form-container" style="height: 475px; max-height: 500px;">
+                                    <h1>Registrar Entrada</h1>
+                                    <br>
+                                    <form id="entrada-form">
+                                        <div class="form-group">
+                                            <label for="produto-entrada-select">Produto*:</label>
+                                            <select id="produto-entrada-select" name="produto" required>
+                                                <!-- Produtos serão carregados -->
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="quantidade-entrada">Quantidade*:</label>
+                                            <input type="number" id="quantidade-entrada" name="quantidade" required> g/ml
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="data-entrada">Data de Entrada*:</label>
+                                            <input type="date" id="data-entrada" name="data_entrada" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="descricao-entrada">Descrição*:</label>
+                                            <input type="text" id="descricao-entrada" name="descricao" maxlength="120" placeholder="Ex: Novo Frasco" required>
+                                        </div>
+                                        <button type="submit">Registrar</button>
+                                    </form>
+                                </div>       
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="js/MovimentacaoProduto.js"></script>
+</body>
+</html>

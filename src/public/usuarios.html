@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="images/icone3.png" type="image/png">
+    <title>Inventário Produtos Químicos</title>
+    <link rel="stylesheet" href="css/style3.css">
+    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="header">
+    <nav>
+        <ul id="sidemenu">
+            <img src="images/logomenu.png" class="logo">
+            </br>
+            <li>
+                <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
+                    <i class="fas fa-user"></i>
+                    <span id="user-name-text"></span>
+                </span>
+            </li>
+            </br>
+            <li><a href="MovimentacaoProduto.html"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
+            <li><a href="Inventario.html"><i class="fas fa-boxes"></i> Inventário</a></li>
+            <li><a href="Relatorio.html"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+            <!-- HTML para o menu de administração -->
+            <li class="submenu admin-menu" style="display: none;">
+                <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
+                <ul class="submenu-items">
+                    <li><a href="Usuarios.html"><i class="fas fa-users"></i> Usuários</a></li>
+                    <li><a href="Produto.html"><i class="fas fa-tags"></i> Produtos</a></li>
+                    <li><a href="Laboratorio.html"><i class="fas fa-flask"></i> Laboratórios</a></li>
+                </ul>
+            </li>
+            </br>
+            <li class="logout">
+                <a href="index.html" style="border-top: 1px solid;">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </a>
+                <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
+            </ul>
+            <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
+        </nav>
+    <div class="container">
+        <div id="about"> 
+            <div class="container">
+                <div class="row">
+                    <div class="about-col-2">
+                        <h1 class="sub-title">Usuários</h1>
+                        </br>                        
+                        <div class="tab-titles">
+                            <p class="tab-links active-link" onclick="opentab('todos')">Todos os Usuários</p>
+                            <p class="tab-links" onclick="opentab('addUser')">Adicionar Usuário</p>
+                            <p class="tab-links" onclick="opentab('Status')">Status dos Usuário</p>
+                        </div>
+        
+                        <div class="tab-contents active-tab" id="todos">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Email</th>
+                                        <th>Tipo:</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usuarios-tbody">
+                                    <!-- Linhas serão preenchidas -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="tab-contents" id="addUser">
+                            <div class="form-container">
+                                <h2>Adicionar Usuário</h2>
+                                </br>
+                                <form id="add-user-form">
+                                    <div class="form-group">
+                                        <label for="username">Nome de Usuário:</label>
+                                        <input type="text" id="username" name="username" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email">Email:</label>
+                                        <input type="email" id="email" name="email" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="type">Tipo de Usuário:</label>
+                                        <select id="type" name="type" required>
+                                            <option value="normal">Normal</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="password">Senha:</label>
+                                        <input type="password" id="password" name="password" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="confirm-password">Confirmar Senha:</label>
+                                        <input type="password" id="confirm-password" name="confirm-password" required>
+                                    </div>
+                                    <button type="submit">Adicionar Usuário</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-contents" id="Status" style="text-align: center;margin-bottom: 20px;">
+                            <div class="form-container">
+                                <h1 style="margin-bottom: 20px;">Desativar Usuário</h1>
+                                <form id="remove-user-form">
+                                    <select id="usuarios-select" name="usuarios" style="margin-bottom: 20px;">
+                                        <!-- Opções serão preenchidas -->
+                                    </select>
+                                    <button type="submit" class="btn-remover">Desativar Usuário</button>
+                                </form>
+                            </div>
+                            <div class="form-container">
+                                <h1 style="margin-bottom: 20px;">Ativar Usuário</h1>
+                                <form id="activate-user-form">
+                                    <select id="usuarios-select-ativar" name="usuarios" style="margin-bottom: 20px;">
+                                        <!-- Opções serão preenchidas -->
+                                    </select>
+                                    <button type="submit" class="btn-ativar">Ativar Usuário</button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+</div>
+<script src="js/usuarios.js"></script>
+</body>
+</html>

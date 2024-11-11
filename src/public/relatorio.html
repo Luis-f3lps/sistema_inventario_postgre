@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="images/icone3.png" type="image/png">
+    <title>Inventário Produtos Químicos</title>
+    <link rel="stylesheet" href="css/style5.css">
+    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<!------------------Relatórios--------------->
+<div id="header">
+    <nav>
+        <ul id="sidemenu">
+            <img src="images/logomenu.png" class="logo">
+            </br>
+            <li>
+                <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
+                    <i class="fas fa-user"></i>
+                    <span id="user-name-text"></span>
+                </span>
+            </li>
+            </br>
+            <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
+            <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
+            <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+            <!-- HTML para o menu de administração -->
+            <li class="submenu admin-menu" style="display: none;">
+                <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
+                <ul class="submenu-items">
+                    <li><a href="/Usuarios"><i class="fas fa-users"></i> Usuários</a></li>
+                    <li><a href="/Produto"><i class="fas fa-tags"></i> Produtos</a></li>
+                    <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Laboratórios</a></li>
+                </ul>
+            </li>
+            </br>
+            <li class="logout">
+                <a href="index.html" style="border-top: 1px solid;">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </a>
+                <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
+            </ul>
+            <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
+        </nav>
+    <div class="container">
+        <div id="about">
+            <div class="container">
+                <div class="row">
+                    <div class="about-col-2">
+                        <h1 class="sub-title">Relatórios</h1>
+                        </br>
+                        <div class="tab-titles">
+                            <p class="tab-links active-link" onclick="opentab('Aba02')">Relatórios dos Consumos</p>
+                            <p class="tab-links" onclick="opentab('Aba01')">Relatórios de Entradas</p>
+                        </div>
+                        <div class="tab-contents" id="Aba01">
+                            <form id="filter-form2">
+                                <label for="entrada-start-date">Data Inicial:</label>
+                                <input type="date" id="entrada-start-date" name="start-date" required>
+                                <label for="entrada-end-date">Data Final:</label>
+                                <input type="date" id="entrada-end-date" name="end-date" required>
+                                <button type="submit">Filtrar</button>
+                            </form>
+                            <table>
+                                <thead>
+                                    <tr id="green">
+                                        <th>ID Entrada</th>
+                                        <th>Data da Entrada</th>
+                                        <th>Quantidade</th>
+                                        <th>Nome do produto</th>
+                                        <th>Descricao</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="registro-entrada">
+                                    <!-- Os dados serão inseridos -->
+                                </tbody>
+                            </table>
+                            <div id="pagination">
+                                <!-- Botões de paginação -->
+                            </div>
+                            <button class="print-button" onclick="geradorPdfEntradatipo2()">
+                                <i class="fa-solid fa-print"></i> Imprimir
+                            </button>
+                        </div>
+                        <div class="tab-contents active-tab" id="Aba02">
+                            <form id="filter-form">
+                                <label for="start-date">Data Inicial:</label>
+                                <input type="date" id="start-date" name="start-date" required>
+                                <label for="end-date">Data Final:</label>
+                                <input type="date" id="end-date" name="end-date" required>
+                                <select id="laboratorios-select2" name="laboratorio">
+                                    <option value="">Todos os Laboratórios</option>
+                                    <!-- Opções serão preenchidas dinamicamente -->
+                                </select>
+                                <button type="submit">Filtrar</button>
+                            </form>
+                            <table id="consumo-table">
+                                <thead>
+                                    <tr id="red">
+                                        <th>ID Consumo</th>
+                                        <th>Data Consumo</th>
+                                        <th>Sigla</th>
+                                        <th>Produto</th>
+                                        <th>Laboratório</th>
+                                        <th>Quantidade</th>
+                                        <th>Tipo de Unidade</th>
+                                        <th>Descricao</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="consumo-tbody">
+                                    <!-- Linhas serão preenchidas -->
+                                </tbody>
+                            </table>
+                            <div id="pagination2">
+                                <!-- Botões de paginação -->
+                            </div>
+                            <button class="print-button" onclick="generatePDFConsumo()">
+                                <i class="fa-solid fa-print"></i> Imprimir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="js/relatorio.js"></script>
+</body>
+</html>

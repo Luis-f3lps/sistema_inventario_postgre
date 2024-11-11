@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="images/icone3.png" type="image/png">
+    <title>Laboratórios</title>
+    <link rel="stylesheet" href="css/style6.css">
+    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="header">
+    <nav>
+        <ul id="sidemenu">
+            <img src="images/logomenu.png" class="logo">
+            </br>
+            <li>
+                <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
+                    <i class="fas fa-user"></i>
+                    <span id="user-name-text"></span>
+                </span>
+            </li>
+            </br>
+            <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
+            <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
+            <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+            <!-- HTML para o menu de administração -->
+            <li class="submenu admin-menu" style="display: none;">
+                <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
+                <ul class="submenu-items">
+                    <li><a href="/Usuarios"><i class="fas fa-users"></i> Usuários</a></li>
+                    <li><a href="/Produto"><i class="fas fa-tags"></i> Produtos</a></li>
+                    <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Laboratórios</a></li>
+                </ul>
+            </li>
+            </br>
+            <li class="logout">
+                <a href="index.html" style="border-top: 1px solid;">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </a>
+                <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
+        </ul>
+        <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
+    </nav>
+    <div class="container">
+        <div id="about"> 
+            <div class="container">
+                <div class="row">
+                    <div class="about-col-2">
+                        <h1 class="sub-title">Laboratórios</h1>
+                        </br>                        
+                        <div class="tab-titles">
+                            <p class="tab-links active-link" onclick="opentab('todos')">Todos os Laboratórios</p>
+                            <p class="tab-links" onclick="opentab('adicionar')">Adicionar Laboratório</p>
+                            <p class="tab-links" onclick="opentab('alterar')">Alterar responsavel do Laboratório</p>
+                            <p class="tab-links" onclick="opentab('remover')">Remover Laboratório</p>
+                        </div>
+        
+                        <div class="tab-contents active-tab" id="todos">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Nome do Laboratório</th>
+                                        <th>Responsável</th>
+                                        <th>Email</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="laboratorio-tbody">
+                                    <!-- Linhas da tabela serão preenchidas dinamicamente -->
+                                </tbody>
+                            </table>
+                            <div id="pagination">
+                                <!-- Botões de paginação -->
+                            </div>
+                        </div>
+                        <div class="tab-contents" id="adicionar">
+                            <div class="form-container">
+                                <h2>Adicionar Laboratório</h2>
+                                </br>
+                                <form id="add-laboratorio-form">
+                                    <div class="form-group">
+                                        <label for="nome_laboratorio">Nome do Laboratório:</label>
+                                        <input type="text" id="nome_laboratorio" name="nome_laboratorio" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="usuarios">Selecione um usuário:</label>
+                                        <select id="usuarios-select" name="usuarios">
+                                            <!-- Opções serão preenchidas -->
+                                        </select>
+                                    </div>
+                                    <button type="submit">Adicionar Laboratório</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="tab-contents" id="alterar">
+                            <div class="form-container">
+                                <h2>ALterar responsavel do Laboratório</h2>
+                                </br>
+                                <form id="update-responsavel-form">
+                                    <div class="form-group">
+                                        <label for="laboratorios">Selecione um Laboratório:</label>
+                                        <select id="laboratorios-select2" name="laboratorios">
+                                            <!-- Opções serão preenchidas -->
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="usuarios">Selecione o Novo Responsável:</label>
+                                        <select id="usuarios-select2" name="usuarios">
+                                            <!-- Opções serão preenchidas -->
+                                        </select>
+                                    </div>
+                                    <button type="submit33">Atualizar Responsável</button>
+                                </form>                                
+                            </div>
+                        </div>
+                        <div class="tab-contents" id="remover">
+                            <div class="form-container">
+                                <h1>Remover Laboratório</h1>
+                                </br>
+                                </br>
+                                <form id="remove-laboratorio-form">
+                                    <label for="laboratorios">Selecione um laboratório:</label>
+                                    <select id="remove-laboratorio" name="laboratorios">
+                                        <!-- Opções serão preenchidas -->
+                                    </select>                                    
+                                    </br></br></br>
+                                    <button type="submit" class="btn-remover">Remover Laboratório</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+</div>
+<script src="js/laboratorio.js"></script>
+</body>
+</html>
