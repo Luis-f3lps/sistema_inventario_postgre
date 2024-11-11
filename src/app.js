@@ -13,7 +13,6 @@ import pool from './database.js'; // Importa a pool de conexões do arquivo data
 // Definindo __filename e __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 // Carregando variáveis de ambiente do arquivo .env
 dotenv.config({ path: path.resolve(__dirname, 'variaveis.env') }); // Ajuste o caminho conforme necessário
 console.log({
@@ -118,11 +117,10 @@ app.listen(PORT, () => {
   console.log(`Servidor rodando no endereço http://localhost:${PORT}`);
 });
 
-app.get('/Relatorio', Autenticado, (req, res) => {
-    // Ajuste para refletir o caminho correto
-    res.sendFile(path.join(__dirname, 'src', 'public', 'Relatorio.html'));
+// Rota para a página Relatório
+app.get('/Relatorio', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'Relatorio.html'));
   });
-  
 
 
 app.get('/Usuarios', Autenticado, (req, res) => {
