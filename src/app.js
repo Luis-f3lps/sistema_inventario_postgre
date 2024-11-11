@@ -653,12 +653,6 @@ app.get('/api/produtoPag', Autenticado, async (req, res) => {
     }
   });
   
-
-  const PDFDocument = require('pdfkit');
-  const path = require('path');
-  const fs = require('fs');
-  const { pool } = require('./db'); // Assumindo que você tem uma conexão PostgreSQL configurada
-  
   app.get('/generate-pdf-produto', async (req, res) => {
     try {
         // Consulta para obter produtos usando pool de PostgreSQL
