@@ -144,7 +144,7 @@ app.get('/Inventario', Autenticado, (req, res) => {
 });
 
 app.get('/Laboratorio', Autenticado, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'Laboratorio.html'));
+  res.sendFile(path.join(__dirname, 'public', 'laboratorio.html'));
 });
 // Rota para obter o usuário logado
 app.get('/api/usuario-logado', async (req, res) => {
@@ -1200,7 +1200,7 @@ app.get('/api/tabelaregistraentradaInico', Autenticado, async (req, res) => {
     }
 });
 
-  app.get('/api/tabelaregistraentrada', Autenticado, async (req, res) => {
+app.get('/api/tabelaregistraentrada', Autenticado, async (req, res) => {
     try {
         const { startDate, endDate, page = 1, limit = 20 } = req.query;
   
@@ -1237,24 +1237,30 @@ app.get('/api/tabelaregistraentradaInico', Autenticado, async (req, res) => {
         
         const params = [];
         if (startDate && endDate) {
-            query += ' WHERE r.data_entrada BETWEEN ? AND ?';
+            query += ' WHERE r.data_entrada BETWEEN $1 AND $2';  // Sintaxe do PostgreSQL para parâmetros
             params.push(startDate, endDate);
         }
   
-        query += ' ORDER BY r.data_entrada DESC LIMIT ? OFFSET ?';
+        query += ' ORDER BY r.data_entrada DESC LIMIT $3 OFFSET $4'; // Sintaxe do PostgreSQL para parâmetros
         params.push(finalLimit, offset);
   
-        const [rows] = await pool.execute(query, params); // Usando pool
+        // Executar a query para obter os dados
+        const { rows } = await pool.query(query, params);
   
         // Obter o total de registros
-        const [countResult] = await pool.execute(`
+        let countQuery = `
             SELECT COUNT(*) as total 
             FROM registro_entrada r 
             JOIN produto e ON r.id_produto = e.id_produto
-            ${startDate && endDate ? 'WHERE r.data_entrada BETWEEN ? AND ?' : ''}
-        `, startDate && endDate ? [startDate, endDate] : []);
+        `;
   
-        const totalItems = countResult[0].total;
+        if (startDate && endDate) {
+            countQuery += ' WHERE r.data_entrada BETWEEN $1 AND $2'; // Ajustando para o PostgreSQL
+        }
+  
+        const countResult = await pool.query(countQuery, startDate && endDate ? [startDate, endDate] : []);
+  
+        const totalItems = parseInt(countResult.rows[0].total, 10);
         const totalPages = Math.ceil(totalItems / finalLimit);
   
         res.json({
@@ -1267,32 +1273,32 @@ app.get('/api/tabelaregistraentradaInico', Autenticado, async (req, res) => {
         console.error('Erro ao buscar registros de entrada:', error);
         res.status(500).json({ error: 'Erro ao buscar registros de entrada' });
     }
-  });
+});
   
-  app.get('/api/tabelaregistraConsumo', Autenticado, async (req, res) => {
+app.get('/api/tabelaregistraConsumo', Autenticado, async (req, res) => {
     try {
         const { startDate, endDate, page = 1, limit = 20 } = req.query;
-  
+
         // Validação de página e limite
         const pageInt = parseInt(page, 10);
         const limitInt = parseInt(limit, 10);
-  
+
         if (isNaN(pageInt) || pageInt <= 0 || isNaN(limitInt) || limitInt <= 0) {
             return res.status(400).json({ error: 'Os parâmetros de página e limite devem ser números inteiros positivos.' });
         }
-  
+
         // Limitar o limite de itens por página
         const MAX_LIMIT = 100;
         const finalLimit = limitInt > MAX_LIMIT ? MAX_LIMIT : limitInt;
-  
+
         const offset = (pageInt - 1) * finalLimit;
-  
+
         // Validação de formato de data (YYYY-MM-DD)
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if ((startDate && !dateRegex.test(startDate)) || (endDate && !dateRegex.test(endDate))) {
             return res.status(400).json({ error: 'As datas devem estar no formato YYYY-MM-DD.' });
         }
-  
+
         let query = `
             SELECT 
                 rc.id_consumo, 
@@ -1310,35 +1316,35 @@ app.get('/api/tabelaregistraentradaInico', Autenticado, async (req, res) => {
             JOIN 
                 laboratorio l ON rc.id_laboratorio = l.id_laboratorio
         `;
-  
+
         const params = [];
         if (startDate && endDate) {
-            query += ' WHERE rc.data_consumo BETWEEN ? AND ?';
+            query += ' WHERE rc.data_consumo BETWEEN $1 AND $2';
             params.push(startDate, endDate);
         }
-  
-        query += ' ORDER BY rc.data_consumo DESC LIMIT ? OFFSET ?';
+
+        query += ' ORDER BY rc.data_consumo DESC LIMIT $3 OFFSET $4';
         params.push(finalLimit, offset);
-  
-        const [rows] = await pool.execute(query, params); // Usando pool
-  
+
+        const result = await pool.query(query, params); // Usando pool para execução da consulta
+
         // Contar o total de registros
         const countQuery = `
             SELECT COUNT(*) as total 
             FROM registro_consumo rc 
             JOIN produto e ON rc.id_produto = e.id_produto
             JOIN laboratorio l ON rc.id_laboratorio = l.id_laboratorio
-            ${startDate && endDate ? 'WHERE rc.data_consumo BETWEEN ? AND ?' : ''}
+            ${startDate && endDate ? 'WHERE rc.data_consumo BETWEEN $1 AND $2' : ''}
         `;
         
         const countParams = startDate && endDate ? [startDate, endDate] : [];
-        const [countResult] = await pool.execute(countQuery, countParams); // Usando pool
-  
-        const totalItems = countResult[0].total;
+        const countResult = await pool.query(countQuery, countParams); // Contando o total de registros
+
+        const totalItems = countResult.rows[0].total;
         const totalPages = Math.ceil(totalItems / finalLimit);
-  
+
         res.json({
-            data: rows,
+            data: result.rows,
             totalItems,
             totalPages,
             currentPage: pageInt,
@@ -1347,7 +1353,8 @@ app.get('/api/tabelaregistraentradaInico', Autenticado, async (req, res) => {
         console.error('Erro ao buscar registros de consumo:', error);
         res.status(500).json({ error: 'Erro ao buscar registros de consumo' });
     }
-  });
+});
+
   app.post('/api/filter_records', Autenticado, async (req, res) => {
     try {
       const { startDate, endDate } = req.body; 
