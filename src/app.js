@@ -119,14 +119,10 @@ app.listen(PORT, () => {
 });
 
 app.get('/Relatorio', Autenticado, (req, res) => {
-    const filePath = path.join(__dirname, 'public', 'Relatorio.html');
-    console.log('Caminho do arquivo Relatorio:', filePath); // Verifique se o caminho está correto
-    res.sendFile(filePath, (err) => {
-        if (err) {
-            console.error('Erro ao enviar arquivo:', err);
-        }
-    });
-});
+    // Ajuste para refletir o caminho correto
+    res.sendFile(path.join(__dirname, 'src', 'public', 'Relatorio.html'));
+  });
+  
 
 
 app.get('/Usuarios', Autenticado, (req, res) => {
