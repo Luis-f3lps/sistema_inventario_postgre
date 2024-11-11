@@ -119,12 +119,12 @@ app.listen(PORT, () => {
 
 // Rota para a página Relatório
 app.get('/Relatorio', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'Relatorio.html'));
+    res.sendFile(path.join(__dirname, 'public', 'relatorio.html'));
   });
 
 
 app.get('/Usuarios', Autenticado, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'Usuarios.html'));
+  res.sendFile(path.join(__dirname, 'public', 'usuarios.html'));
 });
 
 app.get('/Produto', Autenticado, (req, res) => {
