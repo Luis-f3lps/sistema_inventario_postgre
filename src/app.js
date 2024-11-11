@@ -14,10 +14,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Carregando variáveis de ambiente do arquivo .env
-dotenv.config({ path: path.resolve(__dirname, 'variaveis.env') });
+dotenv.config({ path: path.resolve(__dirname, 'variaveis.env') }); // Ajuste o caminho conforme necessário
 console.log({
-  DATABASE_URL: process.env.DATABASE_URL,
+  DB_HOST: process.env.DB_HOST,
+  DB_USER: process.env.DB_USER,
+  DB_PASSWORD: process.env.DB_PASSWORD,
+  DB_NAME: process.env.DB_NAME,
 });
+
 
 // Criando o pool de conexões com o PostgreSQL usando a DATABASE_URL
 const pool = new Pool({
@@ -1355,7 +1359,7 @@ app.get('/api/tabelaregistraentradaInico', Autenticado, async (req, res) => {
         res.status(500).json({ error: 'Erro ao buscar registros de consumo' });
     }
   });
-  
+
   app.post('/api/filter_records', Autenticado, async (req, res) => {
     try {
       const { startDate, endDate } = req.body; 
