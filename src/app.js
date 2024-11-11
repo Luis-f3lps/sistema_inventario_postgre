@@ -2,12 +2,13 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-import { Pool } from 'pg'; // Importa o Pool do PostgreSQL
+import pkg from 'pg'; // Importa o pacote pg
 import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import session from 'express-session';
 import bcrypt from 'bcrypt';
 import connectPgSimple from 'connect-pg-simple'; // Importa a integração do express-session com o PostgreSQL
+import pool from './database.js'; // Importa a pool de conexões do arquivo database.js
 
 // Definindo __filename e __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -20,15 +21,6 @@ console.log({
   DB_USER: process.env.DB_USER,
   DB_PASSWORD: process.env.DB_PASSWORD,
   DB_NAME: process.env.DB_NAME,
-});
-
-
-// Criando o pool de conexões com o PostgreSQL usando a DATABASE_URL
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false, // Necessário para conexões SSL seguras no Neon
-  },
 });
 
 const app = express();
