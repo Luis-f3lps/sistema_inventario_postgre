@@ -1079,10 +1079,12 @@ app.get('/api/consumos', Autenticado, async (req, res) => {
   // Endpoint para buscar siglas
   app.get('/api/siglas', Autenticado, async (req, res) => {
     try {
-      const [siglas] = await pool.execute(
-        'SELECT id_produto, sigla FROM produto' // Corrigido: tabela `produto`, e não `produtos`
+      const { rows: siglas } = await pool.query(
+        'SELECT id_produto, sigla FROM produto'
       );
-      res.json(siglas.length ? siglas : []); // Retorna um array vazio se não houver siglas
+  
+      // Retorna um array vazio se não houver siglas
+      res.json(siglas.length ? siglas : []);
     } catch (error) {
       console.error('Erro ao buscar siglas:', error);
       res.status(500).json({ error: 'Erro ao buscar siglas.' });
