@@ -1009,9 +1009,9 @@ app.post('/api/registrar_entrada', async (req, res) => {
     }
   });
   
-// Endpoint para buscar
+// Endpoint para buscar consumos
 
-consumosapp.get('/api/consumos', Autenticado, async (req, res) => {
+app.get('/api/consumos', Autenticado, async (req, res) => {
   try {
     const { startDate, endDate, laboratorio } = req.query;
 
