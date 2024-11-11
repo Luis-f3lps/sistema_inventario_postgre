@@ -341,19 +341,25 @@ app.get('/api/produto', Autenticado, async (req, res) => {
 
 // Obter todos os laboratórios
 app.get('/api/laboratorios', Autenticado, async (req, res) => {
-    try {
-        // Consulta para obter todos os laboratórios e seus responsáveis
-        const result = await pool.query(`
-            SELECT laboratorio.id_laboratorio, laboratorio.nome_laboratorio, usuario.nome_usuario AS responsavel, usuario.email
-            FROM laboratorio
-            LEFT JOIN usuario ON laboratorio.usuario_email = usuario.email
-        `);
-        res.json(result.rows); // Acesso aos resultados através de 'rows' no PostgreSQL
-    } catch (error) {
-        console.error('Erro ao obter laboratórios:', error);
-        res.status(500).json({ error: 'Erro no servidor ao obter laboratórios' });
-    }
-  });
+  try {
+    // Consulta para obter todos os laboratórios e seus responsáveis
+    const result = await pool.query(`
+      SELECT 
+        laboratorio.id_laboratorio, 
+        laboratorio.nome_laboratorio, 
+        usuario.nome_usuario AS responsavel, 
+        usuario.email
+      FROM laboratorio
+      LEFT JOIN usuario ON laboratorio.usuario_email = usuario.email
+    `);
+
+    // Acessa os resultados através de 'rows' no PostgreSQL
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Erro ao obter laboratórios:', error);
+    res.status(500).json({ error: 'Erro no servidor ao obter laboratórios' });
+  }
+});
   
 
 // Paginação para laboratórios
@@ -471,27 +477,30 @@ app.delete('/api/laboratorios/:id_laboratorio', Autenticado, async (req, res) =>
   
 
 // Obter laboratórios com base no tipo de usuário
+
 app.get('/api/lab', Autenticado, async (req, res) => {
-    try {
-        const { tipo_usuario, email } = req.session.user; // Obter tipo de usuário e email do usuário logado
-  
-        let query;
-        let params = [];
-  
-        if (tipo_usuario === 'admin') {
-            query = 'SELECT id_laboratorio, nome_laboratorio FROM laboratorio';
-        } else {
-            query = 'SELECT id_laboratorio, nome_laboratorio FROM laboratorio WHERE usuario_email = $1';
-            params.push(email); // Adiciona o email do usuário à consulta
-        }
-  
-        const { rows: labs } = await pool.query(query, params); // Executa a consulta e pega as linhas retornadas
-        res.json(labs);
-    } catch (error) {
-        console.error('Erro ao buscar laboratórios:', error);
-        res.status(500).json({ message: 'Erro ao buscar laboratórios' });
+  try {
+    const { tipo_usuario, email } = req.session.user; // Obtém o tipo de usuário e o email do usuário logado
+
+    let query;
+    let params = [];
+
+    // Caso seja administrador, retorna todos os laboratórios; caso contrário, retorna apenas os laboratórios atribuídos ao usuário
+    if (tipo_usuario === 'admin') {
+      query = 'SELECT id_laboratorio, nome_laboratorio FROM laboratorio';
+    } else {
+      query = 'SELECT id_laboratorio, nome_laboratorio FROM laboratorio WHERE usuario_email = $1';
+      params.push(email); // Adiciona o email do usuário como parâmetro
     }
-  });
+
+    // Executa a consulta e pega as linhas retornadas
+    const { rows: labs } = await pool.query(query, params);
+    res.json(labs);
+  } catch (error) {
+    console.error('Erro ao buscar laboratórios:', error);
+    res.status(500).json({ message: 'Erro ao buscar laboratórios' });
+  }
+});
   
   app.delete('/api/excluir-produto/:idproduto', Autenticado, async (req, res) => {
     const { idproduto } = req.params;
