@@ -965,6 +965,7 @@ app.get('/api/produtoPag', Autenticado, async (req, res) => {
     }
   });
   
+// Endpoint para registrar entrada (versão PostgreSQL com atualização de quantidade)
 app.post('/api/registrar_entrada', async (req, res) => {
   const { id_produto, quantidade, data_entrada, descricao } = req.body;
 
@@ -974,45 +975,92 @@ app.post('/api/registrar_entrada', async (req, res) => {
   }
 
   try {
-    // Inserindo dados no banco de dados com PostgreSQL
-    const result = await pool.query(
+    // Passo 1: Buscar a quantidade atual do produto
+    const produtoResult = await pool.query(
+      'SELECT quantidade FROM produto WHERE id_produto = $1',
+      [id_produto]
+    );
+
+    if (produtoResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Produto não encontrado.' });
+    }
+
+    const quantidadeAtual = produtoResult.rows[0].quantidade;
+
+    // Passo 2: Somar a nova quantidade
+    const novaQuantidade = parseFloat(quantidadeAtual) + parseFloat(quantidade);
+
+    // Passo 3: Atualizar a quantidade do produto
+    await pool.query(
+      'UPDATE produto SET quantidade = $1 WHERE id_produto = $2',
+      [novaQuantidade, id_produto]
+    );
+
+    // Passo 4: Inserir o registro de entrada
+    await pool.query(
       'INSERT INTO registro_entrada (id_produto, quantidade, data_entrada, descricao) VALUES ($1, $2, $3, $4)',
       [id_produto, quantidade, data_entrada, descricao]
     );
-    
-    res.json({ message: 'Entrada registrada com sucesso!' });
+
+    res.json({ message: 'Entrada registrada e quantidade atualizada com sucesso!' });
+
   } catch (error) {
     console.error('Erro ao registrar entrada:', error);
     res.status(500).json({ error: 'Erro ao registrar entrada.' });
   }
 });
 
-  // Endpoint para registrar consumo
-  app.post('/api/registrar_consumo', async (req, res) => {
-    console.log(req.body); // Log para depuração
+// Endpoint para registrar consumo com atualização da quantidade (PostgreSQL)
+app.post('/api/registrar_consumo', async (req, res) => {
+  console.log(req.body); // Log para depuração
 
-    const { data_consumo, id_produto, id_laboratorio, quantidade, descricao } = req.body;
+  const { data_consumo, id_produto, id_laboratorio, quantidade, descricao } = req.body;
 
-    // Validação simples
-    if (!data_consumo || !id_produto || !id_laboratorio || !quantidade) {
-      return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+  // Validação simples
+  if (!data_consumo || !id_produto || !id_laboratorio || !quantidade) {
+    return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
+  }
+
+  try {
+    // Passo 1: Buscar a quantidade atual do produto
+    const produtoResult = await pool.query(
+      'SELECT quantidade FROM produto WHERE id_produto = $1',
+      [id_produto]
+    );
+
+    if (produtoResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Produto não encontrado.' });
     }
 
-    try {
-      // Inserindo dados no banco de dados com PostgreSQL
-      const result = await pool.query(
-        'INSERT INTO registro_consumo (data_consumo, id_produto, id_laboratorio, quantidade, descricao) VALUES ($1, $2, $3, $4, $5)',
-        [data_consumo, id_produto, id_laboratorio, quantidade, descricao]
-      );
-      
-      res.json({ message: 'Consumo registrado com sucesso!' });
+    const quantidadeAtual = parseFloat(produtoResult.rows[0].quantidade);
 
-    } catch (error) {
-      console.error('Erro ao registrar consumo:', error);
-      res.status(500).json({ error: 'Erro ao registrar consumo.' });
+    // Passo 2: Verificar se há quantidade suficiente
+    if (parseFloat(quantidade) > quantidadeAtual) {
+      return res.status(400).json({ error: 'Quantidade insuficiente no produto.' });
     }
-  });
 
+    // Passo 3: Calcular a nova quantidade
+    const novaQuantidade = quantidadeAtual - parseFloat(quantidade);
+
+    // Passo 4: Atualizar a quantidade do produto
+    await pool.query(
+      'UPDATE produto SET quantidade = $1 WHERE id_produto = $2',
+      [novaQuantidade, id_produto]
+    );
+
+    // Passo 5: Registrar o consumo
+    await pool.query(
+      'INSERT INTO registro_consumo (data_consumo, id_produto, id_laboratorio, quantidade, descricao) VALUES ($1, $2, $3, $4, $5)',
+      [data_consumo, id_produto, id_laboratorio, quantidade, descricao]
+    );
+
+    res.json({ message: 'Consumo registrado e quantidade atualizada com sucesso!' });
+
+  } catch (error) {
+    console.error('Erro ao registrar consumo:', error);
+    res.status(500).json({ error: 'Erro ao registrar consumo.' });
+  }
+});
 
 // Endpoint para buscar consumos
 
