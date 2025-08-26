@@ -412,6 +412,10 @@ nav .fa-solid{
             font-size: 40px;
             align-items: center;
         }
+                #sidemenu {
+    position: absolute;
+    border-radius: 20px;
+}
         nav{
             margin-top: 40px;
         }
