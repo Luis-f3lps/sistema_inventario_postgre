@@ -24,7 +24,7 @@ html{
 #sidemenu {
     position: fixed;
     left: 0;
-    top: 50%;
+    top: 69%;
     transform: translateY(-50%); 
     padding: 0;
     margin: 0;
@@ -348,7 +348,7 @@ nav .fa-solid{
             top: 0;
             right: -600px;
             width: 600px;
-            height: 100vh;
+            height: 3000px;
             padding-top: 50px;
             z-index: 2;
             transition: right 0.5s;
@@ -449,3 +449,4 @@ nav .fa-solid{
                 margin-top: 5px;
             }
         }
+
