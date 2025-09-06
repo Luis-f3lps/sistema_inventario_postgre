@@ -65,12 +65,17 @@
                 <div id="slots" class="slots" aria-live="polite"></div>
                 <div class="help">Aulas de 1 hora. Manhã: 07h–11h (7→10). Tarde/Noite: 13h–22h (13→21).</div>
             </div>
-<div class="row-checkbox">
-            <input type="checkbox" id="precisaTecnico">
-            <label for="precisaTecnico">Precisa de acompanhamento do técnico?</label>
-        </div>
+<div class="row-radio">
+    <span>Precisa de acompanhamento do técnico?</span>
+    <div class="radio-options">
+        <input type="radio" id="tecnicoSim" name="precisaTecnico" value="true">
+        <label for="tecnicoSim">Sim</label>
+        
+        <input type="radio" id="tecnicoNao" name="precisaTecnico" value="false" checked>
+        <label for="tecnicoNao">Não</label>
+    </div>
+</div>
 
-        <button id="submitBtn" class="primary" disabled>Solicitar Aula</button>
         <div id="msg" class="msg"></div>
             <button id="submitBtn" class="primary" disabled>Solicitar Aula</button>
             <div id="msg" class="msg"></div>
@@ -219,7 +224,7 @@
             labId: labEl.value,
             date: dateEl.value,
             hour: selectedSlot,
-            precisa_tecnico: precisaTecnicoEl.checked
+            precisa_tecnico: document.querySelector('input[name="precisaTecnico"]:checked').value === 'true'
 
         };
 

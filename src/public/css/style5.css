@@ -492,3 +492,20 @@ nav .fa-solid{
 .status-analisando { color: #f0ad4e; font-weight: bold; }
 .status-autorizado { color: #5cb85c; font-weight: bold; }
 .status-nao_autorizado { color: #d9534f; font-weight: bold; }
+.row-radio {
+    margin-top: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Espaço entre a pergunta e as opções */
+}
+
+.radio-options {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espaço entre o "Sim" e o "Não" */
+}
+
+.radio-options label {
+    margin-right: 15px;
+}
