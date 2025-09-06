@@ -1482,6 +1482,7 @@ app.get('/api/tabelaregistraConsumo', Autenticado, async (req, res) => {
 
   // /////////////////////////////////////////////////////////////
 // 🔹 1. Professor verifica a disponibilidade de horários
+// Endpoint que verifica a disponibilidade de horários
 app.get("/api/availability", async (req, res) => {
     try {
         const { date, labId } = req.query;
@@ -1489,9 +1490,10 @@ app.get("/api/availability", async (req, res) => {
             `SELECT h.hora_inicio 
              FROM aulas a
              JOIN horarios h ON a.id_horario = h.id_horario
-             WHERE a.data = $1 
+             WHERE 
+               a.data = $1 
                AND a.id_laboratorio = $2 
-               AND a.status IN ('autorizado', 'analisando')`, // <<< MUDANÇA AQUI
+               AND a.status <> 'nao_autorizado'`, // <<< A MUDANÇA ESTÁ AQUI
             [date, labId]
         );
         const occupied = result.rows.map((r) => r.hora_inicio.slice(0, 5));

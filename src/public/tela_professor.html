@@ -71,9 +71,21 @@
     </div>
 
     <script>
-        fetch('menu.html')
-            .then(res => res.text())
-            .then(data => document.getElementById('menu-container').innerHTML = data);
+// Pegar o nome do usuário logado
+function loadLoggedInUser() {
+    fetch('/api/usuario-logado')
+    .then(response => response.json())
+    .then(data => {
+        const userNameElement = document.getElementById('user-name-text');
+        userNameElement.innerHTML = data.nome;
+        if (data.tipo_usuario === 'admin') {
+            document.querySelector('.admin-menu').style.display = 'block';
+        }
+    })
+    .catch(error => console.error('Erro ao carregar usuário logado:', error));
+}
+loadLoggedInUser();
+
     </script>
     
     <script>
