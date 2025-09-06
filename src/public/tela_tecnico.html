@@ -73,18 +73,22 @@
         try {
             const response = await fetch('/api/usuario-logado');
             if (!response.ok) {
-                window.location.href = '/login.html';
+                // Se não estiver logado, redireciona para a página de login
+                window.location.href = '/login.html'; // Crie uma página de login
                 return;
             }
-            loggedInUser = await response.json();
-            
-            // Depois de saber quem está logado, carregamos as solicitações
-            await loadRequests();
+            const data = await response.json();
+            loggedInUser = data; // Guarda os dados do usuário
+
+            const userNameElement = document.getElementById('user-name-text');
+            userNameElement.textContent = data.nome;
+            if (data.tipo_usuario === 'admin') {
+                document.querySelector('.admin-menu').style.display = 'block';
+            }
         } catch (error) {
-            console.error('Erro ao carregar utilizador logado:', error);
+            console.error('Erro ao carregar usuário logado:', error);
         }
     }
-
     // Função para carregar as solicitações pendentes
 async function loadRequests() {
     // A verificação do tipo de usuário foi corrigida aqui
