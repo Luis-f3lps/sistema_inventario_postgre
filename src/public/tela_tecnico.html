@@ -68,30 +68,39 @@
 <script>
     let loggedInUser = null;
 
+    // Função 1: Descobre quem está logado
     async function loadLoggedInUser() {
         try {
             const response = await fetch('/api/usuario-logado');
             if (!response.ok) {
-                // Se não estiver logado, redireciona para a página de login
-                window.location.href = '/login.html'; // Crie uma página de login
+                window.location.href = '/login.html';
                 return;
             }
             const data = await response.json();
-            loggedInUser = data; // Guarda os dados do usuário
+            loggedInUser = data;
 
+            // Preenche o nome do utilizador no menu
             const userNameElement = document.getElementById('user-name-text');
-            userNameElement.textContent = data.nome;
+            if (userNameElement) {
+                userNameElement.textContent = data.nome_usuario || data.nome;
+            }
             if (data.tipo_usuario === 'admin') {
                 document.querySelector('.admin-menu').style.display = 'block';
             }
+            
+            // >>> A CORREÇÃO MAIS IMPORTANTE ESTÁ AQUI <<<
+            // Depois de saber quem está logado, MANDAMOS carregar a tabela.
+            await loadRequests(); 
+
         } catch (error) {
-            console.error('Erro ao carregar usuário logado:', error);
+            console.error('Erro ao carregar utilizador logado:', error);
         }
     }
 
-    // Função para carregar as solicitações
+    // Função 2: Carrega os dados da tabela
     async function loadRequests() {
-        if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'normal') {
+        // >>> SEGUNDA CORREÇÃO: Verificar se o tipo de utilizador é 'tecnico' <<<
+        if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
             const tbody = document.querySelector("#requestsTable tbody");
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
             return;
@@ -101,14 +110,14 @@
             const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
             if (!res.ok) throw new Error('Erro na rede');
             const data = await res.json();
-            renderTable(data);
+            renderTable(data); // Chama a função para desenhar a tabela
         } catch (error) {
             console.error('Falha ao carregar solicitações:', error);
             document.querySelector("#requestsTable tbody").innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
         }
     }
 
-    // Função para desenhar a tabela com a nova lógica de botões
+    // Função 3: Desenha a tabela na tela
     function renderTable(requests) {
         const tbody = document.querySelector("#requestsTable tbody");
         tbody.innerHTML = "";
@@ -121,7 +130,6 @@
         requests.forEach(r => {
             const tr = document.createElement("tr");
             
-            // Lógica para definir quais botões mostrar
             let actionsHtml = '';
             if (r.status === 'analisando') {
                 actionsHtml = `
@@ -129,9 +137,9 @@
                     <button class="btn btn-reject" data-id="${r.id_aula}">Recusar</button>
                 `;
             } else if (r.status === 'autorizado') {
-                actionsHtml = `
-                    <button class="btn btn-deauthorize" data-id="${r.id_aula}">Não Autorizar</button>
-                `;
+                actionsHtml = `<button class="btn btn-deauthorize" data-id="${r.id_aula}">Não Autorizar</button>`;
+            } else {
+                actionsHtml = 'Decidido';
             }
 
             tr.innerHTML = `
@@ -148,7 +156,7 @@
         });
     }
 
-    // Função para chamar a API e atualizar o status
+    // Função 4: Atualiza o status de uma aula
     async function updateRequest(id, novoStatus) {
         try {
             await fetch(`/api/requests/${id}`, {
@@ -156,30 +164,31 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ novoStatus })
             });
-            // Recarrega a lista para mostrar o estado atualizado
-            await loadRequests();
+            await loadRequests(); // Recarrega a lista
         } catch (error) {
             console.error('Falha ao atualizar status:', error);
-            alert('Não foi possível atualizar o status. Tente novamente.');
+            alert('Não foi possível atualizar o status.');
         }
     }
 
-    // Ponto de entrada: inicia o processo quando a página carrega
+    // Ponto de Entrada: Inicia todo o processo
     document.addEventListener('DOMContentLoaded', () => {
-        loadLoggedInUser();
+        loadLoggedInUser(); // A única coisa a fazer é chamar a primeira função da "corrente"
 
-        // Adiciona um "ouvinte" de eventos à tabela inteira
+        // "Ouvinte" de eventos para os cliques nos botões
         const tbody = document.querySelector("#requestsTable tbody");
         tbody.addEventListener('click', (event) => {
             const target = event.target;
             const aulaId = target.dataset.id;
+
+            if (!aulaId) return;
 
             if (target.classList.contains('btn-accept')) {
                 updateRequest(aulaId, 'autorizado');
             } else if (target.classList.contains('btn-reject')) {
                 updateRequest(aulaId, 'nao_autorizado');
             } else if (target.classList.contains('btn-deauthorize')) {
-                updateRequest(aulaId, 'nao_autorizado');
+                updateRequest(aulaId, 'analisando'); 
             }
         });
     });
