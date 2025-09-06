@@ -186,7 +186,7 @@ nav ul li a:hover::after{
 button {
     padding: 10px;
     border-radius: 4px;
-    background-color: #094412;
+    background-color: #212529;
     color: #fff;
     font-size: 16px;
     cursor: pointer;
@@ -203,7 +203,7 @@ button {
     cursor: pointer;
 }
 button:hover {
-    background-color: #094412; 
+    background-color: #212529; 
 }
 
 .tab-titles{
@@ -235,7 +235,7 @@ button:hover {
     margin: 10px 0;
 }
 .tab-contents ul li span{
-    color: #094412;
+    color: #212529;
     font-size: 14px;
 }
 .tab-contents{
@@ -392,7 +392,7 @@ nav ul .fa-solid {
             z-index: 1;
         }
  nav ul{
-     background: #094412;
+     background: #212529;
      top: 0;
      right: -600px;
      width: 600px;

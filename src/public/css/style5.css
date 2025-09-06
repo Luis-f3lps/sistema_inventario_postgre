@@ -153,7 +153,7 @@ nav ul li a:hover::after{
     margin: 10px 0;
 }
 .tab-contents ul li span{
-    color: #094412;
+    color: #212529;
     font-size: 14px;
 }
 .tab-contents{
@@ -226,7 +226,7 @@ button[type="submit2"] {
 button {
     padding: 10px;
     border-radius: 4px;
-    background-color: #094412;
+    background-color: #212529;
     color: #fff;
     font-size: 16px;
     cursor: pointer;
@@ -343,7 +343,7 @@ nav .fa-solid{
             z-index: 1;
         }
         nav ul{
-            background: #094412;
+            background: #212529;
             top: 0;
             right: -600px;
             width: 600px;
@@ -428,10 +428,10 @@ nav .fa-solid{
             margin-top: 40px;
         }
         tbody{
-            font-size: xx-large;
+            font-size: x-large;
         }
         th{
-            font-size: xx-large;
+            font-size: x-large;
         }
         input[type="text"] {
     width: 85%;
@@ -1007,4 +1007,12 @@ nav .fa-solid{
     border-radius: 8px;
     text-align: center;
     font-weight: 500;
+}
+@media only screen and (min-width: 901px) and (min-height: 1601px) {
+    #sidemenu {
+        left: -800px;
+        padding: 0;
+        margin: 0;
+        z-index: 1;
+    }
 }
