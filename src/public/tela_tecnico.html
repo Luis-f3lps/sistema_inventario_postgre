@@ -45,111 +45,75 @@
                 </ul>
                 <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
             </nav>
-        <div class="container">
-            <h1>Solicitações Pendentes</h1>
-
-          <table id="requestsTable">
+<div class="container">
+        <h1>Solicitações Pendentes</h1>
+        <table id="requestsTable">
             <thead>
-              <tr>
-                <th>Professor</th>
-                <th>Laboratório</th>
-                <th>Data</th>
-                <th>Horário</th>
-                <th>Precisa Técnico</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
+                <tr>
+                    <th>Professor</th>
+                    <th>Laboratório</th>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Precisa Técnico</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
             </thead>
             <tbody>
-              <!-- preenchido via JS -->
-            </tbody>
-          </table>
+                </tbody>
+        </table>
+    </div>
+</div>
 
-          <script>
-                // Variável global para guardar os dados do usuário logado
+<script>
     let loggedInUser = null;
 
-    // --- FUNÇÕES DE AUTENTICAÇÃO E DADOS ---
+    // Função para buscar os dados do utilizador logado
     async function loadLoggedInUser() {
         try {
             const response = await fetch('/api/usuario-logado');
             if (!response.ok) {
-                // Se não estiver logado, redireciona para a página de login
-                window.location.href = '/login.html'; // Crie uma página de login
+                window.location.href = '/login.html';
                 return;
             }
-            const data = await response.json();
-            loggedInUser = data; // Guarda os dados do usuário
-
-            const userNameElement = document.getElementById('user-name-text');
-            userNameElement.textContent = data.nome;
-            if (data.tipo_usuario === 'admin') {
-                document.querySelector('.admin-menu').style.display = 'block';
-            }
-        } catch (error) {
-            console.error('Erro ao carregar usuário logado:', error);
-        }
-    }
- // --- FUNÇÕES DE AUTENTICAÇÃO E DADOS ---
-    async function loadLoggedInUser() {
-        try {
-            const response = await fetch('/api/usuario-logado');
-            if (!response.ok) {
-                window.location.href = '/login.html'; // Redireciona se não estiver logado
-                return;
-            }
-            const data = await response.json();
-            loggedInUser = data; // Guarda os dados do usuário
-
-            // Exibe o nome do usuário no menu
-            const userNameElement = document.getElementById('user-name-text');
-            userNameElement.textContent = data.nome;
-            if (data.tipo_usuario === 'admin') {
-                document.querySelector('.admin-menu').style.display = 'block';
-            }
+            loggedInUser = await response.json();
             
-            // >>> CORREÇÃO IMPORTANTE <<<
-            // Só depois de saber quem está logado é que buscamos os pedidos
+            // Depois de saber quem está logado, carregamos as solicitações
             await loadRequests();
-
         } catch (error) {
-            console.error('Erro ao carregar usuário logado:', error);
+            console.error('Erro ao carregar utilizador logado:', error);
         }
     }
 
-    // Função principal para carregar as solicitações da API
+    // Função para carregar as solicitações pendentes
     async function loadRequests() {
-        // Assegura que temos um usuário logado e que ele é um técnico
-if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'normal') {
+        if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
             const tbody = document.querySelector("#requestsTable tbody");
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">Acesso restrito a técnicos.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
             return;
         }
 
         try {
-            // >>> CORREÇÃO IMPORTANTE <<<
-            // Usa o e-mail do usuário que acabou de fazer login
             const tecnicoEmail = loggedInUser.email;
             const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
-            
-            if (!res.ok) throw new Error(`Erro na rede: ${res.statusText}`);
+            if (!res.ok) throw new Error('Erro na rede');
             
             const data = await res.json();
             renderTable(data);
         } catch (error) {
             console.error('Falha ao carregar solicitações:', error);
             const tbody = document.querySelector("#requestsTable tbody");
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red; padding:20px;">Erro ao carregar dados.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
         }
     }
 
-    // Função para desenhar a tabela com os dados recebidos
+    // Função para desenhar a tabela
     function renderTable(requests) {
         const tbody = document.querySelector("#requestsTable tbody");
-        tbody.innerHTML = ""; // Limpa a tabela
+        tbody.innerHTML = "";
 
         if (requests.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">Nenhuma solicitação pendente</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Nenhuma solicitação pendente.</td></tr>`;
             return;
         }
 
@@ -162,8 +126,8 @@ if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'normal'
                 <td>${r.hora_inicio.slice(0, 5)}</td>
                 <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
                 <td class="status status-${r.status}">${r.status}</td>
-                <td>
-                    <button class="btn btn-accept">Aceitar</button>
+                <td class="actions">
+                    <button class="btn btn-accept">Autorizar</button>
                     <button class="btn btn-reject">Recusar</button>
                 </td>
             `;
@@ -171,42 +135,36 @@ if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'normal'
             const acceptBtn = tr.querySelector(".btn-accept");
             const rejectBtn = tr.querySelector(".btn-reject");
             const statusEl = tr.querySelector(".status");
+            const actionsEl = tr.querySelector(".actions");
 
-            acceptBtn.addEventListener("click", async () => {
-                await updateRequest(r.id_aula, true);
-                statusEl.textContent = "autorizado";
-                statusEl.className = "status status-autorizado";
-                acceptBtn.disabled = true;
-                rejectBtn.disabled = true;
-            });
-
-            rejectBtn.addEventListener("click", async () => {
-                await updateRequest(r.id_aula, false);
-                statusEl.textContent = "nao_autorizado";
-                statusEl.className = "status status-nao_autorizado";
-                acceptBtn.disabled = true;
-                rejectBtn.disabled = true;
-            });
+            acceptBtn.addEventListener("click", () => updateRequest(r.id_aula, 'autorizado', statusEl, actionsEl));
+            rejectBtn.addEventListener("click", () => updateRequest(r.id_aula, 'nao_autorizado', statusEl, actionsEl));
 
             tbody.appendChild(tr);
         });
     }
 
-    // Função para enviar a atualização de status para a API
-    async function updateRequest(id, aprovado) {
-        // Usa o e-mail do usuário logado também para o registo de auditoria
-        const tecnicoEmail = loggedInUser.email;
-        await fetch(`/api/requests/${id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ aprovado, tecnico_email: tecnicoEmail })
-        });
+    // Função para chamar a API e atualizar o status
+    async function updateRequest(id, novoStatus, statusEl, actionsEl) {
+        try {
+            await fetch(`/api/requests/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ novoStatus }) // Envia o novo status
+            });
+
+            // Atualiza a interface para dar feedback imediato
+            statusEl.textContent = novoStatus;
+            statusEl.className = `status status-${novoStatus}`;
+            actionsEl.innerHTML = 'Decidido'; // Remove os botões e mostra um texto
+            
+        } catch (error) {
+            console.error('Falha ao atualizar status:', error);
+            alert('Não foi possível atualizar o status. Tente novamente.');
+        }
     }
 
-    // --- INICIALIZAÇÃO DA PÁGINA ---
-    // A única coisa a fazer quando a página carrega é verificar quem está logado.
-    // O resto do processo é desencadeado a partir daí.
+    // Ponto de entrada: inicia o processo quando a página carrega
     document.addEventListener('DOMContentLoaded', loadLoggedInUser);
-</script>
 </script>
         </html>

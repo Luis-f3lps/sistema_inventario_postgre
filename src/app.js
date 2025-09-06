@@ -1614,30 +1614,28 @@ app.get("/api/requests", async (req, res) => {
   }
 });
 
-// 🔹 Técnico autoriza/nega aula
+// Endpoint do Técnico para Autorizar/Negar (VERSÃO SIMPLIFICADA)
 app.patch("/api/requests/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { aprovado, tecnico_email } = req.body;
+    try {
+        const { id } = req.params;
+        // O body agora só precisa de dizer qual o novo status
+        const { novoStatus } = req.body; 
 
-    // Atualiza o status da aula
-    await pool.query("UPDATE aulas SET autorizado = $1 WHERE id_aula = $2", [
-      aprovado,
-      id,
-    ]);
+        // Validação para garantir que o status é um dos valores permitidos
+        if (!['autorizado', 'nao_autorizado'].includes(novoStatus)) {
+            return res.status(400).json({ error: "Status inválido fornecido." });
+        }
 
-    // Opcional: log na tabela autorizacoes
-    await pool.query(
-      `INSERT INTO autorizacoes (id_aula, tecnico_email, aprovado)
-       VALUES ($1, $2, $3)`,
-      [id, tecnico_email, aprovado]
-    );
+        // Atualiza a coluna 'status' na tabela 'aulas' e pronto.
+        await pool.query(
+            "UPDATE aulas SET status = $1 WHERE id_aula = $2", 
+            [novoStatus, id]
+        );
 
-    res.json({ message: "Atualizado com sucesso" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao autorizar aula" });
-  }
+        res.json({ message: "Status da aula atualizado com sucesso" });
+    } catch (err) {
+        console.error("Erro ao atualizar aula:", err);
+        res.status(500).json({ error: "Erro interno ao atualizar o status da aula" });
+    }
 });
-
 export default app;
