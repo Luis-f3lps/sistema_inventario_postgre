@@ -1554,27 +1554,29 @@ app.get("/api/requests", async (req, res) => {
 });
 
 // 🔹 4. Técnico autoriza/nega uma aula (VERSÃO SIMPLIFICADA E CORRIGIDA)
+// Endpoint do Técnico para atualizar o status da aula
 app.patch("/api/requests/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const { novoStatus } = req.body; 
+        const { novoStatus } = req.body; // Recebe 'autorizado' do front-end
 
-        if (!['autorizado', 'nao_autorizado'].includes(novoStatus)) {
-            return res.status(400).json({ error: "Status inválido fornecido." });
+        // Validação para segurança
+        if (novoStatus !== 'autorizado') {
+            return res.status(400).json({ error: "Ação inválida." });
         }
 
+        // Atualiza o status na tabela 'aulas'
         await pool.query(
             "UPDATE aulas SET status = $1 WHERE id_aula = $2", 
             [novoStatus, id]
         );
 
-        res.json({ message: "Status da aula atualizado com sucesso" });
+        res.json({ message: "Aula autorizada com sucesso!" });
     } catch (err) {
-        console.error("Erro ao atualizar aula:", err);
-        res.status(500).json({ error: "Erro interno ao atualizar o status da aula" });
+        console.error("Erro ao autorizar aula:", err);
+        res.status(500).json({ error: "Erro interno ao autorizar a aula." });
     }
 });
-
 
 // 🔹 5. Listar todas as aulas de um professor ou técnico (CORRIGIDO)
 app.get("/api/my-classes", async (req, res) => {
