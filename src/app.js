@@ -1478,7 +1478,7 @@ app.get('/api/tabelaregistraConsumo', Autenticado, async (req, res) => {
   });
 
   // /////////////////////////////////////////////////////////////
-
+// 🔹 1. Professor verifica a disponibilidade de horários
 app.get("/api/availability", async (req, res) => {
     try {
         const { date, labId } = req.query;
@@ -1486,18 +1486,18 @@ app.get("/api/availability", async (req, res) => {
             `SELECT h.hora_inicio 
              FROM aulas a
              JOIN horarios h ON a.id_horario = h.id_horario
-             WHERE a.data = $1 AND a.id_laboratorio = $2`,
+             WHERE a.data = $1 AND a.id_laboratorio = $2 AND a.status = 'autorizado'`, // Mostra apenas os autorizados como ocupados
             [date, labId]
         );
         const occupied = result.rows.map((r) => r.hora_inicio.slice(0, 5));
         res.json({ occupied });
     } catch (err) {
-        console.error(err);
+        console.error("Erro ao buscar disponibilidade:", err);
         res.status(500).json({ error: "Erro ao buscar disponibilidade" });
     }
 });
 
-// 🔹 2. Professor solicita aula (MODIFICADO para usar a SESSÃO)
+// 🔹 2. Professor solicita uma nova aula
 app.post("/api/schedule", async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: "Você precisa estar logado." });
@@ -1508,10 +1508,10 @@ app.post("/api/schedule", async (req, res) => {
 
         const horario = await pool.query("SELECT id_horario FROM horarios WHERE hora_inicio = $1::time", [hour]);
         if (horario.rowCount === 0) return res.status(400).json({ error: "Horário inválido" });
+        
         const id_horario = horario.rows[0].id_horario;
 
-        // MUDANÇA AQUI: Removemos 'autorizado' da lista de colunas.
-        // O status 'analisando' será adicionado por padrão pelo banco de dados.
+        // Insere a aula com o status 'analisando' por defeito
         const result = await pool.query(
             `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico)
              VALUES ($1, $2, $3, $4, $5)
@@ -1520,93 +1520,22 @@ app.post("/api/schedule", async (req, res) => {
         );
         res.status(201).json({ message: "Aula solicitada com sucesso!", aula: result.rows[0] });
     } catch (err) {
-        // ... (o tratamento de erro continua igual)
+        if (err.code === "23505") { // Violação de chave única
+            return res.status(400).json({ error: "Esse horário já está ocupado ou em análise neste laboratório" });
+        }
+        console.error("Erro ao solicitar aula:", err);
+        res.status(500).json({ error: "Erro ao solicitar aula" });
     }
 });
 
-// 🔹 3. Técnico vê solicitações pendentes
-app.get("/api/requests", async (req, res) => {
-    try {
-        const { tecnico_email } = req.query;
-        // MUDANÇA AQUI: Trocamos 'a.autorizado' por 'a.status' na consulta.
-        const result = await pool.query(
-            `SELECT a.id_aula, u.nome as professor, l.nome_laboratorio, a.data, h.hora_inicio, a.precisa_tecnico, a.status
-             FROM aulas a
-             JOIN usuarios u ON a.professor_email = u.email
-             JOIN laboratorios l ON a.id_laboratorio = l.id_laboratorio
-             JOIN horarios h ON a.id_horario = h.id_horario
-             WHERE l.usuario_email = $1 AND a.status = 'analisando'`, // Condição atualizada
-            [tecnico_email]
-        );
-        res.json(result.rows);
-    } catch (err) {
-        // ... (o tratamento de erro continua igual)
-    }
-});
-
-// 🔹 4. Técnico autoriza/nega aula
-app.patch("/api/requests/:id", async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { aprovado, tecnico_email } = req.body;
-
-        // MUDANÇA AQUI: Lógica para definir o status correto
-        const novoStatus = aprovado ? 'autorizado' : 'nao_autorizado';
-
-        // Atualiza a coluna 'status' na tabela 'aulas'
-        await pool.query("UPDATE aulas SET status = $1 WHERE id_aula = $2", [
-            novoStatus,
-            id,
-        ]);
-
-        // O log na tabela 'autorizacoes' continua o mesmo e é muito importante!
-        await pool.query(
-            `INSERT INTO autorizacoes (id_aula, tecnico_email, aprovado) VALUES ($1, $2, $3)`,
-            [id, tecnico_email, aprovado]
-        );
-        res.json({ message: "Status da aula atualizado com sucesso" });
-    } catch (err) {
-        // ... (o tratamento de erro continua igual)
-    }
-});
-
-// 🔹 5. Listar aulas do professor ou técnico
-app.get("/api/my-classes", async (req, res) => {
-  try {
-    const { email } = req.query;
-
-    const result = await pool.query(
-      `SELECT a.id_aula, l.nome_laboratorio, a.data, h.hora_inicio, a.precisa_tecnico, a.autorizado
-         FROM aulas a
-         JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-         JOIN horarios h ON a.id_horario = h.id_horario
-        WHERE a.professor_email = $1
-           OR (a.precisa_tecnico = true AND l.usuario_email = $1)`,
-      [email]
-    );
-
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao buscar aulas" });
-  }
-});
-
-// /////////////////////////////////
+// 🔹 3. Técnico vê as solicitações pendentes (Versão ÚNICA e CORRIGIDA)
 app.get("/api/requests", async (req, res) => {
   try {
     const { tecnico_email } = req.query;
-
-    // CONSULTA CORRIGIDA E SIMPLIFICADA
     const result = await pool.query(
       `SELECT 
-         a.id_aula, 
-         u.nome as professor, 
-         l.nome_laboratorio, 
-         a.data, 
-         h.hora_inicio, 
-         a.precisa_tecnico, 
-         a.status
+         a.id_aula, u.nome as professor, l.nome_laboratorio, a.data, 
+         h.hora_inicio, a.precisa_tecnico, a.status
        FROM aulas a
        JOIN usuarios u ON a.professor_email = u.email
        JOIN laboratorios l ON a.id_laboratorio = l.id_laboratorio
@@ -1615,26 +1544,23 @@ app.get("/api/requests", async (req, res) => {
          l.usuario_email = $1 AND a.status = 'analisando'`, // Condição correta
       [tecnico_email]
     );
-
     res.json(result.rows);
   } catch (err) {
     console.error("Erro ao buscar solicitações:", err);
     res.status(500).json({ error: "Erro ao buscar solicitações" });
   }
 });
-// Endpoint do Técnico para Autorizar/Negar (VERSÃO SIMPLIFICADA)
+
+// 🔹 4. Técnico autoriza/nega uma aula (VERSÃO SIMPLIFICADA E CORRIGIDA)
 app.patch("/api/requests/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        // O body agora só precisa de dizer qual o novo status
         const { novoStatus } = req.body; 
 
-        // Validação para garantir que o status é um dos valores permitidos
         if (!['autorizado', 'nao_autorizado'].includes(novoStatus)) {
             return res.status(400).json({ error: "Status inválido fornecido." });
         }
 
-        // Atualiza a coluna 'status' na tabela 'aulas' e pronto.
         await pool.query(
             "UPDATE aulas SET status = $1 WHERE id_aula = $2", 
             [novoStatus, id]
@@ -1645,5 +1571,29 @@ app.patch("/api/requests/:id", async (req, res) => {
         console.error("Erro ao atualizar aula:", err);
         res.status(500).json({ error: "Erro interno ao atualizar o status da aula" });
     }
+});
+
+
+// 🔹 5. Listar todas as aulas de um professor ou técnico (CORRIGIDO)
+app.get("/api/my-classes", async (req, res) => {
+  try {
+    const { email } = req.query;
+    const result = await pool.query(
+      `SELECT 
+         a.id_aula, l.nome_laboratorio, a.data, h.hora_inicio, 
+         a.precisa_tecnico, a.status
+       FROM aulas a
+       JOIN laboratorios l ON a.id_laboratorio = l.id_laboratorio
+       JOIN horarios h ON a.id_horario = h.id_horario
+       WHERE 
+         a.professor_email = $1 
+         OR (a.precisa_tecnico = true AND l.usuario_email = $1)`,
+      [email]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Erro ao buscar aulas:", err);
+    res.status(500).json({ error: "Erro ao buscar aulas" });
+  }
 });
 export default app;
