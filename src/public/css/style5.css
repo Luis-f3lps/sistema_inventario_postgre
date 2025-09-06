@@ -601,7 +601,6 @@ nav .fa-solid{
 }
 
 .bloco-horario:not(.occupied):hover {
-    background-color: #d3d9df;
     transform: translateY(-2px);
 }
 
@@ -1000,3 +999,13 @@ nav .fa-solid{
         }
         .botao-aceitar { background-color: #28a745; }
         .botao-recusar { background-color: #dc3545; }
+.mensagem-status.erro {
+    display: block !important; /* Garante que a mensagem seja visível */
+    background-color: #fce8e6; /* Fundo vermelho claro */
+    color: #b92c2c; /* Cor do texto vermelho escuro */
+    border: 1px solid #f5c6cb;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 500;
+}
