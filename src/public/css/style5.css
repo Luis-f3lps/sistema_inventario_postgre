@@ -676,3 +676,108 @@ nav .fa-solid{
     border-radius: 6px;
     display: none;
 }
+/* --- Estilo do Container Principal da Gestão de Aulas --- */
+.gestao-aulas-container {
+    max-width: 1100px; /* Mais largo para tabelas */
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.gestao-aulas-container h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 2.2em;
+    font-weight: 600;
+}
+
+/* --- Estilo da Tabela de Solicitações --- */
+.tabela-solicitacoes {
+    width: 100%;
+    border-collapse: collapse; /* Remove espaços entre as células */
+    margin-top: 20px;
+}
+
+/* Cabeçalho da Tabela */
+.tabela-solicitacoes thead th {
+    background-color: #f2f6fa;
+    color: #34495e;
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 1em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Corpo e Linhas da Tabela */
+.tabela-solicitacoes tbody td {
+    padding: 15px;
+    border-bottom: 1px solid #e0e6ed;
+    color: #555;
+}
+
+/* Efeito de Zebrado (cores alternadas) para melhor leitura */
+.tabela-solicitacoes tbody tr:nth-child(even) {
+    background-color: #f9fafc;
+}
+
+.tabela-solicitacoes tbody tr:hover {
+    background-color: #e9f2ff; /* Destaque ao passar o mouse */
+}
+
+/* --- Estilos para os Status e Botões (dentro da tabela) --- */
+.status-aula {
+    font-weight: bold;
+    text-transform: capitalize;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+.status-analisando {
+    color: #d28c0e;
+    background-color: #fef3cd;
+}
+
+.status-autorizado {
+    color: #1a7a4c;
+    background-color: #d1f7e5;
+}
+
+.status-nao_autorizado {
+    color: #b92c2c;
+    background-color: #fce8e6;
+}
+
+/* Container para os botões de ação */
+.celula-acoes {
+    display: flex;
+    gap: 10px;
+}
+
+/* Botões de Ação */
+.btn-acao {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9em;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-acao:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.btn-aceitar { background-color: #28a745; }
+.btn-recusar { background-color: #dc3545; }
+.btn-reverter { background-color: #ffc107; color: #333; }
