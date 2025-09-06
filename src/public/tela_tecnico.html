@@ -52,23 +52,32 @@
                 </ul>
                 <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
             </nav>
-    <div class="painel-minhas-aulas">
-        <h1>Minhas Solicitações de Aula</h1>
+    <div class="painel-gestao-solicitacoes">
+        <h1>Solicitações Pendentes</h1>
+        <p style="text-align: center; color: #666;">Abaixo estão as aulas que aguardam a sua aprovação.</p>
 
-        <table class="tabela-visualizacao-aulas">
+        <table class="tabela-de-aulas">
             <thead>
                 <tr>
+                    <th>Professor</th>
                     <th>Laboratório</th>
                     <th>Data</th>
                     <th>Horário</th>
                     <th>Apoio Técnico</th>
                     <th>Status</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
-            <tbody id="minhas-aulas-tbody">
+            <tbody id="corpo-tabela-solicitacoes">
                 </tbody>
         </table>
     </div>
+
+    <script>
+        fetch('menu.html')
+            .then(res => res.text())
+            .then(data => document.getElementById('menu-container').innerHTML = data);
+    </script>
 
     <script>
         let loggedInUser = null;
@@ -82,79 +91,100 @@
                     return;
                 }
                 loggedInUser = await response.json();
-                
-                // Depois de saber quem está logado, carregamos as solicitações
-                await loadMyRequests(); 
+                await loadPendingRequests(); 
             } catch (error) {
                 console.error('Erro ao carregar utilizador:', error);
             }
         }
 
-            // menu
-        document.querySelectorAll('.submenu > a').forEach(menu => {
-            menu.addEventListener('click', function(e) {
-                e.preventDefault();
-                const submenuItems = this.nextElementSibling;
-                submenuItems.classList.toggle('open');
-                this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-            });
-        });
-
-        // Função 2: Carrega as solicitações do professor
-        async function loadMyRequests() {
-            if (!loggedInUser) return;
+        // Função 2: Carrega apenas as solicitações com status 'analisando'
+        async function loadPendingRequests() {
+            const tbody = document.getElementById("corpo-tabela-solicitacoes");
+            if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
+                return;
+            }
             try {
-                // Chama o novo endpoint da API
-                const res = await fetch(`/api/minhas-solicitacoes`);
+                const tecnicoEmail = loggedInUser.email;
+                const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
                 if (!res.ok) throw new Error('Erro na rede');
                 
                 const data = await res.json();
                 renderTable(data);
             } catch (error) {
                 console.error('Falha ao carregar solicitações:', error);
-                document.getElementById("minhas-aulas-tbody").innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
             }
         }
 
         // Função 3: Desenha a tabela na tela
         function renderTable(requests) {
-            const tbody = document.getElementById("minhas-aulas-tbody");
+            const tbody = document.getElementById("corpo-tabela-solicitacoes");
             tbody.innerHTML = "";
 
             if (requests.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação futura.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
                 return;
             }
 
             requests.forEach(r => {
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
+                    <td>${r.professor}</td>
                     <td>${r.nome_laboratorio}</td>
                     <td>${new Date(r.data).toLocaleDateString()}</td>
                     <td>${r.hora_inicio.slice(0, 5)}</td>
                     <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
                     <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
+                    <td class="celula-de-acoes">
+                        <button class="botao-de-acao botao-aceitar" data-id="${r.id_aula}">Autorizar</button>
+                        <button class="botao-de-acao botao-recusar" data-id="${r.id_aula}">Não Autorizar</button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // Ponto de Entrada: Inicia o processo quando a página carrega
-        document.addEventListener('DOMContentLoaded', loadLoggedInUser);
-    </script>
-        <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuContainer = document.getElementById('menu-container');
-            if (menuContainer) {
-                fetch('menu.html')
-                    .then(response => response.text())
-                    .then(data => {
-                        menuContainer.innerHTML = data;
-                        // O código para fazer os botões do menu funcionar vai aqui...
-                    })
-                    .catch(error => console.error('Erro ao carregar o menu:', error));
+        // Função 4: Envia a decisão para a API
+        async function updateRequestStatus(id, novoStatus) {
+            try {
+                await fetch(`/api/requests/${id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ novoStatus })
+                });
+                // Remove a linha da tabela para dar feedback visual de que a ação foi concluída
+                const rowToRemove = document.querySelector(`button[data-id='${id}']`).closest('tr');
+                if(rowToRemove) {
+                    rowToRemove.style.opacity = '0';
+                    setTimeout(() => rowToRemove.remove(), 300);
+                }
+            } catch (error) {
+                console.error('Falha ao atualizar status:', error);
+                alert('Não foi possível processar a sua decisão. Tente novamente.');
             }
+        }
+
+        // Ponto de Entrada: Inicia o processo quando a página carrega
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLoggedInUser();
+
+            // "Ouvinte" de eventos para os cliques nos botões da tabela
+            const tbody = document.getElementById("corpo-tabela-solicitacoes");
+            tbody.addEventListener('click', (event) => {
+                const target = event.target;
+                const aulaId = target.dataset.id;
+
+                if (!aulaId) return; // Ignora cliques fora dos botões
+
+                if (target.classList.contains('botao-aceitar')) {
+                    updateRequestStatus(aulaId, 'autorizado');
+                } else if (target.classList.contains('botao-recusar')) {
+                    updateRequestStatus(aulaId, 'nao_autorizado');
+                }
+            });
         });
     </script>
+
 </body>
 </html>
