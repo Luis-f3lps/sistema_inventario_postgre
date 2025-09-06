@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="images/icone3.png" type="image/png">
+    <title>Inventário Produtos Químicos</title>
+    <link rel="stylesheet" href="css/style5.css">
+    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<!------------------Relatórios--------------->
+<div id="header">
+        <nav>
+            <ul id="sidemenu">
+                <img src="images/logomenu.png" class="logo">
+                </br>
+                <li>
+                    <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
+                        <i class="fas fa-user"></i>
+                        <span id="user-name-text"></span>
+                    </span>
+                </li>
+                </br>
+
+                <li><a href="/Horario"><i class="fas fa-clock"></i> Horarios</a></li>
+                <li><a href="/Tela_Tecnico"><i class="fas fa-bell"></i> Solicitações</a></li>
+                <li class="submenu produto">
+                    <a href="#"><i class="fas fa-boxes"></i> Inventário <i class="fas fa-chevron-down"></i></a>
+                    <ul class="submenu-items">
+                        <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
+                        <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
+                        <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+                                    </ul>
+                </li>
+                <!-- HTML para o menu de administração -->
+                <li class="submenu admin-menu" style="display: none;">
+                    <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
+                    <ul class="submenu-items">
+                        <li><a href="/Usuarios"><i class="fas fa-users"></i> Usuários</a></li>
+                        <li><a href="/Produto"><i class="fas fa-tags"></i> Produtos</a></li>
+                        <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Laboratórios</a></li>
+                    </ul>
+                </li>
+                </br>
+                <li class="logout">
+                    <a href="index.html" style="border-top: 1px solid;">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                    <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
+                </ul>
+                <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
+            </nav>  
+<div class="gestao-aulas-container">
+
+    <h1>Painel de Gerenciamento de Aulas</h1>
+
+    <table id="requestsTable" class="tabela-solicitacoes">
+        <thead>
+            <tr>
+                <th>Professor</th>
+                <th>Laboratório</th>
+                <th>Data</th>
+                <th>Horário</th>
+                <th>Apoio Técnico</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+
+</div>
+</div>
+
+<script>
+    let loggedInUser = null;
+
+    // Função 1: Descobre quem está logado
+    async function loadLoggedInUser() {
+        try {
+            const response = await fetch('/api/usuario-logado');
+            if (!response.ok) {
+                window.location.href = '/login.html';
+                return;
+            }
+            const data = await response.json();
+            loggedInUser = data;
+
+            // Preenche o nome do utilizador no menu
+            const userNameElement = document.getElementById('user-name-text');
+            if (userNameElement) {
+                userNameElement.textContent = data.nome_usuario || data.nome;
+            }
+            if (data.tipo_usuario === 'admin') {
+                document.querySelector('.admin-menu').style.display = 'block';
+            }
+            
+            // >>> A CORREÇÃO MAIS IMPORTANTE ESTÁ AQUI <<<
+            // Depois de saber quem está logado, MANDAMOS carregar a tabela.
+            await loadRequests(); 
+
+        } catch (error) {
+            console.error('Erro ao carregar utilizador logado:', error);
+        }
+    }
+
+    // menu
+document.querySelectorAll('.submenu > a').forEach(menu => {
+    menu.addEventListener('click', function(e) {
+        e.preventDefault();
+        const submenuItems = this.nextElementSibling;
+        submenuItems.classList.toggle('open');
+        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+    });
+});
+
+    // Função 2: Carrega os dados da tabela
+    async function loadRequests() {
+        // >>> SEGUNDA CORREÇÃO: Verificar se o tipo de utilizador é 'tecnico' <<<
+        if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
+            const tbody = document.querySelector("#requestsTable tbody");
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
+            return;
+        }
+        try {
+            const tecnicoEmail = loggedInUser.email;
+            const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
+            if (!res.ok) throw new Error('Erro na rede');
+            const data = await res.json();
+            renderTable(data); // Chama a função para desenhar a tabela
+        } catch (error) {
+            console.error('Falha ao carregar solicitações:', error);
+            document.querySelector("#requestsTable tbody").innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
+        }
+    }
+
+    // Função 3: Desenha a tabela na tela
+function renderTable(requests) {
+    const tbody = document.querySelector(".tabela-solicitacoes tbody"); // Seletor atualizado
+    tbody.innerHTML = "";
+
+    if (requests.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px;">Nenhuma solicitação para gerenciar.</td></tr>`;
+        return;
+    }
+
+    requests.forEach(r => {
+        const tr = document.createElement("tr");
+        
+        let actionsHtml = '';
+        if (r.status === 'analisando') {
+            actionsHtml = `
+                <button class="btn-acao btn-aceitar" data-id="${r.id_aula}">Autorizar</button>
+                <button class="btn-acao btn-recusar" data-id="${r.id_aula}">Recusar</button>
+            `;
+        } else if (r.status === 'autorizado') {
+            actionsHtml = `<button class="btn-acao btn-reverter" data-id="${r.id_aula}">Reverter</button>`;
+        } else {
+            actionsHtml = 'Decidido';
+        }
+
+        tr.innerHTML = `
+            <td>${r.professor}</td>
+            <td>${r.nome_laboratorio}</td>
+            <td>${r.data}</td>
+            <td>${r.hora_inicio.slice(0, 5)}</td>
+            <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
+            <td><span class="status-aula status-${r.status}">${r.status}</span></td>
+            <td class="celula-acoes">${actionsHtml}</td>
+        `;
+        
+        tbody.appendChild(tr);
+    });
+}
+
+    // Função 4: Atualiza o status de uma aula
+    async function updateRequest(id, novoStatus) {
+        try {
+            await fetch(`/api/requests/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ novoStatus })
+            });
+            await loadRequests(); // Recarrega a lista
+        } catch (error) {
+            console.error('Falha ao atualizar status:', error);
+            alert('Não foi possível atualizar o status.');
+        }
+    }
+
+    // Ponto de Entrada: Inicia todo o processo
+    document.addEventListener('DOMContentLoaded', () => {
+        loadLoggedInUser(); // A única coisa a fazer é chamar a primeira função da "corrente"
+
+        // "Ouvinte" de eventos para os cliques nos botões
+        const tbody = document.querySelector("#requestsTable tbody");
+        tbody.addEventListener('click', (event) => {
+            const target = event.target;
+            const aulaId = target.dataset.id;
+
+            if (!aulaId) return;
+
+            if (target.classList.contains('btn-accept')) {
+                updateRequest(aulaId, 'autorizado');
+            } else if (target.classList.contains('btn-reject')) {
+                updateRequest(aulaId, 'nao_autorizado');
+            } else if (target.classList.contains('btn-deauthorize')) {
+                updateRequest(aulaId, 'analisando'); 
+            }
+        });
+    });
+</script>
