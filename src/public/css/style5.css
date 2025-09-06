@@ -458,5 +458,35 @@ nav .fa-solid{
                 margin-top: 5px;
             }
         }
+/* Estilo para os botões de horário (slots) */
+.slot {
+    background-color: #f0f0f0; /* Cor padrão para horários livres */
+    border: 1px solid #ccc;
+    color: #333;
+    padding: 8px 12px;
+    margin: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s; /* Efeito suave de transição */
+}
 
+/* Efeito ao passar o mouse sobre um horário livre */
+.slot:not(.occupied):hover {
+    background-color: #e0e0e0;
+}
+
+/* Estilo para o botão de horário SELECIONADO */
+.slot.selected {
+    background-color: #007bff; /* Cor de destaque (azul) */
+    color: #ffffff; /* Cor do texto (branco) */
+    border-color: #0056b3;
+}
+
+/* Estilo para horários já ocupados */
+.slot.occupied {
+    background-color: #dc3545; /* Cor para ocupado (vermelho) */
+    color: #ffffff;
+    cursor: not-allowed; /* Muda o cursor para indicar que não é clicável */
+    opacity: 0.7;
+}
 
