@@ -1529,12 +1529,10 @@ app.post("/api/schedule", async (req, res) => {
         res.status(500).json({ error: "Erro ao solicitar aula" });
     }
 });
-
-// Endpoint do Técnico para ver as solicitações pendentes (CORRIGIDO)
+// Endpoint do Técnico para ver as solicitações (Já estava correto)
 app.get("/api/requests", async (req, res) => {
   try {
     const { tecnico_email } = req.query;
-
     const result = await pool.query(
       `SELECT 
          a.id_aula, u.nome_usuario as professor, l.nome_laboratorio, 
@@ -1544,13 +1542,11 @@ app.get("/api/requests", async (req, res) => {
        JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
        JOIN horarios h ON a.id_horario = h.id_horario
        WHERE 
-         l.usuario_email = $1 
-         AND a.status IN ('analisando', 'autorizado') 
+         l.usuario_email = $1 AND a.status IN ('analisando', 'autorizado') 
        ORDER BY 
-         a.data, h.hora_inicio`, // Ordena para melhor visualização
+         a.data, h.hora_inicio`,
       [tecnico_email]
     );
-
     res.json(result.rows);
   } catch (err) {
     console.error("Erro ao buscar solicitações:", err);
@@ -1558,16 +1554,16 @@ app.get("/api/requests", async (req, res) => {
   }
 });
 
-// 🔹 4. Técnico autoriza/nega uma aula (VERSÃO SIMPLIFICADA E CORRIGIDA)
-// Endpoint do Técnico para atualizar o status da aula
+// Endpoint do Técnico para autorizar/negar/reverter (CORRIGIDO)
 app.patch("/api/requests/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const { novoStatus } = req.body; // Recebe 'autorizado' do front-end
+        const { novoStatus } = req.body;
 
-        // Validação para segurança
-        if (novoStatus !== 'autorizado') {
-            return res.status(400).json({ error: "Ação inválida." });
+        // >>> A CORREÇÃO ESTÁ AQUI <<<
+        // A validação agora permite todos os status que o front-end pode enviar
+        if (!['autorizado', 'nao_autorizado', 'analisando'].includes(novoStatus)) {
+            return res.status(400).json({ error: "Ação ou status inválido fornecido." });
         }
 
         // Atualiza o status na tabela 'aulas'
@@ -1576,14 +1572,14 @@ app.patch("/api/requests/:id", async (req, res) => {
             [novoStatus, id]
         );
 
-        res.json({ message: "Aula autorizada com sucesso!" });
+        res.json({ message: "Status da aula atualizado com sucesso!" });
     } catch (err) {
-        console.error("Erro ao autorizar aula:", err);
-        res.status(500).json({ error: "Erro interno ao autorizar a aula." });
+        console.error("Erro ao atualizar o status da aula:", err);
+        res.status(500).json({ error: "Erro interno ao atualizar o status da aula." });
     }
 });
 
-// 🔹 5. Listar todas as aulas de um professor ou técnico (CORRIGIDO)
+// Endpoint para listar todas as aulas de um professor ou técnico (CORRIGIDO)
 app.get("/api/my-classes", async (req, res) => {
   try {
     const { email } = req.query;
@@ -1592,7 +1588,7 @@ app.get("/api/my-classes", async (req, res) => {
          a.id_aula, l.nome_laboratorio, a.data, h.hora_inicio, 
          a.precisa_tecnico, a.status
        FROM aulas a
-       JOIN laboratorios l ON a.id_laboratorio = l.id_laboratorio
+       JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio -- <<< CORREÇÃO AQUI
        JOIN horarios h ON a.id_horario = h.id_horario
        WHERE 
          a.professor_email = $1 
