@@ -120,8 +120,13 @@ app.listen(PORT, () => {
 // Rota para a página Relatório
 app.get('/Relatorio', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'relatorio.html'));
+  })
+  app.get('/Horario', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'horarios.html'));
   });
-
+  app.get('/Tela_Tecnico', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'tela_tecnico.html'));
+  });
 
 app.get('/Usuarios', Autenticado, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'usuarios.html'));
@@ -1471,6 +1476,183 @@ app.get('/api/tabelaregistraConsumo', Autenticado, async (req, res) => {
       res.status(500).json({ error: 'Erro ao filtrar registros.' });
     }
   });
-  
+
+  // /////////////////////////////////////////////////////////////
+
+// 🔹 1. Checar horários ocupados
+app.get("/api/availability", async (req, res) => {
+  try {
+    const { date, labId } = req.query;
+
+    const result = await pool.query(
+      `SELECT h.hora_inicio 
+         FROM aulas a
+         JOIN horarios h ON a.id_horario = h.id_horario
+        WHERE a.data = $1 AND a.id_laboratorio = $2`,
+      [date, labId]
+    );
+
+    const occupied = result.rows.map((r) => r.hora_inicio.slice(0, 5)); // "07:00"
+    res.json({ occupied });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao buscar disponibilidade" });
+  }
+});
+
+// 🔹 2. Professor solicita aula
+app.post("/api/schedule", async (req, res) => {
+  try {
+    const { professor_email, labId, date, hour, precisa_tecnico } = req.body;
+
+    // buscar id_horario pelo hour
+    const horario = await pool.query(
+      "SELECT id_horario FROM horarios WHERE hora_inicio = $1",
+      [hour]
+    );
+
+    if (horario.rowCount === 0)
+      return res.status(400).json({ error: "Horário inválido" });
+
+    const id_horario = horario.rows[0].id_horario;
+
+    // inserir aula
+    const result = await pool.query(
+      `INSERT INTO aulas 
+        (professor_email, id_laboratorio, data, id_horario, precisa_tecnico, autorizado)
+       VALUES ($1,$2,$3,$4,$5,false)
+       RETURNING *`,
+      [professor_email, labId, date, id_horario, precisa_tecnico]
+    );
+
+    res.status(201).json({ message: "Aula solicitada", aula: result.rows[0] });
+  } catch (err) {
+    if (err.code === "23505") {
+      // UNIQUE violation
+      return res
+        .status(400)
+        .json({ error: "Esse horário já está ocupado neste laboratório" });
+    }
+    console.error(err);
+    res.status(500).json({ error: "Erro ao solicitar aula" });
+  }
+});
+
+// 🔹 3. Técnico vê solicitações pendentes
+app.get("/api/requests", async (req, res) => {
+  try {
+    const { tecnico_email } = req.query;
+
+    const result = await pool.query(
+      `SELECT a.id_aula, u.nome as professor, l.nome_laboratorio, a.data, h.hora_inicio, a.precisa_tecnico, a.autorizado
+         FROM aulas a
+         JOIN usuarios u ON a.professor_email = u.email
+         JOIN laboratorios l ON a.id_laboratorio = l.id_laboratorio
+         JOIN horarios h ON a.id_horario = h.id_horario
+        WHERE l.usuario_email = $1 AND a.autorizado = false`,
+      [tecnico_email]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao buscar solicitações" });
+  }
+});
+
+// 🔹 4. Técnico autoriza/nega aula
+app.patch("/api/requests/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { aprovado, tecnico_email } = req.body;
+
+    await pool.query("UPDATE aulas SET autorizado = $1 WHERE id_aula = $2", [
+      aprovado,
+      id,
+    ]);
+
+    // opcional: log na tabela autorizacoes
+    await pool.query(
+      `INSERT INTO autorizacoes (id_aula, tecnico_email, aprovado)
+       VALUES ($1,$2,$3)`,
+      [id, tecnico_email, aprovado]
+    );
+
+    res.json({ message: "Atualizado com sucesso" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao autorizar aula" });
+  }
+});
+
+// 🔹 5. Listar aulas do professor ou técnico
+app.get("/api/my-classes", async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    const result = await pool.query(
+      `SELECT a.id_aula, l.nome_laboratorio, a.data, h.hora_inicio, a.precisa_tecnico, a.autorizado
+         FROM aulas a
+         JOIN laboratorios l ON a.id_laboratorio = l.id_laboratorio
+         JOIN horarios h ON a.id_horario = h.id_horario
+        WHERE a.professor_email = $1
+           OR (a.precisa_tecnico = true AND l.usuario_email = $1)`,
+      [email]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao buscar aulas" });
+  }
+});
+
+// /////////////////////////////////
+app.get("/api/requests", async (req, res) => {
+  try {
+    const { tecnico_email } = req.query;
+
+    const result = await pool.query(
+      `SELECT a.id_aula, u.nome as professor, l.nome_laboratorio, a.data, h.hora_inicio, a.precisa_tecnico, a.autorizado
+       FROM aulas a
+       JOIN usuarios u ON a.professor_email = u.email
+       JOIN laboratorios l ON a.id_laboratorio = l.id_laboratorio
+       JOIN horarios h ON a.id_horario = h.id_horario
+       WHERE l.usuario_email = $1 AND a.autorizado = false`,
+      [tecnico_email]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao buscar solicitações" });
+  }
+});
+
+// 🔹 Técnico autoriza/nega aula
+app.patch("/api/requests/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { aprovado, tecnico_email } = req.body;
+
+    // Atualiza o status da aula
+    await pool.query("UPDATE aulas SET autorizado = $1 WHERE id_aula = $2", [
+      aprovado,
+      id,
+    ]);
+
+    // Opcional: log na tabela autorizacoes
+    await pool.query(
+      `INSERT INTO autorizacoes (id_aula, tecnico_email, aprovado)
+       VALUES ($1, $2, $3)`,
+      [id, tecnico_email, aprovado]
+    );
+
+    res.json({ message: "Atualizado com sucesso" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao autorizar aula" });
+  }
+});
 
 export default app;

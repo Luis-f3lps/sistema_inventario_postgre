@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="images/icone3.png" type="image/png">
+    <title>Inventário Produtos Químicos</title>
+    <link rel="stylesheet" href="css/style5.css">
+    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<!------------------Relatórios--------------->
+<div id="header">
+        <nav>
+            <ul id="sidemenu">
+                <img src="images/logomenu.png" class="logo">
+                </br>
+                <li>
+                    <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
+                        <i class="fas fa-user"></i>
+                        <span id="user-name-text"></span>
+                    </span>
+                </li>
+                </br>
+                <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
+                <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
+                <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+                <li><a href="/Horario"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+                <li><a href="/Tela_Tecnico"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+
+                <!-- HTML para o menu de administração -->
+                <li class="submenu admin-menu" style="display: none;">
+                    <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
+                    <ul class="submenu-items">
+                        <li><a href="/Usuarios"><i class="fas fa-users"></i> Usuários</a></li>
+                        <li><a href="/Produto"><i class="fas fa-tags"></i> Produtos</a></li>
+                        <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Laboratórios</a></li>
+                    </ul>
+                </li>
+                </br>
+                <li class="logout">
+                    <a href="index.html" style="border-top: 1px solid;">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                    <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
+                </ul>
+                <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
+            </nav>
+        <div class="container">
+            <h1>Solicitações Pendentes</h1>
+
+          <table id="requestsTable">
+            <thead>
+              <tr>
+                <th>Professor</th>
+                <th>Laboratório</th>
+                <th>Data</th>
+                <th>Horário</th>
+                <th>Precisa Técnico</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- preenchido via JS -->
+            </tbody>
+          </table>
+
+          <script>
+            const tecnicoEmail = "tecnico01@sistema.com"; // substitua pelo usuário logado
+
+            async function loadRequests() {
+              const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
+              const data = await res.json();
+              renderTable(data);
+            }
+
+            function renderTable(requests) {
+              const tbody = document.querySelector("#requestsTable tbody");
+              tbody.innerHTML = "";
+
+              if (requests.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">Nenhuma solicitação pendente</td></tr>`;
+                return;
+              }
+
+              requests.forEach(r => {
+                const tr = document.createElement("tr");
+
+                tr.innerHTML = `
+                  <td>${r.professor}</td>
+                  <td>${r.nome_laboratorio}</td>
+                  <td>${r.data}</td>
+                  <td>${r.hora_inicio.slice(0,5)}</td>
+                  <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
+                  <td class="status pending">Pendente</td>
+                  <td>
+                    <button class="btn btn-accept">Aceitar</button>
+                    <button class="btn btn-reject">Recusar</button>
+                  </td>
+                `;
+
+                // eventos dos botões
+                const acceptBtn = tr.querySelector(".btn-accept");
+                const rejectBtn = tr.querySelector(".btn-reject");
+                const statusEl = tr.querySelector(".status");
+
+                acceptBtn.addEventListener("click", async () => {
+                  await updateRequest(r.id_aula, true);
+                  statusEl.textContent = "Aceito";
+                  statusEl.className = "status accepted";
+                  acceptBtn.disabled = true;
+                  rejectBtn.disabled = true;
+                });
+
+                rejectBtn.addEventListener("click", async () => {
+                  await updateRequest(r.id_aula, false);
+                  statusEl.textContent = "Recusado";
+                  statusEl.className = "status rejected";
+                  acceptBtn.disabled = true;
+                  rejectBtn.disabled = true;
+                });
+
+                tbody.appendChild(tr);
+              });
+            }
+
+            async function updateRequest(id, aprovado) {
+              await fetch(`/api/requests/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ aprovado, tecnico_email: tecnicoEmail })
+              });
+            }
+
+            // carregar quando abrir a página
+            loadRequests();
+          </script>
+        </body>
+        </html>

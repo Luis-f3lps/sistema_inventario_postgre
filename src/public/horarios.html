@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="images/icone3.png" type="image/png">
+    <title>Inventário Produtos Químicos</title>
+    <link rel="stylesheet" href="css/style5.css">
+    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<!------------------Relatórios--------------->
+<div id="header">
+        <nav>
+            <ul id="sidemenu">
+                <img src="images/logomenu.png" class="logo">
+                </br>
+                <li>
+                    <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
+                        <i class="fas fa-user"></i>
+                        <span id="user-name-text"></span>
+                    </span>
+                </li>
+                </br>
+                <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
+                <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
+                <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+                <li><a href="/Horario"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+
+                <!-- HTML para o menu de administração -->
+                <li class="submenu admin-menu" style="display: none;">
+                    <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
+                    <ul class="submenu-items">
+                        <li><a href="/Usuarios"><i class="fas fa-users"></i> Usuários</a></li>
+                        <li><a href="/Produto"><i class="fas fa-tags"></i> Produtos</a></li>
+                        <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Laboratórios</a></li>
+                    </ul>
+                </li>
+                </br>
+                <li class="logout">
+                    <a href="index.html" style="border-top: 1px solid;">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                    <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
+                </ul>
+                <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
+            </nav>
+        <div class="container">
+            <h1>Agendar Aula — Escolha data e horário</h1>
+
+            <div class="row">
+                <label for="lab">Laboratório</label>
+                <select id="lab">
+                <!-- Substitua/Popule dinamicamente com seus labs -->
+                <option value="1">Física (Lab 1)</option>
+                <option value="4">Química (Lab 4)</option>
+                </select>
+
+                <label for="date">Data</label>
+                <input id="date" type="date" />
+            </div>
+
+            <div>
+                <strong>Horários disponíveis:</strong>
+                <div id="slots" class="slots" aria-live="polite"></div>
+                <div class="help">Aulas de 1 hora. Manhã: 07h–11h (7→10). Tarde/Noite: 13h–22h (13→21).</div>
+            </div>
+
+            <button id="submitBtn" class="primary" disabled>Solicitar Aula</button>
+            <div id="msg" class="msg"></div>
+        </div>
+</div>
+
+  <script>
+    // configuração de blocos: gera IDs no formato "HH:MM"
+    const morningStart = 7, morningEndExclusive = 11;   // 07,08,09,10
+    const afternoonStart = 13, afternoonEndExclusive = 22; // 13..21
+
+    const slotsEl = document.getElementById('slots');
+    const dateEl = document.getElementById('date');
+    const labEl = document.getElementById('lab');
+    const submitBtn = document.getElementById('submitBtn');
+    const msgEl = document.getElementById('msg');
+
+    let occupiedSlots = []; // exemplo: ["07:00","13:00"]
+    let selectedSlot = null;
+
+    // Inicializa data com hoje
+    const today = new Date().toISOString().slice(0,10);
+    dateEl.value = today;
+
+    // Gera array de horários como strings "07:00"
+    function generateAllSlots() {
+      const arr = [];
+      for (let h = morningStart; h < morningEndExclusive; h++) arr.push(formatHour(h));
+      for (let h = afternoonStart; h < afternoonEndExclusive; h++) arr.push(formatHour(h));
+      return arr;
+    }
+
+    function formatHour(h) {
+      return (h<10 ? '0'+h : ''+h) + ':00';
+    }
+
+    // Renderiza botões de slots, marcando ocupados e selecionado
+    function renderSlots() {
+      const all = generateAllSlots();
+      slotsEl.innerHTML = '';
+      all.forEach(hour => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'slot';
+        btn.textContent = `${hour} — ${formatEnd(hour)}`;
+        btn.dataset.hour = hour;
+
+        if (occupiedSlots.includes(hour)) {
+          btn.classList.add('occupied');
+          btn.setAttribute('aria-disabled','true');
+        } else {
+          btn.addEventListener('click', () => {
+            // selecionar / desselecionar
+            if (selectedSlot === hour) {
+              selectedSlot = null;
+            } else {
+              selectedSlot = hour;
+            }
+            updateSelectionUI();
+          });
+        }
+        slotsEl.appendChild(btn);
+      });
+      updateSelectionUI();
+    }
+
+    function formatEnd(start) {
+      const [hh,mm] = start.split(':').map(Number);
+      const endH = hh + 1;
+      return (endH<10 ? '0'+endH : ''+endH) + ':00';
+    }
+
+    function updateSelectionUI() {
+      document.querySelectorAll('.slot').forEach(el => {
+        el.classList.remove('selected');
+        if (!el.classList.contains('occupied') && el.dataset.hour === selectedSlot) {
+          el.classList.add('selected');
+        }
+      });
+      submitBtn.disabled = !selectedSlot;
+    }
+
+    // Simula chamada ao backend para checar disponibilidade
+    // Substitua essa função por fetch('/api/availability?date=...&labId=...')
+    async function fetchOccupiedSlotsSimulated(date, labId) {
+      // EXEMPLO: regras simuladas de ocupação (apenas demo)
+      // A ideia é: o backend retorna array de horas ocupadas: ["07:00","14:00"]
+      // Aqui criamos uma simulação pseudo-aleatória baseada na data + labId
+      const seed = date + ':' + labId;
+      const hash = Array.from(seed).reduce((s,c)=> s + c.charCodeAt(0),0);
+      const rnd = (n) => (hash + n*13) % 7;
+      const choices = generateAllSlots();
+      const occ = [];
+      for (let i=0;i<choices.length;i++){
+        if (((i + rnd(i)) % 7) === 0) occ.push(choices[i]);
+      }
+      // Garantir que não fique tudo ocupado
+      return occ.slice(0, Math.min(6, occ.length));
+    }
+
+    // Real fetch example (descomente e implemente no backend)
+    /*
+    async function fetchOccupiedSlotsFromAPI(date, labId) {
+      const res = await fetch(`/api/availability?date=${encodeURIComponent(date)}&labId=${encodeURIComponent(labId)}`);
+      if (!res.ok) throw new Error('Falha ao consultar disponibilidade');
+      const data = await res.json(); // espera { occupied: ["07:00", ...] }
+      return data.occupied || [];
+    }
+    */
+
+    async function loadAvailability() {
+      const date = dateEl.value;
+      const labId = labEl.value;
+      selectedSlot = null;
+      submitBtn.disabled = true;
+      msgEl.style.display = 'none';
+      // usar versão simulada - troque pela função fetchOccupiedSlotsFromAPI quando tiver o backend
+      occupiedSlots = await fetchOccupiedSlotsSimulated(date, labId);
+      renderSlots();
+    }
+
+    // quando a data ou lab mudar
+    dateEl.addEventListener('change', loadAvailability);
+    labEl.addEventListener('change', loadAvailability);
+
+    // submit: enviar solicitação de agendamento
+    submitBtn.addEventListener('click', async () => {
+      if (!selectedSlot) return;
+      const payload = {
+        professor_email: 'professor@exemplo.com', // substitua pelo usuário logado
+        labId: labEl.value,
+        date: dateEl.value,
+        hour: selectedSlot,
+        precisa_tecnico: false // poderia ter checkbox
+      };
+
+      // Exemplo de POST para seu backend:
+      /* descomentar para usar
+      try {
+        const res = await fetch('/api/schedule', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.message || 'Erro');
+        msgEl.textContent = 'Solicitação enviada com sucesso.';
+        msgEl.style.display = 'block';
+        // Atualiza disponibilidade (slot agora ocupado na simulação)
+        loadAvailability();
+      } catch (err) {
+        msgEl.textContent = 'Erro ao enviar: ' + err.message;
+        msgEl.style.display = 'block';
+      }
+      */
+
+      // Simulação local (sem backend)
+      msgEl.textContent = `Simulação: solicitada aula no lab ${payload.labId} — ${payload.date} ${payload.hour}`;
+      msgEl.style.display = 'block';
+
+      // sinalizar slot ocupado localmente
+      occupiedSlots.push(selectedSlot);
+      selectedSlot = null;
+      renderSlots();
+    });
+
+    // inicializa
+    loadAvailability();
+  </script>
+  </body>
+</html>
