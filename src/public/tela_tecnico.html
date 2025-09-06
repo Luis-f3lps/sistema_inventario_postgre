@@ -120,7 +120,7 @@
     // Função principal para carregar as solicitações da API
     async function loadRequests() {
         // Assegura que temos um usuário logado e que ele é um técnico
-if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
+if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'normal') {
             const tbody = document.querySelector("#requestsTable tbody");
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">Acesso restrito a técnicos.</td></tr>`;
             return;
