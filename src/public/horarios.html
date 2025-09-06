@@ -65,7 +65,13 @@
                 <div id="slots" class="slots" aria-live="polite"></div>
                 <div class="help">Aulas de 1 hora. Manhã: 07h–11h (7→10). Tarde/Noite: 13h–22h (13→21).</div>
             </div>
+<div class="row-checkbox">
+            <input type="checkbox" id="precisaTecnico">
+            <label for="precisaTecnico">Precisa de acompanhamento do técnico?</label>
+        </div>
 
+        <button id="submitBtn" class="primary" disabled>Solicitar Aula</button>
+        <div id="msg" class="msg"></div>
             <button id="submitBtn" class="primary" disabled>Solicitar Aula</button>
             <div id="msg" class="msg"></div>
         </div>
@@ -103,6 +109,7 @@
     const labEl = document.getElementById('lab');
     const submitBtn = document.getElementById('submitBtn');
     const msgEl = document.getElementById('msg');
+    const precisaTecnicoEl = document.getElementById('precisaTecnico');
 
     const morningStart = 7, morningEndExclusive = 11;
     const afternoonStart = 13, afternoonEndExclusive = 22;
@@ -212,7 +219,8 @@
             labId: labEl.value,
             date: dateEl.value,
             hour: selectedSlot,
-            precisa_tecnico: false
+            precisa_tecnico: precisaTecnicoEl.checked
+
         };
 
         try {

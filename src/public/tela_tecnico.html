@@ -66,74 +66,109 @@
           </table>
 
           <script>
-            const tecnicoEmail = "tecnico01@sistema.com"; // substitua pelo usuário logado
+                // Variável global para guardar os dados do usuário logado
+    let loggedInUser = null;
 
-            async function loadRequests() {
-              const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
-              const data = await res.json();
-              renderTable(data);
-            }
-
-            function renderTable(requests) {
-              const tbody = document.querySelector("#requestsTable tbody");
-              tbody.innerHTML = "";
-
-              if (requests.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">Nenhuma solicitação pendente</td></tr>`;
+    // --- FUNÇÕES DE AUTENTICAÇÃO E DADOS ---
+    async function loadLoggedInUser() {
+        try {
+            const response = await fetch('/api/usuario-logado');
+            if (!response.ok) {
+                // Se não estiver logado, redireciona para a página de login
+                window.location.href = '/login.html'; // Crie uma página de login
                 return;
-              }
+            }
+            const data = await response.json();
+            loggedInUser = data; // Guarda os dados do usuário
 
-              requests.forEach(r => {
-                const tr = document.createElement("tr");
+            const userNameElement = document.getElementById('user-name-text');
+            userNameElement.textContent = data.nome;
+            if (data.tipo_usuario === 'admin') {
+                document.querySelector('.admin-menu').style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Erro ao carregar usuário logado:', error);
+        }
+    }
 
-                tr.innerHTML = `
-                  <td>${r.professor}</td>
-                  <td>${r.nome_laboratorio}</td>
-                  <td>${r.data}</td>
-                  <td>${r.hora_inicio.slice(0,5)}</td>
-                  <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
-                  <td class="status pending">Pendente</td>
-                  <td>
+    // Função principal para carregar as solicitações da API
+    async function loadRequests() {
+        try {
+            const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
+            if (!res.ok) throw new Error(`Erro na rede: ${res.statusText}`);
+            
+            const data = await res.json();
+            renderTable(data);
+        } catch (error) {
+            console.error('Falha ao carregar solicitações:', error);
+            const tbody = document.querySelector("#requestsTable tbody");
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red; padding:20px;">Erro ao carregar dados.</td></tr>`;
+        }
+    }
+
+    // Função para desenhar a tabela com os dados recebidos
+    function renderTable(requests) {
+        const tbody = document.querySelector("#requestsTable tbody");
+        tbody.innerHTML = ""; // Limpa a tabela
+
+        if (requests.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">Nenhuma solicitação pendente</td></tr>`;
+            return;
+        }
+
+        requests.forEach(r => {
+            const tr = document.createElement("tr");
+
+            // MUDANÇA AQUI: Exibimos o status que vem da API e adicionamos uma classe CSS
+            tr.innerHTML = `
+                <td>${r.professor}</td>
+                <td>${r.nome_laboratorio}</td>
+                <td>${r.data}</td>
+                <td>${r.hora_inicio.slice(0, 5)}</td>
+                <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
+                <td class="status status-${r.status}">${r.status}</td>
+                <td>
                     <button class="btn btn-accept">Aceitar</button>
                     <button class="btn btn-reject">Recusar</button>
-                  </td>
-                `;
+                </td>
+            `;
+            
+            const acceptBtn = tr.querySelector(".btn-accept");
+            const rejectBtn = tr.querySelector(".btn-reject");
+            const statusEl = tr.querySelector(".status");
 
-                // eventos dos botões
-                const acceptBtn = tr.querySelector(".btn-accept");
-                const rejectBtn = tr.querySelector(".btn-reject");
-                const statusEl = tr.querySelector(".status");
+            acceptBtn.addEventListener("click", async () => {
+                await updateRequest(r.id_aula, true);
+                // MUDANÇA AQUI: Atualizamos o texto e a classe do status para o novo padrão
+                statusEl.textContent = "autorizado";
+                statusEl.className = "status status-autorizado";
+                acceptBtn.disabled = true;
+                rejectBtn.disabled = true;
+            });
 
-                acceptBtn.addEventListener("click", async () => {
-                  await updateRequest(r.id_aula, true);
-                  statusEl.textContent = "Aceito";
-                  statusEl.className = "status accepted";
-                  acceptBtn.disabled = true;
-                  rejectBtn.disabled = true;
-                });
+            rejectBtn.addEventListener("click", async () => {
+                await updateRequest(r.id_aula, false);
+                // MUDANÇA AQUI: Atualizamos o texto e a classe do status para o novo padrão
+                statusEl.textContent = "nao_autorizado";
+                statusEl.className = "status status-nao_autorizado";
+                acceptBtn.disabled = true;
+                rejectBtn.disabled = true;
+            });
 
-                rejectBtn.addEventListener("click", async () => {
-                  await updateRequest(r.id_aula, false);
-                  statusEl.textContent = "Recusado";
-                  statusEl.className = "status rejected";
-                  acceptBtn.disabled = true;
-                  rejectBtn.disabled = true;
-                });
+            tbody.appendChild(tr);
+        });
+    }
 
-                tbody.appendChild(tr);
-              });
-            }
+    // A função updateRequest não precisa de mudanças! A API já é inteligente.
+    async function updateRequest(id, aprovado) {
+        await fetch(`/api/requests/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ aprovado, tecnico_email: tecnicoEmail })
+        });
+    }
 
-            async function updateRequest(id, aprovado) {
-              await fetch(`/api/requests/${id}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ aprovado, tecnico_email: tecnicoEmail })
-              });
-            }
-
-            // carregar quando abrir a página
-            loadRequests();
-          </script>
-        </body>
+    // Carrega os dados quando a página for aberta
+    document.addEventListener('DOMContentLoaded', loadRequests);
+</script>
         </html>

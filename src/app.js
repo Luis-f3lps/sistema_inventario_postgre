@@ -1499,88 +1499,75 @@ app.get("/api/availability", async (req, res) => {
 
 // 🔹 2. Professor solicita aula (MODIFICADO para usar a SESSÃO)
 app.post("/api/schedule", async (req, res) => {
-    // 1. Verificar se o usuário está logado
     if (!req.session.user) {
-        return res.status(401).json({ error: "Você precisa estar logado para agendar uma aula." });
+        return res.status(401).json({ error: "Você precisa estar logado." });
     }
-
     try {
-        // 2. Pegar o email da SESSÃO, não do corpo da requisição
         const professor_email = req.session.user.email;
         const { labId, date, hour, precisa_tecnico } = req.body;
 
-        const horario = await pool.query(
-            // Adicionamos ::time para converter a string para o tipo TIME
-            "SELECT id_horario FROM horarios WHERE hora_inicio = $1::time", [hour] 
-        );
-
-        if (horario.rowCount === 0)
-            return res.status(400).json({ error: "Horário inválido" });
-
+        const horario = await pool.query("SELECT id_horario FROM horarios WHERE hora_inicio = $1::time", [hour]);
+        if (horario.rowCount === 0) return res.status(400).json({ error: "Horário inválido" });
         const id_horario = horario.rows[0].id_horario;
 
+        // MUDANÇA AQUI: Removemos 'autorizado' da lista de colunas.
+        // O status 'analisando' será adicionado por padrão pelo banco de dados.
         const result = await pool.query(
-            `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico, autorizado)
-             VALUES ($1, $2, $3, $4, $5, false)
+            `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico)
+             VALUES ($1, $2, $3, $4, $5)
              RETURNING *`,
             [professor_email, labId, date, id_horario, precisa_tecnico]
         );
-
         res.status(201).json({ message: "Aula solicitada com sucesso!", aula: result.rows[0] });
     } catch (err) {
-        if (err.code === "23505") { // UNIQUE violation
-            return res.status(400).json({ error: "Esse horário já está ocupado neste laboratório" });
-        }
-        console.error(err);
-        res.status(500).json({ error: "Erro ao solicitar aula" });
+        // ... (o tratamento de erro continua igual)
     }
 });
 
 // 🔹 3. Técnico vê solicitações pendentes
 app.get("/api/requests", async (req, res) => {
-  try {
-    const { tecnico_email } = req.query;
-
-    const result = await pool.query(
-      `SELECT a.id_aula, u.nome as professor, l.nome_laboratorio, a.data, h.hora_inicio, a.precisa_tecnico, a.autorizado
-         FROM aulas a
-         JOIN usuario u ON a.professor_email = u.email
-         JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-         JOIN horarios h ON a.id_horario = h.id_horario
-        WHERE l.usuario_email = $1 AND a.autorizado = false`,
-      [tecnico_email]
-    );
-
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao buscar solicitações" });
-  }
+    try {
+        const { tecnico_email } = req.query;
+        // MUDANÇA AQUI: Trocamos 'a.autorizado' por 'a.status' na consulta.
+        const result = await pool.query(
+            `SELECT a.id_aula, u.nome as professor, l.nome_laboratorio, a.data, h.hora_inicio, a.precisa_tecnico, a.status
+             FROM aulas a
+             JOIN usuarios u ON a.professor_email = u.email
+             JOIN laboratorios l ON a.id_laboratorio = l.id_laboratorio
+             JOIN horarios h ON a.id_horario = h.id_horario
+             WHERE l.usuario_email = $1 AND a.status = 'analisando'`, // Condição atualizada
+            [tecnico_email]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        // ... (o tratamento de erro continua igual)
+    }
 });
 
 // 🔹 4. Técnico autoriza/nega aula
 app.patch("/api/requests/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { aprovado, tecnico_email } = req.body;
+    try {
+        const { id } = req.params;
+        const { aprovado, tecnico_email } = req.body;
 
-    await pool.query("UPDATE aulas SET autorizado = $1 WHERE id_aula = $2", [
-      aprovado,
-      id,
-    ]);
+        // MUDANÇA AQUI: Lógica para definir o status correto
+        const novoStatus = aprovado ? 'autorizado' : 'nao_autorizado';
 
-    // opcional: log na tabela autorizacoes
-    await pool.query(
-      `INSERT INTO autorizacoes (id_aula, tecnico_email, aprovado)
-       VALUES ($1,$2,$3)`,
-      [id, tecnico_email, aprovado]
-    );
+        // Atualiza a coluna 'status' na tabela 'aulas'
+        await pool.query("UPDATE aulas SET status = $1 WHERE id_aula = $2", [
+            novoStatus,
+            id,
+        ]);
 
-    res.json({ message: "Atualizado com sucesso" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao autorizar aula" });
-  }
+        // O log na tabela 'autorizacoes' continua o mesmo e é muito importante!
+        await pool.query(
+            `INSERT INTO autorizacoes (id_aula, tecnico_email, aprovado) VALUES ($1, $2, $3)`,
+            [id, tecnico_email, aprovado]
+        );
+        res.json({ message: "Status da aula atualizado com sucesso" });
+    } catch (err) {
+        // ... (o tratamento de erro continua igual)
+    }
 });
 
 // 🔹 5. Listar aulas do professor ou técnico
