@@ -120,6 +120,7 @@
     <button id="submitBtn" class="btn-principal" disabled>Solicitar Aula</button>
     
 </div>
+
 <script>
     // Variável global para guardar os dados do usuário logado
     let loggedInUser = null;
@@ -129,18 +130,23 @@
         try {
             const response = await fetch('/api/usuario-logado');
             if (!response.ok) {
-                // Se não estiver logado, redireciona para a página de login
-                window.location.href = '/login.html'; // Crie uma página de login
+                window.location.href = '/login.html';
                 return;
             }
             const data = await response.json();
-            loggedInUser = data; // Guarda os dados do usuário
+            loggedInUser = data;
 
             const userNameElement = document.getElementById('user-name-text');
-            userNameElement.textContent = data.nome;
+            if(userNameElement) {
+                userNameElement.textContent = data.nome_usuario || data.nome;
+            }
             if (data.tipo_usuario === 'admin') {
                 document.querySelector('.admin-menu').style.display = 'block';
             }
+            
+            // >>> CORREÇÃO: Carregar a disponibilidade SÓ DEPOIS de saber quem está logado
+            await loadAvailability();
+
         } catch (error) {
             console.error('Erro ao carregar usuário logado:', error);
         }
@@ -153,7 +159,7 @@
     const labEl = document.getElementById('lab');
     const submitBtn = document.getElementById('submitBtn');
     const msgEl = document.getElementById('msg');
-    const precisaTecnicoEl = document.getElementById('precisaTecnico');
+    // A linha 'const precisaTecnicoEl' foi REMOVIDA pois era um erro.
 
     const morningStart = 7, morningEndExclusive = 11;
     const afternoonStart = 13, afternoonEndExclusive = 22;
@@ -161,9 +167,6 @@
     let occupiedSlots = [];
     let selectedSlot = null;
 
-    // ✅ INÍCIO DO CÓDIGO QUE FALTAVA
-
-    // Gera o array completo de todos os horários possíveis
     function generateAllSlots() {
         const arr = [];
         for (let h = morningStart; h < morningEndExclusive; h++) arr.push(formatHour(h));
@@ -171,26 +174,24 @@
         return arr;
     }
 
-    // Formata uma hora para o formato "HH:00"
     function formatHour(h) {
         return (h < 10 ? '0' + h : '' + h) + ':00';
     }
     
-    // Calcula a hora de término (ex: "07:00" -> "08:00")
     function formatEnd(start) {
         const [hh, mm] = start.split(':').map(Number);
         const endH = hh + 1;
         return (endH < 10 ? '0' + endH : '' + endH) + ':00';
     }
 
-    // Renderiza os botões na tela, marcando os ocupados
     function renderSlots() {
         const all = generateAllSlots();
         slotsEl.innerHTML = '';
         all.forEach(hour => {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'slot';
+            // >>> CORREÇÃO: Usar a nova classe '.bloco-horario'
+            btn.className = 'bloco-horario'; 
             btn.textContent = `${hour} — ${formatEnd(hour)}`;
             btn.dataset.hour = hour;
 
@@ -199,11 +200,7 @@
                 btn.setAttribute('aria-disabled', 'true');
             } else {
                 btn.addEventListener('click', () => {
-                    if (selectedSlot === hour) {
-                        selectedSlot = null;
-                    } else {
-                        selectedSlot = hour;
-                    }
+                    selectedSlot = (selectedSlot === hour) ? null : hour;
                     updateSelectionUI();
                 });
             }
@@ -212,9 +209,9 @@
         updateSelectionUI();
     }
     
-    // Atualiza a interface para mostrar qual botão está selecionado
     function updateSelectionUI() {
-        document.querySelectorAll('.slot').forEach(el => {
+        // >>> CORREÇÃO: Usar a nova classe '.bloco-horario'
+        document.querySelectorAll('.bloco-horario').forEach(el => {
             el.classList.remove('selected');
             if (!el.classList.contains('occupied') && el.dataset.hour === selectedSlot) {
                 el.classList.add('selected');
@@ -222,8 +219,6 @@
         });
         submitBtn.disabled = !selectedSlot;
     }
-    // ✅ FIM DO CÓDIGO QUE FALTAVA
-
 
     // --- CONEXÃO COM A API REAL ---
     async function fetchOccupiedSlotsFromAPI(date, labId) {
@@ -251,11 +246,9 @@
         }
     }
 
-    // Quando a data ou lab mudar
     dateEl.addEventListener('change', loadAvailability);
     labEl.addEventListener('change', loadAvailability);
 
-    // SUBMIT USANDO A API REAL E O USUÁRIO LOGADO
     submitBtn.addEventListener('click', async () => {
         if (!selectedSlot || !loggedInUser) return;
 
@@ -263,7 +256,7 @@
             labId: labEl.value,
             date: dateEl.value,
             hour: selectedSlot,
-    precisa_tecnico: document.querySelector('input[name="precisaTecnico"]:checked').value === 'true'
+            precisa_tecnico: document.querySelector('input[name="precisaTecnico"]:checked').value === 'true'
         };
 
         try {
@@ -272,18 +265,14 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-
             const result = await res.json();
             if (!res.ok) {
                 throw new Error(result.error || 'Ocorreu um erro');
             }
-
             msgEl.textContent = result.message;
             msgEl.style.color = 'green';
             msgEl.style.display = 'block';
-            
-            loadAvailability();
-
+            await loadAvailability();
         } catch (err) {
             msgEl.textContent = 'Erro ao enviar: ' + err.message;
             msgEl.style.color = 'red';
@@ -293,14 +282,13 @@
 
     // --- INICIALIZAÇÃO DA PÁGINA ---
     document.addEventListener('DOMContentLoaded', () => {
-        loadLoggedInUser(); // Primeiro, verifica quem está logado
+        // >>> CORREÇÃO: Inicializa apenas o login, que depois chama o resto.
+        loadLoggedInUser(); 
         
+        // A data inicial é definida aqui para garantir que o elemento existe.
         const today = new Date().toISOString().slice(0, 10);
         dateEl.value = today;
-        
-        loadAvailability(); // Depois, carrega os horários
     });
-
 </script>
   </body>
 </html>
