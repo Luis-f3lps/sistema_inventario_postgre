@@ -142,5 +142,19 @@
         // Ponto de Entrada: Inicia o processo quando a página carrega
         document.addEventListener('DOMContentLoaded', loadLoggedInUser);
     </script>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuContainer = document.getElementById('menu-container');
+            if (menuContainer) {
+                fetch('menu.html')
+                    .then(response => response.text())
+                    .then(data => {
+                        menuContainer.innerHTML = data;
+                        // O código para fazer os botões do menu funcionar vai aqui...
+                    })
+                    .catch(error => console.error('Erro ao carregar o menu:', error));
+            }
+        });
+    </script>
 </body>
 </html>
