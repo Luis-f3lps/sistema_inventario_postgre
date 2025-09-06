@@ -1510,7 +1510,8 @@ app.post("/api/schedule", async (req, res) => {
         const { labId, date, hour, precisa_tecnico } = req.body;
 
         const horario = await pool.query(
-            "SELECT id_horario FROM horarios WHERE hora_inicio = $1", [hour]
+            // Adicionamos ::time para converter a string para o tipo TIME
+            "SELECT id_horario FROM horarios WHERE hora_inicio = $1::time", [hour] 
         );
 
         if (horario.rowCount === 0)
