@@ -32,6 +32,14 @@ document.addEventListener('DOMContentLoaded', function() {
         redirecionarSeNaoAutenticado();
     }
 });
+document.querySelectorAll('.submenu > a').forEach(menu => {
+    menu.addEventListener('click', function(e) {
+        e.preventDefault();
+        const submenuItems = this.nextElementSibling;
+        submenuItems.classList.toggle('open');
+        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+    });
+});
 
 
 

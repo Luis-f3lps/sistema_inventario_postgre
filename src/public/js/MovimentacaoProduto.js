@@ -294,3 +294,11 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => console.error('Erro ao atualizar entrada:', error));
     });
 });
+document.querySelectorAll('.submenu > a').forEach(menu => {
+    menu.addEventListener('click', function(e) {
+        e.preventDefault();
+        const submenuItems = this.nextElementSibling;
+        submenuItems.classList.toggle('open');
+        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+    });
+});
