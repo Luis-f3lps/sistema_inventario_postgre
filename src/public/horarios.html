@@ -147,45 +147,41 @@
     // --- FUNÇÕES DE AGENDAMENTO ---
 
     // >>> A LÓGICA ATUALIZADA ESTÁ AQUI <<<
-    async function loadAvailability() {
-        const dataSelecionadaStr = dateEl.value;
-        const labId = labEl.value;
+async function loadAvailability() {
+    const dataSelecionadaStr = dateEl.value;
+    const labId = labEl.value;
 
-        // Limpa a mensagem anterior
-        msgEl.style.display = 'none';
-        msgEl.className = 'mensagem-status'; // Reseta as classes
+    // Limpa a mensagem anterior
+    msgEl.style.display = 'none';
+    msgEl.className = 'mensagem-status'; // Reseta as classes
 
-        // --- VALIDAÇÃO DA DATA ---
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas o dia
+    // --- VALIDAÇÃO DA DATA (VERSÃO CORRIGIDA) ---
+    // Pega a data de hoje no formato YYYY-MM-DD, ignorando a hora
+    const hojeStr = new Date().toISOString().slice(0, 10);
 
-        // Converte a string da data do input para um objeto Date
-        const [ano, mes, dia] = dataSelecionadaStr.split('-').map(Number);
-        const dataSelecionada = new Date(ano, mes - 1, dia);
-
-        if (dataSelecionada < hoje) {
-            slotsEl.innerHTML = ''; // Limpa os horários
-            submitBtn.disabled = true; // Desativa o botão de submeter
-            
-            // Mostra a mensagem de erro "bonita"
-            msgEl.textContent = 'Não é possível agendar aulas para uma data que já passou.';
-            msgEl.classList.add('erro');
-            return; // Interrompe a execução da função
-        }
-        // --- FIM DA VALIDAÇÃO ---
-
-        selectedSlot = null;
-        submitBtn.disabled = true;
-
-        try {
-            occupiedSlots = await fetchOccupiedSlotsFromAPI(dataSelecionadaStr, labId);
-            renderSlots();
-        } catch (error) {
-            console.error('Erro ao carregar disponibilidade:', error);
-            msgEl.textContent = 'Erro ao carregar horários. Tente novamente.';
-            msgEl.classList.add('erro');
-        }
+    if (dataSelecionadaStr < hojeStr) {
+        slotsEl.innerHTML = ''; // Limpa os horários
+        submitBtn.disabled = true; // Desativa o botão de submeter
+        
+        // Mostra a mensagem de erro
+        msgEl.textContent = 'Não é possível agendar em datas passadas.';
+        msgEl.classList.add('erro');
+        return; // Interrompe a execução
     }
+    // --- FIM DA VALIDAÇÃO ---
+
+    selectedSlot = null;
+    submitBtn.disabled = true;
+
+    try {
+        occupiedSlots = await fetchOccupiedSlotsFromAPI(dataSelecionadaStr, labId);
+        renderSlots();
+    } catch (error) {
+        console.error('Erro ao carregar disponibilidade:', error);
+        msgEl.textContent = 'Erro ao carregar horários. Tente novamente.';
+        msgEl.classList.add('erro');
+    }
+}
     
     // ... (O resto das suas funções: generateAllSlots, formatHour, renderSlots, etc. continuam iguais)
     
