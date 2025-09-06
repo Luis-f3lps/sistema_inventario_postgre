@@ -23,38 +23,15 @@ function opentab(tabname) {
     event.currentTarget.classList.add("active-link");
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-        const menuContainer = document.getElementById('menu-container');
-
-        if (menuContainer) {
-            fetch('menu.html')
-                .then(response => response.text())
-                .then(data => {
-                    // 1. Injeta o HTML do menu na página
-                    menuContainer.innerHTML = data;
-
-                    // 2. Agora que o menu existe, encontra os elementos dele
-                    const sideMenu = menuContainer.querySelector("#sidemenu");
-                    const openMenuBtn = menuContainer.querySelector(".fa-bars");
-                    const closeMenuBtn = menuContainer.querySelector(".fa-circle-xmark");
-
-                    // 3. Define as funções que controlam o menu
-                    function openmenu() {
-                        if (sideMenu) sideMenu.style.right = "0";
-                    }
-
-                    function closemenu() {
-                        if (sideMenu) sideMenu.style.right = "-200px";
-                    }
-
-                    // 4. "Liga" as funções aos botões corretos
-                    if (openMenuBtn) openMenuBtn.addEventListener('click', openmenu);
-                    if (closeMenuBtn) closeMenuBtn.addEventListener('click', closemenu);
-                })
-                .catch(error => console.error('Erro ao carregar o menu:', error));
-        }
+document.querySelectorAll('.submenu > a').forEach(menu => {
+    menu.addEventListener('click', function(e) {
+        e.preventDefault();
+        const submenuItems = this.nextElementSibling;
+        submenuItems.classList.toggle('open');
+        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
     });
-    
+});
+
 function Autenticado() {
     return fetch('/api/check-auth', {
         method: 'GET',
