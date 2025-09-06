@@ -1486,7 +1486,9 @@ app.get("/api/availability", async (req, res) => {
             `SELECT h.hora_inicio 
              FROM aulas a
              JOIN horarios h ON a.id_horario = h.id_horario
-             WHERE a.data = $1 AND a.id_laboratorio = $2 AND a.status = 'autorizado'`, // Mostra apenas os autorizados como ocupados
+             WHERE a.data = $1 
+               AND a.id_laboratorio = $2 
+               AND a.status IN ('autorizado', 'analisando')`, // <<< MUDANÇA AQUI
             [date, labId]
         );
         const occupied = result.rows.map((r) => r.hora_inicio.slice(0, 5));
