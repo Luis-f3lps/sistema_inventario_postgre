@@ -127,6 +127,9 @@ app.get('/Relatorio', (req, res) => {
   app.get('/Tela_Tecnico', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'tela_tecnico.html'));
   });
+  app.get('/Tela_Professor', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'tela_professor.html'));
+  });
 
 app.get('/Usuarios', Autenticado, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'usuarios.html'));
