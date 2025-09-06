@@ -84,7 +84,42 @@
         </div>
 </div>
 </div>
+<div class="agendamento-container">
 
+    <h1>Agendar Aula — Escolha data e horário</h1>
+
+    <div class="seletor-fila">
+        <label for="lab">Laboratório</label>
+        <select id="lab">
+            <option value="1">Física (Lab 1)</option>
+            <option value="4">Química (Lab 4)</option>
+        </select>
+
+        <label for="date">Data</label>
+        <input id="date" type="date" />
+    </div>
+
+    <div>
+        <strong>Horários disponíveis:</strong>
+        <div id="slots" class="grade-horarios"></div>
+        <div class="texto-ajuda">Aulas de 1 hora. Manhã: 07h–11h (7→10). Tarde/Noite: 13h–22h (13→21).</div>
+    </div>
+
+    <div class="opcao-tecnico-fila">
+        <span>Precisa de acompanhamento do técnico?</span>
+        <div class="radio-options">
+            <input type="radio" id="tecnicoSim" name="precisaTecnico" value="true">
+            <label for="tecnicoSim">Sim</label>
+            
+            <input type="radio" id="tecnicoNao" name="precisaTecnico" value="false" checked>
+            <label for="tecnicoNao">Não</label>
+        </div>
+    </div>
+
+    <div id="msg" class="mensagem-status"></div>
+    <button id="submitBtn" class="btn-principal" disabled>Solicitar Aula</button>
+    
+</div>
 <script>
     // Variável global para guardar os dados do usuário logado
     let loggedInUser = null;
