@@ -78,7 +78,7 @@
 <script>
     let loggedInUser = null;
 
-    // Função 1: Descobre quem está logado
+    // --- FUNÇÕES DE AUTENTICAÇÃO E DADOS ---
     async function loadLoggedInUser() {
         try {
             const response = await fetch('/api/usuario-logado');
@@ -89,21 +89,19 @@
             const data = await response.json();
             loggedInUser = data;
 
-            // Preenche o nome do utilizador no menu
             const userNameElement = document.getElementById('user-name-text');
-            if (userNameElement) {
+            if(userNameElement) {
                 userNameElement.textContent = data.nome_usuario || data.nome;
             }
             if (data.tipo_usuario === 'admin') {
                 document.querySelector('.admin-menu').style.display = 'block';
             }
             
-            // >>> A CORREÇÃO MAIS IMPORTANTE ESTÁ AQUI <<<
-            // Depois de saber quem está logado, MANDAMOS carregar a tabela.
-            await loadRequests(); 
+            // >>> CORREÇÃO: Carregar a disponibilidade SÓ DEPOIS de saber quem está logado
+            await loadAvailability();
 
         } catch (error) {
-            console.error('Erro ao carregar utilizador logado:', error);
+            console.error('Erro ao carregar usuário logado:', error);
         }
     }
 
