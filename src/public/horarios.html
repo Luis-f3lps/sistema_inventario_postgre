@@ -70,7 +70,6 @@
             <div id="msg" class="msg"></div>
         </div>
 </div>
-
 <script>
     // Variável global para guardar os dados do usuário logado
     let loggedInUser = null;
@@ -105,20 +104,77 @@
     const submitBtn = document.getElementById('submitBtn');
     const msgEl = document.getElementById('msg');
 
+    const morningStart = 7, morningEndExclusive = 11;
+    const afternoonStart = 13, afternoonEndExclusive = 22;
+
     let occupiedSlots = [];
     let selectedSlot = null;
 
-    // ... (as funções generateAllSlots, formatHour, renderSlots, formatEnd, updateSelectionUI continuam EXATAMENTE IGUAIS) ...
-    function generateAllSlots() { /* ...código igual... */ }
-    function formatHour(h) { /* ...código igual... */ }
-    function renderSlots() { /* ...código igual... */ }
-    function formatEnd(start) { /* ...código igual... */ }
-    function updateSelectionUI() { /* ...código igual... */ }
+    // ✅ INÍCIO DO CÓDIGO QUE FALTAVA
+
+    // Gera o array completo de todos os horários possíveis
+    function generateAllSlots() {
+        const arr = [];
+        for (let h = morningStart; h < morningEndExclusive; h++) arr.push(formatHour(h));
+        for (let h = afternoonStart; h < afternoonEndExclusive; h++) arr.push(formatHour(h));
+        return arr;
+    }
+
+    // Formata uma hora para o formato "HH:00"
+    function formatHour(h) {
+        return (h < 10 ? '0' + h : '' + h) + ':00';
+    }
+    
+    // Calcula a hora de término (ex: "07:00" -> "08:00")
+    function formatEnd(start) {
+        const [hh, mm] = start.split(':').map(Number);
+        const endH = hh + 1;
+        return (endH < 10 ? '0' + endH : '' + endH) + ':00';
+    }
+
+    // Renderiza os botões na tela, marcando os ocupados
+    function renderSlots() {
+        const all = generateAllSlots();
+        slotsEl.innerHTML = '';
+        all.forEach(hour => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'slot';
+            btn.textContent = `${hour} — ${formatEnd(hour)}`;
+            btn.dataset.hour = hour;
+
+            if (occupiedSlots.includes(hour)) {
+                btn.classList.add('occupied');
+                btn.setAttribute('aria-disabled', 'true');
+            } else {
+                btn.addEventListener('click', () => {
+                    if (selectedSlot === hour) {
+                        selectedSlot = null;
+                    } else {
+                        selectedSlot = hour;
+                    }
+                    updateSelectionUI();
+                });
+            }
+            slotsEl.appendChild(btn);
+        });
+        updateSelectionUI();
+    }
+    
+    // Atualiza a interface para mostrar qual botão está selecionado
+    function updateSelectionUI() {
+        document.querySelectorAll('.slot').forEach(el => {
+            el.classList.remove('selected');
+            if (!el.classList.contains('occupied') && el.dataset.hour === selectedSlot) {
+                el.classList.add('selected');
+            }
+        });
+        submitBtn.disabled = !selectedSlot;
+    }
+    // ✅ FIM DO CÓDIGO QUE FALTAVA
 
 
     // --- CONEXÃO COM A API REAL ---
-
-    // TROQUE A FUNÇÃO SIMULADA PELA REAL
     async function fetchOccupiedSlotsFromAPI(date, labId) {
         const res = await fetch(`/api/availability?date=${encodeURIComponent(date)}&labId=${encodeURIComponent(labId)}`);
         if (!res.ok) throw new Error('Falha ao consultar disponibilidade');
@@ -134,7 +190,6 @@
         msgEl.style.display = 'none';
 
         try {
-            // AGORA USAMOS A FUNÇÃO REAL
             occupiedSlots = await fetchOccupiedSlotsFromAPI(date, labId);
             renderSlots();
         } catch (error) {
@@ -153,7 +208,6 @@
     submitBtn.addEventListener('click', async () => {
         if (!selectedSlot || !loggedInUser) return;
 
-        // O professor_email agora vem do usuário logado!
         const payload = {
             labId: labEl.value,
             date: dateEl.value,
@@ -170,15 +224,13 @@
 
             const result = await res.json();
             if (!res.ok) {
-                // Lança o erro para ser pego pelo catch, usando a mensagem da API
                 throw new Error(result.error || 'Ocorreu um erro');
             }
 
             msgEl.textContent = result.message;
             msgEl.style.color = 'green';
             msgEl.style.display = 'block';
-
-            // Atualiza a disponibilidade para mostrar o novo horário como ocupado
+            
             loadAvailability();
 
         } catch (err) {
@@ -192,7 +244,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         loadLoggedInUser(); // Primeiro, verifica quem está logado
         
-        // Inicializa data com hoje
         const today = new Date().toISOString().slice(0, 10);
         dateEl.value = today;
         
