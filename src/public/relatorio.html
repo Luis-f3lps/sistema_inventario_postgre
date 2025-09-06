@@ -5,51 +5,13 @@
     <link rel="icon" href="images/icone3.png" type="image/png">
     <title>Inventário Produtos Químicos</title>
     <link rel="stylesheet" href="css/style5.css">
+    <link rel="stylesheet" href="css/menu.css"> 
     <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <!------------------Relatórios--------------->
 <div id="header">
-        <nav>
-            <ul id="sidemenu">
-                <img src="images/logomenu.png" class="logo">
-                </br>
-                <li>
-                    <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
-                        <i class="fas fa-user"></i>
-                        <span id="user-name-text"></span>
-                    </span>
-                </li>
-                </br>
-                
-                <li><a href="/Horario"><i class="fas fa-clock"></i> Horario</a></li>
-                <li><a href="/Tela_Tecnico"><i class="fas fa-bell"></i>Solicitações</a></li>
-                <li class="submenu produto">
-                    <a href="#"><i class="fas fa-boxes"></i> Inventário<i class="fas fa-chevron-down"></i></a>
-                    <ul class="submenu-items">
-                        <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
-                        <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
-                        <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
-                                    </ul>
-                </li>
-                <!-- HTML para o menu de administração -->
-                <li class="submenu admin-menu" style="display: none;">
-                    <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
-                    <ul class="submenu-items">
-                        <li><a href="/Usuarios"><i class="fas fa-users"></i> Usuários</a></li>
-                        <li><a href="/Produto"><i class="fas fa-tags"></i> Produtos</a></li>
-                        <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Laboratórios</a></li>
-                    </ul>
-                </li>
-                </br>
-                <li class="logout">
-                    <a href="index.html" style="border-top: 1px solid;">
-                        <i class="fas fa-sign-out-alt"></i> Sair
-                    </a>
-                    <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
-                </ul>
-                <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
-            </nav>
+    <div id="menu-container"></div>
     <div class="container">
         <div id="about">
             <div class="container">
@@ -133,5 +95,13 @@
     </div>
 </div>
 <script src="js/relatorio.js"></script>
+<script>
+    // Carrega o menu a partir do ficheiro externo
+    fetch('menu.html')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('menu-container').innerHTML = data;
+        });
+</script>
 </body>
 </html>
