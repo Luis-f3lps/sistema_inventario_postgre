@@ -1546,8 +1546,8 @@ app.get("/api/requests", async (req, res) => {
     const result = await pool.query(
       `SELECT a.id_aula, u.nome as professor, l.nome_laboratorio, a.data, h.hora_inicio, a.precisa_tecnico, a.autorizado
          FROM aulas a
-         JOIN usuarios u ON a.professor_email = u.email
-         JOIN laboratorios l ON a.id_laboratorio = l.id_laboratorio
+         JOIN usuario u ON a.professor_email = u.email
+         JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
          JOIN horarios h ON a.id_horario = h.id_horario
         WHERE l.usuario_email = $1 AND a.autorizado = false`,
       [tecnico_email]
@@ -1593,7 +1593,7 @@ app.get("/api/my-classes", async (req, res) => {
     const result = await pool.query(
       `SELECT a.id_aula, l.nome_laboratorio, a.data, h.hora_inicio, a.precisa_tecnico, a.autorizado
          FROM aulas a
-         JOIN laboratorios l ON a.id_laboratorio = l.id_laboratorio
+         JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
          JOIN horarios h ON a.id_horario = h.id_horario
         WHERE a.professor_email = $1
            OR (a.precisa_tecnico = true AND l.usuario_email = $1)`,
@@ -1615,8 +1615,8 @@ app.get("/api/requests", async (req, res) => {
     const result = await pool.query(
       `SELECT a.id_aula, u.nome as professor, l.nome_laboratorio, a.data, h.hora_inicio, a.precisa_tecnico, a.autorizado
        FROM aulas a
-       JOIN usuarios u ON a.professor_email = u.email
-       JOIN laboratorios l ON a.id_laboratorio = l.id_laboratorio
+       JOIN usuario u ON a.professor_email = u.email
+       JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
        JOIN horarios h ON a.id_horario = h.id_horario
        WHERE l.usuario_email = $1 AND a.autorizado = false`,
       [tecnico_email]
