@@ -1588,7 +1588,7 @@ app.get("/api/my-classes", async (req, res) => {
          a.id_aula, l.nome_laboratorio, a.data, h.hora_inicio, 
          a.precisa_tecnico, a.status
        FROM aulas a
-       JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio -- <<< CORREÇÃO AQUI
+       JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio 
        JOIN horarios h ON a.id_horario = h.id_horario
        WHERE 
          a.professor_email = $1 
