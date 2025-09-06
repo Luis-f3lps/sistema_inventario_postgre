@@ -90,11 +90,48 @@
             console.error('Erro ao carregar usuário logado:', error);
         }
     }
+ // --- FUNÇÕES DE AUTENTICAÇÃO E DADOS ---
+    async function loadLoggedInUser() {
+        try {
+            const response = await fetch('/api/usuario-logado');
+            if (!response.ok) {
+                window.location.href = '/login.html'; // Redireciona se não estiver logado
+                return;
+            }
+            const data = await response.json();
+            loggedInUser = data; // Guarda os dados do usuário
+
+            // Exibe o nome do usuário no menu
+            const userNameElement = document.getElementById('user-name-text');
+            userNameElement.textContent = data.nome;
+            if (data.tipo_usuario === 'admin') {
+                document.querySelector('.admin-menu').style.display = 'block';
+            }
+            
+            // >>> CORREÇÃO IMPORTANTE <<<
+            // Só depois de saber quem está logado é que buscamos os pedidos
+            await loadRequests();
+
+        } catch (error) {
+            console.error('Erro ao carregar usuário logado:', error);
+        }
+    }
 
     // Função principal para carregar as solicitações da API
     async function loadRequests() {
+        // Assegura que temos um usuário logado e que ele é um técnico
+        if (!loggedInUser || loggedInUser.tipo_usuario !== 'tecnico') {
+            const tbody = document.querySelector("#requestsTable tbody");
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">Acesso restrito a técnicos.</td></tr>`;
+            return;
+        }
+
         try {
+            // >>> CORREÇÃO IMPORTANTE <<<
+            // Usa o e-mail do usuário que acabou de fazer login
+            const tecnicoEmail = loggedInUser.email;
             const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
+            
             if (!res.ok) throw new Error(`Erro na rede: ${res.statusText}`);
             
             const data = await res.json();
@@ -118,8 +155,6 @@
 
         requests.forEach(r => {
             const tr = document.createElement("tr");
-
-            // MUDANÇA AQUI: Exibimos o status que vem da API e adicionamos uma classe CSS
             tr.innerHTML = `
                 <td>${r.professor}</td>
                 <td>${r.nome_laboratorio}</td>
@@ -139,7 +174,6 @@
 
             acceptBtn.addEventListener("click", async () => {
                 await updateRequest(r.id_aula, true);
-                // MUDANÇA AQUI: Atualizamos o texto e a classe do status para o novo padrão
                 statusEl.textContent = "autorizado";
                 statusEl.className = "status status-autorizado";
                 acceptBtn.disabled = true;
@@ -148,7 +182,6 @@
 
             rejectBtn.addEventListener("click", async () => {
                 await updateRequest(r.id_aula, false);
-                // MUDANÇA AQUI: Atualizamos o texto e a classe do status para o novo padrão
                 statusEl.textContent = "nao_autorizado";
                 statusEl.className = "status status-nao_autorizado";
                 acceptBtn.disabled = true;
@@ -159,8 +192,10 @@
         });
     }
 
-    // A função updateRequest não precisa de mudanças! A API já é inteligente.
+    // Função para enviar a atualização de status para a API
     async function updateRequest(id, aprovado) {
+        // Usa o e-mail do usuário logado também para o registo de auditoria
+        const tecnicoEmail = loggedInUser.email;
         await fetch(`/api/requests/${id}`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -168,7 +203,10 @@
         });
     }
 
-    // Carrega os dados quando a página for aberta
-    document.addEventListener('DOMContentLoaded', loadRequests);
+    // --- INICIALIZAÇÃO DA PÁGINA ---
+    // A única coisa a fazer quando a página carrega é verificar quem está logado.
+    // O resto do processo é desencadeado a partir daí.
+    document.addEventListener('DOMContentLoaded', loadLoggedInUser);
+</script>
 </script>
         </html>
