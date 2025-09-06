@@ -68,100 +68,119 @@
 <script>
     let loggedInUser = null;
 
-    // Função para obter os dados do utilizador logado
     async function loadLoggedInUser() {
         try {
             const response = await fetch('/api/usuario-logado');
             if (!response.ok) {
-                window.location.href = '/login.html';
+                // Se não estiver logado, redireciona para a página de login
+                window.location.href = '/login.html'; // Crie uma página de login
                 return;
             }
-            loggedInUser = await response.json();
-            await loadRequests();
+            const data = await response.json();
+            loggedInUser = data; // Guarda os dados do usuário
+
+            const userNameElement = document.getElementById('user-name-text');
+            userNameElement.textContent = data.nome;
+            if (data.tipo_usuario === 'admin') {
+                document.querySelector('.admin-menu').style.display = 'block';
+            }
         } catch (error) {
-            console.error('Erro ao carregar utilizador:', error);
+            console.error('Erro ao carregar usuário logado:', error);
         }
     }
-
-    // Função para carregar as solicitações com status 'analisando'
+    
+    // Função para carregar as solicitações
     async function loadRequests() {
-        if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'normal') {
+        if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
             const tbody = document.querySelector("#requestsTable tbody");
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
             return;
         }
-
         try {
             const tecnicoEmail = loggedInUser.email;
             const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
             if (!res.ok) throw new Error('Erro na rede');
-            
             const data = await res.json();
             renderTable(data);
         } catch (error) {
             console.error('Falha ao carregar solicitações:', error);
-            const tbody = document.querySelector("#requestsTable tbody");
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Erro ao carregar os dados.</td></tr>`;
+            document.querySelector("#requestsTable tbody").innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
         }
     }
 
-    // Função para desenhar a tabela na tela
+    // Função para desenhar a tabela com a nova lógica de botões
     function renderTable(requests) {
         const tbody = document.querySelector("#requestsTable tbody");
         tbody.innerHTML = "";
 
         if (requests.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Nenhuma solicitação pendente no momento.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Nenhuma solicitação pendente ou autorizada.</td></tr>`;
             return;
         }
 
         requests.forEach(r => {
             const tr = document.createElement("tr");
+            
+            // Lógica para definir quais botões mostrar
+            let actionsHtml = '';
+            if (r.status === 'analisando') {
+                actionsHtml = `
+                    <button class="btn btn-accept" data-id="${r.id_aula}">Autorizar</button>
+                    <button class="btn btn-reject" data-id="${r.id_aula}">Recusar</button>
+                `;
+            } else if (r.status === 'autorizado') {
+                actionsHtml = `
+                    <button class="btn btn-deauthorize" data-id="${r.id_aula}">Não Autorizar</button>
+                `;
+            }
+
             tr.innerHTML = `
                 <td>${r.professor}</td>
                 <td>${r.nome_laboratorio}</td>
                 <td>${r.data}</td>
                 <td>${r.hora_inicio.slice(0, 5)}</td>
                 <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
-                <td class="status status-analisando">analisando</td>
-                <td class="actions">
-                    <button class="btn-autorizar">Autorizar</button>
-                </td>
+                <td class="status status-${r.status}">${r.status}</td>
+                <td class="actions">${actionsHtml}</td>
             `;
             
-            const authorizeBtn = tr.querySelector(".btn-autorizar");
-            const statusEl = tr.querySelector(".status");
-
-            authorizeBtn.addEventListener("click", () => authorizeRequest(r.id_aula, statusEl, authorizeBtn));
-
             tbody.appendChild(tr);
         });
     }
 
-    // Função para chamar a API e autorizar a aula
-    async function authorizeRequest(id, statusEl, buttonEl) {
+    // Função para chamar a API e atualizar o status
+    async function updateRequest(id, novoStatus) {
         try {
             await fetch(`/api/requests/${id}`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ novoStatus: 'autorizado' }) // Envia sempre 'autorizado'
+                body: JSON.stringify({ novoStatus })
             });
-
-            // Atualiza a interface para dar feedback imediato
-            statusEl.textContent = 'autorizado';
-            statusEl.className = 'status status-autorizado';
-            buttonEl.textContent = 'Autorizado';
-            buttonEl.disabled = true;
-            
+            // Recarrega a lista para mostrar o estado atualizado
+            await loadRequests();
         } catch (error) {
-            console.error('Falha ao autorizar:', error);
-            alert('Não foi possível autorizar a aula. Tente novamente.');
+            console.error('Falha ao atualizar status:', error);
+            alert('Não foi possível atualizar o status. Tente novamente.');
         }
     }
 
-    // Inicia o processo quando a página carrega
-    document.addEventListener('DOMContentLoaded', loadLoggedInUser);
-</script>
+    // Ponto de entrada: inicia o processo quando a página carrega
+    document.addEventListener('DOMContentLoaded', () => {
+        loadLoggedInUser();
 
-</body>
-</html>
+        // Adiciona um "ouvinte" de eventos à tabela inteira
+        const tbody = document.querySelector("#requestsTable tbody");
+        tbody.addEventListener('click', (event) => {
+            const target = event.target;
+            const aulaId = target.dataset.id;
+
+            if (target.classList.contains('btn-accept')) {
+                updateRequest(aulaId, 'autorizado');
+            } else if (target.classList.contains('btn-reject')) {
+                updateRequest(aulaId, 'nao_autorizado');
+            } else if (target.classList.contains('btn-deauthorize')) {
+                updateRequest(aulaId, 'nao_autorizado');
+            }
+        });
+    });
+</script>
