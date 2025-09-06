@@ -72,6 +72,19 @@
 </div>
 
   <script>
+    // Pegar o nome do usuário logado
+function loadLoggedInUser() {
+  fetch('/api/usuario-logado')
+    .then(response => response.json())
+    .then(data => {
+      const userNameElement = document.getElementById('user-name-text');
+      userNameElement.innerHTML = data.nome;
+      if (data.tipo_usuario === 'admin') {
+        document.querySelector('.admin-menu').style.display = 'block';
+      }
+    })
+    .catch(error => console.error('Erro ao carregar usuário logado:', error));
+}
     // configuração de blocos: gera IDs no formato "HH:MM"
     const morningStart = 7, morningEndExclusive = 11;   // 07,08,09,10
     const afternoonStart = 13, afternoonEndExclusive = 22; // 13..21
