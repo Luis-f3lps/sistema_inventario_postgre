@@ -112,7 +112,7 @@
     </script>
 
 <script>
- let loggedInUser = null;
+    let loggedInUser = null;
 
     // --- FUNÇÕES DE AUTENTICAÇÃO E DADOS ---
     async function loadLoggedInUser() {
@@ -129,6 +129,7 @@
                 userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
             }
             
+            // Carrega a disponibilidade SÓ DEPOIS de saber quem está logado
             await loadAvailability();
         } catch (error) {
             console.error('Erro ao carregar usuário logado:', error);
@@ -142,62 +143,138 @@
     const submitBtn = document.getElementById('submitBtn');
     const msgEl = document.getElementById('msg');
     
-    // ... (outras constantes como morningStart, etc.)
+    const morningStart = 7, morningEndExclusive = 11;
+    const afternoonStart = 13, afternoonEndExclusive = 22;
+
+    let occupiedSlots = [];
+    let selectedSlot = null;
 
     // --- FUNÇÕES DE AGENDAMENTO ---
 
-    // >>> A LÓGICA ATUALIZADA ESTÁ AQUI <<<
-async function loadAvailability() {
-    const dataSelecionadaStr = dateEl.value;
-    const labId = labEl.value;
+    // Validação de data e carregamento dos horários
+    async function loadAvailability() {
+        const dataSelecionadaStr = dateEl.value;
+        const labId = labEl.value;
 
-    // Limpa a mensagem anterior
-    msgEl.style.display = 'none';
-    msgEl.className = 'mensagem-status'; // Reseta as classes
+        msgEl.style.display = 'none';
+        msgEl.className = 'mensagem-status'; 
+        slotsEl.innerHTML = ''; // Limpa os slots antes de validar
 
-    // --- VALIDAÇÃO DA DATA (VERSÃO CORRIGIDA) ---
-    // Pega a data de hoje no formato YYYY-MM-DD, ignorando a hora
-    const hojeStr = new Date().toISOString().slice(0, 10);
+        const hojeStr = new Date().toISOString().slice(0, 10);
 
-    if (dataSelecionadaStr < hojeStr) {
-        slotsEl.innerHTML = ''; // Limpa os horários
-        submitBtn.disabled = true; // Desativa o botão de submeter
-        
-        // Mostra a mensagem de erro
-        msgEl.textContent = 'Não é possível agendar em datas passadas.';
-        msgEl.classList.add('erro');
-        return; // Interrompe a execução
+        if (dataSelecionadaStr < hojeStr) {
+            submitBtn.disabled = true;
+            msgEl.textContent = 'Não é possível agendar em datas passadas.';
+            msgEl.classList.add('erro');
+            msgEl.style.display = 'block';
+            return;
+        }
+
+        selectedSlot = null;
+        submitBtn.disabled = true;
+
+        try {
+            occupiedSlots = await fetchOccupiedSlotsFromAPI(dataSelecionadaStr, labId);
+            renderSlots();
+        } catch (error) {
+            console.error('Erro ao carregar disponibilidade:', error);
+            msgEl.textContent = 'Erro ao carregar horários. Tente novamente.';
+            msgEl.classList.add('erro');
+            msgEl.style.display = 'block';
+        }
     }
-    // --- FIM DA VALIDAÇÃO ---
-
-    selectedSlot = null;
-    submitBtn.disabled = true;
-
-    try {
-        occupiedSlots = await fetchOccupiedSlotsFromAPI(dataSelecionadaStr, labId);
-        renderSlots();
-    } catch (error) {
-        console.error('Erro ao carregar disponibilidade:', error);
-        msgEl.textContent = 'Erro ao carregar horários. Tente novamente.';
-        msgEl.classList.add('erro');
+    
+    // Desenha os botões de horário na tela
+    function renderSlots() {
+        const all = generateAllSlots();
+        slotsEl.innerHTML = '';
+        all.forEach(hour => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'bloco-horario'; 
+            btn.textContent = `${hour} — ${formatEnd(hour)}`;
+            btn.dataset.hour = hour;
+            if (occupiedSlots.includes(hour)) {
+                btn.classList.add('occupied');
+                btn.setAttribute('aria-disabled', 'true');
+            } else {
+                btn.addEventListener('click', () => {
+                    selectedSlot = (selectedSlot === hour) ? null : hour;
+                    updateSelectionUI();
+                });
+            }
+            slotsEl.appendChild(btn);
+        });
+        updateSelectionUI();
     }
-}
-    
-    // ... (O resto das suas funções: generateAllSlots, formatHour, renderSlots, etc. continuam iguais)
-    
-    function generateAllSlots() { /* ...código igual... */ }
-    function formatHour(h) { /* ...código igual... */ }
-    function formatEnd(start) { /* ...código igual... */ }
-    function renderSlots() { /* ...código igual... */ }
-    function updateSelectionUI() { /* ...código igual... */ }
-    async function fetchOccupiedSlotsFromAPI(date, labId) { /* ...código igual... */ }
+
+    // Atualiza a interface para mostrar o horário selecionado
+    function updateSelectionUI() {
+        document.querySelectorAll('.bloco-horario').forEach(el => {
+            el.classList.remove('selected');
+            if (!el.classList.contains('occupied') && el.dataset.hour === selectedSlot) {
+                el.classList.add('selected');
+            }
+        });
+        submitBtn.disabled = !selectedSlot;
+    }
+
+    // Busca os horários ocupados na API
+    async function fetchOccupiedSlotsFromAPI(date, labId) {
+        const res = await fetch(`/api/availability?date=${encodeURIComponent(date)}&labId=${encodeURIComponent(labId)}`);
+        if (!res.ok) throw new Error('Falha ao consultar disponibilidade');
+        const data = await res.json();
+        return data.occupied || [];
+    }
+
+    // Funções auxiliares de formatação
+    function generateAllSlots() {
+        const arr = [];
+        for (let h = morningStart; h < morningEndExclusive; h++) arr.push(formatHour(h));
+        for (let h = afternoonStart; h < afternoonEndExclusive; h++) arr.push(formatHour(h));
+        return arr;
+    }
+    function formatHour(h) { return (h < 10 ? '0' + h : '' + h) + ':00'; }
+    function formatEnd(start) {
+        const [hh] = start.split(':');
+        const endH = parseInt(hh) + 1;
+        return (endH < 10 ? '0' + endH : '' + endH) + ':00';
+    }
 
     // --- EVENT LISTENERS E INICIALIZAÇÃO ---
     dateEl.addEventListener('change', loadAvailability);
     labEl.addEventListener('change', loadAvailability);
-    
-    submitBtn.addEventListener('click', async () => { /* ...código igual... */ });
 
+    // Lógica para submeter o agendamento
+    submitBtn.addEventListener('click', async () => {
+        if (!selectedSlot || !loggedInUser) return;
+        const payload = {
+            labId: labEl.value,
+            date: dateEl.value,
+            hour: selectedSlot,
+            precisa_tecnico: document.querySelector('input[name="precisaTecnico"]:checked').value === 'true'
+        };
+        try {
+            const res = await fetch('/api/schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || 'Ocorreu um erro');
+            
+            msgEl.textContent = result.message;
+            msgEl.className = 'mensagem-status sucesso'; // Adiciona classe de sucesso
+            msgEl.style.display = 'block';
+            await loadAvailability();
+        } catch (err) {
+            msgEl.textContent = 'Erro ao enviar: ' + err.message;
+            msgEl.className = 'mensagem-status erro'; // Adiciona classe de erro
+            msgEl.style.display = 'block';
+        }
+    });
+
+    // Ponto de entrada da página
     document.addEventListener('DOMContentLoaded', () => {
         const today = new Date().toISOString().slice(0, 10);
         dateEl.value = today;
