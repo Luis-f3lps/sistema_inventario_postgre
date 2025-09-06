@@ -1479,63 +1479,60 @@ app.get('/api/tabelaregistraConsumo', Autenticado, async (req, res) => {
 
   // /////////////////////////////////////////////////////////////
 
-// 🔹 1. Checar horários ocupados
 app.get("/api/availability", async (req, res) => {
-  try {
-    const { date, labId } = req.query;
-
-    const result = await pool.query(
-      `SELECT h.hora_inicio 
-         FROM aulas a
-         JOIN horarios h ON a.id_horario = h.id_horario
-        WHERE a.data = $1 AND a.id_laboratorio = $2`,
-      [date, labId]
-    );
-
-    const occupied = result.rows.map((r) => r.hora_inicio.slice(0, 5)); // "07:00"
-    res.json({ occupied });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao buscar disponibilidade" });
-  }
+    try {
+        const { date, labId } = req.query;
+        const result = await pool.query(
+            `SELECT h.hora_inicio 
+             FROM aulas a
+             JOIN horarios h ON a.id_horario = h.id_horario
+             WHERE a.data = $1 AND a.id_laboratorio = $2`,
+            [date, labId]
+        );
+        const occupied = result.rows.map((r) => r.hora_inicio.slice(0, 5));
+        res.json({ occupied });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erro ao buscar disponibilidade" });
+    }
 });
 
-// 🔹 2. Professor solicita aula
+// 🔹 2. Professor solicita aula (MODIFICADO para usar a SESSÃO)
 app.post("/api/schedule", async (req, res) => {
-  try {
-    const { professor_email, labId, date, hour, precisa_tecnico } = req.body;
-
-    // buscar id_horario pelo hour
-    const horario = await pool.query(
-      "SELECT id_horario FROM horarios WHERE hora_inicio = $1",
-      [hour]
-    );
-
-    if (horario.rowCount === 0)
-      return res.status(400).json({ error: "Horário inválido" });
-
-    const id_horario = horario.rows[0].id_horario;
-
-    // inserir aula
-    const result = await pool.query(
-      `INSERT INTO aulas 
-        (professor_email, id_laboratorio, data, id_horario, precisa_tecnico, autorizado)
-       VALUES ($1,$2,$3,$4,$5,false)
-       RETURNING *`,
-      [professor_email, labId, date, id_horario, precisa_tecnico]
-    );
-
-    res.status(201).json({ message: "Aula solicitada", aula: result.rows[0] });
-  } catch (err) {
-    if (err.code === "23505") {
-      // UNIQUE violation
-      return res
-        .status(400)
-        .json({ error: "Esse horário já está ocupado neste laboratório" });
+    // 1. Verificar se o usuário está logado
+    if (!req.session.user) {
+        return res.status(401).json({ error: "Você precisa estar logado para agendar uma aula." });
     }
-    console.error(err);
-    res.status(500).json({ error: "Erro ao solicitar aula" });
-  }
+
+    try {
+        // 2. Pegar o email da SESSÃO, não do corpo da requisição
+        const professor_email = req.session.user.email;
+        const { labId, date, hour, precisa_tecnico } = req.body;
+
+        const horario = await pool.query(
+            "SELECT id_horario FROM horarios WHERE hora_inicio = $1", [hour]
+        );
+
+        if (horario.rowCount === 0)
+            return res.status(400).json({ error: "Horário inválido" });
+
+        const id_horario = horario.rows[0].id_horario;
+
+        const result = await pool.query(
+            `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico, autorizado)
+             VALUES ($1, $2, $3, $4, $5, false)
+             RETURNING *`,
+            [professor_email, labId, date, id_horario, precisa_tecnico]
+        );
+
+        res.status(201).json({ message: "Aula solicitada com sucesso!", aula: result.rows[0] });
+    } catch (err) {
+        if (err.code === "23505") { // UNIQUE violation
+            return res.status(400).json({ error: "Esse horário já está ocupado neste laboratório" });
+        }
+        console.error(err);
+        res.status(500).json({ error: "Erro ao solicitar aula" });
+    }
 });
 
 // 🔹 3. Técnico vê solicitações pendentes
