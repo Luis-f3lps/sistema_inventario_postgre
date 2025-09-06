@@ -100,7 +100,7 @@
     // Função 2: Carrega os dados da tabela
     async function loadRequests() {
         // >>> SEGUNDA CORREÇÃO: Verificar se o tipo de utilizador é 'tecnico' <<<
-        if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'normal') {
+        if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
             const tbody = document.querySelector("#requestsTable tbody");
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
             return;
