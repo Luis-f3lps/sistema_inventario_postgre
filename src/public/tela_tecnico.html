@@ -86,27 +86,27 @@
     }
 
     // Função para carregar as solicitações pendentes
-    async function loadRequests() {
-        if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'normal') {
-            const tbody = document.querySelector("#requestsTable tbody");
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
-            return;
-        }
-
-        try {
-            const tecnicoEmail = loggedInUser.email;
-            const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
-            if (!res.ok) throw new Error('Erro na rede');
-            
-            const data = await res.json();
-            renderTable(data);
-        } catch (error) {
-            console.error('Falha ao carregar solicitações:', error);
-            const tbody = document.querySelector("#requestsTable tbody");
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
-        }
+async function loadRequests() {
+    // A verificação do tipo de usuário foi corrigida aqui
+    if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
+        const tbody = document.querySelector("#requestsTable tbody");
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
+        return;
     }
 
+    try {
+        const tecnicoEmail = loggedInUser.email;
+        const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
+        if (!res.ok) throw new Error('Erro na rede');
+        
+        const data = await res.json();
+        renderTable(data);
+    } catch (error) {
+        console.error('Falha ao carregar solicitações:', error);
+        const tbody = document.querySelector("#requestsTable tbody");
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
+    }
+}
     // Função para desenhar a tabela
     function renderTable(requests) {
         const tbody = document.querySelector("#requestsTable tbody");
