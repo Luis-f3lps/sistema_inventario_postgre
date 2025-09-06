@@ -87,7 +87,7 @@
 
     // Função para carregar as solicitações pendentes
     async function loadRequests() {
-        if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
+        if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'normal') {
             const tbody = document.querySelector("#requestsTable tbody");
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
             return;
