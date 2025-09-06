@@ -297,7 +297,8 @@ nav ul .fa-solid {
     top: 25px;
     left: 200px;
     cursor: pointer;
-    color: #094412;
+    color: #212529;
+
 }
 .print-button {
     background-color: #3005ce;
@@ -329,7 +330,7 @@ nav ul .fa-solid {
         font-size: 25px;
     }
     nav ul{
-        background: #094412;
+        background: #212529;
         top: 0;
         left: 0; 
         height: 100vh;

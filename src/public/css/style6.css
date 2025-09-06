@@ -349,10 +349,10 @@ nav .fa-solid{
         top: 25px;
         left: 200px;
         cursor: pointer;
-        color: #094412;
+        color: #212529;
     }
     nav ul{
-        background: #094412;
+        background: #212529;
         top: 0;
         left: 0; 
         height: 100vh;
@@ -416,7 +416,7 @@ nav .fa-solid{
             z-index: 1;
         }
         nav ul{
-            background: #094412;
+            background: #212529;
             top: 0;
             right: -600px;
             width: 600px;
