@@ -1605,6 +1605,7 @@ app.get("/api/my-classes", async (req, res) => {
   }
 });
 
+
 // Endpoint para o professor ver as suas próprias solicitações futuras
 app.get("/api/minhas-solicitacoes", async (req, res) => {
   try {
@@ -1639,6 +1640,5 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
     res.status(500).json({ error: "Erro ao buscar solicitações." });
   }
 });
-
 
 export default app;
