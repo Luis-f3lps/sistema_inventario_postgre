@@ -89,6 +89,14 @@ function loadLoggedInUser() {
 }
 loadLoggedInUser();
 
+var sidemenu = document.getElementById("sidemenu");
+function openmenu(){
+    sidemenu.style.left = "0px";
+}
+function clossmenu(){
+    sidemenu.style.left = "-800px";
+}
+
     </script>
 
     <script>
@@ -115,6 +123,7 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
         submenuItems.classList.toggle('open');
         this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
     });
+
 });
 
         // Função 2: Carrega apenas as solicitações com status 'analisando'
