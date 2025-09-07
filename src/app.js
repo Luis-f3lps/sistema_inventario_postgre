@@ -1607,20 +1607,33 @@ app.get("/api/my-classes", async (req, res) => {
 });
 
 // Endpoint para o professor ver as suas próprias solicitações futuras
+// Endpoint para o professor ver as suas próprias solicitações (com atualização automática)
 app.get("/api/minhas-solicitacoes", async (req, res) => {
   try {
-    // Usamos o e-mail que vem da sessão para segurança
     if (!req.session.user) {
-      return res.status(401).json({ error: "Utilizador não autenticado." });
+        return res.status(401).json({ error: "Utilizador não autenticado." });
     }
     const professor_email = req.session.user.email;
 
-    // A consulta agora filtra por e-mail do professor e pela data (a partir de hoje)
+    // >>> PASSO 1: ATUALIZAR AS AULAS PASSADAS <<<
+    // Este comando encontra todas as aulas do professor que ainda estão "em análise"
+    // e cuja data já passou, e muda o status delas para 'nao_autorizado'.
+    await pool.query(
+      `UPDATE aulas 
+       SET status = 'nao_autorizado' 
+       WHERE 
+         professor_email = $1 
+         AND status = 'analisando' 
+         AND data < CURRENT_DATE`,
+      [professor_email]
+    );
+
+    // >>> PASSO 2: BUSCAR A LISTA JÁ ATUALIZADA <<<
+    // Agora, a consulta SELECT fica mais simples, pois os dados no banco já estão corretos.
     const result = await pool.query(
       `SELECT 
          l.nome_laboratorio, 
-         -- MODIFICAÇÃO AQUI: Formate a data diretamente no SQL
-         TO_CHAR(a.data, 'DD/MM/YYYY') AS data, 
+         a.data, 
          h.hora_inicio, 
          a.precisa_tecnico, 
          a.status
@@ -1628,18 +1641,16 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
        JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
        JOIN horarios h ON a.id_horario = h.id_horario
        WHERE 
-         a.professor_email = $1 
-         AND a.data >= CURRENT_DATE -- Filtra por hoje e datas futuras
+         a.professor_email = $1
        ORDER BY 
-         a.data, h.hora_inicio`, // Ordena para melhor visualização
+         a.data DESC, h.hora_inicio ASC`,
       [professor_email]
     );
 
     res.json(result.rows);
   } catch (err) {
-    console.error("Erro ao buscar solicitações do professor:", err);
-    res.status(500).json({ error: "Erro ao buscar solicitações." });
+    console.error("Erro ao buscar ou atualizar solicitações do professor:", err);
+    res.status(500).json({ error: "Erro ao processar as suas solicitações." });
   }
 });
-
 export default app;
