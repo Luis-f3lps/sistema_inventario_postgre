@@ -152,11 +152,14 @@ function renderTable(requests) {
 
     requests.forEach(r => {
         const tr = document.createElement("tr");
+
+        // >>> A CORREÇÃO ESTÁ AQUI <<<
+        // Converte a data para o formato local (dd/mm/aaaa) antes de a exibir
+        const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
+
         tr.innerHTML = `
             <td>${r.nome_laboratorio}</td>
-            
-            <td>${r.data}</td>
-            
+            <td>${dataFormatada}</td>
             <td>${r.hora_inicio.slice(0, 5)} - ${r.hora_fim.slice(0, 5)}</td>
             <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
             <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
