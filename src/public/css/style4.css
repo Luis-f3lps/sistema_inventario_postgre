@@ -537,3 +537,57 @@ nav .fa-solid{
                 margin-top: 5px;
             }
         }
+/* O fundo escurecido que cobre a página inteira */
+.acesso-negado-overlay {
+    position: fixed; /* Fica fixo na tela, mesmo com scroll */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Preto com 70% de transparência */
+    z-index: 1000; /* Garante que fica por cima de tudo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    animation: fadeIn 0.3s forwards; /* Animação de entrada */
+}
+
+/* A caixa de diálogo com a mensagem */
+.acesso-negado-caixa {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    transform: scale(0.9);
+    animation: popIn 0.3s 0.1s forwards; /* Animação de entrada */
+    max-width: 400px;
+}
+
+/* Ícone de cadeado */
+.acesso-negado-caixa .fas.fa-lock {
+    font-size: 50px;
+    color: #e74c3c; /* Vermelho */
+    margin-bottom: 20px;
+}
+
+.acesso-negado-caixa h2 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 1.8em;
+}
+
+.acesso-negado-caixa p {
+    margin: 0;
+    color: #666;
+    font-size: 1.1em;
+}
+
+/* Animações */
+@keyframes fadeIn {
+    to { opacity: 1; }
+}
+@keyframes popIn {
+    to { transform: scale(1); }
+}
