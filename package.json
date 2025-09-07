@@ -2,7 +2,7 @@
   "name": "sistema",
   "version": "1.0.0",
   "description": "Sistema para controle de produtos químicos",
-  "main": "index.js",
+  "main": "login.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon server.js",

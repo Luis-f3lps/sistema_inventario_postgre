@@ -43,7 +43,7 @@ function Autenticado() {
 function redirecionarSeNaoAutenticado() {
     Autenticado().then(authenticated => {
         if (!authenticated) {
-            window.location.href = 'index.html'; // Redireciona para a página de login
+            window.location.href = 'login.html'; // Redireciona para a página de login
         }
     });
 }
@@ -57,7 +57,7 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
 });
 
 document.addEventListener('DOMContentLoaded', function() {
-    if (window.location.pathname !== '/index.html') {
+    if (window.location.pathname !== '/login.html') {
         redirecionarSeNaoAutenticado();
     }
 });

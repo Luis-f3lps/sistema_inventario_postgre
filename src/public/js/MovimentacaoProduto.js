@@ -33,14 +33,14 @@ function Autenticado() {
 function redirecionarSeNaoAutenticado() {
     Autenticado().then(authenticated => {
         if (!authenticated) {
-            window.location.href = 'index.html'; 
+            window.location.href = 'login.html'; 
         }
     });
 }
 
 // Verifica autenticação ao carregar a página
 document.addEventListener('DOMContentLoaded', function() {
-    if (window.location.pathname !== '/index.html') {
+    if (window.location.pathname !== '/login.html') {
         redirecionarSeNaoAutenticado();
     }
     loadSelectOptions('/api/produto', 'sigla-select');
