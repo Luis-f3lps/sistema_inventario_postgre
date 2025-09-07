@@ -1607,7 +1607,6 @@ app.get("/api/my-classes", async (req, res) => {
 });
 
 // Endpoint para o professor ver as suas próprias solicitações futuras
-// Endpoint para o professor ver as suas próprias solicitações (com atualização automática)
 app.get("/api/minhas-solicitacoes", async (req, res) => {
   try {
     if (!req.session.user) {
@@ -1615,9 +1614,7 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
     }
     const professor_email = req.session.user.email;
 
-    // >>> PASSO 1: ATUALIZAR AS AULAS PASSADAS <<<
-    // Este comando encontra todas as aulas do professor que ainda estão "em análise"
-    // e cuja data já passou, e muda o status delas para 'nao_autorizado'.
+    // PASSO 1: ATUALIZAR AS AULAS PASSADAS (esta parte continua igual e correta)
     await pool.query(
       `UPDATE aulas 
        SET status = 'nao_autorizado' 
@@ -1628,23 +1625,23 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
       [professor_email]
     );
 
-    // >>> PASSO 2: BUSCAR A LISTA JÁ ATUALIZADA <<<
-    // Agora, a consulta SELECT fica mais simples, pois os dados no banco já estão corretos.
+    // PASSO 2: BUSCAR A LISTA FILTRADA
     const result = await pool.query(
       `SELECT 
          l.nome_laboratorio, 
          a.data, 
          h.hora_inicio, 
-         h.hora_fim, -- Coluna adicionada
+         h.hora_fim,
          a.precisa_tecnico, 
          a.status
        FROM aulas a
        JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
        JOIN horarios h ON a.id_horario = h.id_horario
        WHERE 
-         a.professor_email = $1
+         a.professor_email = $1 
+         AND a.data >= CURRENT_DATE -- <<< A MUDANÇA ESTÁ AQUI
        ORDER BY 
-         a.data DESC, h.hora_inicio ASC`,
+         a.data ASC, h.hora_inicio ASC`, // Ordena das mais próximas para as mais distantes
       [professor_email]
     );
 
