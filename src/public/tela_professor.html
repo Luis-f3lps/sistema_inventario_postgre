@@ -140,28 +140,30 @@ function clossmenu(){
             }
         }
 
-        // Função 3: Desenha a tabela na tela
-        function renderTable(requests) {
-            const tbody = document.getElementById("minhas-aulas-tbody");
-            tbody.innerHTML = "";
+// Função 3: Desenha a tabela na tela
+function renderTable(requests) {
+    const tbody = document.getElementById("minhas-aulas-tbody");
+    tbody.innerHTML = "";
 
-            if (requests.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação futura.</td></tr>`;
-                return;
-            }
+    if (requests.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação futura.</td></tr>`;
+        return;
+    }
 
-            requests.forEach(r => {
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${r.nome_laboratorio}</td>
-                    <td>${new Date(r.data).toLocaleDateString()}</td>
-                    <td>${r.hora_inicio.slice(0, 5)}</td>
-                    <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
-                    <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+    requests.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${r.nome_laboratorio}</td>
+            
+            <td>${r.data}</td>
+            
+            <td>${r.hora_inicio.slice(0, 5)}</td>
+            <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
+            <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
         // Ponto de Entrada: Inicia o processo quando a página carrega
         document.addEventListener('DOMContentLoaded', loadLoggedInUser);

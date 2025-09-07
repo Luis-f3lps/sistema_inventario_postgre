@@ -1492,8 +1492,7 @@ app.get("/api/availability", async (req, res) => {
              JOIN horarios h ON a.id_horario = h.id_horario
              WHERE 
                a.data = $1 
-               AND a.id_laboratorio = $2 
-               AND a.status <> 'nao_autorizado'`, // <<< A MUDANÇA ESTÁ AQUI
+               AND a.id_laboratorio = $2`, // <<< REMOVEMOS A LINHA DO STATUS AQUI
             [date, labId]
         );
         const occupied = result.rows.map((r) => r.hora_inicio.slice(0, 5));
@@ -1607,13 +1606,12 @@ app.get("/api/my-classes", async (req, res) => {
   }
 });
 
-
 // Endpoint para o professor ver as suas próprias solicitações futuras
 app.get("/api/minhas-solicitacoes", async (req, res) => {
   try {
     // Usamos o e-mail que vem da sessão para segurança
     if (!req.session.user) {
-        return res.status(401).json({ error: "Utilizador não autenticado." });
+      return res.status(401).json({ error: "Utilizador não autenticado." });
     }
     const professor_email = req.session.user.email;
 
@@ -1621,7 +1619,8 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
     const result = await pool.query(
       `SELECT 
          l.nome_laboratorio, 
-         a.data, 
+         -- MODIFICAÇÃO AQUI: Formate a data diretamente no SQL
+         TO_CHAR(a.data, 'DD/MM/YYYY') AS data, 
          h.hora_inicio, 
          a.precisa_tecnico, 
          a.status
