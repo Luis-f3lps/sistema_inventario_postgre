@@ -1635,6 +1635,7 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
          l.nome_laboratorio, 
          a.data, 
          h.hora_inicio, 
+         h.hora_fim, -- Coluna adicionada
          a.precisa_tecnico, 
          a.status
        FROM aulas a

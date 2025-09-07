@@ -157,7 +157,7 @@ function renderTable(requests) {
             
             <td>${r.data}</td>
             
-            <td>${r.hora_inicio.slice(0, 5)}</td>
+            <td>${r.hora_inicio.slice(0, 5)} - ${r.hora_fim.slice(0, 5)}</td>
             <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
             <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
         `;
