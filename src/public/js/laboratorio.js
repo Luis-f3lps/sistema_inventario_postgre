@@ -7,18 +7,7 @@ function openmenu() {
 function clossmenu() {
     sidemenu.style.left = "-800px";
 }
-document.addEventListener('DOMContentLoaded', () => {
-    const menuContainer = document.getElementById('menu-container');
-    if (menuContainer) {
-        fetch('menu.html')
-            .then(response => response.text())
-            .then(data => {
-                menuContainer.innerHTML = data;
-                // O código para fazer os botões do menu funcionar vai aqui...
-            })
-            .catch(error => console.error('Erro ao carregar o menu:', error));
-    }
-});
+
 document.querySelectorAll('.submenu > a').forEach(menu => {
     menu.addEventListener('click', function (e) {
         e.preventDefault();
