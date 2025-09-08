@@ -22,7 +22,7 @@
                 </li>
                 </br>
                 <li><a href="/Home"><i class="fas fa-home"></i> Home</a></li>
-                <li><a href="/Horario"><i class="fas fa-clock"></i> Horari444os</a></li>
+                <li><a href="/Horario"><i class="fas fa-clock"></i> Horarios</a></li>
                 <li><a href="/Tela_Tecnico"><i class="fas fa-bell"></i> Solicitações</a></li>
                 <li><a href="/Tela_Professor"><i class="fas fa-bell"></i> Solicitações Aula</a></li>
 
@@ -84,76 +84,39 @@
 
 
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuContainer = document.getElementById('menu-container');
-            if (menuContainer) {
-                fetch('menu.html')
-                    .then(response => response.text())
-                    .then(data => {
-                        menuContainer.innerHTML = data;
-                        // O código para fazer os botões do menu funcionar vai aqui...
-                    })
-                    .catch(error => console.error('Erro ao carregar o menu:', error));
-            }
-        });
-        document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
-        e.preventDefault();
-        const submenuItems = this.nextElementSibling;
-        submenuItems.classList.toggle('open');
-        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-    });
-});
-
-var sidemenu = document.getElementById("sidemenu");
-function openmenu(){
-    sidemenu.style.left = "0px";
-}
-function clossmenu(){
-    sidemenu.style.left = "-800px";
-}
-
-    </script>
-
 <script>
-    let loggedInUser = null;
+    // Função principal que inicia tudo quando a página carrega
+    document.addEventListener('DOMContentLoaded', () => {
+        // Como o menu já está no HTML, podemos ativar a sua funcionalidade diretamente
+        ativarFuncionalidadeMenu();
+        
+        // E depois, carregar os dados da página (utilizador e painel)
+        carregarDadosDaPagina();
+    });
 
-    // --- FUNÇÕES DE AUTENTICAÇÃO E DADOS ---
-    async function loadLoggedInUser() {
-        try {
-            const response = await fetch('/api/usuario-logado');
-            if (!response.ok) {
-                window.location.href = '/login.html';
-                return;
-            }
-            loggedInUser = await response.json();
-            
-            const userNameElement = document.getElementById('user-name-text');
-            if(userNameElement) {
-                userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
-            }
-            
-            // Carrega a disponibilidade SÓ DEPOIS de saber quem está logado
-            await loadAvailability();
-        } catch (error) {
-            console.error('Erro ao carregar usuário logado:', error);
-        }
+    /**
+     * Adiciona os eventos de clique aos botões do menu.
+     */
+    function ativarFuncionalidadeMenu() {
+        const sideMenu = document.getElementById("sidemenu");
+        const openMenuBtn = document.querySelector(".fa-bars");
+        const closeMenuBtn = document.querySelector(".fa-circle-xmark");
+        
+        if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
+        if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
+
+        document.querySelectorAll('.submenu > a').forEach(menu => {
+            menu.addEventListener('click', function(e) {
+                e.preventDefault();
+                this.nextElementSibling.classList.toggle('open');
+                this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+            });
+        });
     }
 
-    // --- ELEMENTOS E CONSTANTES ---
-    const slotsEl = document.getElementById('slots');
-    const dateEl = document.getElementById('date');
-    const labEl = document.getElementById('lab');
-    const submitBtn = document.getElementById('submitBtn');
-    const msgEl = document.getElementById('msg');
-    
-    const morningStart = 7, morningEndExclusive = 11;
-    const afternoonStart = 13, afternoonEndExclusive = 22;
-
-    let occupiedSlots = [];
-    let selectedSlot = null;
-
+    /**
+     * Função que busca os dados do utilizador e depois os dados do painel.
+     */
     async function carregarDadosDaPagina() {
         try {
             const response = await fetch('/api/usuario-logado');
@@ -164,10 +127,15 @@ function clossmenu(){
             const loggedInUser = await response.json();
 
             // >>> É AQUI QUE O NOME É EXIBIDO <<<
-            // Esta linha agora funciona porque o menu já foi carregado
             const userNameElement = document.getElementById('user-name-text');
             if (userNameElement) {
                 userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
+            }
+
+            // Mostra o menu de admin se o utilizador for admin
+            if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'admin') {
+                const adminMenu = document.querySelector('.admin-menu');
+                if (adminMenu) adminMenu.style.display = 'block';
             }
 
             // Agora, busca os dados específicos do painel
@@ -193,37 +161,35 @@ function clossmenu(){
         }).catch(error => console.error('Erro ao carregar dados dos painéis:', error));
     }
     
-    // As suas funções 'renderizar' continuam iguais
-function renderizarSolicitacoes(solicitacoes) {
-    const lista = document.getElementById('lista-solicitacoes');
-    if (!lista) return;
-    if (solicitacoes.length === 0) {
-        lista.innerHTML = '<li>Nenhuma solicitação recente.</li>'; return;
+    // As suas funções de 'renderizar' continuam iguais
+    function renderizarSolicitacoes(solicitacoes) {
+        const lista = document.getElementById('lista-solicitacoes');
+        if (!lista) return;
+        if (solicitacoes.length === 0) {
+            lista.innerHTML = '<li>Nenhuma solicitação recente.</li>'; return;
+        }
+        lista.innerHTML = solicitacoes.map(s => `
+            <li>
+                <span>${s.nome_laboratorio} (${new Date(s.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} | ${s.hora_inicio.slice(0,5)} - ${s.hora_fim.slice(0,5)})</span>
+                <span class="etiqueta-status status-${s.status}">${s.status}</span>
+            </li>
+        `).join('');
     }
-    lista.innerHTML = solicitacoes.map(s => `
-        <li>
-            <span>
-                ${s.nome_laboratorio} 
-                <small>(${new Date(s.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} | ${s.hora_inicio.slice(0,5)} - ${s.hora_fim.slice(0,5)})</small>
-            </span>
-            <span class="etiqueta-status status-${s.status}">${s.status}</span>
-        </li>
-    `).join('');
-}
 
-function renderizarAulasAutorizadas(aulas) {
-    const lista = document.getElementById('lista-aulas-autorizadas');
-    if (!lista) return;
-    if (aulas.length === 0) {
-        lista.innerHTML = '<li>Nenhuma aula autorizada futura.</li>'; return;
+    function renderizarAulasAutorizadas(aulas) {
+        const lista = document.getElementById('lista-aulas-autorizadas');
+        if (!lista) return;
+        if (aulas.length === 0) {
+            lista.innerHTML = '<li>Nenhuma aula autorizada futura.</li>'; return;
+        }
+        lista.innerHTML = aulas.map(a => `
+            <li>
+                <span>${a.nome_laboratorio}</span>
+                <span>${new Date(a.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} | ${a.hora_inicio.slice(0,5)} - ${a.hora_fim.slice(0,5)}</span>
+            </li>
+        `).join('');
     }
-    lista.innerHTML = aulas.map(a => `
-        <li>
-            <span>${a.nome_laboratorio}</span>
-            <span>${new Date(a.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} | ${a.hora_inicio.slice(0,5)} - ${a.hora_fim.slice(0,5)}</span>
-        </li>
-    `).join('');
-}
+    
     function renderizarMeusLaboratorios(laboratorios) {
         const lista = document.getElementById('lista-meus-laboratorios');
         if (!lista) return;
