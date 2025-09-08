@@ -121,6 +121,9 @@ app.listen(PORT, () => {
 app.get('/Relatorio', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'relatorio.html'));
   })
+  app.get('/Home', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'Home.html'));
+  })
   app.get('/Horario', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'horarios.html'));
   });

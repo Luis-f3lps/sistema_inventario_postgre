@@ -16,7 +16,7 @@ document.getElementById('login-form').addEventListener('submit', function(event)
         const errorMessage = document.getElementById('error-message');
         if (data.success) {
             // Login bem-sucedido, redirecionar 
-            window.location.href = '/Relatorio'; 
+            window.location.href = '/Home'; 
         } else {
             errorMessage.innerText = data.error;
             errorMessage.style.display = 'block'; 
