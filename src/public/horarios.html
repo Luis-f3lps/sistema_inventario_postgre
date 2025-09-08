@@ -112,31 +112,43 @@ function clossmenu(){
     </script>
 
 <script>
-    let loggedInUser = null;
+    // Função principal que inicia tudo quando a página carrega
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. Ativa a funcionalidade do menu, pois ele já está no HTML
+        ativarFuncionalidadeMenu();
+        
+        // 2. Define a data de hoje no calendário
+        const dateEl = document.getElementById('date');
+        const today = new Date().toISOString().slice(0, 10);
+        dateEl.value = today;
 
-    // --- FUNÇÕES DE AUTENTICAÇÃO E DADOS ---
-    async function loadLoggedInUser() {
-        try {
-            const response = await fetch('/api/usuario-logado');
-            if (!response.ok) {
-                window.location.href = '/login.html';
-                return;
-            }
-            loggedInUser = await response.json();
-            
-            const userNameElement = document.getElementById('user-name-text');
-            if(userNameElement) {
-                userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
-            }
-            
-            // Carrega a disponibilidade SÓ DEPOIS de saber quem está logado
-            await loadAvailability();
-        } catch (error) {
-            console.error('Erro ao carregar usuário logado:', error);
-        }
+        // 3. Inicia o processo de carregar os dados do utilizador e da página
+        loadLoggedInUser();
+    });
+
+    /**
+     * Adiciona os eventos de clique aos botões do menu.
+     */
+    function ativarFuncionalidadeMenu() {
+        const sideMenu = document.getElementById("sidemenu");
+        const openMenuBtn = document.querySelector(".fa-bars");
+        const closeMenuBtn = document.querySelector(".fa-circle-xmark");
+        
+        if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
+        if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
+
+        document.querySelectorAll('.submenu > a').forEach(menu => {
+            menu.addEventListener('click', function(e) {
+                e.preventDefault();
+                this.nextElementSibling.classList.toggle('open');
+                this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+            });
+        });
     }
 
-    // --- ELEMENTOS E CONSTANTES ---
+    // --- LÓGICA DE AGENDAMENTO ---
+
+    let loggedInUser = null;
     const slotsEl = document.getElementById('slots');
     const dateEl = document.getElementById('date');
     const labEl = document.getElementById('lab');
@@ -149,16 +161,47 @@ function clossmenu(){
     let occupiedSlots = [];
     let selectedSlot = null;
 
-    // --- FUNÇÕES DE AGENDAMENTO ---
+    /**
+     * Busca os dados do utilizador e, se bem-sucedido, carrega a disponibilidade dos horários.
+     */
+    async function loadLoggedInUser() {
+        try {
+            const response = await fetch('/api/usuario-logado');
+            if (!response.ok) {
+                window.location.href = '/login.html';
+                return;
+            }
+            loggedInUser = await response.json();
+            
+            const userNameElement = document.getElementById('user-name-text');
+            if (userNameElement) {
+                userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
+            }
 
-    // Validação de data e carregamento dos horários
+            // Exibe o menu de admin se o utilizador for admin
+            if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'admin') {
+                const adminMenu = document.querySelector('.admin-menu');
+                if (adminMenu) adminMenu.style.display = 'block';
+            }
+            
+            // >>> AQUI ESTÁ A CORREÇÃO <<<
+            // Agora que sabemos quem está logado, carregamos a disponibilidade para a data de hoje.
+            await loadAvailability();
+        } catch (error) {
+            console.error('Erro ao carregar dados do utilizador:', error);
+        }
+    }
+
+    /**
+     * Valida a data e carrega os horários disponíveis da API.
+     */
     async function loadAvailability() {
         const dataSelecionadaStr = dateEl.value;
         const labId = labEl.value;
 
         msgEl.style.display = 'none';
         msgEl.className = 'mensagem-status'; 
-        slotsEl.innerHTML = ''; // Limpa os slots antes de validar
+        slotsEl.innerHTML = '';
 
         const hojeStr = new Date().toISOString().slice(0, 10);
 
@@ -184,7 +227,7 @@ function clossmenu(){
         }
     }
     
-    // Desenha os botões de horário na tela
+    // As suas outras funções (renderSlots, updateSelectionUI, etc.) continuam aqui...
     function renderSlots() {
         const all = generateAllSlots();
         slotsEl.innerHTML = '';
@@ -207,8 +250,6 @@ function clossmenu(){
         });
         updateSelectionUI();
     }
-
-    // Atualiza a interface para mostrar o horário selecionado
     function updateSelectionUI() {
         document.querySelectorAll('.bloco-horario').forEach(el => {
             el.classList.remove('selected');
@@ -218,16 +259,11 @@ function clossmenu(){
         });
         submitBtn.disabled = !selectedSlot;
     }
-
-    // Busca os horários ocupados na API
     async function fetchOccupiedSlotsFromAPI(date, labId) {
         const res = await fetch(`/api/availability?date=${encodeURIComponent(date)}&labId=${encodeURIComponent(labId)}`);
         if (!res.ok) throw new Error('Falha ao consultar disponibilidade');
-        const data = await res.json();
-        return data.occupied || [];
+        return (await res.json()).occupied || [];
     }
-
-    // Funções auxiliares de formatação
     function generateAllSlots() {
         const arr = [];
         for (let h = morningStart; h < morningEndExclusive; h++) arr.push(formatHour(h));
@@ -241,11 +277,10 @@ function clossmenu(){
         return (endH < 10 ? '0' + endH : '' + endH) + ':00';
     }
 
-    // --- EVENT LISTENERS E INICIALIZAÇÃO ---
+    // --- EVENT LISTENERS ---
     dateEl.addEventListener('change', loadAvailability);
     labEl.addEventListener('change', loadAvailability);
 
-    // Lógica para submeter o agendamento
     submitBtn.addEventListener('click', async () => {
         if (!selectedSlot || !loggedInUser) return;
         const payload = {
@@ -264,32 +299,14 @@ function clossmenu(){
             if (!res.ok) throw new Error(result.error || 'Ocorreu um erro');
             
             msgEl.textContent = result.message;
-            msgEl.className = 'mensagem-status sucesso'; // Adiciona classe de sucesso
+            msgEl.className = 'mensagem-status sucesso';
             msgEl.style.display = 'block';
             await loadAvailability();
         } catch (err) {
             msgEl.textContent = 'Erro ao enviar: ' + err.message;
-            msgEl.className = 'mensagem-status erro'; // Adiciona classe de erro
+            msgEl.className = 'mensagem-status erro';
             msgEl.style.display = 'block';
         }
-    });
-function loadLoggedInUser() {
-    fetch('/api/usuario-logado')
-    .then(response => response.json())
-    .then(data => {
-        const userNameElement = document.getElementById('user-name-text');
-        userNameElement.innerHTML = data.nome;
-        if (data.tipo_usuario === 'admin') {
-            document.querySelector('.admin-menu').style.display = 'block';
-        }
-    })
-    .catch(error => console.error('Erro ao carregar usuário logado:', error));
-}
-    // Ponto de entrada da página
-    document.addEventListener('DOMContentLoaded', () => {
-        const today = new Date().toISOString().slice(0, 10);
-        dateEl.value = today;
-        loadLoggedInUser();
     });
 </script>
   </body>
