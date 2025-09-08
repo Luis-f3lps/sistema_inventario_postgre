@@ -1651,4 +1651,61 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
     res.status(500).json({ error: "Erro ao processar as suas solicitações." });
   }
 });
+
+// Endpoint para o painel "Minhas Solicitações" (últimas 6 pendentes/recusadas)
+app.get("/api/dashboard/solicitacoes-recentes", async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+    try {
+        const professor_email = req.session.user.email;
+        const result = await pool.query(
+            `SELECT l.nome_laboratorio, a.data, a.status
+             FROM aulas a
+             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+             WHERE a.professor_email = $1 AND a.status IN ('analisando', 'nao_autorizado')
+             ORDER BY a.data DESC
+             LIMIT 6`,
+            [professor_email]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: "Erro ao buscar solicitações recentes." });
+    }
+});
+
+// Endpoint para o painel "Próximas Aulas" (próximas 6 autorizadas)
+app.get("/api/dashboard/aulas-autorizadas", async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+    try {
+        const professor_email = req.session.user.email;
+        const result = await pool.query(
+            `SELECT l.nome_laboratorio, a.data, h.hora_inicio
+             FROM aulas a
+             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+             JOIN horarios h ON a.id_horario = h.id_horario
+             WHERE a.professor_email = $1 AND a.status = 'autorizado' AND a.data >= CURRENT_DATE
+             ORDER BY a.data ASC, h.hora_inicio ASC
+             LIMIT 6`,
+            [professor_email]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: "Erro ao buscar aulas autorizadas." });
+    }
+});
+
+// Endpoint para o painel "Meus Laboratórios"
+app.get("/api/dashboard/meus-laboratorios", async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+    try {
+        const user_email = req.session.user.email;
+        const result = await pool.query(
+            `SELECT nome_laboratorio FROM laboratorio WHERE usuario_email = $1 ORDER BY nome_laboratorio`,
+            [user_email]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: "Erro ao buscar laboratórios." });
+    }
+});
+
 export default app;

@@ -1070,3 +1070,70 @@ nav .fa-solid{
 @keyframes popIn {
     to { transform: scale(1); }
 }
+/* --- Estilo do Painel Principal (Dashboard) --- */
+.painel-principal-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.painel-grelha {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 colunas de tamanho igual */
+    grid-template-rows: repeat(2, auto); /* 2 linhas de altura automática */
+    gap: 30px; /* Espaço entre os cartões */
+}
+
+/* Estilo individual de cada "cartão" do painel */
+.cartao-painel {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+}
+
+.cartao-painel h2 {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+    font-size: 1.4em;
+    border-bottom: 2px solid #f0f2f5;
+    padding-bottom: 15px;
+}
+
+/* Lista dentro de cada cartão */
+.lista-painel {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1; /* Faz a lista ocupar o espaço disponível */
+}
+
+.lista-painel li {
+    padding: 12px 5px;
+    border-bottom: 1px solid #f0f2f5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.lista-painel li:last-child {
+    border-bottom: none;
+}
+
+/* Etiqueta de status (reaproveitada) */
+.etiqueta-status {
+    font-weight: bold;
+    text-transform: capitalize;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.85em;
+    text-align: center;
+    display: inline-block;
+}
+
+.status-analisando { color: #d28c0e; background-color: #fef3cd; }
+.status-nao_autorizado { color: #b92c2c; background-color: #fce8e6; }
+.status-autorizado { color: #1a7a4c; background-color: #d1f7e5; }

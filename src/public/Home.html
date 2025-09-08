@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="images/icone3.png" type="image/png">
+    <title>Inventário Produtos Químicos</title>
+    <link rel="stylesheet" href="css/style5.css">
+    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<!------------------Relatórios--------------->
+<div id="header">
+        <nav>
+            <ul id="sidemenu">
+                <img src="images/logomenu.png" class="logo">
+                </br>
+                <li>
+                    <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
+                        <i class="fas fa-user"></i>
+                        <span id="user-name-text"></span>
+                    </span>
+                </li>
+                </br>
+                <li><a href="/Home"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="/Horario"><i class="fas fa-clock"></i> Horarios</a></li>
+                <li><a href="/Tela_Tecnico"><i class="fas fa-bell"></i> Solicitações</a></li>
+                <li><a href="/Tela_Professor"><i class="fas fa-bell"></i> Solicitações Aula</a></li>
+
+                <li class="submenu produto">
+                    <a href="#"><i class="fas fa-boxes"></i> Inventário <i class="fas fa-chevron-down"></i></a>
+                    <ul class="submenu-items">
+                        <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
+                        <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
+                        <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+                                    </ul>
+                </li>
+                <!-- HTML para o menu de administração -->
+                <li class="submenu admin-menu" style="display: none;">
+                    <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
+                    <ul class="submenu-items">
+                        <li><a href="/Usuarios"><i class="fas fa-users"></i> Usuários</a></li>
+                        <li><a href="/Produto"><i class="fas fa-tags"></i> Produtos</a></li>
+                        <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Laboratórios</a></li>
+                    </ul>
+                </li>
+                </br>
+                <li class="logout">
+                    <a href="login.html" style="border-top: 1px solid;">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                    <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
+                </ul>
+                <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
+            </nav>
+
+    <div class="painel-principal-container">
+        <div class="painel-grelha">
+
+            <div class="cartao-painel">
+                <h2>Minhas Solicitações Recentes</h2>
+                <ul id="lista-solicitacoes" class="lista-painel">
+                    </ul>
+            </div>
+
+            <div class="cartao-painel">
+                <h2>Próximas Aulas Autorizadas</h2>
+                <ul id="lista-aulas-autorizadas" class="lista-painel">
+                    </ul>
+            </div>
+
+            <div class="cartao-painel">
+                <h2>Meus Laboratórios</h2>
+                <ul id="lista-meus-laboratorios" class="lista-painel">
+                    </ul>
+            </div>
+
+            <div class="cartao-painel">
+                <h2>Estatísticas Rápidas</h2>
+                <p style="text-align:center; color:#888; margin-top: 20px;">(Em breve)</p>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuContainer = document.getElementById('menu-container');
+            if (menuContainer) {
+                fetch('menu.html')
+                    .then(response => response.text())
+                    .then(data => {
+                        menuContainer.innerHTML = data;
+                        // O código para fazer os botões do menu funcionar vai aqui...
+                    })
+                    .catch(error => console.error('Erro ao carregar o menu:', error));
+            }
+        });
+        document.querySelectorAll('.submenu > a').forEach(menu => {
+    menu.addEventListener('click', function(e) {
+        e.preventDefault();
+        const submenuItems = this.nextElementSibling;
+        submenuItems.classList.toggle('open');
+        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+    });
+});
+
+var sidemenu = document.getElementById("sidemenu");
+function openmenu(){
+    sidemenu.style.left = "0px";
+}
+function clossmenu(){
+    sidemenu.style.left = "-800px";
+}
+
+    </script>
+
+<script>
+    let loggedInUser = null;
+
+    // --- FUNÇÕES DE AUTENTICAÇÃO E DADOS ---
+    async function loadLoggedInUser() {
+        try {
+            const response = await fetch('/api/usuario-logado');
+            if (!response.ok) {
+                window.location.href = '/login.html';
+                return;
+            }
+            loggedInUser = await response.json();
+            
+            const userNameElement = document.getElementById('user-name-text');
+            if(userNameElement) {
+                userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
+            }
+            
+            // Carrega a disponibilidade SÓ DEPOIS de saber quem está logado
+            await loadAvailability();
+        } catch (error) {
+            console.error('Erro ao carregar usuário logado:', error);
+        }
+    }
+        async function carregarDadosPainel() {
+            try {
+                const response = await fetch('/api/usuario-logado');
+                if (!response.ok) { window.location.href = '/login.html'; return; }
+                loggedInUser = await response.json();
+
+                // Dispara todas as buscas de dados em paralelo para mais eficiência
+                Promise.all([
+                    fetch('/api/dashboard/solicitacoes-recentes').then(res => res.json()),
+                    fetch('/api/dashboard/aulas-autorizadas').then(res => res.json()),
+                    fetch('/api/dashboard/meus-laboratorios').then(res => res.json())
+                ]).then(([solicitacoes, aulas, laboratorios]) => {
+                    renderizarSolicitacoes(solicitacoes);
+                    renderizarAulasAutorizadas(aulas);
+                    renderizarMeusLaboratorios(laboratorios);
+                });
+
+            } catch (error) {
+                console.error('Erro ao carregar dados do painel:', error);
+            }
+        }
+
+        function renderizarSolicitacoes(solicitacoes) {
+            const lista = document.getElementById('lista-solicitacoes');
+            if (solicitacoes.length === 0) {
+                lista.innerHTML = '<li>Nenhuma solicitação recente.</li>'; return;
+            }
+            lista.innerHTML = solicitacoes.map(s => `
+                <li>
+                    <span>${s.nome_laboratorio} (${new Date(s.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})})</span>
+                    <span class="etiqueta-status status-${s.status}">${s.status}</span>
+                </li>
+            `).join('');
+        }
+
+        function renderizarAulasAutorizadas(aulas) {
+            const lista = document.getElementById('lista-aulas-autorizadas');
+            if (aulas.length === 0) {
+                lista.innerHTML = '<li>Nenhuma aula autorizada futura.</li>'; return;
+            }
+            lista.innerHTML = aulas.map(a => `
+                <li>
+                    <span>${a.nome_laboratorio}</span>
+                    <span>${new Date(a.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} às ${a.hora_inicio.slice(0,5)}</span>
+                </li>
+            `).join('');
+        }
+
+        function renderizarMeusLaboratorios(laboratorios) {
+            const lista = document.getElementById('lista-meus-laboratorios');
+            if (laboratorios.length === 0) {
+                lista.innerHTML = '<li>Você não é responsável por nenhum laboratório.</li>'; return;
+            }
+            lista.innerHTML = laboratorios.map(l => `<li>${l.nome_laboratorio}</li>`).join('');
+        }
+        
+        document.addEventListener('DOMContentLoaded', carregarDadosPainel);
+    </script>
+  </body>
+</html>
