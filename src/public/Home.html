@@ -88,6 +88,14 @@
 
 
         <script>
+            document.querySelectorAll('.submenu > a').forEach(menu => {
+                menu.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const submenuItems = this.nextElementSibling;
+                    submenuItems.classList.toggle('open');
+                    this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+                });
+            });
             // Função principal que inicia tudo quando a página carrega
             document.addEventListener('DOMContentLoaded', () => {
                 // Como o menu já está no HTML, podemos ativar a sua funcionalidade diretamente
