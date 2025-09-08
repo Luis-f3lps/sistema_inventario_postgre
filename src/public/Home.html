@@ -83,59 +83,77 @@
     </div>
 
 
-<script>
-    // Função principal que inicia tudo quando a página carrega
-    document.addEventListener('DOMContentLoaded', () => {
-        const menuContainer = document.getElementById('menu-container');
 
-        if (menuContainer) {
-            // 1. Primeiro, busca o HTML do menu
-            fetch('menu.html')
-                .then(response => {
-                    if (!response.ok) throw new Error('menu.html não foi encontrado.');
-                    return response.text();
-                })
-                .then(data => {
-                    // 2. Insere o HTML do menu na página
-                    menuContainer.innerHTML = data;
-
-                    // 3. AGORA que o menu existe, ativa a sua funcionalidade
-                    ativarFuncionalidadeMenu(menuContainer);
-
-                    // 4. E SÓ AGORA, busca os dados do utilizador e do painel
-                    carregarDadosDaPagina();
-                })
-                .catch(error => {
-                    console.error('Erro crítico ao carregar o menu:', error);
-                    // Mesmo que o menu falhe, tenta carregar o resto da página
-                    carregarDadosDaPagina();
-                });
-        }
-    });
-
-    /**
-     * Adiciona os eventos de clique aos botões do menu depois de ele ser carregado.
-     */
-    function ativarFuncionalidadeMenu(container) {
-        const sideMenu = container.querySelector("#sidemenu");
-        const openMenuBtn = container.querySelector(".fa-bars");
-        const closeMenuBtn = container.querySelector(".fa-circle-xmark");
-        
-        if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
-        if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
-
-        container.querySelectorAll('.submenu > a').forEach(menu => {
-            menu.addEventListener('click', function(e) {
-                e.preventDefault();
-                this.nextElementSibling.classList.toggle('open');
-                this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-            });
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuContainer = document.getElementById('menu-container');
+            if (menuContainer) {
+                fetch('menu.html')
+                    .then(response => response.text())
+                    .then(data => {
+                        menuContainer.innerHTML = data;
+                        // O código para fazer os botões do menu funcionar vai aqui...
+                    })
+                    .catch(error => console.error('Erro ao carregar o menu:', error));
+            }
         });
+        document.querySelectorAll('.submenu > a').forEach(menu => {
+    menu.addEventListener('click', function(e) {
+        e.preventDefault();
+        const submenuItems = this.nextElementSibling;
+        submenuItems.classList.toggle('open');
+        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+    });
+});
+
+var sidemenu = document.getElementById("sidemenu");
+function openmenu(){
+    sidemenu.style.left = "0px";
+}
+function clossmenu(){
+    sidemenu.style.left = "-800px";
+}
+
+    </script>
+
+<script>
+    let loggedInUser = null;
+
+    // --- FUNÇÕES DE AUTENTICAÇÃO E DADOS ---
+    async function loadLoggedInUser() {
+        try {
+            const response = await fetch('/api/usuario-logado');
+            if (!response.ok) {
+                window.location.href = '/login.html';
+                return;
+            }
+            loggedInUser = await response.json();
+            
+            const userNameElement = document.getElementById('user-name-text');
+            if(userNameElement) {
+                userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
+            }
+            
+            // Carrega a disponibilidade SÓ DEPOIS de saber quem está logado
+            await loadAvailability();
+        } catch (error) {
+            console.error('Erro ao carregar usuário logado:', error);
+        }
     }
 
-    /**
-     * Função principal que busca os dados do utilizador e do painel.
-     */
+    // --- ELEMENTOS E CONSTANTES ---
+    const slotsEl = document.getElementById('slots');
+    const dateEl = document.getElementById('date');
+    const labEl = document.getElementById('lab');
+    const submitBtn = document.getElementById('submitBtn');
+    const msgEl = document.getElementById('msg');
+    
+    const morningStart = 7, morningEndExclusive = 11;
+    const afternoonStart = 13, afternoonEndExclusive = 22;
+
+    let occupiedSlots = [];
+    let selectedSlot = null;
+
     async function carregarDadosDaPagina() {
         try {
             const response = await fetch('/api/usuario-logado');
