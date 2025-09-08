@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="images/icone3.png" type="image/png">
@@ -7,9 +8,10 @@
     <link rel="stylesheet" href="css/style5.css">
     <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
-<!------------------Relatórios--------------->
-<div id="header">
+    <!------------------Relatórios--------------->
+    <div id="header">
         <nav>
             <ul id="sidemenu">
                 <img src="images/logomenu.png" class="logo">
@@ -32,7 +34,7 @@
                         <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
                         <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
                         <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
-                                    </ul>
+                    </ul>
                 </li>
                 <!-- HTML para o menu de administração -->
                 <li class="submenu admin-menu" style="display: none;">
@@ -45,160 +47,161 @@
                 </li>
                 </br>
                 <li class="logout">
-                        <a href="/logout" style="border-top: 1px solid;">                        
-                            <i class="fas fa-sign-out-alt"></i> Sair
-                        </a>
+                    <a href="/logout" style="border-top: 1px solid;">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
                 </li>
                 <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
-                </ul>
-                <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
-            </nav>
+            </ul>
+            <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
+        </nav>
 
-    <div class="painel-principal-container">
-        <div class="painel-grelha">
+        <div class="painel-principal-container">
+            <div class="painel-grelha">
 
-            <div class="cartao-painel">
-                <h2>Minhas Solicitações Recentes</h2>
-                <ul id="lista-solicitacoes" class="lista-painel">
+                <div class="cartao-painel">
+                    <h2>Minhas Solicitações Recentes</h2>
+                    <ul id="lista-solicitacoes" class="lista-painel">
                     </ul>
-            </div>
+                </div>
 
-            <div class="cartao-painel">
-                <h2>Próximas Aulas Autorizadas</h2>
-                <ul id="lista-aulas-autorizadas" class="lista-painel">
+                <div class="cartao-painel">
+                    <h2>Próximas Aulas Autorizadas</h2>
+                    <ul id="lista-aulas-autorizadas" class="lista-painel">
                     </ul>
-            </div>
+                </div>
 
-            <div class="cartao-painel">
-                <h2>Meus Laboratórios</h2>
-                <ul id="lista-meus-laboratorios" class="lista-painel">
+                <div class="cartao-painel">
+                    <h2>Meus Laboratórios</h2>
+                    <ul id="lista-meus-laboratorios" class="lista-painel">
                     </ul>
-            </div>
+                </div>
 
-            <div class="cartao-painel">
-                <h2>Estatísticas Rápidas</h2>
-                <p style="text-align:center; color:#888; margin-top: 20px;">(Em breve)</p>
-            </div>
+                <div class="cartao-painel">
+                    <h2>Estatísticas Rápidas</h2>
+                    <p style="text-align:center; color:#888; margin-top: 20px;">(Em breve)</p>
+                </div>
 
+            </div>
         </div>
-    </div>
 
 
 
-<script>
-    // Função principal que inicia tudo quando a página carrega
-    document.addEventListener('DOMContentLoaded', () => {
-        // Como o menu já está no HTML, podemos ativar a sua funcionalidade diretamente
-        ativarFuncionalidadeMenu();
-        
-        // E depois, carregar os dados da página (utilizador e painel)
-        carregarDadosDaPagina();
-    });
+        <script>
+            // Função principal que inicia tudo quando a página carrega
+            document.addEventListener('DOMContentLoaded', () => {
+                // Como o menu já está no HTML, podemos ativar a sua funcionalidade diretamente
+                ativarFuncionalidadeMenu();
 
-    /**
-     * Adiciona os eventos de clique aos botões do menu.
-     */
-    function ativarFuncionalidadeMenu() {
-        const sideMenu = document.getElementById("sidemenu");
-        const openMenuBtn = document.querySelector(".fa-bars");
-        const closeMenuBtn = document.querySelector(".fa-circle-xmark");
-        
-        if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
-        if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
-
-        document.querySelectorAll('.submenu > a').forEach(menu => {
-            menu.addEventListener('click', function(e) {
-                e.preventDefault();
-                this.nextElementSibling.classList.toggle('open');
-                this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+                // E depois, carregar os dados da página (utilizador e painel)
+                carregarDadosDaPagina();
             });
-        });
-    }
 
-    /**
-     * Função que busca os dados do utilizador e depois os dados do painel.
-     */
-    async function carregarDadosDaPagina() {
-        try {
-            const response = await fetch('/api/usuario-logado');
-            if (!response.ok) {
-                window.location.href = '/login.html';
-                return;
-            }
-            const loggedInUser = await response.json();
+            /**
+             * Adiciona os eventos de clique aos botões do menu.
+             */
+            function ativarFuncionalidadeMenu() {
+                const sideMenu = document.getElementById("sidemenu");
+                const openMenuBtn = document.querySelector(".fa-bars");
+                const closeMenuBtn = document.querySelector(".fa-circle-xmark");
 
-            // >>> É AQUI QUE O NOME É EXIBIDO <<<
-            const userNameElement = document.getElementById('user-name-text');
-            if (userNameElement) {
-                userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
-            }
+                if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
+                if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
 
-            // Mostra o menu de admin se o utilizador for admin
-            if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'admin') {
-                const adminMenu = document.querySelector('.admin-menu');
-                if (adminMenu) adminMenu.style.display = 'block';
+                document.querySelectorAll('.submenu > a').forEach(menu => {
+                    menu.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        this.nextElementSibling.classList.toggle('open');
+                        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+                    });
+                });
             }
 
-            // Agora, busca os dados específicos do painel
-            carregarDadosDoPainel();
+            /**
+             * Função que busca os dados do utilizador e depois os dados do painel.
+             */
+            async function carregarDadosDaPagina() {
+                try {
+                    const response = await fetch('/api/usuario-logado');
+                    if (!response.ok) {
+                        window.location.href = '/login.html';
+                        return;
+                    }
+                    const loggedInUser = await response.json();
 
-        } catch (error) {
-            console.error('Erro ao carregar dados da página:', error);
-        }
-    }
+                    // >>> É AQUI QUE O NOME É EXIBIDO <<<
+                    const userNameElement = document.getElementById('user-name-text');
+                    if (userNameElement) {
+                        userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
+                    }
 
-    /**
-     * Busca os dados para os cartões do painel.
-     */
-    function carregarDadosDoPainel() {
-        Promise.all([
-            fetch('/api/dashboard/solicitacoes-recentes').then(res => res.json()),
-            fetch('/api/dashboard/aulas-autorizadas').then(res => res.json()),
-            fetch('/api/dashboard/meus-laboratorios').then(res => res.json())
-        ]).then(([solicitacoes, aulas, laboratorios]) => {
-            renderizarSolicitacoes(solicitacoes);
-            renderizarAulasAutorizadas(aulas);
-            renderizarMeusLaboratorios(laboratorios);
-        }).catch(error => console.error('Erro ao carregar dados dos painéis:', error));
-    }
-    
-    // As suas funções de 'renderizar' continuam iguais
-    function renderizarSolicitacoes(solicitacoes) {
-        const lista = document.getElementById('lista-solicitacoes');
-        if (!lista) return;
-        if (solicitacoes.length === 0) {
-            lista.innerHTML = '<li>Nenhuma solicitação recente.</li>'; return;
-        }
-        lista.innerHTML = solicitacoes.map(s => `
+                    // Mostra o menu de admin se o utilizador for admin
+                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'admin') {
+                        const adminMenu = document.querySelector('.admin-menu');
+                        if (adminMenu) adminMenu.style.display = 'block';
+                    }
+
+                    // Agora, busca os dados específicos do painel
+                    carregarDadosDoPainel();
+
+                } catch (error) {
+                    console.error('Erro ao carregar dados da página:', error);
+                }
+            }
+
+            /**
+             * Busca os dados para os cartões do painel.
+             */
+            function carregarDadosDoPainel() {
+                Promise.all([
+                    fetch('/api/dashboard/solicitacoes-recentes').then(res => res.json()),
+                    fetch('/api/dashboard/aulas-autorizadas').then(res => res.json()),
+                    fetch('/api/dashboard/meus-laboratorios').then(res => res.json())
+                ]).then(([solicitacoes, aulas, laboratorios]) => {
+                    renderizarSolicitacoes(solicitacoes);
+                    renderizarAulasAutorizadas(aulas);
+                    renderizarMeusLaboratorios(laboratorios);
+                }).catch(error => console.error('Erro ao carregar dados dos painéis:', error));
+            }
+
+            // As suas funções de 'renderizar' continuam iguais
+            function renderizarSolicitacoes(solicitacoes) {
+                const lista = document.getElementById('lista-solicitacoes');
+                if (!lista) return;
+                if (solicitacoes.length === 0) {
+                    lista.innerHTML = '<li>Nenhuma solicitação recente.</li>'; return;
+                }
+                lista.innerHTML = solicitacoes.map(s => `
             <li>
-                <span>${s.nome_laboratorio} (${new Date(s.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} | ${s.hora_inicio.slice(0,5)} - ${s.hora_fim.slice(0,5)})</span>
+                <span>${s.nome_laboratorio} (${new Date(s.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} | ${s.hora_inicio.slice(0, 5)} - ${s.hora_fim.slice(0, 5)})</span>
                 <span class="etiqueta-status status-${s.status}">${s.status}</span>
             </li>
         `).join('');
-    }
+            }
 
-    function renderizarAulasAutorizadas(aulas) {
-        const lista = document.getElementById('lista-aulas-autorizadas');
-        if (!lista) return;
-        if (aulas.length === 0) {
-            lista.innerHTML = '<li>Nenhuma aula autorizada futura.</li>'; return;
-        }
-        lista.innerHTML = aulas.map(a => `
+            function renderizarAulasAutorizadas(aulas) {
+                const lista = document.getElementById('lista-aulas-autorizadas');
+                if (!lista) return;
+                if (aulas.length === 0) {
+                    lista.innerHTML = '<li>Nenhuma aula autorizada futura.</li>'; return;
+                }
+                lista.innerHTML = aulas.map(a => `
             <li>
                 <span>${a.nome_laboratorio}</span>
-                <span>${new Date(a.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})} | ${a.hora_inicio.slice(0,5)} - ${a.hora_fim.slice(0,5)}</span>
+                <span>${new Date(a.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} | ${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}</span>
             </li>
         `).join('');
-    }
-    
-    function renderizarMeusLaboratorios(laboratorios) {
-        const lista = document.getElementById('lista-meus-laboratorios');
-        if (!lista) return;
-        if (laboratorios.length === 0) {
-            lista.innerHTML = '<li>Você não é responsável por nenhum laboratório.</li>'; return;
-        }
-        lista.innerHTML = laboratorios.map(l => `<li>${l.nome_laboratorio}</li>`).join('');
-    }
-</script>
-  </body>
+            }
+
+            function renderizarMeusLaboratorios(laboratorios) {
+                const lista = document.getElementById('lista-meus-laboratorios');
+                if (!lista) return;
+                if (laboratorios.length === 0) {
+                    lista.innerHTML = '<li>Você não é responsável por nenhum laboratório.</li>'; return;
+                }
+                lista.innerHTML = laboratorios.map(l => `<li>${l.nome_laboratorio}</li>`).join('');
+            }
+        </script>
+</body>
+
 </html>

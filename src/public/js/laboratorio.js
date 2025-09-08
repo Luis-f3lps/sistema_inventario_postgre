@@ -1,26 +1,26 @@
-    
+
 
 var sidemenu = document.getElementById("sidemenu");
-function openmenu(){
+function openmenu() {
     sidemenu.style.left = "0px";
 }
-function clossmenu(){
+function clossmenu() {
     sidemenu.style.left = "-800px";
 }
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuContainer = document.getElementById('menu-container');
-            if (menuContainer) {
-                fetch('menu.html')
-                    .then(response => response.text())
-                    .then(data => {
-                        menuContainer.innerHTML = data;
-                        // O código para fazer os botões do menu funcionar vai aqui...
-                    })
-                    .catch(error => console.error('Erro ao carregar o menu:', error));
-            }
-        });
-        document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
+document.addEventListener('DOMContentLoaded', () => {
+    const menuContainer = document.getElementById('menu-container');
+    if (menuContainer) {
+        fetch('menu.html')
+            .then(response => response.text())
+            .then(data => {
+                menuContainer.innerHTML = data;
+                // O código para fazer os botões do menu funcionar vai aqui...
+            })
+            .catch(error => console.error('Erro ao carregar o menu:', error));
+    }
+});
+document.querySelectorAll('.submenu > a').forEach(menu => {
+    menu.addEventListener('click', function (e) {
         e.preventDefault();
         const submenuItems = this.nextElementSibling;
         submenuItems.classList.toggle('open');
@@ -35,9 +35,9 @@ function Autenticado() {
             'Content-Type': 'application/json',
         },
     })
-    .then(response => response.json())
-    .then(data => data.Autenticado)
-    .catch(() => false);
+        .then(response => response.json())
+        .then(data => data.Autenticado)
+        .catch(() => false);
 }
 
 function redirecionarSeNaoAutenticado() {
@@ -48,7 +48,7 @@ function redirecionarSeNaoAutenticado() {
     });
 }
 document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
+    menu.addEventListener('click', function (e) {
         e.preventDefault();
         const submenuItems = this.nextElementSibling;
         submenuItems.classList.toggle('open');
@@ -56,7 +56,7 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
     });
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     if (window.location.pathname !== '/login.html') {
         redirecionarSeNaoAutenticado();
     }
@@ -82,31 +82,31 @@ function opentab(tabname) {
 // Pegar dados de laboratórios da API e preencher a tabela e o select
 function loadLaboratorios(page = 1, limit = 20) { // Ajustando o limite padrão
     fetch(`/api/laboratoriosPag?page=${page}&limit=${limit}`)
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        const tbody = document.getElementById('laboratorio-tbody');
-        tbody.innerHTML = ''; // Limpar a tabela
-        data.data.forEach(laboratorio => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const tbody = document.getElementById('laboratorio-tbody');
+            tbody.innerHTML = ''; // Limpar a tabela
+            data.data.forEach(laboratorio => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
                 <td>${laboratorio.nome_laboratorio}</td>
                 <td>${laboratorio.nome_usuario}</td>
                 <td>${laboratorio.usuario_email}</td>
             `;
-            tbody.appendChild(tr);
-        });
-    })
-    .catch(error => console.error('Erro ao carregar laboratórios:', error));
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(error => console.error('Erro ao carregar laboratórios:', error));
 }
 
 
 // Carregar laboratórios e nome do usuário logado 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     loadLaboratorios();
     loadLoggedInUser();
 });
@@ -126,7 +126,7 @@ fetch('/api/usuarios')
     .catch(error => console.error('Erro ao carregar usuários:', error));
 
 // Add novo laboratório
-document.getElementById('add-laboratorio-form').addEventListener('submit', function(event) {
+document.getElementById('add-laboratorio-form').addEventListener('submit', function (event) {
     event.preventDefault();
 
     const nomeLaboratorio = document.getElementById('nome_laboratorio').value;
@@ -142,38 +142,38 @@ document.getElementById('add-laboratorio-form').addEventListener('submit', funct
         },
         body: JSON.stringify({ nome_laboratorio: nomeLaboratorio, usuario_email: usuarioEmail })
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Resposta do Servidor:', data);
+        .then(response => response.json())
+        .then(data => {
+            console.log('Resposta do Servidor:', data);
 
-        if (data.error) {
-            alert(data.error);
-        } else {
-            alert(data.message);
+            if (data.error) {
+                alert(data.error);
+            } else {
+                alert(data.message);
 
-            // add o novo laboratório na tabela
-            const tbody = document.getElementById('laboratorio-tbody');
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
+                // add o novo laboratório na tabela
+                const tbody = document.getElementById('laboratorio-tbody');
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
                 <td>${nomeLaboratorio}</td>
                 <td>${usuarioEmail}</td>
             `;
-            tbody.appendChild(tr);
+                tbody.appendChild(tr);
 
-            // add o novo laboratório no select para remoção
-            const select = document.getElementById('laboratorios');
-            const option = document.createElement('option');
-            option.value = data.id_laboratorio;
-            option.textContent = nomeLaboratorio;
-            select.appendChild(option);
+                // add o novo laboratório no select para remoção
+                const select = document.getElementById('laboratorios');
+                const option = document.createElement('option');
+                option.value = data.id_laboratorio;
+                option.textContent = nomeLaboratorio;
+                select.appendChild(option);
 
-            // Limpar o formulário
-            document.getElementById('add-laboratorio-form').reset();
-            // Recarregar a página para atualizar os dados
-            location.reload();
-        }
-    })
-    .catch(error => console.error('Erro ao add laboratório:', error));
+                // Limpar o formulário
+                document.getElementById('add-laboratorio-form').reset();
+                // Recarregar a página para atualizar os dados
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Erro ao add laboratório:', error));
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -238,7 +238,7 @@ function loadLaboratorios3() {
 }
 
 // Função para remover laboratório
-document.getElementById('remove-laboratorio-form').addEventListener('submit', function(event) {
+document.getElementById('remove-laboratorio-form').addEventListener('submit', function (event) {
     event.preventDefault();
 
     const selectElement = document.getElementById('remove-laboratorio');
@@ -254,22 +254,22 @@ document.getElementById('remove-laboratorio-form').addEventListener('submit', fu
     fetch(`/api/laboratorios/${idLaboratorio}`, {
         method: 'DELETE',
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            alert(data.error);
-        } else {
-            alert(data.message);
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                alert(data.message);
 
-            // Recarregar a lista de laboratórios
-            loadLaboratorios3();
-            loadLaboratorios();
-        }
-    })
-    .catch(error => console.error('Erro ao remover laboratório:', error));
+                // Recarregar a lista de laboratórios
+                loadLaboratorios3();
+                loadLaboratorios();
+            }
+        })
+        .catch(error => console.error('Erro ao remover laboratório:', error));
 });
 
- // Pegar o nome do usuário logado
+// Pegar o nome do usuário logado
 function loadLoggedInUser() {
     fetch('/api/usuario-logado')
         .then(response => response.json())
@@ -287,7 +287,7 @@ loadLoggedInUser();
 
 // Coisa legal do submenu
 document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
+    menu.addEventListener('click', function (e) {
         e.preventDefault();
         const submenuItems = this.nextElementSibling;
         submenuItems.classList.toggle('open');
@@ -295,7 +295,7 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
     });
 });
 
-document.getElementById('update-responsavel-form').addEventListener('submit', function(event) {
+document.getElementById('update-responsavel-form').addEventListener('submit', function (event) {
     event.preventDefault();
 
     const laboratorioSelect = document.getElementById('laboratorios-select2');
@@ -321,17 +321,17 @@ document.getElementById('update-responsavel-form').addEventListener('submit', fu
         },
         body: JSON.stringify({ idLaboratorio, usuarioEmail: emailResponsavel })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            alert(data.error);
-        } else {
-            alert(data.message);
-            loadLaboratorios(); // Atualiza a lista de laboratórios
-            loadUsuarios(); // Atualiza a lista de usuários
-        }
-    })
-    .catch(error => console.error('Erro ao atualizar responsável:', error));
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                alert(data.message);
+                loadLaboratorios(); // Atualiza a lista de laboratórios
+                loadUsuarios(); // Atualiza a lista de usuários
+            }
+        })
+        .catch(error => console.error('Erro ao atualizar responsável:', error));
 });
 
 
@@ -372,7 +372,7 @@ function updatePagination(totalPages, currentPage) {
 }
 
 // Carregar laboratórios e usuários quando a página carregar
-window.onload = function() {
+window.onload = function () {
     loadLaboratorios2();
     loadLaboratorios3();
     loadUsuarios2();

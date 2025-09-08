@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="images/icone3.png" type="image/png">
@@ -7,9 +8,10 @@
     <link rel="stylesheet" href="css/style5.css">
     <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
-<!------------------Relatórios--------------->
-<div id="header">
+    <!------------------Relatórios--------------->
+    <div id="header">
         <nav>
             <ul id="sidemenu">
                 <img src="images/logomenu.png" class="logo">
@@ -32,7 +34,7 @@
                         <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
                         <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
                         <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
-                                    </ul>
+                    </ul>
                 </li>
                 <!-- HTML para o menu de administração -->
                 <li class="submenu admin-menu" style="display: none;">
@@ -45,121 +47,121 @@
                 </li>
                 </br>
                 <li class="logout">
-                        <a href="/logout" style="border-top: 1px solid;">                        
-                            <i class="fas fa-sign-out-alt"></i> Sair
-                        </a>
+                    <a href="/logout" style="border-top: 1px solid;">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
                 </li>
                 <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
-                </ul>
-                <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
-            </nav>
-    <div class="painel-gestao-solicitacoes">
-        <h1>Solicitações Pendentes</h1>
-        <p style="text-align: center; color: #666;">Abaixo estão as aulas que aguardam a sua aprovação.</p>
+            </ul>
+            <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
+        </nav>
+        <div class="painel-gestao-solicitacoes">
+            <h1>Solicitações Pendentes</h1>
+            <p style="text-align: center; color: #666;">Abaixo estão as aulas que aguardam a sua aprovação.</p>
 
-        <table class="tabela-de-aulas">
-            <thead>
-                <tr>
-                    <th>Professor</th>
-                    <th>Laboratório</th>
-                    <th>Data</th>
-                    <th>Horário</th>
-                    <th>Apoio Técnico</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="corpo-tabela-solicitacoes">
+            <table class="tabela-de-aulas">
+                <thead>
+                    <tr>
+                        <th>Professor</th>
+                        <th>Laboratório</th>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Apoio Técnico</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="corpo-tabela-solicitacoes">
                 </tbody>
-        </table>
-    </div>
+            </table>
+        </div>
 
-    <script>
-// Pegar o nome do usuário logado
-function loadLoggedInUser() {
-    fetch('/api/usuario-logado')
-    .then(response => response.json())
-    .then(data => {
-        const userNameElement = document.getElementById('user-name-text');
-        userNameElement.innerHTML = data.nome;
-        if (data.tipo_usuario === 'admin') {
-            document.querySelector('.admin-menu').style.display = 'block';
-        }
-    })
-    .catch(error => console.error('Erro ao carregar usuário logado:', error));
-}
-loadLoggedInUser();
+        <script>
+            // Pegar o nome do usuário logado
+            function loadLoggedInUser() {
+                fetch('/api/usuario-logado')
+                    .then(response => response.json())
+                    .then(data => {
+                        const userNameElement = document.getElementById('user-name-text');
+                        userNameElement.innerHTML = data.nome;
+                        if (data.tipo_usuario === 'admin') {
+                            document.querySelector('.admin-menu').style.display = 'block';
+                        }
+                    })
+                    .catch(error => console.error('Erro ao carregar usuário logado:', error));
+            }
+            loadLoggedInUser();
 
-var sidemenu = document.getElementById("sidemenu");
-function openmenu(){
-    sidemenu.style.left = "0px";
-}
-function clossmenu(){
-    sidemenu.style.left = "-800px";
-}
+            var sidemenu = document.getElementById("sidemenu");
+            function openmenu() {
+                sidemenu.style.left = "0px";
+            }
+            function clossmenu() {
+                sidemenu.style.left = "-800px";
+            }
 
-    </script>
+        </script>
 
-    <script>
-        let loggedInUser = null;
+        <script>
+            let loggedInUser = null;
 
-        // Função 1: Descobre quem está logado
-        async function loadLoggedInUser() {
-            try {
-                const response = await fetch('/api/usuario-logado');
-                if (!response.ok) {
-                    window.location.href = '/login.html';
+            // Função 1: Descobre quem está logado
+            async function loadLoggedInUser() {
+                try {
+                    const response = await fetch('/api/usuario-logado');
+                    if (!response.ok) {
+                        window.location.href = '/login.html';
+                        return;
+                    }
+                    loggedInUser = await response.json();
+                    await loadPendingRequests();
+                } catch (error) {
+                    console.error('Erro ao carregar utilizador:', error);
+                }
+            }
+            document.querySelectorAll('.submenu > a').forEach(menu => {
+                menu.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const submenuItems = this.nextElementSibling;
+                    submenuItems.classList.toggle('open');
+                    this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+                });
+
+            });
+
+            // Função 2: Carrega apenas as solicitações com status 'analisando'
+            async function loadPendingRequests() {
+                const tbody = document.getElementById("corpo-tabela-solicitacoes");
+                if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
                     return;
                 }
-                loggedInUser = await response.json();
-                await loadPendingRequests(); 
-            } catch (error) {
-                console.error('Erro ao carregar utilizador:', error);
-            }
-        }
-document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
-        e.preventDefault();
-        const submenuItems = this.nextElementSibling;
-        submenuItems.classList.toggle('open');
-        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-    });
+                try {
+                    const tecnicoEmail = loggedInUser.email;
+                    const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
+                    if (!res.ok) throw new Error('Erro na rede');
 
-});
-
-        // Função 2: Carrega apenas as solicitações com status 'analisando'
-        async function loadPendingRequests() {
-            const tbody = document.getElementById("corpo-tabela-solicitacoes");
-            if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
-                return;
-            }
-            try {
-                const tecnicoEmail = loggedInUser.email;
-                const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
-                if (!res.ok) throw new Error('Erro na rede');
-                
-                const data = await res.json();
-                renderTable(data);
-            } catch (error) {
-                console.error('Falha ao carregar solicitações:', error);
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
-            }
-        }
-
-        // Função 3: Desenha a tabela na tela
-        function renderTable(requests) {
-            const tbody = document.getElementById("corpo-tabela-solicitacoes");
-            tbody.innerHTML = "";
-
-            if (requests.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
-                return;
+                    const data = await res.json();
+                    renderTable(data);
+                } catch (error) {
+                    console.error('Falha ao carregar solicitações:', error);
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
+                }
             }
 
-            requests.forEach(r => {
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
+            // Função 3: Desenha a tabela na tela
+            function renderTable(requests) {
+                const tbody = document.getElementById("corpo-tabela-solicitacoes");
+                tbody.innerHTML = "";
+
+                if (requests.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
+                    return;
+                }
+
+                requests.forEach(r => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
                     <td>${r.professor}</td>
                     <td>${r.nome_laboratorio}</td>
                     <td>${new Date(r.data).toLocaleDateString()}</td>
@@ -171,50 +173,51 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
                         <button class="botao-de-acao botao-recusar" data-id="${r.id_aula}">Não Autorizar</button>
                     </td>
                 `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // Função 4: Envia a decisão para a API
-        async function updateRequestStatus(id, novoStatus) {
-            try {
-                await fetch(`/api/requests/${id}`, {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ novoStatus })
+                    tbody.appendChild(tr);
                 });
-                // Remove a linha da tabela para dar feedback visual de que a ação foi concluída
-                const rowToRemove = document.querySelector(`button[data-id='${id}']`).closest('tr');
-                if(rowToRemove) {
-                    rowToRemove.style.opacity = '0';
-                    setTimeout(() => rowToRemove.remove(), 300);
-                }
-            } catch (error) {
-                console.error('Falha ao atualizar status:', error);
-                alert('Não foi possível processar a sua decisão. Tente novamente.');
             }
-        }
 
-        // Ponto de Entrada: Inicia o processo quando a página carrega
-        document.addEventListener('DOMContentLoaded', () => {
-            loadLoggedInUser();
-
-            // "Ouvinte" de eventos para os cliques nos botões da tabela
-            const tbody = document.getElementById("corpo-tabela-solicitacoes");
-            tbody.addEventListener('click', (event) => {
-                const target = event.target;
-                const aulaId = target.dataset.id;
-
-                if (!aulaId) return; // Ignora cliques fora dos botões
-
-                if (target.classList.contains('botao-aceitar')) {
-                    updateRequestStatus(aulaId, 'autorizado');
-                } else if (target.classList.contains('botao-recusar')) {
-                    updateRequestStatus(aulaId, 'nao_autorizado');
+            // Função 4: Envia a decisão para a API
+            async function updateRequestStatus(id, novoStatus) {
+                try {
+                    await fetch(`/api/requests/${id}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ novoStatus })
+                    });
+                    // Remove a linha da tabela para dar feedback visual de que a ação foi concluída
+                    const rowToRemove = document.querySelector(`button[data-id='${id}']`).closest('tr');
+                    if (rowToRemove) {
+                        rowToRemove.style.opacity = '0';
+                        setTimeout(() => rowToRemove.remove(), 300);
+                    }
+                } catch (error) {
+                    console.error('Falha ao atualizar status:', error);
+                    alert('Não foi possível processar a sua decisão. Tente novamente.');
                 }
+            }
+
+            // Ponto de Entrada: Inicia o processo quando a página carrega
+            document.addEventListener('DOMContentLoaded', () => {
+                loadLoggedInUser();
+
+                // "Ouvinte" de eventos para os cliques nos botões da tabela
+                const tbody = document.getElementById("corpo-tabela-solicitacoes");
+                tbody.addEventListener('click', (event) => {
+                    const target = event.target;
+                    const aulaId = target.dataset.id;
+
+                    if (!aulaId) return; // Ignora cliques fora dos botões
+
+                    if (target.classList.contains('botao-aceitar')) {
+                        updateRequestStatus(aulaId, 'autorizado');
+                    } else if (target.classList.contains('botao-recusar')) {
+                        updateRequestStatus(aulaId, 'nao_autorizado');
+                    }
+                });
             });
-        });
-    </script>
+        </script>
 
 </body>
+
 </html>

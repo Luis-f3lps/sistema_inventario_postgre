@@ -1,13 +1,13 @@
 
 var sidemenu = document.getElementById("sidemenu");
-function openmenu(){
+function openmenu() {
     sidemenu.style.left = "0px";
 }
-function clossmenu(){
+function clossmenu() {
     sidemenu.style.left = "-800px";
 }
 document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
+    menu.addEventListener('click', function (e) {
         e.preventDefault();
         const submenuItems = this.nextElementSibling;
         submenuItems.classList.toggle('open');
@@ -24,22 +24,22 @@ function Autenticado() {
             'Content-Type': 'application/json',
         },
     })
-    .then(response => response.json())
-    .then(data => data.Autenticado)
-    .catch(() => false);
+        .then(response => response.json())
+        .then(data => data.Autenticado)
+        .catch(() => false);
 }
 
 // Função para redirecionar se o usuário não estiver autenticado
 function redirecionarSeNaoAutenticado() {
     Autenticado().then(authenticated => {
         if (!authenticated) {
-            window.location.href = 'login.html'; 
+            window.location.href = 'login.html';
         }
     });
 }
 
 // Verifica autenticação ao carregar a página
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     if (window.location.pathname !== '/login.html') {
         redirecionarSeNaoAutenticado();
     }
@@ -113,7 +113,7 @@ function opentab(tabname) {
 
 // Manipulador de eventos para os submenus
 document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
+    menu.addEventListener('click', function (e) {
         e.preventDefault();
         const submenuItems = this.nextElementSibling;
         submenuItems.classList.toggle('open');
@@ -157,11 +157,11 @@ function loadsiglasEntrada() {
 }
 
 // Chama a função quando a página for carregada
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     loadsiglasEntrada();
 });
 // Manipulador de envio do formulário de entrada
-document.getElementById('entrada-form').addEventListener('submit', function(event) {
+document.getElementById('entrada-form').addEventListener('submit', function (event) {
     event.preventDefault(); // Previne o comportamento padrão de envio do formulário
 
     const idproduto = document.getElementById('produto-entrada-select').value;
@@ -190,19 +190,19 @@ document.getElementById('entrada-form').addEventListener('submit', function(even
         },
         body: JSON.stringify(entradaData),
     })
-    .then(response => response.json())
-    .then(result => {
-        if (result.message) {
-            alert(result.message);
-        } else {
-            alert(result.error || 'Erro ao registrar a entrada.');
-        }
-    })
-    .catch(error => console.error('Erro ao registrar entrada:', error));
+        .then(response => response.json())
+        .then(result => {
+            if (result.message) {
+                alert(result.message);
+            } else {
+                alert(result.error || 'Erro ao registrar a entrada.');
+            }
+        })
+        .catch(error => console.error('Erro ao registrar entrada:', error));
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('consumo-form').addEventListener('submit', function(event) {
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('consumo-form').addEventListener('submit', function (event) {
         event.preventDefault(); // Previne o comportamento padrão de envio do formulário
 
         const idproduto = document.getElementById('sigla-select').value;
@@ -232,37 +232,37 @@ document.addEventListener('DOMContentLoaded', function() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(consumoData) 
+            body: JSON.stringify(consumoData)
         })
-        .then(response => response.json())
-        .then(result => {
-            if (result.message) {
-                alert(result.message);
-            } else {
-                alert(result.error || 'Erro ao registrar consumo.');
-            }
-        })
-        .catch(error => console.error('Erro ao registrar consumo:', error));
+            .then(response => response.json())
+            .then(result => {
+                if (result.message) {
+                    alert(result.message);
+                } else {
+                    alert(result.error || 'Erro ao registrar consumo.');
+                }
+            })
+            .catch(error => console.error('Erro ao registrar consumo:', error));
     });
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Carregar os IDs de entrada no select
-    fetch('/api/entradas') 
+    fetch('/api/entradas')
         .then(response => response.json())
         .then(data => {
             const idSelect = document.getElementById('id-select');
             data.forEach(entrada => {
                 const option = document.createElement('option');
-                option.value = entrada.id; 
-                option.textContent = entrada.id; 
+                option.value = entrada.id;
+                option.textContent = entrada.id;
                 idSelect.appendChild(option);
             });
         })
         .catch(error => console.error('Erro ao carregar IDs de entrada:', error));
 
     // Manipulador de envio do formulário
-    document.getElementById('entrada-form').addEventListener('submit', function(event) {
+    document.getElementById('entrada-form').addEventListener('submit', function (event) {
         event.preventDefault(); // Previne o comportamento padrão de envio do formulário
 
         const idEntrada = document.getElementById('id-select').value; // ID da entrada selecionada
@@ -291,19 +291,19 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(entradaData),
         })
-        .then(response => response.json())
-        .then(result => {
-            if (result.message) {
-                alert(result.message);
-            } else {
-                alert(result.error);
-            }
-        })
-        .catch(error => console.error('Erro ao atualizar entrada:', error));
+            .then(response => response.json())
+            .then(result => {
+                if (result.message) {
+                    alert(result.message);
+                } else {
+                    alert(result.error);
+                }
+            })
+            .catch(error => console.error('Erro ao atualizar entrada:', error));
     });
 });
 document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
+    menu.addEventListener('click', function (e) {
         e.preventDefault();
         const submenuItems = this.nextElementSibling;
         submenuItems.classList.toggle('open');

@@ -1,6 +1,6 @@
 
-        document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
+document.querySelectorAll('.submenu > a').forEach(menu => {
+    menu.addEventListener('click', function (e) {
         e.preventDefault();
         const submenuItems = this.nextElementSibling;
         submenuItems.classList.toggle('open');
@@ -9,28 +9,28 @@
 });
 
 var sidemenu = document.getElementById("sidemenu");
-function openmenu(){
+function openmenu() {
     sidemenu.style.left = "0px";
 }
-function clossmenu(){
+function clossmenu() {
     sidemenu.style.left = "-800px";
 }
 
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuContainer = document.getElementById('menu-container');
-            if (menuContainer) {
-                fetch('menu.html')
-                    .then(response => response.text())
-                    .then(data => {
-                        menuContainer.innerHTML = data;
-                        // O código para fazer os botões do menu funcionar vai aqui...
-                    })
-                    .catch(error => console.error('Erro ao carregar o menu:', error));
-            }
-        });
-        document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
+document.addEventListener('DOMContentLoaded', () => {
+    const menuContainer = document.getElementById('menu-container');
+    if (menuContainer) {
+        fetch('menu.html')
+            .then(response => response.text())
+            .then(data => {
+                menuContainer.innerHTML = data;
+                // O código para fazer os botões do menu funcionar vai aqui...
+            })
+            .catch(error => console.error('Erro ao carregar o menu:', error));
+    }
+});
+document.querySelectorAll('.submenu > a').forEach(menu => {
+    menu.addEventListener('click', function (e) {
         e.preventDefault();
         const submenuItems = this.nextElementSibling;
         submenuItems.classList.toggle('open');
@@ -44,9 +44,9 @@ function Autenticado() {
             'Content-Type': 'application/json',
         },
     })
-    .then(response => response.json())
-    .then(data => data.Autenticado)
-    .catch(() => false);
+        .then(response => response.json())
+        .then(data => data.Autenticado)
+        .catch(() => false);
 }
 
 function redirecionarSeNaoAutenticado() {
@@ -57,7 +57,7 @@ function redirecionarSeNaoAutenticado() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     if (window.location.pathname !== '/login.html') {
         redirecionarSeNaoAutenticado();
     }
@@ -135,15 +135,15 @@ function loadProdutosSelect() {
         .catch(error => console.error('Erro ao carregar produtos:', error));
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadProdutos();       
-    loadProdutosSelect(); 
-    loadproduto(); 
+document.addEventListener('DOMContentLoaded', function () {
+    loadProdutos();
+    loadProdutosSelect();
+    loadproduto();
 });
 
 // menu
 document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
+    menu.addEventListener('click', function (e) {
         e.preventDefault();
         const submenuItems = this.nextElementSibling;
         submenuItems.classList.toggle('open');
@@ -154,15 +154,15 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
 // Pegar o nome do usuário logado
 function loadLoggedInUser() {
     fetch('/api/usuario-logado')
-    .then(response => response.json())
-    .then(data => {
-        const userNameElement = document.getElementById('user-name-text');
-        userNameElement.innerHTML = data.nome;
-        if (data.tipo_usuario === 'admin') {
-            document.querySelector('.admin-menu').style.display = 'block';
-        }
-    })
-    .catch(error => console.error('Erro ao carregar usuário logado:', error));
+        .then(response => response.json())
+        .then(data => {
+            const userNameElement = document.getElementById('user-name-text');
+            userNameElement.innerHTML = data.nome;
+            if (data.tipo_usuario === 'admin') {
+                document.querySelector('.admin-menu').style.display = 'block';
+            }
+        })
+        .catch(error => console.error('Erro ao carregar usuário logado:', error));
 }
 loadLoggedInUser();
 
@@ -209,25 +209,25 @@ function updatePagination(totalPages, currentPage) {
 
 function geradorPdfproduto() {
     fetch('/generate-pdf-produto', {
-                method: 'GET',
-            })
-            .then(response => {
-                if (response.ok) {
-                    return response.blob();
-                }
-                throw new Error('Falha ao gerar o PDF.');
-            })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'Relatorio_produto.pdf';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                alert('Erro ao gerar o PDF.');
-            });
+        method: 'GET',
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            }
+            throw new Error('Falha ao gerar o PDF.');
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Relatorio_produto.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao gerar o PDF.');
+        });
 }

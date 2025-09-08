@@ -21,7 +21,7 @@ function mostrarAvisoDeAcessoNegado() {
         <h2>Acesso Restrito</h2>
         <p>Você não tem permissão para aceder a esta página. A redirecionar...</p>
     `;
-    
+
     overlay.appendChild(caixaAviso);
     document.body.appendChild(overlay);
 
@@ -47,7 +47,7 @@ async function verificarAcessoAdmin() {
             }
 
             const utilizador = await response.json();
-            
+
             // A verificação principal: se o tipo de utilizador NÃO for 'admin'...
             if (utilizador.tipo_usuario.trim().toLowerCase() !== 'admin') {
                 mostrarAvisoDeAcessoNegado(); // ...mostra o aviso e redireciona.

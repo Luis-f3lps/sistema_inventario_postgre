@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="images/icone3.png" type="image/png">
@@ -7,9 +8,10 @@
     <link rel="stylesheet" href="css/style5.css">
     <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
-<!------------------Relatórios--------------->
-<div id="header">
+    <!------------------Relatórios--------------->
+    <div id="header">
         <nav>
             <ul id="sidemenu">
                 <img src="images/logomenu.png" class="logo">
@@ -32,7 +34,7 @@
                         <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
                         <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
                         <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
-                                    </ul>
+                    </ul>
                 </li>
                 <!-- HTML para o menu de administração -->
                 <li class="submenu admin-menu" style="display: none;">
@@ -45,132 +47,134 @@
                 </li>
                 </br>
                 <li class="logout">
-                        <a href="/logout" style="border-top: 1px solid;">                        
-                            <i class="fas fa-sign-out-alt"></i> Sair
-                        </a>
+                    <a href="/logout" style="border-top: 1px solid;">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
                 </li>
                 <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
-                </ul>
-                <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
-            </nav>  <div class="painel-minhas-aulas">
-        <h1>Minhas Solicitações de Aula</h1>
-        <p style="text-align: center; color: #666;">Abaixo estão as suas solicitações para hoje e datas futuras.</p>
+            </ul>
+            <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
+        </nav>
+        <div class="painel-minhas-aulas">
+            <h1>Minhas Solicitações de Aula</h1>
+            <p style="text-align: center; color: #666;">Abaixo estão as suas solicitações para hoje e datas futuras.</p>
 
-        <table class="tabela-visualizacao-aulas">
-            <thead>
-                <tr>
-                    <th>Laboratório</th>
-                    <th>Data</th>
-                    <th>Horário</th>
-                    <th>Apoio Técnico</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="minhas-aulas-tbody">
+            <table class="tabela-visualizacao-aulas">
+                <thead>
+                    <tr>
+                        <th>Laboratório</th>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Apoio Técnico</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="minhas-aulas-tbody">
                 </tbody>
-        </table>
-    </div>
+            </table>
+        </div>
 
-    <script>
-// Pegar o nome do usuário logado
-function loadLoggedInUser() {
-    fetch('/api/usuario-logado')
-    .then(response => response.json())
-    .then(data => {
-        const userNameElement = document.getElementById('user-name-text');
-        userNameElement.innerHTML = data.nome;
-        if (data.tipo_usuario === 'admin') {
-            document.querySelector('.admin-menu').style.display = 'block';
-        }
-    })
-    .catch(error => console.error('Erro ao carregar usuário logado:', error));
-}
-loadLoggedInUser();
-document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
-        e.preventDefault();
-        const submenuItems = this.nextElementSibling;
-        submenuItems.classList.toggle('open');
-        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-    });
-});
+        <script>
+            // Pegar o nome do usuário logado
+            function loadLoggedInUser() {
+                fetch('/api/usuario-logado')
+                    .then(response => response.json())
+                    .then(data => {
+                        const userNameElement = document.getElementById('user-name-text');
+                        userNameElement.innerHTML = data.nome;
+                        if (data.tipo_usuario === 'admin') {
+                            document.querySelector('.admin-menu').style.display = 'block';
+                        }
+                    })
+                    .catch(error => console.error('Erro ao carregar usuário logado:', error));
+            }
+            loadLoggedInUser();
+            document.querySelectorAll('.submenu > a').forEach(menu => {
+                menu.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const submenuItems = this.nextElementSibling;
+                    submenuItems.classList.toggle('open');
+                    this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+                });
+            });
 
-var sidemenu = document.getElementById("sidemenu");
-function openmenu(){
-    sidemenu.style.left = "0px";
-}
-function clossmenu(){
-    sidemenu.style.left = "-800px";
-}
+            var sidemenu = document.getElementById("sidemenu");
+            function openmenu() {
+                sidemenu.style.left = "0px";
+            }
+            function clossmenu() {
+                sidemenu.style.left = "-800px";
+            }
 
-    </script>
-    
-    <script>
-        let loggedInUser = null;
+        </script>
 
-        // Função 1: Descobre quem está logado
-        async function loadLoggedInUser() {
-            try {
-                const response = await fetch('/api/usuario-logado');
-                if (!response.ok) {
-                    window.location.href = '/login.html';
+        <script>
+            let loggedInUser = null;
+
+            // Função 1: Descobre quem está logado
+            async function loadLoggedInUser() {
+                try {
+                    const response = await fetch('/api/usuario-logado');
+                    if (!response.ok) {
+                        window.location.href = '/login.html';
+                        return;
+                    }
+                    loggedInUser = await response.json();
+
+                    // Depois de saber quem está logado, carregamos as solicitações
+                    await loadMyRequests();
+                } catch (error) {
+                    console.error('Erro ao carregar utilizador:', error);
+                }
+            }
+
+            // Função 2: Carrega as solicitações do professor
+            async function loadMyRequests() {
+                if (!loggedInUser) return;
+                try {
+                    // Chama o novo endpoint da API
+                    const res = await fetch(`/api/minhas-solicitacoes`);
+                    if (!res.ok) throw new Error('Erro na rede');
+
+                    const data = await res.json();
+                    renderTable(data);
+                } catch (error) {
+                    console.error('Falha ao carregar solicitações:', error);
+                    document.getElementById("minhas-aulas-tbody").innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
+                }
+            }
+
+            // Função 3: Desenha a tabela na tela
+            function renderTable(requests) {
+                const tbody = document.getElementById("minhas-aulas-tbody");
+                tbody.innerHTML = "";
+
+                if (requests.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação futura.</td></tr>`;
                     return;
                 }
-                loggedInUser = await response.json();
-                
-                // Depois de saber quem está logado, carregamos as solicitações
-                await loadMyRequests(); 
-            } catch (error) {
-                console.error('Erro ao carregar utilizador:', error);
-            }
-        }
 
-        // Função 2: Carrega as solicitações do professor
-        async function loadMyRequests() {
-            if (!loggedInUser) return;
-            try {
-                // Chama o novo endpoint da API
-                const res = await fetch(`/api/minhas-solicitacoes`);
-                if (!res.ok) throw new Error('Erro na rede');
-                
-                const data = await res.json();
-                renderTable(data);
-            } catch (error) {
-                console.error('Falha ao carregar solicitações:', error);
-                document.getElementById("minhas-aulas-tbody").innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
-            }
-        }
+                requests.forEach(r => {
+                    const tr = document.createElement("tr");
 
-// Função 3: Desenha a tabela na tela
-function renderTable(requests) {
-    const tbody = document.getElementById("minhas-aulas-tbody");
-    tbody.innerHTML = "";
+                    // >>> A CORREÇÃO ESTÁ AQUI <<<
+                    // Converte a data para o formato local (dd/mm/aaaa) antes de a exibir
+                    const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
-    if (requests.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação futura.</td></tr>`;
-        return;
-    }
-
-    requests.forEach(r => {
-        const tr = document.createElement("tr");
-
-        // >>> A CORREÇÃO ESTÁ AQUI <<<
-        // Converte a data para o formato local (dd/mm/aaaa) antes de a exibir
-        const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
-
-        tr.innerHTML = `
+                    tr.innerHTML = `
             <td>${r.nome_laboratorio}</td>
             <td>${dataFormatada}</td>
             <td>${r.hora_inicio.slice(0, 5)} - ${r.hora_fim.slice(0, 5)}</td>
             <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
             <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
         `;
-        tbody.appendChild(tr);
-    });
-}
+                    tbody.appendChild(tr);
+                });
+            }
 
-        // Ponto de Entrada: Inicia o processo quando a página carrega
-        document.addEventListener('DOMContentLoaded', loadLoggedInUser);
-    </script>
+            // Ponto de Entrada: Inicia o processo quando a página carrega
+            document.addEventListener('DOMContentLoaded', loadLoggedInUser);
+        </script>
 </body>
+
 </html>

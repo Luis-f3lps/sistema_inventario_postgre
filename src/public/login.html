@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="images/icone3.png" type="image/png">
@@ -7,28 +8,30 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
-<div id="header">
-    <div class="container">
-        <div class="login-box">
-            <img src="images/logomenulogin.png" class="logo">
-            <h2>Login</h2>
-            <form id="login-form">
-                <div class="inputBox">
-                    <input type="text" name="email" required>
-                    <span>Email</span>
-                </div>
-                <div class="inputBox">
-                    <input type="password" id="password" name="senha" required>
-                    <span>Senha</span>
-                    <div id="toggle" onclick="showHide();"></div>
-                </div>
-                <button type="submit" name="acao" value="logar">Entrar</button>
-                <div id="error-message" style="color: red; display: none;"></div>
-            </form>
+    <div id="header">
+        <div class="container">
+            <div class="login-box">
+                <img src="images/logomenulogin.png" class="logo">
+                <h2>Login</h2>
+                <form id="login-form">
+                    <div class="inputBox">
+                        <input type="text" name="email" required>
+                        <span>Email</span>
+                    </div>
+                    <div class="inputBox">
+                        <input type="password" id="password" name="senha" required>
+                        <span>Senha</span>
+                        <div id="toggle" onclick="showHide();"></div>
+                    </div>
+                    <button type="submit" name="acao" value="logar">Entrar</button>
+                    <div id="error-message" style="color: red; display: none;"></div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-<script src="js/login.js"></script>
+    <script src="js/login.js"></script>
 </body>
+
 </html>

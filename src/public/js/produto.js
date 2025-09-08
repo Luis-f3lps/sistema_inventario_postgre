@@ -1,9 +1,9 @@
 
 var sidemenu = document.getElementById("sidemenu");
-function openmenu(){
+function openmenu() {
     sidemenu.style.left = "0px";
 }
-function clossmenu(){
+function clossmenu() {
     sidemenu.style.left = "-800px";
 }
 
@@ -14,9 +14,9 @@ function Autenticado() {
             'Content-Type': 'application/json',
         },
     })
-    .then(response => response.json())
-    .then(data => data.Autenticado)
-    .catch(() => false);
+        .then(response => response.json())
+        .then(data => data.Autenticado)
+        .catch(() => false);
 }
 
 function redirecionarSeNaoAutenticado() {
@@ -26,33 +26,33 @@ function redirecionarSeNaoAutenticado() {
         }
     });
 }
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuContainer = document.getElementById('menu-container');
-            if (menuContainer) {
-                fetch('menu.html')
-                    .then(response => response.text())
-                    .then(data => {
-                        menuContainer.innerHTML = data;
-                        // O código para fazer os botões do menu funcionar vai aqui...
-                    })
-                    .catch(error => console.error('Erro ao carregar o menu:', error));
-            }
-        });
-        document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
+document.addEventListener('DOMContentLoaded', () => {
+    const menuContainer = document.getElementById('menu-container');
+    if (menuContainer) {
+        fetch('menu.html')
+            .then(response => response.text())
+            .then(data => {
+                menuContainer.innerHTML = data;
+                // O código para fazer os botões do menu funcionar vai aqui...
+            })
+            .catch(error => console.error('Erro ao carregar o menu:', error));
+    }
+});
+document.querySelectorAll('.submenu > a').forEach(menu => {
+    menu.addEventListener('click', function (e) {
         e.preventDefault();
         const submenuItems = this.nextElementSibling;
         submenuItems.classList.toggle('open');
         this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
     });
 });
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     if (window.location.pathname !== '/login.html') {
         redirecionarSeNaoAutenticado();
     }
 });
 document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
+    menu.addEventListener('click', function (e) {
         e.preventDefault();
         const submenuItems = this.nextElementSibling;
         submenuItems.classList.toggle('open');
@@ -151,8 +151,8 @@ function loadProdutosSelect() {
 
 
 // Função para enviar o formulário
-document.getElementById('add-produto-form').addEventListener('submit', function(event) {
-    event.preventDefault(); 
+document.getElementById('add-produto-form').addEventListener('submit', function (event) {
+    event.preventDefault();
 
     // Captura os valores dos campos do formulário
     const sigla = document.getElementById('sigla').value;
@@ -182,31 +182,31 @@ document.getElementById('add-produto-form').addEventListener('submit', function(
         },
         body: JSON.stringify(data),
     })
-    .then(response => response.json())
-    .then(result => {
-        if (result.message) {
-            alert(result.message); 
-            loadProdutos(); // Atualiza a tabela após adicionar o produto
-            document.getElementById('add-produto-form').reset();
-            loadproduto();
-        } else {
-            alert(result.error); 
-        }
-    })
-    .catch(error => console.error('Erro ao adicionar produto:', error));
+        .then(response => response.json())
+        .then(result => {
+            if (result.message) {
+                alert(result.message);
+                loadProdutos(); // Atualiza a tabela após adicionar o produto
+                document.getElementById('add-produto-form').reset();
+                loadproduto();
+            } else {
+                alert(result.error);
+            }
+        })
+        .catch(error => console.error('Erro ao adicionar produto:', error));
 });
 
 
 // Chamar as funções para carregar produtos e selecionar produtos ao carregar a página
-document.addEventListener('DOMContentLoaded', function() {
-    loadProdutos();       
+document.addEventListener('DOMContentLoaded', function () {
+    loadProdutos();
     loadProdutosSelect();
-    loadproduto(); 
+    loadproduto();
 });
 
 // menu
 document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
+    menu.addEventListener('click', function (e) {
         e.preventDefault();
         const submenuItems = this.nextElementSibling;
         submenuItems.classList.toggle('open');
@@ -216,16 +216,16 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
 
 // Pegar o nome do usuário logado
 function loadLoggedInUser() {
-  fetch('/api/usuario-logado')
-    .then(response => response.json())
-    .then(data => {
-      const userNameElement = document.getElementById('user-name-text');
-      userNameElement.innerHTML = data.nome;
-      if (data.tipo_usuario === 'admin') {
-        document.querySelector('.admin-menu').style.display = 'block';
-      }
-    })
-    .catch(error => console.error('Erro ao carregar usuário logado:', error));
+    fetch('/api/usuario-logado')
+        .then(response => response.json())
+        .then(data => {
+            const userNameElement = document.getElementById('user-name-text');
+            userNameElement.innerHTML = data.nome;
+            if (data.tipo_usuario === 'admin') {
+                document.querySelector('.admin-menu').style.display = 'block';
+            }
+        })
+        .catch(error => console.error('Erro ao carregar usuário logado:', error));
 }
 loadLoggedInUser();
 
@@ -252,48 +252,48 @@ function excluirproduto(idproduto) {
     fetch(`/api/excluir-produto/${idproduto}`, {
         method: 'DELETE',
     })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(errorData => {
-                throw new Error(errorData.message || 'Erro desconhecido ao excluir o produto');
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        alert(data.message || 'produto excluído com sucesso');
-        carregarsiglas(); // Atualiza os siglas após exclusão
-    })
-    .catch(error => {
-        // Mostrar mensagem de erro
-        alert(`Erro: ${error.message}`);
-        console.error('Erro ao excluir o produto:', error);
-    });
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(errorData.message || 'Erro desconhecido ao excluir o produto');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert(data.message || 'produto excluído com sucesso');
+            carregarsiglas(); // Atualiza os siglas após exclusão
+        })
+        .catch(error => {
+            // Mostrar mensagem de erro
+            alert(`Erro: ${error.message}`);
+            console.error('Erro ao excluir o produto:', error);
+        });
 }
 
 // Delete-produto-form
-    document.getElementById('delete-produto-form').addEventListener('submit', function(event) {
-        event.preventDefault();
+document.getElementById('delete-produto-form').addEventListener('submit', function (event) {
+    event.preventDefault();
 
-        const idproduto = document.getElementById('sigla-select').value;
-        if (!idproduto) {
-            alert('Por favor, selecione um sigla válido.');
-            return;
-        }
+    const idproduto = document.getElementById('sigla-select').value;
+    if (!idproduto) {
+        alert('Por favor, selecione um sigla válido.');
+        return;
+    }
 
-        if (confirm('Tem certeza que deseja excluir este produto?')) {
-            excluirproduto(idproduto);
-            loadProdutos();
-            carregarsiglas(); // Atualiza os siglas 
-        }
-    });
+    if (confirm('Tem certeza que deseja excluir este produto?')) {
+        excluirproduto(idproduto);
+        loadProdutos();
+        carregarsiglas(); // Atualiza os siglas 
+    }
+});
 
 // Carrega os siglas ao inicializar a página
- document.addEventListener('DOMContentLoaded', carregarsiglas);
+document.addEventListener('DOMContentLoaded', carregarsiglas);
 
 
- // load produto
-    function loadproduto(page = 1, limit = 20) {
+// load produto
+function loadproduto(page = 1, limit = 20) {
     fetch(`/api/produtoPag?page=${page}&limit=${limit}`)
         .then(response => response.json())
         .then(data => {
@@ -339,27 +339,27 @@ function updatePagination(totalPages, currentPage) {
 
 // Generate-pdf-produto
 function geradorPdfproduto() {
-            fetch('/generate-pdf-produto', {
-                method: 'GET',
-            })
-            .then(response => {
-                if (response.ok) {
-                    return response.blob();
-                }
-                throw new Error('Falha ao gerar o PDF.');
-            })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'Relatorio_produto.pdf';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                alert('Erro ao gerar o PDF.');
-            });
-        }
+    fetch('/generate-pdf-produto', {
+        method: 'GET',
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            }
+            throw new Error('Falha ao gerar o PDF.');
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Relatorio_produto.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao gerar o PDF.');
+        });
+}
 

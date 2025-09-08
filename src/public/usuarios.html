@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="images/icone3.png" type="image/png">
@@ -9,8 +10,9 @@
     <script src="js/auth-guard.js" defer></script>
 
 </head>
+
 <body>
-<div id="header">
+    <div id="header">
         <nav>
             <ul id="sidemenu">
                 <img src="images/logomenu.png" class="logo">
@@ -33,7 +35,7 @@
                         <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
                         <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
                         <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
-                                    </ul>
+                    </ul>
                 </li>
                 <!-- HTML para o menu de administração -->
                 <li class="submenu admin-menu" style="display: none;">
@@ -46,104 +48,107 @@
                 </li>
                 </br>
                 <li class="logout">
-                        <a href="/logout" style="border-top: 1px solid;">                        
-                            <i class="fas fa-sign-out-alt"></i> Sair
-                        </a>
+                    <a href="/logout" style="border-top: 1px solid;">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
                 </li>
                 <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
-                </ul>
-                <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
-            </nav>
-    <div class="container">
-        <div id="about"> 
-            <div class="container">
-                <div class="row">
-                    <div class="about-col-2">
-                        <h1 class="sub-title">Usuários</h1>
-                        </br>                        
-                        <div class="tab-titles">
-                            <p class="tab-links active-link" onclick="opentab('todos')">Todos os Usuários</p>
-                            <p class="tab-links" onclick="opentab('addUser')">Adicionar Usuário</p>
-                            <p class="tab-links" onclick="opentab('Status')">Status dos Usuário</p>
-                        </div>
-        
-                        <div class="tab-contents active-tab" id="todos">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Nome</th>
-                                        <th>Email</th>
-                                        <th>Tipo:</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="usuarios-tbody">
-                                    <!-- Linhas serão preenchidas -->
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <div class="tab-contents" id="addUser">
-                            <div class="form-container">
-                                <h2>Adicionar Usuário</h2>
-                                </br>
-                                <form id="add-user-form">
-                                    <div class="form-group">
-                                        <label for="username">Nome de Usuário:</label>
-                                        <input type="text" id="username" name="username" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="email">Email:</label>
-                                        <input type="email" id="email" name="email" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="type">Tipo de Usuário:</label>
-                                        <select id="type" name="type" required>
-                                            <option value="tecnico">tecnico</option>
-                                            <option value="admin">Admin</option>
-                                            <option value="professor">Professor</option>
+            </ul>
+            <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
+        </nav>
+        <div class="container">
+            <div id="about">
+                <div class="container">
+                    <div class="row">
+                        <div class="about-col-2">
+                            <h1 class="sub-title">Usuários</h1>
+                            </br>
+                            <div class="tab-titles">
+                                <p class="tab-links active-link" onclick="opentab('todos')">Todos os Usuários</p>
+                                <p class="tab-links" onclick="opentab('addUser')">Adicionar Usuário</p>
+                                <p class="tab-links" onclick="opentab('Status')">Status dos Usuário</p>
+                            </div>
+
+                            <div class="tab-contents active-tab" id="todos">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Email</th>
+                                            <th>Tipo:</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usuarios-tbody">
+                                        <!-- Linhas serão preenchidas -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="tab-contents" id="addUser">
+                                <div class="form-container">
+                                    <h2>Adicionar Usuário</h2>
+                                    </br>
+                                    <form id="add-user-form">
+                                        <div class="form-group">
+                                            <label for="username">Nome de Usuário:</label>
+                                            <input type="text" id="username" name="username" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="email">Email:</label>
+                                            <input type="email" id="email" name="email" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="type">Tipo de Usuário:</label>
+                                            <select id="type" name="type" required>
+                                                <option value="tecnico">tecnico</option>
+                                                <option value="admin">Admin</option>
+                                                <option value="professor">Professor</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="password">Senha:</label>
+                                            <input type="password" id="password" name="password" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="confirm-password">Confirmar Senha:</label>
+                                            <input type="password" id="confirm-password" name="confirm-password"
+                                                required>
+                                        </div>
+                                        <button type="submit">Adicionar Usuário</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="tab-contents" id="Status" style="text-align: center;margin-bottom: 20px;">
+                                <div class="form-container">
+                                    <h1 style="margin-bottom: 20px;">Desativar Usuário</h1>
+                                    <form id="remove-user-form">
+                                        <select id="usuarios-select" name="usuarios" style="margin-bottom: 20px;">
+                                            <!-- Opções serão preenchidas -->
                                         </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="password">Senha:</label>
-                                        <input type="password" id="password" name="password" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="confirm-password">Confirmar Senha:</label>
-                                        <input type="password" id="confirm-password" name="confirm-password" required>
-                                    </div>
-                                    <button type="submit">Adicionar Usuário</button>
-                                </form>
+                                        <button type="submit" class="btn-remover">Desativar Usuário</button>
+                                    </form>
+                                </div>
+                                <div class="form-container">
+                                    <h1 style="margin-bottom: 20px;">Ativar Usuário</h1>
+                                    <form id="activate-user-form">
+                                        <select id="usuarios-select-ativar" name="usuarios"
+                                            style="margin-bottom: 20px;">
+                                            <!-- Opções serão preenchidas -->
+                                        </select>
+                                        <button type="submit" class="btn-ativar">Ativar Usuário</button>
+                                    </form>
+                                </div>
                             </div>
+
                         </div>
-                        
-                        <div class="tab-contents" id="Status" style="text-align: center;margin-bottom: 20px;">
-                            <div class="form-container">
-                                <h1 style="margin-bottom: 20px;">Desativar Usuário</h1>
-                                <form id="remove-user-form">
-                                    <select id="usuarios-select" name="usuarios" style="margin-bottom: 20px;">
-                                        <!-- Opções serão preenchidas -->
-                                    </select>
-                                    <button type="submit" class="btn-remover">Desativar Usuário</button>
-                                </form>
-                            </div>
-                            <div class="form-container">
-                                <h1 style="margin-bottom: 20px;">Ativar Usuário</h1>
-                                <form id="activate-user-form">
-                                    <select id="usuarios-select-ativar" name="usuarios" style="margin-bottom: 20px;">
-                                        <!-- Opções serão preenchidas -->
-                                    </select>
-                                    <button type="submit" class="btn-ativar">Ativar Usuário</button>
-                                </form>
-                            </div>
-                        </div>
-                        
                     </div>
                 </div>
             </div>
         </div>
-    </div>    
-</div>
-<script src="js/usuarios.js"></script>
+    </div>
+    <script src="js/usuarios.js"></script>
 </body>
+
 </html>

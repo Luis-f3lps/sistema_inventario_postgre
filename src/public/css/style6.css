@@ -1,38 +1,44 @@
-*{    
+* {
     margin: 0;
     padding: 0;
     font-family: 'Poppins', sans-serif;
     box-sizing: border-box;
 }
-html{
+
+html {
     scroll-behavior: smooth;
 }
-#header{
+
+#header {
     width: 100%;
     height: 100vh;
     background-color: rgb(255, 255, 255);
     background-size: cover;
     background-position: center;
 }
-.container{
+
+.container {
     padding: 10px 10%;
 }
-.logo{
-    width: 220px;;
+
+.logo {
+    width: 220px;
+    ;
 }
+
 #sidemenu {
     position: fixed;
     left: 0;
-    top: 50%; 
-    transform: translateY(-50%); 
+    top: 50%;
+    transform: translateY(-50%);
     padding: 0;
     margin: 0;
-    z-index: 1; 
+    z-index: 1;
 }
 
 #sidemenu li {
     display: block;
-    margin-bottom: 10px; 
+    margin-bottom: 10px;
 }
 
 #sidemenu li a {
@@ -50,9 +56,10 @@ html{
 #sidemenu li.logout a {
     color: #ff4d4d;
 }
+
 #sidemenu li {
     display: block;
-    margin-bottom: 10px; 
+    margin-bottom: 10px;
 }
 
 #sidemenu li span {
@@ -88,9 +95,11 @@ html{
 .rotate {
     transform: rotate(180deg);
 }
+
 .container {
     z-index: 2;
 }
+
 .form-container {
     max-width: 400px;
     margin: 0 auto;
@@ -110,6 +119,7 @@ html{
     background-color: #f9f9f9;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
 .form-group {
     margin-bottom: 20px;
 }
@@ -122,6 +132,7 @@ input[type="date"] {
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
     transition: border-color 0.3s, box-shadow 0.3s;
 }
+
 input {
     padding: 10px;
     font-size: 16px;
@@ -143,25 +154,27 @@ input[type="password"] {
     border: 2px solid #4CAF50;
 }
 
-nav{
+nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
 }
-nav ul li{
-    display:inline-block;
+
+nav ul li {
+    display: inline-block;
     list-style: none;
     margin: 10px 20px;
 }
 
-nav ul li a{
+nav ul li a {
     color: #1B1E22;
     text-decoration: none;
     font-size: 22px;
     position: relative;
 }
-nav ul li a::after{
+
+nav ul li a::after {
     content: '';
     width: 0;
     height: 3px;
@@ -171,20 +184,25 @@ nav ul li a::after{
     bottom: -6px;
     transition: 0.5s;
 }
-nav ul li a:hover::after{
+
+nav ul li a:hover::after {
     width: 100%;
 }
-.header-text{
+
+.header-text {
     margin-top: 20%;
     font-size: 30px;
 }
-.header-text h1{
+
+.header-text h1 {
     font-size: 60px;
     margin-bottom: 1%;
 }
-.header-text h1 span{
+
+.header-text h1 span {
     color: #ff004f;
 }
+
 button {
     padding: 10px;
     border-radius: 4px;
@@ -194,33 +212,37 @@ button {
     cursor: pointer;
     margin: 5px;
 }
-.btn-remover{
+
+.btn-remover {
     width: 100%;
     padding: 10px;
     border: none;
     border-radius: 4px;
-    background-color: #e70808; 
+    background-color: #e70808;
     color: #fff;
     font-size: 16px;
     cursor: pointer;
 }
+
 button:hover {
-    background-color: #212529; 
+    background-color: #212529;
 }
 
 
-.tab-titles{
+.tab-titles {
     display: flex;
-    margin: 20px 0 40px;    
+    margin: 20px 0 40px;
 }
-.tab-links{
+
+.tab-links {
     margin-right: 50px;
     font-size: 18px;
     font-weight: 500;
     cursor: pointer;
     position: relative;
 }
-.tab-links::after{
+
+.tab-links::after {
     content: '';
     width: 0;
     height: 3px;
@@ -230,21 +252,26 @@ button:hover {
     bottom: -8px;
     transition: 0.5s;
 }
-.active-link.active-link::after{
+
+.active-link.active-link::after {
     width: 50%;
 }
-.tab-contents ul li{
+
+.tab-contents ul li {
     list-style: none;
     margin: 10px 0;
 }
-.tab-contents ul li span{
+
+.tab-contents ul li span {
     color: #212529;
     font-size: 14px;
 }
-.tab-contents{
+
+.tab-contents {
     display: none;
 }
-.tab-contents.active-tab{
+
+.tab-contents.active-tab {
     display: block;
 }
 
@@ -253,13 +280,13 @@ select {
     font-size: 16px;
     border: 2px solid #4CAF50;
     border-radius: 5px;
-    appearance: none; 
+    appearance: none;
     background-color: white;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234CAF50' width='24px' height='24px'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
     background-position: right 10px top 50%;
     background-repeat: no-repeat;
     background-size: 20px;
-    padding-right: 30px; 
+    padding-right: 30px;
     width: 300px;
     transition: border-color 0.3s ease;
 }
@@ -268,6 +295,7 @@ select:focus {
     outline: none;
     border-color: #45a049;
 }
+
 table {
     border-collapse: collapse;
     width: 80%;
@@ -277,7 +305,8 @@ table {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-th, td {
+th,
+td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: center;
@@ -292,7 +321,7 @@ tr:nth-child(even) {
     background-color: #f2f2f2;
 }
 
-nav .fa-solid{
+nav .fa-solid {
     display: none;
 }
 
@@ -318,7 +347,8 @@ nav .fa-solid{
     #about {
         margin-left: 100px;
     }
-    img{
+
+    img {
         margin-top: 20px;
     }
 }
@@ -327,185 +357,227 @@ nav .fa-solid{
     #about {
         margin-left: 170px;
     }
-    img{
+
+    img {
         margin-top: 5px;
     }
 }
 
 
-    .header-text{
-        margin-top: 100%;
-        font-size: 16px;
+.header-text {
+    margin-top: 100%;
+    font-size: 16px;
+}
+
+.header-text h1 {
+    font-size: 30px;
+}
+
+nav .fa-solid {
+    display: block;
+    font-size: 25px;
+}
+
+nav ul .fa-solid {
+    position: absolute;
+    top: 25px;
+    left: 200px;
+    cursor: pointer;
+    color: #212529;
+}
+
+nav ul {
+    background: #212529;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    padding-top: 50px;
+    z-index: 2;
+    transition: left 0.5s;
+}
+
+ul li {
+    display: block;
+    margin: 25px;
+}
+
+nav ul li a {
+    color: #ffffff;
+}
+
+.sub-title {
+    margin-top: 10px;
+    font-size: 35px;
+}
+
+.sub-title-type-2 {
+    font-size: 30px;
+}
+
+.about-col-1,
+.about-col-2 {
+    flex: 100%;
+}
+
+.about-col-1 {
+    margin: 30px;
+}
+
+.about-col-2 {
+    font-size: 14px;
+}
+
+.tab-links {
+    font-size: 16px;
+    margin-right: 20px;
+}
+
+.contact-left,
+.contact-right {
+    flex-basis: 100%;
+}
+
+.header-text {
+    color: #fff;
+}
+
+.copyright {
+    font-size: 14px;
+    color: #ffffff;
+}
+
+.services-list div a {
+    color: #ffffff;
+}
+
+@media only screen and (min-width: 901px) and (min-height: 1601px) {
+
+    .container {
+        padding: 1px 1%;
+        position: static;
+        z-index: 2;
     }
-    .header-text h1{
-        font-size: 30px;
+
+    #sidemenu {
+        left: -800px;
+
+        padding: 0;
+        margin: 0;
+        z-index: 1;
     }
-    nav .fa-solid{
-        display: block;
-        font-size: 25px;
-    }
-    nav ul .fa-solid {
-        position: absolute;
-        top: 25px;
-        left: 200px;
-        cursor: pointer;
-        color: #212529;
-    }
-    nav ul{
+
+    nav ul {
         background: #212529;
         top: 0;
-        left: 0; 
+        right: -600px;
+        width: 600px;
         height: 100vh;
         padding-top: 50px;
         z-index: 2;
-        transition: left 0.5s; 
+        transition: right 0.5s;
     }
-    ul li{
+
+    nav ul li {
         display: block;
-        margin: 25px;
+        margin: 45px;
     }
-    nav ul li a{
+
+    nav ul li a {
+        color: #ffffff;
+        font-size: 52px;
+        ;
+    }
+
+    nav ul .fa-solid {
+        position: absolute;
+        top: 100px;
+        left: 500px;
+        cursor: pointer;
         color: #ffffff;
     }
-    .sub-title{
-        margin-top: 10px;
-        font-size: 35px;
+
+    i.fa-circle-xmark {
+        color: #ff4d4d;
+        /* Cor do ícone (vermelho) */
+        cursor: pointer;
+        /* Cursor de ponteiro ao passar o mouse */
+        transition: transform 0.3s ease, color 0.3s ease;
+        /* Transição suave para animações */
     }
-    .sub-title-type-2{
-        font-size: 30px;
+
+    i.fa-circle-xmark:hover {
+        color: #e60000;
+        /* Cor mais escura ao passar o mouse */
+        transform: scale(1.2);
+        /* Aumenta o ícone em 20% ao passar o mouse */
     }
-    .about-col-1, .about-col-2{
-        flex: 100%;
+
+    img {
+        margin-top: 90px;
     }
-    .about-col-1{
-        margin: 30px;
+
+    nav .fa-solid {
+        position: fixed;
+        display: block;
+        font-size: 60px;
+        padding: 10px;
     }
-    .about-col-2{
-        font-size: 14px;
-    }
-    .tab-links{
-        font-size: 16px;
-        margin-right: 20px;
-    }
-    .contact-left, .contact-right{
-        flex-basis: 100%;
-    }
-    .header-text{
-        color: #fff;
-    }
-    .copyright{
-        font-size: 14px;
+
+    #sidemenu .submenu-items li a {
+        padding: 10px;
+        font-size: 46px;
         color: #ffffff;
     }
-    .services-list div a{
+
+    #sidemenu li a {
+        display: block;
+        padding: 10px;
+        text-decoration: none;
         color: #ffffff;
+        transition: background-color 0.3s;
     }
-    @media only screen and (min-width: 901px) and (min-height: 1601px) {
 
-        .container {
-            padding: 1px 1%;
-                position: static;
-                z-index: 2;
-        }
-        
-        #sidemenu {
-            left: -800px;
+    #sidemenu .submenu-items {
+        display: none;
+        list-style-type: none;
+        padding-left: 20px;
+        margin-top: -40px;
+        margin-left: -50px;
+    }
 
-            padding: 0;
-            margin: 0;
-            z-index: 1;
-        }
-        nav ul{
-            background: #212529;
-            top: 0;
-            right: -600px;
-            width: 600px;
-            height: 100vh;
-            padding-top: 50px;
-            z-index: 2;
-            transition: right 0.5s;
-        }
-        nav ul li{
-            display: block;
-            margin: 45px;
-        }
-        nav ul li a{
-            color: #ffffff;
-            font-size: 52px;;
-        }
-        nav ul .fa-solid {
-            position: absolute;
-            top: 100px;
-            left: 500px;
-            cursor: pointer;
-            color: #ffffff;
-        }
-        i.fa-circle-xmark {
-            color: #ff4d4d; /* Cor do ícone (vermelho) */
-            cursor: pointer; /* Cursor de ponteiro ao passar o mouse */
-            transition: transform 0.3s ease, color 0.3s ease; /* Transição suave para animações */
-        }
+    #sidemenu li span {
+        display: block;
+        padding: 10px;
+        text-decoration: none;
+        color: #ffffff;
+        transition: background-color 0.3s;
+        font-size: 40px;
+        align-items: center;
+    }
 
-        i.fa-circle-xmark:hover {
-            color: #e60000; /* Cor mais escura ao passar o mouse */
-            transform: scale(1.2); /* Aumenta o ícone em 20% ao passar o mouse */
-        }
-        img {
-            margin-top: 90px;
-        }
+    nav {
+        margin-top: 40px;
+    }
+}
 
-        nav .fa-solid {
-            position: fixed;
-            display: block;
-            font-size: 60px;
-            padding: 10px;
-        }
-        #sidemenu .submenu-items li a {
-            padding: 10px;
-            font-size: 46px;
-            color: #ffffff;
-        }
-        #sidemenu li a {
-            display: block;
-            padding: 10px;
-            text-decoration: none;
-            color: #ffffff;
-            transition: background-color 0.3s;
-        }
-        #sidemenu .submenu-items {
-            display: none;
-            list-style-type: none;
-            padding-left: 20px;
-            margin-top: -40px;
-            margin-left: -50px;
-        }
-        #sidemenu li span {
-            display: block;
-            padding: 10px;
-            text-decoration: none;
-            color: #ffffff;
-            transition: background-color 0.3s;
-            font-size: 40px;
-            align-items: center;
-        }
-        nav{
-            margin-top: 40px;
-        }
-        }
-        /* O fundo escurecido que cobre a página inteira */
+/* O fundo escurecido que cobre a página inteira */
 .acesso-negado-overlay {
-    position: fixed; /* Fica fixo na tela, mesmo com scroll */
+    position: fixed;
+    /* Fica fixo na tela, mesmo com scroll */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* Preto com 70% de transparência */
-    z-index: 1000; /* Garante que fica por cima de tudo */
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Preto com 70% de transparência */
+    z-index: 1000;
+    /* Garante que fica por cima de tudo */
     display: flex;
     justify-content: center;
     align-items: center;
     opacity: 0;
-    animation: fadeIn 0.3s forwards; /* Animação de entrada */
+    animation: fadeIn 0.3s forwards;
+    /* Animação de entrada */
 }
 
 /* A caixa de diálogo com a mensagem */
@@ -514,16 +586,18 @@ nav .fa-solid{
     padding: 40px;
     border-radius: 12px;
     text-align: center;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
     transform: scale(0.9);
-    animation: popIn 0.3s 0.1s forwards; /* Animação de entrada */
+    animation: popIn 0.3s 0.1s forwards;
+    /* Animação de entrada */
     max-width: 400px;
 }
 
 /* Ícone de cadeado */
 .acesso-negado-caixa .fas.fa-lock {
     font-size: 50px;
-    color: #e74c3c; /* Vermelho */
+    color: #e74c3c;
+    /* Vermelho */
     margin-bottom: 20px;
 }
 
@@ -541,8 +615,13 @@ nav .fa-solid{
 
 /* Animações */
 @keyframes fadeIn {
-    to { opacity: 1; }
+    to {
+        opacity: 1;
+    }
 }
+
 @keyframes popIn {
-    to { transform: scale(1); }
+    to {
+        transform: scale(1);
+    }
 }

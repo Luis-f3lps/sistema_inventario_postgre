@@ -1,9 +1,9 @@
 
 var sidemenu = document.getElementById("sidemenu");
-function openmenu(){
+function openmenu() {
     sidemenu.style.left = "0px";
 }
-function clossmenu(){
+function clossmenu() {
     sidemenu.style.left = "-800px";
 }
 
@@ -24,7 +24,7 @@ function opentab(tabname) {
 }
 
 document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function(e) {
+    menu.addEventListener('click', function (e) {
         e.preventDefault();
         const submenuItems = this.nextElementSibling;
         submenuItems.classList.toggle('open');
@@ -39,9 +39,9 @@ function Autenticado() {
             'Content-Type': 'application/json',
         },
     })
-    .then(response => response.json())
-    .then(data => data.Autenticado)
-    .catch(() => false);
+        .then(response => response.json())
+        .then(data => data.Autenticado)
+        .catch(() => false);
 }
 
 function redirecionarSeNaoAutenticado() {
@@ -52,7 +52,7 @@ function redirecionarSeNaoAutenticado() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     if (window.location.pathname !== '/login.html') {
         redirecionarSeNaoAutenticado();
     }
@@ -63,25 +63,25 @@ function geradorPdfEntrada() {
     fetch('/generate-pdf-entrada', {
         method: 'GET',
     })
-    .then(response => {
-        if (response.ok) {
-            return response.blob();
-        }
-        throw new Error('Falha ao gerar o PDF.');
-    })
-    .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'Relatorio_Entrada.pdf';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    })
-    .catch(error => {
-        console.error('Erro:', error);
-        alert('Erro ao gerar o PDF.');
-    });
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            }
+            throw new Error('Falha ao gerar o PDF.');
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Relatorio_Entrada.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao gerar o PDF.');
+        });
 }
 
 function geradorPdfConsumo() {
@@ -90,23 +90,23 @@ function geradorPdfConsumo() {
 
     table.style.transform = 'scale(1)';
     table.style.transformOrigin = 'top left';
-    table.style.width = '100%'; 
+    table.style.width = '100%';
 
     html2canvas(table, { scale: 1 }).then(canvas => {
-        table.style = originalStyle; 
+        table.style = originalStyle;
 
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
-        
-        const imgWidth = pdf.internal.pageSize.width; 
-        const imgHeight = canvas.height * imgWidth / canvas.width; 
+
+        const imgWidth = pdf.internal.pageSize.width;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
         const pageHeight = pdf.internal.pageSize.height;
-        
+
         let heightLeft = imgHeight;
         let position = 0;
 
         pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        
+
         pdf.setFontSize(18);
         pdf.text('Relatório de Laboratórios', imgWidth / 2, 15, { align: 'center' });
 
@@ -132,8 +132,8 @@ function formatDate(dateString) {
     return date.toLocaleDateString('pt-BR', options); // Formato dd/mm/yyyy
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('filter-form').addEventListener('submit', function(event) {
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('filter-form').addEventListener('submit', function (event) {
         event.preventDefault();
         const startDate = document.getElementById('start-date').value;
         const endDate = document.getElementById('end-date').value;
@@ -178,27 +178,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Pegar o nome do usuário logado
 function loadLoggedInUser() {
-  fetch('/api/usuario-logado')
-    .then(response => response.json())
-    .then(data => {
-      const userNameElement = document.getElementById('user-name-text');
-      userNameElement.innerHTML = data.nome;
-      if (data.tipo_usuario === 'admin') {
-        document.querySelector('.admin-menu').style.display = 'block';
-      }
-    })
-    .catch(error => console.error('Erro ao carregar usuário logado:', error));
+    fetch('/api/usuario-logado')
+        .then(response => response.json())
+        .then(data => {
+            const userNameElement = document.getElementById('user-name-text');
+            userNameElement.innerHTML = data.nome;
+            if (data.tipo_usuario === 'admin') {
+                document.querySelector('.admin-menu').style.display = 'block';
+            }
+        })
+        .catch(error => console.error('Erro ao carregar usuário logado:', error));
 }
 loadLoggedInUser();
 
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     fetch('/api/tabelaregistraentradaInico')
         .then(response => response.json())
         .then(data => {
             const tbody = document.getElementById('registro-entrada');
-            tbody.innerHTML = ''; 
-            
+            tbody.innerHTML = '';
+
             data.forEach(entry => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-document.getElementById('filter-form2').addEventListener('submit', function(event) {
+document.getElementById('filter-form2').addEventListener('submit', function (event) {
     event.preventDefault(); // Previne o comportamento padrão do formulário
 
     const startDate = document.getElementById('entrada-start-date').value;
@@ -251,7 +251,7 @@ function loadEntradas(page = 1, startDate = '', endDate = '') {
 
 function updateTable(entries) {
     const tbody = document.getElementById('registro-entrada');
-    tbody.innerHTML = ''; 
+    tbody.innerHTML = '';
 
     if (Array.isArray(entries)) {
         entries.forEach(entry => {
@@ -280,25 +280,25 @@ function geradorPdfEntradatipo2() {
     fetch(url, {
         method: 'GET',
     })
-    .then(response => {
-        if (response.ok) {
-            return response.blob();
-        }
-        throw new Error('Falha ao gerar o PDF.');
-    })
-    .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'Relatorio_Entrada.pdf';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    })
-    .catch(error => {
-        console.error('Erro:', error);
-        alert('Erro ao gerar o PDF.');
-    });
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            }
+            throw new Error('Falha ao gerar o PDF.');
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Relatorio_Entrada.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao gerar o PDF.');
+        });
 }
 
 function generatePDFConsumo() {
@@ -313,30 +313,30 @@ function generatePDFConsumo() {
     fetch(url, {
         method: 'GET',
     })
-    .then(response => {
-        if (response.ok) {
-            return response.blob();
-        }
-        throw new Error('Falha ao gerar o PDF.');
-    })
-    .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'Relatorio_Consumo.pdf';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    })
-    .catch(error => {
-        console.error('Erro:', error);
-        alert('Erro ao gerar o PDF.');
-    });
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            }
+            throw new Error('Falha ao gerar o PDF.');
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Relatorio_Consumo.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao gerar o PDF.');
+        });
 }
 
 function updatePagination(totalPages, currentPage, startDate = '', endDate = '') {
     const paginationDiv = document.getElementById('pagination');
-    paginationDiv.innerHTML = ''; 
+    paginationDiv.innerHTML = '';
 
     for (let i = 1; i <= totalPages; i++) {
         const button = document.createElement('button');
@@ -353,21 +353,21 @@ function updatePagination(totalPages, currentPage, startDate = '', endDate = '')
 }
 
 // Carregar a primeira página ao iniciar
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     loadEntradas(1); // Carregar a primeira página sem filtro
-	loadLaboratorios2();
+    loadLaboratorios2();
 });
 
 function updatePaginationConsumos(totalPages, currentPage, startDate = '', endDate = '', laboratorio = 'todos') {
     const paginationDiv = document.getElementById('pagination2');
-    paginationDiv.innerHTML = ''; 
+    paginationDiv.innerHTML = '';
 
     // Loop para criar botões de paginação
     for (let i = 1; i <= totalPages; i++) {
         const button = document.createElement('button');
         button.textContent = i;
         button.classList.add('pagination-button');
-        
+
         // Destacar a página atual
         if (i === currentPage) {
             button.classList.add('active');
