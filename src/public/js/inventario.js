@@ -17,26 +17,6 @@ function clossmenu() {
 }
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    const menuContainer = document.getElementById('menu-container');
-    if (menuContainer) {
-        fetch('menu.html')
-            .then(response => response.text())
-            .then(data => {
-                menuContainer.innerHTML = data;
-                // O código para fazer os botões do menu funcionar vai aqui...
-            })
-            .catch(error => console.error('Erro ao carregar o menu:', error));
-    }
-});
-document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function (e) {
-        e.preventDefault();
-        const submenuItems = this.nextElementSibling;
-        submenuItems.classList.toggle('open');
-        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-    });
-});
 function Autenticado() {
     return fetch('/api/check-auth', {
         method: 'GET',
@@ -139,16 +119,6 @@ document.addEventListener('DOMContentLoaded', function () {
     loadProdutos();
     loadProdutosSelect();
     loadproduto();
-});
-
-// menu
-document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function (e) {
-        e.preventDefault();
-        const submenuItems = this.nextElementSibling;
-        submenuItems.classList.toggle('open');
-        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-    });
 });
 
 // Pegar o nome do usuário logado
