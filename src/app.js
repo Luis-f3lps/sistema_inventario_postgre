@@ -174,15 +174,16 @@ app.get('/api/usuario-logado', async (req, res) => {
   });
 // Rota de logout
 app.get('/logout', (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        console.error('Erro ao destruir a sessão:', err);
-        return res.status(500).json({ error: 'Erro ao fazer logout' });
-      }
-      res.clearCookie('connect.sid'); // Limpa o cookie da sessão
-      res.redirect('/'); // Redireciona para a página inicial ou de login
-    });
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Erro ao destruir a sessão:', err);
+      return res.status(500).json({ error: 'Erro ao fazer logout' });
+    }
+    // Limpa o cookie do navegador e redireciona
+    res.clearCookie('connect.sid'); 
+    res.redirect('/login.html'); // Redireciona para a página de login
   });
+});
     
 
 // Rota para usuários
