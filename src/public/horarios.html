@@ -92,36 +92,41 @@
 
         <script>
 
+    // Função principal que inicia tudo quando a página carrega
+    document.addEventListener('DOMContentLoaded', () => {
+        // Como o menu já está no HTML, podemos ativar a sua funcionalidade diretamente
+        ativarFuncionalidadeMenu();
 
+        // E depois, carregar os dados da página (utilizador e painel)
+        carregarDadosDaPagina();
+    });
 
-            /**
-             * Adiciona os eventos de clique aos botões do menu.
-             */
-            function ativarFuncionalidadeMenu() {
-                const sideMenu = document.getElementById("sidemenu");
-                const openMenuBtn = document.querySelector(".fa-bars");
-                const closeMenuBtn = document.querySelector(".fa-circle-xmark");
+    /**
+     * Adiciona os eventos de clique aos botões do menu.
+     */
+    function ativarFuncionalidadeMenu() {
+        const sideMenu = document.getElementById("sidemenu");
+        const openMenuBtn = document.querySelector(".fa-bars");
+        const closeMenuBtn = document.querySelector(".fa-circle-xmark");
 
-                if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
-                if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
+        if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
+        if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
 
-                // ESTA É A ÚNICA VERSÃO QUE DEVE EXISTIR
-                document.querySelectorAll('.submenu > a').forEach(menu => {
-                    menu.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        this.nextElementSibling.classList.toggle('open');
-                        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-                    });
-                });
-            }
+        // ESTA É A ÚNICA VERSÃO QUE DEVE EXISTIR
+        document.querySelectorAll('.submenu > a').forEach(menu => {
+            menu.addEventListener('click', function (e) {
+                e.preventDefault();
+                this.nextElementSibling.classList.toggle('open');
+                this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+            });
+        });
+    }
+
             // Função principal que inicia tudo quando a página carrega
             document.addEventListener('DOMContentLoaded', () => {
-
                 // 1. Ativa a funcionalidade do menu, pois ele já está no HTML
                 ativarFuncionalidadeMenu();
 
-                // E depois, carregar os dados da página (utilizador e painel)
-                carregarDadosDaPagina();
                 // 2. Define a data de hoje no calendário
                 const dateEl = document.getElementById('date');
                 const today = new Date().toISOString().slice(0, 10);
