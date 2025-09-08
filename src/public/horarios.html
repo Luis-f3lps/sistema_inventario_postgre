@@ -91,36 +91,69 @@
         </div>
 
         <script>
+           // Função principal que inicia tudo quando a página carrega
+            document.addEventListener('DOMContentLoaded', () => {
+                // Como o menu já está no HTML, podemos ativar a sua funcionalidade diretamente
+                ativarFuncionalidadeMenu();
 
-    // Função principal que inicia tudo quando a página carrega
-    document.addEventListener('DOMContentLoaded', () => {
-        // Como o menu já está no HTML, podemos ativar a sua funcionalidade diretamente
-        ativarFuncionalidadeMenu();
-
-        // E depois, carregar os dados da página (utilizador e painel)
-        carregarDadosDaPagina();
-    });
-
-    /**
-     * Adiciona os eventos de clique aos botões do menu.
-     */
-    function ativarFuncionalidadeMenu() {
-        const sideMenu = document.getElementById("sidemenu");
-        const openMenuBtn = document.querySelector(".fa-bars");
-        const closeMenuBtn = document.querySelector(".fa-circle-xmark");
-
-        if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
-        if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
-
-        // ESTA É A ÚNICA VERSÃO QUE DEVE EXISTIR
-        document.querySelectorAll('.submenu > a').forEach(menu => {
-            menu.addEventListener('click', function (e) {
-                e.preventDefault();
-                this.nextElementSibling.classList.toggle('open');
-                this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+                // E depois, carregar os dados da página (utilizador e painel)
+                carregarDadosDaPagina();
             });
-        });
-    }
+
+            /**
+             * Adiciona os eventos de clique aos botões do menu.
+             */
+            function ativarFuncionalidadeMenu() {
+                const sideMenu = document.getElementById("sidemenu");
+                const openMenuBtn = document.querySelector(".fa-bars");
+                const closeMenuBtn = document.querySelector(".fa-circle-xmark");
+
+                if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
+                if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
+
+                // ESTA É A ÚNICA VERSÃO QUE DEVE EXISTIR
+                document.querySelectorAll('.submenu > a').forEach(menu => {
+                    menu.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        this.nextElementSibling.classList.toggle('open');
+                        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+                    });
+                });
+            }
+
+            /**
+             * Função que busca os dados do utilizador e depois os dados do painel.
+             */
+            async function carregarDadosDaPagina() {
+                try {
+                    const response = await fetch('/api/usuario-logado');
+                    if (!response.ok) {
+                        window.location.href = '/login.html';
+                        return;
+                    }
+                    const loggedInUser = await response.json();
+
+                    // >>> É AQUI QUE O NOME É EXIBIDO <<<
+                    const userNameElement = document.getElementById('user-name-text');
+                    if (userNameElement) {
+                        userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
+                    }
+
+                    // Mostra o menu de admin se o utilizador for admin
+                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'admin') {
+                        const adminMenu = document.querySelector('.admin-menu');
+                        if (adminMenu) adminMenu.style.display = 'block';
+                    }
+
+                    // Agora, busca os dados específicos do painel
+                    carregarDadosDoPainel();
+
+                } catch (error) {
+                    console.error('Erro ao carregar dados da página:', error);
+                }
+            }
+
+
 
             // Função principal que inicia tudo quando a página carrega
             document.addEventListener('DOMContentLoaded', () => {
