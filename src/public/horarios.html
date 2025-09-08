@@ -89,18 +89,7 @@
     </div>
 
     <script>
-function loadLoggedInUser() {
-    fetch('/api/usuario-logado')
-    .then(response => response.json())
-    .then(data => {
-        const userNameElement = document.getElementById('user-name-text');
-        userNameElement.innerHTML = data.nome;
-        if (data.tipo_usuario === 'admin') {
-            document.querySelector('.admin-menu').style.display = 'block';
-        }
-    })
-    .catch(error => console.error('Erro ao carregar usuário logado:', error));
-}
+
 
 
         document.querySelectorAll('.submenu > a').forEach(menu => {
@@ -284,7 +273,18 @@ function clossmenu(){
             msgEl.style.display = 'block';
         }
     });
-
+function loadLoggedInUser() {
+    fetch('/api/usuario-logado')
+    .then(response => response.json())
+    .then(data => {
+        const userNameElement = document.getElementById('user-name-text');
+        userNameElement.innerHTML = data.nome;
+        if (data.tipo_usuario === 'admin') {
+            document.querySelector('.admin-menu').style.display = 'block';
+        }
+    })
+    .catch(error => console.error('Erro ao carregar usuário logado:', error));
+}
     // Ponto de entrada da página
     document.addEventListener('DOMContentLoaded', () => {
         const today = new Date().toISOString().slice(0, 10);
