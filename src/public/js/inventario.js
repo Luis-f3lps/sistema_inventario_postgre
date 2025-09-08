@@ -1,4 +1,13 @@
 
+        document.querySelectorAll('.submenu > a').forEach(menu => {
+    menu.addEventListener('click', function(e) {
+        e.preventDefault();
+        const submenuItems = this.nextElementSibling;
+        submenuItems.classList.toggle('open');
+        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+    });
+});
+
 var sidemenu = document.getElementById("sidemenu");
 function openmenu(){
     sidemenu.style.left = "0px";
@@ -6,6 +15,7 @@ function openmenu(){
 function clossmenu(){
     sidemenu.style.left = "-800px";
 }
+
 
         document.addEventListener('DOMContentLoaded', () => {
             const menuContainer = document.getElementById('menu-container');
