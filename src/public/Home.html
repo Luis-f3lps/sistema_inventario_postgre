@@ -116,29 +116,33 @@ function clossmenu(){
     </script>
 
 <script>
-    let loggedInUser = null;
+ let loggedInUser = null;
 
-    // --- FUNÇÕES DE AUTENTICAÇÃO E DADOS ---
     async function loadLoggedInUser() {
         try {
+            // >>> É AQUI QUE ELE BUSCA OS DADOS DA API <<<
             const response = await fetch('/api/usuario-logado');
+            
             if (!response.ok) {
                 window.location.href = '/login.html';
                 return;
             }
-            loggedInUser = await response.json();
             
+            // Converte a resposta e guarda na variável 'loggedInUser'
+            loggedInUser = await response.json(); 
+            
+            // >>> É AQUI QUE ELE SALVA O NOME NO HTML (PARA O UTILIZADOR VER) <<<
             const userNameElement = document.getElementById('user-name-text');
             if(userNameElement) {
                 userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
             }
             
-            // Carrega a disponibilidade SÓ DEPOIS de saber quem está logado
-            await loadAvailability();
+            // ... resto da função ...
         } catch (error) {
             console.error('Erro ao carregar usuário logado:', error);
         }
     }
+
         async function carregarDadosPainel() {
             try {
                 const response = await fetch('/api/usuario-logado');
