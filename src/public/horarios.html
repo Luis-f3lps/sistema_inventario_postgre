@@ -89,18 +89,20 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuContainer = document.getElementById('menu-container');
-            if (menuContainer) {
-                fetch('menu.html')
-                    .then(response => response.text())
-                    .then(data => {
-                        menuContainer.innerHTML = data;
-                        // O código para fazer os botões do menu funcionar vai aqui...
-                    })
-                    .catch(error => console.error('Erro ao carregar o menu:', error));
-            }
-        });
+function loadLoggedInUser() {
+    fetch('/api/usuario-logado')
+    .then(response => response.json())
+    .then(data => {
+        const userNameElement = document.getElementById('user-name-text');
+        userNameElement.innerHTML = data.nome;
+        if (data.tipo_usuario === 'admin') {
+            document.querySelector('.admin-menu').style.display = 'block';
+        }
+    })
+    .catch(error => console.error('Erro ao carregar usuário logado:', error));
+}
+
+
         document.querySelectorAll('.submenu > a').forEach(menu => {
     menu.addEventListener('click', function(e) {
         e.preventDefault();
