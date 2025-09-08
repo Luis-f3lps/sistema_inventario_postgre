@@ -1537,14 +1537,20 @@ app.post("/api/schedule", async (req, res) => {
         res.status(500).json({ error: "Erro ao solicitar aula" });
     }
 });
-// Endpoint do Técnico para ver as solicitações (Já estava correto)
+// Endpoint do Técnico para ver as solicitações (com hora_fim)
 app.get("/api/requests", async (req, res) => {
   try {
     const { tecnico_email } = req.query;
     const result = await pool.query(
       `SELECT 
-         a.id_aula, u.nome_usuario as professor, l.nome_laboratorio, 
-         a.data, h.hora_inicio, a.precisa_tecnico, a.status
+         a.id_aula, 
+         u.nome_usuario as professor, 
+         l.nome_laboratorio, 
+         a.data, 
+         h.hora_inicio, 
+         h.hora_fim, -- <<< ADICIONADO AQUI
+         a.precisa_tecnico, 
+         a.status
        FROM aulas a
        JOIN usuario u ON a.professor_email = u.email
        JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
