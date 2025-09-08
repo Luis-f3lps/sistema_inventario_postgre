@@ -90,268 +90,209 @@
             <button id="submitBtn" class="btn-principal" disabled>Solicitar Aula</button>
         </div>
 
-        <script>
-           // Função principal que inicia tudo quando a página carrega
-            document.addEventListener('DOMContentLoaded', () => {
-                // Como o menu já está no HTML, podemos ativar a sua funcionalidade diretamente
-                ativarFuncionalidadeMenu();
+<script>
+    // ÚNICO PONTO DE INÍCIO QUANDO A PÁGINA CARREGA
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. Ativa a funcionalidade do menu, pois ele já está no HTML
+        ativarFuncionalidadeMenu();
 
-                // E depois, carregar os dados da página (utilizador e painel)
-                carregarDadosDaPagina();
+        // 2. Define a data de hoje no calendário (se o elemento existir)
+        const dateEl = document.getElementById('date');
+        if (dateEl) {
+            const today = new Date().toISOString().slice(0, 10);
+            dateEl.value = today;
+        }
+
+        // 3. Inicia o processo de carregar os dados do utilizador e da página
+        loadLoggedInUser();
+    });
+
+    /**
+     * Adiciona os eventos de clique aos botões do menu.
+     */
+    function ativarFuncionalidadeMenu() {
+        const sideMenu = document.getElementById("sidemenu");
+        const openMenuBtn = document.querySelector(".fa-bars");
+        const closeMenuBtn = document.querySelector(".fa-circle-xmark");
+
+        if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
+        if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
+
+        document.querySelectorAll('.submenu > a').forEach(menu => {
+            menu.addEventListener('click', function (e) {
+                e.preventDefault();
+                this.nextElementSibling.classList.toggle('open');
+                this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
             });
+        });
+    }
 
-            /**
-             * Adiciona os eventos de clique aos botões do menu.
-             */
-            function ativarFuncionalidadeMenu() {
-                const sideMenu = document.getElementById("sidemenu");
-                const openMenuBtn = document.querySelector(".fa-bars");
-                const closeMenuBtn = document.querySelector(".fa-circle-xmark");
+    // --- LÓGICA DE AGENDAMENTO ---
 
-                if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
-                if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
+    let loggedInUser = null;
+    const slotsEl = document.getElementById('slots');
+    const dateEl = document.getElementById('date');
+    const labEl = document.getElementById('lab');
+    const submitBtn = document.getElementById('submitBtn');
+    const msgEl = document.getElementById('msg');
 
-                // ESTA É A ÚNICA VERSÃO QUE DEVE EXISTIR
-                document.querySelectorAll('.submenu > a').forEach(menu => {
-                    menu.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        this.nextElementSibling.classList.toggle('open');
-                        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-                    });
+    const morningStart = 7, morningEndExclusive = 11;
+    const afternoonStart = 13, afternoonEndExclusive = 22;
+
+    let occupiedSlots = [];
+    let selectedSlot = null;
+
+    /**
+     * Busca os dados do utilizador e, se bem-sucedido, carrega a disponibilidade dos horários.
+     */
+    async function loadLoggedInUser() {
+        try {
+            const response = await fetch('/api/usuario-logado');
+            if (!response.ok) {
+                window.location.href = '/login.html';
+                return;
+            }
+            loggedInUser = await response.json();
+
+            const userNameElement = document.getElementById('user-name-text');
+            if (userNameElement) {
+                userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
+            }
+
+            // Exibe o menu de admin se o utilizador for admin
+            if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'admin') {
+                const adminMenu = document.querySelector('.admin-menu');
+                if (adminMenu) adminMenu.style.display = 'block';
+            }
+
+            // Agora que sabemos quem está logado, carregamos a disponibilidade para a data de hoje.
+            await loadAvailability();
+        } catch (error) {
+            console.error('Erro ao carregar dados do utilizador:', error);
+        }
+    }
+
+    /**
+     * Valida a data e carrega os horários disponíveis da API.
+     */
+    async function loadAvailability() {
+        const dataSelecionadaStr = dateEl.value;
+        const labId = labEl.value;
+
+        msgEl.style.display = 'none';
+        msgEl.className = 'mensagem-status';
+        slotsEl.innerHTML = '';
+
+        const hojeStr = new Date().toISOString().slice(0, 10);
+
+        if (dataSelecionadaStr < hojeStr) {
+            submitBtn.disabled = true;
+            msgEl.textContent = 'Não é possível agendar em datas passadas.';
+            msgEl.classList.add('erro');
+            msgEl.style.display = 'block';
+            return;
+        }
+
+        selectedSlot = null;
+        submitBtn.disabled = true;
+
+        try {
+            occupiedSlots = await fetchOccupiedSlotsFromAPI(dataSelecionadaStr, labId);
+            renderSlots();
+        } catch (error) {
+            console.error('Erro ao carregar disponibilidade:', error);
+            msgEl.textContent = 'Erro ao carregar horários. Tente novamente.';
+            msgEl.classList.add('erro');
+            msgEl.style.display = 'block';
+        }
+    }
+
+    function renderSlots() {
+        const all = generateAllSlots();
+        slotsEl.innerHTML = '';
+        all.forEach(hour => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'bloco-horario';
+            btn.textContent = `${hour} — ${formatEnd(hour)}`;
+            btn.dataset.hour = hour;
+            if (occupiedSlots.includes(hour)) {
+                btn.classList.add('occupied');
+                btn.setAttribute('aria-disabled', 'true');
+            } else {
+                btn.addEventListener('click', () => {
+                    selectedSlot = (selectedSlot === hour) ? null : hour;
+                    updateSelectionUI();
                 });
             }
-
-            /**
-             * Função que busca os dados do utilizador e depois os dados do painel.
-             */
-            async function carregarDadosDaPagina() {
-                try {
-                    const response = await fetch('/api/usuario-logado');
-                    if (!response.ok) {
-                        window.location.href = '/login.html';
-                        return;
-                    }
-                    const loggedInUser = await response.json();
-
-                    // >>> É AQUI QUE O NOME É EXIBIDO <<<
-                    const userNameElement = document.getElementById('user-name-text');
-                    if (userNameElement) {
-                        userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
-                    }
-
-                    // Mostra o menu de admin se o utilizador for admin
-                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'admin') {
-                        const adminMenu = document.querySelector('.admin-menu');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
-
-                    // Agora, busca os dados específicos do painel
-                    carregarDadosDoPainel();
-
-                } catch (error) {
-                    console.error('Erro ao carregar dados da página:', error);
-                }
+            slotsEl.appendChild(btn);
+        });
+        updateSelectionUI();
+    }
+    
+    function updateSelectionUI() {
+        document.querySelectorAll('.bloco-horario').forEach(el => {
+            el.classList.remove('selected');
+            if (!el.classList.contains('occupied') && el.dataset.hour === selectedSlot) {
+                el.classList.add('selected');
             }
+        });
+        submitBtn.disabled = !selectedSlot;
+    }
 
+    async function fetchOccupiedSlotsFromAPI(date, labId) {
+        const res = await fetch(`/api/availability?date=${encodeURIComponent(date)}&labId=${encodeURIComponent(labId)}`);
+        if (!res.ok) throw new Error('Falha ao consultar disponibilidade');
+        return (await res.json()).occupied || [];
+    }
 
+    function generateAllSlots() {
+        const arr = [];
+        for (let h = morningStart; h < morningEndExclusive; h++) arr.push(formatHour(h));
+        for (let h = afternoonStart; h < afternoonEndExclusive; h++) arr.push(formatHour(h));
+        return arr;
+    }
 
-            // Função principal que inicia tudo quando a página carrega
-            document.addEventListener('DOMContentLoaded', () => {
-                // 1. Ativa a funcionalidade do menu, pois ele já está no HTML
-                ativarFuncionalidadeMenu();
+    function formatHour(h) { return (h < 10 ? '0' + h : '' + h) + ':00'; }
+    
+    function formatEnd(start) {
+        const [hh] = start.split(':');
+        const endH = parseInt(hh) + 1;
+        return (endH < 10 ? '0' + endH : '' + endH) + ':00';
+    }
 
-                // 2. Define a data de hoje no calendário
-                const dateEl = document.getElementById('date');
-                const today = new Date().toISOString().slice(0, 10);
-                dateEl.value = today;
+    // --- EVENT LISTENERS ---
+    dateEl.addEventListener('change', loadAvailability);
+    labEl.addEventListener('change', loadAvailability);
 
-                // 3. Inicia o processo de carregar os dados do utilizador e da página
-                loadLoggedInUser();
+    submitBtn.addEventListener('click', async () => {
+        if (!selectedSlot || !loggedInUser) return;
+        const payload = {
+            labId: labEl.value,
+            date: dateEl.value,
+            hour: selectedSlot,
+            precisa_tecnico: document.querySelector('input[name="precisaTecnico"]:checked').value === 'true'
+        };
+        try {
+            const res = await fetch('/api/schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error || 'Ocorreu um erro');
 
-            /**
-             * Adiciona os eventos de clique aos botões do menu.
-             */
-            function ativarFuncionalidadeMenu() {
-                const sideMenu = document.getElementById("sidemenu");
-                const openMenuBtn = document.querySelector(".fa-bars");
-                const closeMenuBtn = document.querySelector(".fa-circle-xmark");
-
-                if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
-                if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
-
-                document.querySelectorAll('.submenu > a').forEach(menu => {
-                    menu.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        this.nextElementSibling.classList.toggle('open');
-                        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-                    });
-                });
-            }
-
-            // --- LÓGICA DE AGENDAMENTO ---
-
-            let loggedInUser = null;
-            const slotsEl = document.getElementById('slots');
-            const dateEl = document.getElementById('date');
-            const labEl = document.getElementById('lab');
-            const submitBtn = document.getElementById('submitBtn');
-            const msgEl = document.getElementById('msg');
-
-            const morningStart = 7, morningEndExclusive = 11;
-            const afternoonStart = 13, afternoonEndExclusive = 22;
-
-            let occupiedSlots = [];
-            let selectedSlot = null;
-
-            /**
-             * Busca os dados do utilizador e, se bem-sucedido, carrega a disponibilidade dos horários.
-             */
-            async function loadLoggedInUser() {
-                try {
-                    const response = await fetch('/api/usuario-logado');
-                    if (!response.ok) {
-                        window.location.href = '/login.html';
-                        return;
-                    }
-                    loggedInUser = await response.json();
-
-                    const userNameElement = document.getElementById('user-name-text');
-                    if (userNameElement) {
-                        userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
-                    }
-
-                    // Exibe o menu de admin se o utilizador for admin
-                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'admin') {
-                        const adminMenu = document.querySelector('.admin-menu');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
-
-                    // >>> AQUI ESTÁ A CORREÇÃO <<<
-                    // Agora que sabemos quem está logado, carregamos a disponibilidade para a data de hoje.
-                    await loadAvailability();
-                } catch (error) {
-                    console.error('Erro ao carregar dados do utilizador:', error);
-                }
-            }
-
-            /**
-             * Valida a data e carrega os horários disponíveis da API.
-             */
-            async function loadAvailability() {
-                const dataSelecionadaStr = dateEl.value;
-                const labId = labEl.value;
-
-                msgEl.style.display = 'none';
-                msgEl.className = 'mensagem-status';
-                slotsEl.innerHTML = '';
-
-                const hojeStr = new Date().toISOString().slice(0, 10);
-
-                if (dataSelecionadaStr < hojeStr) {
-                    submitBtn.disabled = true;
-                    msgEl.textContent = 'Não é possível agendar em datas passadas.';
-                    msgEl.classList.add('erro');
-                    msgEl.style.display = 'block';
-                    return;
-                }
-
-                selectedSlot = null;
-                submitBtn.disabled = true;
-
-                try {
-                    occupiedSlots = await fetchOccupiedSlotsFromAPI(dataSelecionadaStr, labId);
-                    renderSlots();
-                } catch (error) {
-                    console.error('Erro ao carregar disponibilidade:', error);
-                    msgEl.textContent = 'Erro ao carregar horários. Tente novamente.';
-                    msgEl.classList.add('erro');
-                    msgEl.style.display = 'block';
-                }
-            }
-
-            // As suas outras funções (renderSlots, updateSelectionUI, etc.) continuam aqui...
-            function renderSlots() {
-                const all = generateAllSlots();
-                slotsEl.innerHTML = '';
-                all.forEach(hour => {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'bloco-horario';
-                    btn.textContent = `${hour} — ${formatEnd(hour)}`;
-                    btn.dataset.hour = hour;
-                    if (occupiedSlots.includes(hour)) {
-                        btn.classList.add('occupied');
-                        btn.setAttribute('aria-disabled', 'true');
-                    } else {
-                        btn.addEventListener('click', () => {
-                            selectedSlot = (selectedSlot === hour) ? null : hour;
-                            updateSelectionUI();
-                        });
-                    }
-                    slotsEl.appendChild(btn);
-                });
-                updateSelectionUI();
-            }
-            function updateSelectionUI() {
-                document.querySelectorAll('.bloco-horario').forEach(el => {
-                    el.classList.remove('selected');
-                    if (!el.classList.contains('occupied') && el.dataset.hour === selectedSlot) {
-                        el.classList.add('selected');
-                    }
-                });
-                submitBtn.disabled = !selectedSlot;
-            }
-            async function fetchOccupiedSlotsFromAPI(date, labId) {
-                const res = await fetch(`/api/availability?date=${encodeURIComponent(date)}&labId=${encodeURIComponent(labId)}`);
-                if (!res.ok) throw new Error('Falha ao consultar disponibilidade');
-                return (await res.json()).occupied || [];
-            }
-            function generateAllSlots() {
-                const arr = [];
-                for (let h = morningStart; h < morningEndExclusive; h++) arr.push(formatHour(h));
-                for (let h = afternoonStart; h < afternoonEndExclusive; h++) arr.push(formatHour(h));
-                return arr;
-            }
-            function formatHour(h) { return (h < 10 ? '0' + h : '' + h) + ':00'; }
-            function formatEnd(start) {
-                const [hh] = start.split(':');
-                const endH = parseInt(hh) + 1;
-                return (endH < 10 ? '0' + endH : '' + endH) + ':00';
-            }
-
-            // --- EVENT LISTENERS ---
-            dateEl.addEventListener('change', loadAvailability);
-            labEl.addEventListener('change', loadAvailability);
-
-            submitBtn.addEventListener('click', async () => {
-                if (!selectedSlot || !loggedInUser) return;
-                const payload = {
-                    labId: labEl.value,
-                    date: dateEl.value,
-                    hour: selectedSlot,
-                    precisa_tecnico: document.querySelector('input[name="precisaTecnico"]:checked').value === 'true'
-                };
-                try {
-                    const res = await fetch('/api/schedule', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    const result = await res.json();
-                    if (!res.ok) throw new Error(result.error || 'Ocorreu um erro');
-
-                    msgEl.textContent = result.message;
-                    msgEl.className = 'mensagem-status sucesso';
-                    msgEl.style.display = 'block';
-                    await loadAvailability();
-                } catch (err) {
-                    msgEl.textContent = 'Erro ao enviar: ' + err.message;
-                    msgEl.className = 'mensagem-status erro';
-                    msgEl.style.display = 'block';
-                }
-            });
-        </script>
+            msgEl.textContent = result.message;
+            msgEl.className = 'mensagem-status sucesso';
+            msgEl.style.display = 'block';
+            await loadAvailability();
+        } catch (err) {
+            msgEl.textContent = 'Erro ao enviar: ' + err.message;
+            msgEl.className = 'mensagem-status erro';
+            msgEl.style.display = 'block';
+        }
+    });
+</script>
 </body>
 
 </html>
