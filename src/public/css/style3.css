@@ -39,7 +39,7 @@ html{
     display: block;
     padding: 10px;
     text-decoration: none;
-    color: #ffffff;
+    color: #c2c7d0;
     transition: background-color 0.3s;
 }
 
@@ -59,7 +59,7 @@ html{
     display: block;
     padding: 10px;
     text-decoration: none;
-    color: #ffffff;
+    color: #c2c7d0;
     transition: background-color 0.3s;
 }
 
@@ -82,7 +82,7 @@ html{
 #sidemenu .submenu-items li a {
     padding: 10px;
     font-size: 16px;
-    color: #ffffff;
+    color: #c2c7d0;
 }
 
 .rotate {
