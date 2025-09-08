@@ -1661,9 +1661,11 @@ app.get("/api/dashboard/solicitacoes-recentes", async (req, res) => {
     try {
         const professor_email = req.session.user.email;
         const result = await pool.query(
-            `SELECT l.nome_laboratorio, a.data, a.status
+            `SELECT 
+               l.nome_laboratorio, a.data, h.hora_inicio, h.hora_fim, a.status
              FROM aulas a
              JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+             JOIN horarios h ON a.id_horario = h.id_horario -- Join adicionado
              WHERE a.professor_email = $1 AND a.status IN ('analisando', 'nao_autorizado')
              ORDER BY a.data DESC
              LIMIT 6`,
@@ -1681,7 +1683,8 @@ app.get("/api/dashboard/aulas-autorizadas", async (req, res) => {
     try {
         const professor_email = req.session.user.email;
         const result = await pool.query(
-            `SELECT l.nome_laboratorio, a.data, h.hora_inicio
+            `SELECT 
+               l.nome_laboratorio, a.data, h.hora_inicio, h.hora_fim -- Coluna adicionada
              FROM aulas a
              JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
              JOIN horarios h ON a.id_horario = h.id_horario
@@ -1695,7 +1698,6 @@ app.get("/api/dashboard/aulas-autorizadas", async (req, res) => {
         res.status(500).json({ error: "Erro ao buscar aulas autorizadas." });
     }
 });
-
 // Endpoint para o painel "Meus Laboratórios"
 app.get("/api/dashboard/meus-laboratorios", async (req, res) => {
     if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
