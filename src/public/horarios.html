@@ -12,7 +12,7 @@
 <body>
     <!------------------Relatórios--------------->
     <div id="header">
-<nav>
+        <nav>
             <ul id="sidemenu">
                 <img src="images/logomenu.png" class="logo">
                 </br>
@@ -28,8 +28,8 @@
                 <li><a href="/Horario"><i class="fas fa-clock"></i> Horarios</a></li>
                 <li class="tecnico" style="display: none;"><a href="/Tela_Tecnico"><i class="fas fa-bell"></i>
                         Solicitações</a></li>
-                <li class="professor" style="display: none;"><a href="/Tela_Professor"><i
-                            class="fas fa-bell"></i> Solicitações Aula</a></li>
+                <li class="professor" style="display: none;"><a href="/Tela_Professor"><i class="fas fa-bell"></i>
+                        Solicitações Aula</a></li>
 
                 <li class="submenu produto" style="display: none;">
                     <a href="#"><i class="fas fa-boxes"></i> Inventário <i class="fas fa-chevron-down"></i></a>
@@ -96,18 +96,11 @@
         <script>
             // ÚNICO PONTO DE INÍCIO QUANDO A PÁGINA CARREGA
             document.addEventListener('DOMContentLoaded', () => {
-                // 1. Ativa a funcionalidade do menu, pois ele já está no HTML
+                // 1. Ativa a funcionalidade do menu
                 ativarFuncionalidadeMenu();
 
-                // 2. Define a data de hoje no calendário (se o elemento existir)
-                const dateEl = document.getElementById('date');
-                if (dateEl) {
-                    const today = new Date().toISOString().slice(0, 10);
-                    dateEl.value = today;
-                }
-
-                // 3. Inicia o processo de carregar os dados do utilizador e da página
-                loadLoggedInUser();
+                // 2. Inicia o processo de carregar a página (usuário, data e horários)
+                inicializarPaginaDeAgendamento();
             });
 
             /**
@@ -149,41 +142,41 @@
              * Busca os dados do utilizador e, se bem-sucedido, carrega a disponibilidade dos horários.
              */
             async function loadLoggedInUser() {
-    fetch('/api/usuario-logado')
-        .then(response => {
-            // É uma boa prática verificar se a resposta da rede foi bem-sucedida
-            if (!response.ok) {
-                throw new Error('Falha ao buscar usuário. Status: ' + response.status);
+                fetch('/api/usuario-logado')
+                    .then(response => {
+                        // É uma boa prática verificar se a resposta da rede foi bem-sucedida
+                        if (!response.ok) {
+                            throw new Error('Falha ao buscar usuário. Status: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const userNameElement = document.getElementById('user-name-text');
+                        userNameElement.innerHTML = data.nome;
+
+                        // Correção 1: Normaliza o tipo de usuário usando a variável 'data'
+                        const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
+
+                        // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
+                        switch (userType) {
+                            case 'admin':
+                                document.querySelector('.admin-menu').style.display = 'block';
+                                document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                                break;
+
+                            case 'tecnico':
+                                // Mostra AMBOS os menus para o técnico dentro de um único bloco
+                                document.querySelector('.tecnico').style.display = 'block';
+                                document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                                break;
+
+                            case 'professor':
+                                document.querySelector('.professor').style.display = 'block';
+                                break;
+                        }
+                    })
+                    .catch(error => console.error('Erro ao carregar usuário logado:', error));
             }
-            return response.json();
-        })
-        .then(data => {
-            const userNameElement = document.getElementById('user-name-text');
-            userNameElement.innerHTML = data.nome;
-
-            // Correção 1: Normaliza o tipo de usuário usando a variável 'data'
-            const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
-
-            // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
-            switch (userType) {
-                case 'admin':
-                    document.querySelector('.admin-menu').style.display = 'block';
-                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-                    break;
-
-                case 'tecnico':
-                    // Mostra AMBOS os menus para o técnico dentro de um único bloco
-                    document.querySelector('.tecnico').style.display = 'block';
-                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-                    break;
-
-                case 'professor':
-                    document.querySelector('.professor').style.display = 'block';
-                    break;
-            }
-        })
-        .catch(error => console.error('Erro ao carregar usuário logado:', error));
-}
 
             /**
              * Valida a data e carrega os horários disponíveis da API.
