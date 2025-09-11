@@ -96,13 +96,32 @@
         <script>
             // ÚNICO PONTO DE INÍCIO QUANDO A PÁGINA CARREGA
             document.addEventListener('DOMContentLoaded', () => {
-                // 1. Ativa a funcionalidade do menu
+                // 1. Ativa a funcionalidade do menu, pois ele já está no HTML
                 ativarFuncionalidadeMenu();
 
-                // 2. Inicia o processo de carregar a página (usuário, data e horários)
-                inicializarPaginaDeAgendamento();
-            });
+                // 2. Define a data de hoje no calendário (se o elemento existir)
+                const dateEl = document.getElementById('date');
+                if (dateEl) {
+                    const today = new Date().toISOString().slice(0, 10);
+                    dateEl.value = today;
+                }
 
+                // 3. Inicia o processo de carregar os dados do utilizador e da página
+                loadLoggedInUser();
+                inicializarPaginaDeAgendamento();
+
+            });
+            async function inicializarPaginaDeAgendamento() {
+                // Define a data de hoje no calendário
+                const dateEl = document.getElementById('date');
+                if (dateEl) {
+                    const today = new Date().toISOString().slice(0, 10);
+                    dateEl.value = today;
+                }
+
+                // Carrega os dados do usuário e, EM SEGUIDA, os horários de hoje
+                await carregarDadosDoUsuarioEHorarios();
+            }
             /**
              * Adiciona os eventos de clique aos botões do menu.
              */
