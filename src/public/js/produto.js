@@ -219,6 +219,7 @@ function loadLoggedInUser() {
             switch (userType) {
                 case 'admin':
                     document.querySelector('.admin-menu').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
                     break;
 
                 case 'tecnico':

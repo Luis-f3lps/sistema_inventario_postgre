@@ -123,26 +123,37 @@ loadUsers();
 // Pegar o nome do usuário logado
 function loadLoggedInUser() {
     fetch('/api/usuario-logado')
-        .then(response => response.json())
+        .then(response => {
+            // É uma boa prática verificar se a resposta da rede foi bem-sucedida
+            if (!response.ok) {
+                throw new Error('Falha ao buscar usuário. Status: ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
             const userNameElement = document.getElementById('user-name-text');
             userNameElement.innerHTML = data.nome;
-            if (data.tipo_usuario === 'admin') {
-                document.querySelector('.admin-menu').style.display = 'block';
+
+            // Correção 1: Normaliza o tipo de usuário usando a variável 'data'
+            const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
+
+            // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
+            switch (userType) {
+                case 'admin':
+                    document.querySelector('.admin-menu').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                    break;
+
+                case 'tecnico':
+                    // Mostra AMBOS os menus para o técnico dentro de um único bloco
+                    document.querySelector('.tecnico').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                    break;
+
+                case 'professor':
+                    document.querySelector('.professor').style.display = 'block';
+                    break;
             }
-                                if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
-                        const adminMenu = document.querySelector('.tecnico');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
-                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
-                        const adminMenu = document.querySelector('.produto');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
-                    // Exibe o menu de admin se o utilizador for admin
-                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'professor') {
-                        const adminMenu = document.querySelector('.professor');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
         })
         .catch(error => console.error('Erro ao carregar usuário logado:', error));
 }

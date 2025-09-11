@@ -149,44 +149,41 @@
              * Busca os dados do utilizador e, se bem-sucedido, carrega a disponibilidade dos horários.
              */
             async function loadLoggedInUser() {
-                try {
-                    const response = await fetch('/api/usuario-logado');
-                    if (!response.ok) {
-                        window.location.href = '/login.html';
-                        return;
-                    }
-                    loggedInUser = await response.json();
-
-                    const userNameElement = document.getElementById('user-name-text');
-                    if (userNameElement) {
-                        userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
-                    }
-
-                    // Exibe o menu de admin se o utilizador for admin
-                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'admin') {
-                        const adminMenu = document.querySelector('.admin-menu');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
-                    // Exibe o menu de admin se o utilizador for admin
-                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
-                        const adminMenu = document.querySelector('.tecnico');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
-                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
-                        const adminMenu = document.querySelector('.produto');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
-                    // Exibe o menu de admin se o utilizador for admin
-                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'professor') {
-                        const adminMenu = document.querySelector('.professor');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
-                    // Agora que sabemos quem está logado, carregamos a disponibilidade para a data de hoje.
-                    await loadAvailability();
-                } catch (error) {
-                    console.error('Erro ao carregar dados do utilizador:', error);
-                }
+    fetch('/api/usuario-logado')
+        .then(response => {
+            // É uma boa prática verificar se a resposta da rede foi bem-sucedida
+            if (!response.ok) {
+                throw new Error('Falha ao buscar usuário. Status: ' + response.status);
             }
+            return response.json();
+        })
+        .then(data => {
+            const userNameElement = document.getElementById('user-name-text');
+            userNameElement.innerHTML = data.nome;
+
+            // Correção 1: Normaliza o tipo de usuário usando a variável 'data'
+            const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
+
+            // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
+            switch (userType) {
+                case 'admin':
+                    document.querySelector('.admin-menu').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                    break;
+
+                case 'tecnico':
+                    // Mostra AMBOS os menus para o técnico dentro de um único bloco
+                    document.querySelector('.tecnico').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                    break;
+
+                case 'professor':
+                    document.querySelector('.professor').style.display = 'block';
+                    break;
+            }
+        })
+        .catch(error => console.error('Erro ao carregar usuário logado:', error));
+}
 
             /**
              * Valida a data e carrega os horários disponíveis da API.
