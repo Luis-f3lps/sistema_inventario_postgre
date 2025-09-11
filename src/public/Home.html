@@ -88,97 +88,99 @@
             </div>
         </div>
         <script>
-            // Função principal que inicia tudo quando a página carrega
-            document.addEventListener('DOMContentLoaded', () => {
-                // Como o menu já está no HTML, podemos ativar a sua funcionalidade diretamente
-                ativarFuncionalidadeMenu();
 
-                // E depois, carregar os dados da página (utilizador e painel)
-                carregarDadosDaPagina();
-            });
+    // Função principal que inicia tudo quando a página carrega
+    document.addEventListener('DOMContentLoaded', () => {
+        ativarFuncionalidadeMenu();
+        carregarDadosDaPagina();
+    });
 
-            /**
-             * Adiciona os eventos de clique aos botões do menu.
-             */
-            function ativarFuncionalidadeMenu() {
-                const sideMenu = document.getElementById("sidemenu");
-                const openMenuBtn = document.querySelector(".fa-bars");
-                const closeMenuBtn = document.querySelector(".fa-circle-xmark");
+    /**
+     * Adiciona os eventos de clique aos botões do menu.
+     */
+    function ativarFuncionalidadeMenu() {
+        const sideMenu = document.getElementById("sidemenu");
+        const openMenuBtn = document.querySelector(".fa-bars");
+        const closeMenuBtn = document.querySelector(".fa-circle-xmark");
 
-                if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
-                if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
+        if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
+        if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
 
-                // ESTA É A ÚNICA VERSÃO QUE DEVE EXISTIR
-                document.querySelectorAll('.submenu > a').forEach(menu => {
-                    menu.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        this.nextElementSibling.classList.toggle('open');
-                        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-                    });
-                });
-            }
+        // Lógica segura para os submenus (evita erros)
+        document.querySelectorAll('.submenu > a').forEach(menu => {
+            menu.addEventListener('click', function (e) {
+                e.preventDefault();
+                const submenuItems = this.nextElementSibling;
+                const icon = this.querySelector('.fas.fa-chevron-down');
 
-            /**
-             * Função que busca os dados do utilizador e depois os dados do painel.
-             */
-            async function carregarDadosDaPagina() {
-                try {
-                    const response = await fetch('/api/usuario-logado');
-                    if (!response.ok) {
-                        window.location.href = '/login.html';
-                        return;
-                    }
-                    const loggedInUser = await response.json();
-
-                    // >>> É AQUI QUE O NOME É EXIBIDO <<<
-                    const userNameElement = document.getElementById('user-name-text');
-                    if (userNameElement) {
-                        userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
-                    }
-
-                    // Mostra o menu de admin se o utilizador for admin
-                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'admin') {
-                        const adminMenu = document.querySelector('.admin-menu');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
-                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
-                        const adminMenu = document.querySelector('.tecnico');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
-                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
-                        const adminMenu = document.querySelector('.produto');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                        document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-
-                    }
-                    // Exibe o menu de admin se o utilizador for admin
-                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'professor') {
-                        const adminMenu = document.querySelector('.professor');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
-                    // Agora, busca os dados específicos do painel
-                    carregarDadosDoPainel();
-
-                } catch (error) {
-                    console.error('Erro ao carregar dados da página:', error);
+                // Verifica se o submenu existe antes de tentar manipulá-lo
+                if (submenuItems) {
+                    submenuItems.classList.toggle('open');
                 }
+                // Verifica se o ícone existe antes de tentar girá-lo
+                if (icon) {
+                    icon.classList.toggle('rotate');
+                }
+            });
+        });
+    }
+
+    /**
+     * Função que busca os dados do utilizador e depois os dados do painel.
+     */
+    async function carregarDadosDaPagina() {
+        try {
+            const response = await fetch('/api/usuario-logado');
+            if (!response.ok) {
+                window.location.href = '/login.html';
+                return;
+            }
+            const loggedInUser = await response.json();
+
+            const userNameElement = document.getElementById('user-name-text');
+            if (userNameElement) {
+                userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
             }
 
-            /**
-             * Busca os dados para os cartões do painel.
-             */
-            function carregarDadosDoPainel() {
-                Promise.all([
-                    fetch('/api/dashboard/solicitacoes-recentes').then(res => res.json()),
-                    fetch('/api/dashboard/aulas-autorizadas').then(res => res.json()),
-                    fetch('/api/dashboard/meus-laboratorios').then(res => res.json())
-                ]).then(([solicitacoes, aulas, laboratorios]) => {
-                    renderizarSolicitacoes(solicitacoes);
-                    renderizarAulasAutorizadas(aulas);
-                    renderizarMeusLaboratorios(laboratorios);
-                }).catch(error => console.error('Erro ao carregar dados dos painéis:', error));
+            // Lógica unificada para exibição de menus
+            const userType = loggedInUser.tipo_usuario ? loggedInUser.tipo_usuario.trim().toLowerCase() : '';
+            
+            switch (userType) {
+                case 'admin':
+                    document.querySelector('.admin-menu').style.display = 'block';
+                    break;
+                case 'tecnico':
+                    document.querySelector('.tecnico').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                    break;
+                case 'professor':
+                    document.querySelector('.professor').style.display = 'block';
+                    break;
             }
 
+            // Agora, busca os dados específicos do painel
+            carregarDadosDoPainel();
+
+        } catch (error) {
+            console.error('Erro ao carregar dados da página:', error);
+        }
+    }
+
+    /**
+     * Busca os dados para os cartões do painel.
+     */
+    function carregarDadosDoPainel() {
+        Promise.all([
+            fetch('/api/dashboard/solicitacoes-recentes').then(res => res.json()),
+            fetch('/api/dashboard/aulas-autorizadas').then(res => res.json()),
+            fetch('/api/dashboard/meus-laboratorios').then(res => res.json())
+        ]).then(([solicitacoes, aulas, laboratorios]) => {
+            // É importante garantir que as funções de renderização existam
+            if (typeof renderizarSolicitacoes === 'function') renderizarSolicitacoes(solicitacoes);
+            if (typeof renderizarAulasAutorizadas === 'function') renderizarAulasAutorizadas(aulas);
+            if (typeof renderizarMeusLaboratorios === 'function') renderizarMeusLaboratorios(laboratorios);
+        }).catch(error => console.error('Erro ao carregar dados dos painéis:', error));
+    }
             // As suas funções de 'renderizar' continuam iguais
             function renderizarSolicitacoes(solicitacoes) {
                 const lista = document.getElementById('lista-solicitacoes');
