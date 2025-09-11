@@ -148,6 +148,8 @@
                     if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
                         const adminMenu = document.querySelector('.produto');
                         if (adminMenu) adminMenu.style.display = 'block';
+                        document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+
                     }
                     // Exibe o menu de admin se o utilizador for admin
                     if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'professor') {
