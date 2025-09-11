@@ -1673,7 +1673,7 @@ app.get("/api/dashboard/solicitacoes-recentes", async (req, res) => {
              FROM aulas a
              JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
              JOIN horarios h ON a.id_horario = h.id_horario -- Join adicionado
-             WHERE a.professor_email = $1 AND a.status IN ('analisando', 'nao_autorizado')
+             WHERE a.professor_email = $1 AND a.status IN ('analisando', 'nao_autorizado', 'autorizado', 'concluido')
              ORDER BY a.data DESC
              LIMIT 6`,
             [professor_email]
