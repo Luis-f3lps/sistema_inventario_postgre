@@ -120,11 +120,46 @@
                 }
 
                 // Carrega os dados do usuário e, EM SEGUIDA, os horários de hoje
-                await carregarDadosDoUsuarioEHorarios();
+                await carregarDadosDoUsuarioEHorarios(); // Esta chamada agora funcionará
             }
+
             /**
-             * Adiciona os eventos de clique aos botões do menu.
+             * ESTA É A FUNÇÃO QUE PRECISA SER RENOMEADA.
+             * Ela carrega o usuário e DEPOIS chama a função para carregar os horários.
              */
+            async function carregarDadosDoUsuarioEHorarios() { // <-- NOME CORRETO
+                try {
+                    const response = await fetch('/api/usuario-logado');
+                    if (!response.ok) {
+                        window.location.href = '/login.html';
+                        return;
+                    }
+                    loggedInUser = await response.json();
+
+                    const userNameElement = document.getElementById('user-name-text');
+                    userNameElement.innerHTML = loggedInUser.nome;
+
+                    const userType = loggedInUser.tipo_usuario ? loggedInUser.tipo_usuario.trim().toLowerCase() : '';
+                    switch (userType) {
+                        case 'admin':
+                            document.querySelector('.admin-menu').style.display = 'block';
+                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                            break;
+                        case 'tecnico':
+                            document.querySelector('.tecnico').style.display = 'block';
+                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                            break;
+                        case 'professor':
+                            document.querySelector('.professor').style.display = 'block';
+                            break;
+                    }
+
+                    await loadAvailability();
+
+                } catch (error) {
+                    console.error('Erro ao carregar dados do usuário:', error);
+                }
+            }
             function ativarFuncionalidadeMenu() {
                 const sideMenu = document.getElementById("sidemenu");
                 const openMenuBtn = document.querySelector(".fa-bars");
