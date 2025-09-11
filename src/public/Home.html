@@ -136,23 +136,24 @@
                         userNameElement.textContent = loggedInUser.nome_usuario || loggedInUser.nome;
                     }
 
-
-            switch (userType) {
-                case 'admin':
-                    document.querySelector('.admin-menu').style.display = 'block';
-                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-                    break;
-
-                case 'tecnico':
-                    // Mostra AMBOS os menus para o técnico dentro de um único bloco
-                    document.querySelector('.tecnico').style.display = 'block';
-                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-                    break;
-
-                case 'professor':
-                    document.querySelector('.professor').style.display = 'block';
-                    break;
-            }
+                    // Mostra o menu de admin se o utilizador for admin
+                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'admin') {
+                        const adminMenu = document.querySelector('.admin-menu');
+                        if (adminMenu) adminMenu.style.display = 'block';
+                    }
+                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
+                        const adminMenu = document.querySelector('.tecnico');
+                        if (adminMenu) adminMenu.style.display = 'block';
+                    }
+                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
+                        const adminMenu = document.querySelector('.produto');
+                        if (adminMenu) adminMenu.style.display = 'block';
+                    }
+                    // Exibe o menu de admin se o utilizador for admin
+                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'professor') {
+                        const adminMenu = document.querySelector('.professor');
+                        if (adminMenu) adminMenu.style.display = 'block';
+                    }
                     // Agora, busca os dados específicos do painel
                     carregarDadosDoPainel();
 
