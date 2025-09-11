@@ -12,7 +12,7 @@
 <body>
     <!------------------Relatórios--------------->
     <div id="header">
-        <nav>
+<nav>
             <ul id="sidemenu">
                 <img src="images/logomenu.png" class="logo">
                 </br>
@@ -23,12 +23,15 @@
                     </span>
                 </li>
                 </br>
+
                 <li><a href="/Home"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="/Horario"><i class="fas fa-clock"></i> Horarios</a></li>
-                <li><a href="/Tela_Tecnico"><i class="fas fa-bell"></i> Solicitações</a></li>
-                <li><a href="/Tela_Professor"><i class="fas fa-bell"></i> Solicitações Aula</a></li>
+                <li class="submenu tecnico" style="display: none;"><a href="/Tela_Tecnico"><i class="fas fa-bell"></i>
+                        Solicitações</a></li>
+                <li class="submenu professor" style="display: none;"><a href="/Tela_Professor"><i
+                            class="fas fa-bell"></i> Solicitações Aula</a></li>
 
-                <li class="submenu produto">
+                <li class="submenu produto" style="display: none;">
                     <a href="#"><i class="fas fa-boxes"></i> Inventário <i class="fas fa-chevron-down"></i></a>
                     <ul class="submenu-items">
                         <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
@@ -138,7 +141,19 @@
                         const adminMenu = document.querySelector('.admin-menu');
                         if (adminMenu) adminMenu.style.display = 'block';
                     }
-
+                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
+                        const adminMenu = document.querySelector('.tecnico');
+                        if (adminMenu) adminMenu.style.display = 'block';
+                    }
+                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
+                        const adminMenu = document.querySelector('.produto');
+                        if (adminMenu) adminMenu.style.display = 'block';
+                    }
+                    // Exibe o menu de admin se o utilizador for admin
+                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'professor') {
+                        const adminMenu = document.querySelector('.professor');
+                        if (adminMenu) adminMenu.style.display = 'block';
+                    }
                     // Agora, busca os dados específicos do painel
                     carregarDadosDoPainel();
 

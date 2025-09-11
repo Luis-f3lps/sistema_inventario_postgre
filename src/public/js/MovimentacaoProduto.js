@@ -133,6 +133,19 @@ function loadLoggedInUser() {
                 document.querySelector('.tab-links[onclick="opentab(\'Aba02\')"]').style.display = 'block';
 
             }
+                                if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
+                        const adminMenu = document.querySelector('.tecnico');
+                        if (adminMenu) adminMenu.style.display = 'block';
+                    }
+                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
+                        const adminMenu = document.querySelector('.produto');
+                        if (adminMenu) adminMenu.style.display = 'block';
+                    }
+                    // Exibe o menu de admin se o utilizador for admin
+                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'professor') {
+                        const adminMenu = document.querySelector('.professor');
+                        if (adminMenu) adminMenu.style.display = 'block';
+                    }
         })
         .catch(error => console.error('Erro ao carregar usuário logado:', error));
 }
