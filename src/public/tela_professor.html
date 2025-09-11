@@ -28,8 +28,7 @@
                 <li><a href="/Horario"><i class="fas fa-clock"></i> Horarios</a></li>
                 <li class="submenu tecnico" style="display: none;"><a href="/Tela_Tecnico"><i class="fas fa-bell"></i>
                         Solicitações</a></li>
-                <li class="submenu professor" style="display: none;"><a href="/Tela_Professor"><i
-                            class="fas fa-bell"></i> Solicitações Aula</a></li>
+                <li class="submenu professor" style="display: none;"><a href="/Tela_Professor"><i class="fas fa-bell"></i> Solicitações Aula</a></li>
 
                 <li class="submenu produto" style="display: none;">
                     <a href="#"><i class="fas fa-boxes"></i> Inventário <i class="fas fa-chevron-down"></i></a>
@@ -76,35 +75,20 @@
                 </tbody>
             </table>
         </div>
+<script>
+            // Variável global para armazenar os dados do usuário logado
+            let loggedInUser = null;
 
-        <script>
-            // Pegar o nome do usuário logado
-            function loadLoggedInUser() {
-                fetch('/api/usuario-logado')
-                    .then(response => response.json())
-                    .then(data => {
-                        const userNameElement = document.getElementById('user-name-text');
-                        userNameElement.innerHTML = data.nome;
-                        if (data.tipo_usuario === 'admin') {
-                            document.querySelector('.admin-menu').style.display = 'block';
-                        }
-                                            if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
-                        const adminMenu = document.querySelector('.tecnico');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
-                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'tecnico') {
-                        const adminMenu = document.querySelector('.produto');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
-                    // Exibe o menu de admin se o utilizador for admin
-                    if (loggedInUser.tipo_usuario && loggedInUser.tipo_usuario.trim().toLowerCase() === 'professor') {
-                        const adminMenu = document.querySelector('.professor');
-                        if (adminMenu) adminMenu.style.display = 'block';
-                    }
-                    })
-                    .catch(error => console.error('Erro ao carregar usuário logado:', error));
+            // --- Menu Lateral (Sidemenu) ---
+            var sidemenu = document.getElementById("sidemenu");
+            function openmenu() {
+                sidemenu.style.left = "0px";
             }
-            loadLoggedInUser();
+            function clossmenu() {
+                sidemenu.style.left = "-800px";
+            }
+
+            // --- Lógica para Submenus (Inventário, Administração) ---
             document.querySelectorAll('.submenu > a').forEach(menu => {
                 menu.addEventListener('click', function (e) {
                     e.preventDefault();
@@ -114,56 +98,69 @@
                 });
             });
 
-            var sidemenu = document.getElementById("sidemenu");
-            function openmenu() {
-                sidemenu.style.left = "0px";
-            }
-            function clossmenu() {
-                sidemenu.style.left = "-800px";
-            }
 
-        </script>
-
-        <script>
-            let loggedInUser = null;
-
-            // Função 1: Descobre quem está logado
-            async function loadLoggedInUser() {
+            // --- FUNÇÃO PRINCIPAL UNIFICADA ---
+            // Esta função agora faz tudo: identifica o usuário, ajusta o menu e carrega os dados.
+            async function inicializarPagina() {
+                // 1. Tenta buscar o usuário logado
                 try {
                     const response = await fetch('/api/usuario-logado');
                     if (!response.ok) {
+                        // Se não conseguir encontrar o usuário, redireciona para o login
                         window.location.href = '/login.html';
                         return;
                     }
                     loggedInUser = await response.json();
 
-                    // Depois de saber quem está logado, carregamos as solicitações
-                    await loadMyRequests();
+                    // 2. Atualiza a interface com as informações do usuário
+                    const userNameElement = document.getElementById('user-name-text');
+                    userNameElement.innerHTML = loggedInUser.nome;
+
+                    // 3. Exibe os menus corretos com base no tipo de usuário
+                    const userType = loggedInUser.tipo_usuario ? loggedInUser.tipo_usuario.trim().toLowerCase() : '';
+
+                    if (userType === 'admin') {
+                        document.querySelector('.admin-menu').style.display = 'block';
+                    }
+                    if (userType === 'tecnico') {
+                        document.querySelector('.tecnico').style.display = 'block';
+                        document.querySelector('.produto').style.display = 'block';
+                    }
+                    if (userType === 'professor') {
+                        document.querySelector('.professor').style.display = 'block';
+                    }
+
+                    // 4. Se o usuário for um professor, carrega suas solicitações de aula
+                    if (userType === 'professor') {
+                        await loadMyRequests();
+                    }
+
                 } catch (error) {
-                    console.error('Erro ao carregar utilizador:', error);
+                    console.error('Erro ao inicializar a página:', error);
+                    // Pode adicionar uma mensagem de erro na tela aqui, se desejar
                 }
             }
 
-            // Função 2: Carrega as solicitações do professor
+            // Função para carregar as solicitações do professor
             async function loadMyRequests() {
-                if (!loggedInUser) return;
+                if (!loggedInUser) return; // Garante que temos um usuário
+
                 try {
-                    // Chama o novo endpoint da API
                     const res = await fetch(`/api/minhas-solicitacoes`);
-                    if (!res.ok) throw new Error('Erro na rede');
+                    if (!res.ok) throw new Error('Erro na rede ao buscar solicitações');
 
                     const data = await res.json();
                     renderTable(data);
                 } catch (error) {
                     console.error('Falha ao carregar solicitações:', error);
-                    document.getElementById("minhas-aulas-tbody").innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
+                    document.getElementById("minhas-aulas-tbody").innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Erro ao carregar dados. Tente novamente mais tarde.</td></tr>`;
                 }
             }
 
-            // Função 3: Desenha a tabela na tela
+            // Função para renderizar (desenhar) a tabela na tela
             function renderTable(requests) {
                 const tbody = document.getElementById("minhas-aulas-tbody");
-                tbody.innerHTML = "";
+                tbody.innerHTML = ""; // Limpa a tabela antes de adicionar novas linhas
 
                 if (requests.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação futura.</td></tr>`;
@@ -173,23 +170,23 @@
                 requests.forEach(r => {
                     const tr = document.createElement("tr");
 
-                    // >>> A CORREÇÃO ESTÁ AQUI <<<
-                    // Converte a data para o formato local (dd/mm/aaaa) antes de a exibir
+                    // Formata a data para o padrão brasileiro (dd/mm/aaaa)
                     const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
                     tr.innerHTML = `
-            <td>${r.nome_laboratorio}</td>
-            <td>${dataFormatada}</td>
-            <td>${r.hora_inicio.slice(0, 5)} - ${r.hora_fim.slice(0, 5)}</td>
-            <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
-            <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
-        `;
+                        <td>${r.nome_laboratorio}</td>
+                        <td>${dataFormatada}</td>
+                        <td>${r.hora_inicio.slice(0, 5)} - ${r.hora_fim.slice(0, 5)}</td>
+                        <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
+                        <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
+                    `;
                     tbody.appendChild(tr);
                 });
             }
 
-            // Ponto de Entrada: Inicia o processo quando a página carrega
-            document.addEventListener('DOMContentLoaded', loadLoggedInUser);
+            // Ponto de Entrada: Inicia todo o processo quando a página termina de carregar
+            document.addEventListener('DOMContentLoaded', inicializarPagina);
+
         </script>
 </body>
 
