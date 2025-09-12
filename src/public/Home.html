@@ -73,14 +73,15 @@
                     </ul>
                 </div>
 
-                <div class="cartao-painel cartao-meus-laboratorios" style="display: none;">
+
+                <div class="cartao-painel cartao-meus-laboratorios" style="display: block;width: 401px;">
                     <h2>Meus Laboratórios</h2>
                     <ul id="lista-meus-laboratorios" class="lista-painel">
+                        <li>Quimica</li>
                     </ul>
                 </div>
-
                 <div class="cartao-painel cartao-aulas-tecnico" style="display: none;">
-                    <h2>Aulas no meu laboratorio</h2>
+                    <h2>Aulas nos meus laboratorios</h2>
                     <ul id="lista-aulas-nos-meus-laboratorios" class="lista-painel">
                         <p style="text-align:center; color:#888; margin-top: 20px;">(Carregando...)</p>
                     </ul>
@@ -260,14 +261,19 @@
 
                     return `
             <li class="item-painel-detalhado">
-                <strong>${aula.nome_laboratorio}</strong>
-                <span class="detalhe-item-painel">Professor(a): ${aula.nome_professor}</span>
-                <span class="detalhe-item-painel">${dataFormatada} | ${horaInicio} - ${horaFim}</span>
-                <span class="detalhe-item-painel">Apoio Técnico: <strong>${precisaTecnicoTexto}</strong></span>
+                <strong style="
+    margin: 20px;>${aula.nome_laboratorio}</strong>
+                <span class="detalhe-item-painel" style="
+    margin: 20px;>Professor(a): ${aula.nome_professor}</span>
+                <span class="detalhe-item-painel" style="
+    margin: 20px;>${dataFormatada} | ${horaInicio} - ${horaFim}</span>
+                <span class="detalhe-item-painel" style="
+    margin: 20px;>Apoio Técnico: <strong>${precisaTecnicoTexto}</strong></span>
             </li>
         `;
                 }).join('');
             }
+
         </script>
 </body>
 
