@@ -1273,6 +1273,16 @@ nav ul .fa-solid {
     border-bottom: none;
 }
 
+.item-painel-detalhado {
+    display: flex; 
+    flex-direction: column;
+    
+    /* AUMENTE OU DIMINUA ESTE VALOR PARA AJUSTAR O ESPAÇAMENTO INTERNO */
+    gap: 10px; /* Ex: pode aumentar para 15px se quiser mais espaço */
+    
+    border-bottom: 1px solid #eee;
+    padding: 15px 0;
+}
 /* Etiqueta de status (reaproveitada) */
 .etiqueta-status {
     font-weight: bold;

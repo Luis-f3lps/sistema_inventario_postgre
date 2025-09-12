@@ -260,12 +260,9 @@
                     return `
             <li class="item-painel-detalhado">
                 <strong >${aula.nome_laboratorio}</strong>
-                <span class="detalhe-item-painel" style="
-    margin: 20px;>Professor(a): ${aula.nome_professor}</span>
-                <span class="detalhe-item-painel" style="
-    margin: 20px;>${dataFormatada} | ${horaInicio} - ${horaFim}</span>
-                <span class="detalhe-item-painel" style="
-    margin: 20px;>Apoio Técnico: <strong>${precisaTecnicoTexto}</strong></span>
+                <span class="detalhe-item-painel" >Professor(a): ${aula.nome_professor}</span>
+                <span class="detalhe-item-painel">${dataFormatada} | ${horaInicio} - ${horaFim}</span>
+                <span class="detalhe-item-painel">Apoio Técnico: <strong>${precisaTecnicoTexto}</strong></span>
             </li>
         `;
                 }).join('');
