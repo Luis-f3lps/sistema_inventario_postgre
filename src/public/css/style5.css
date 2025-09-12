@@ -34,6 +34,7 @@ html {
     padding: 0;
     margin: 0;
     z-index: 1;
+    width: 250px;
 }
 
 #sidemenu li {
@@ -1220,7 +1221,7 @@ nav ul .fa-solid {
 .painel-principal-container {
     max-width: 1600px;
     margin: 40px auto;
-    margin-left: 250;
+    margin-left: 250px;
     padding: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
