@@ -1740,7 +1740,7 @@ app.get("/api/aulas-meus-laboratorios", async (req, res) => {
             FROM aulas a
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
             JOIN horarios h ON a.id_horario = h.id_horario
-            JOIN usuarios prof ON a.professor_email = prof.email -- <<< NOVO JOIN ADICIONADO
+            JOIN usuario prof ON a.professor_email = prof.email -- <<< NOVO JOIN ADICIONADO
             WHERE 
                 l.usuario_email = $1 
                 AND a.data >= CURRENT_DATE
