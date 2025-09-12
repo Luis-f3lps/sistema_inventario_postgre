@@ -62,25 +62,28 @@
 
         <div class="painel-principal-container">
             <div class="painel-grelha">
-                <div class="cartao-painel">
+                <div class="cartao-painel cartao-aulas-solicitadas" style="display: none;">
                     <h2>Próximas Aulas Autorizadas</h2>
                     <ul id="lista-aulas-autorizadas" class="lista-painel">
                     </ul>
                 </div>
-                <div class="cartao-painel">
+                <div class="cartao-painel cartao-solicitacoes" style="display: none;">
                     <h2>Minhas Solicitações Recentes</h2>
                     <ul id="lista-solicitacoes" class="lista-painel">
                     </ul>
                 </div>
-                <div class="cartao-painel">
+
+                <div class="cartao-painel cartao-meus-laboratorios" style="display: none;">
                     <h2>Meus Laboratórios</h2>
                     <ul id="lista-meus-laboratorios" class="lista-painel">
                     </ul>
                 </div>
-                <div class="cartao-painel">
+
+                <div class="cartao-painel cartao-aulas-tecnico" style="display: none;">
                     <h2>Aulas no meu laboratorio</h2>
                     <ul id="lista-aulas-nos-meus-laboratorios" class="lista-painel">
-                        <p style="text-align:center; color:#888; margin-top: 20px;">(Em breve)</p>
+                        <p style="text-align:center; color:#888; margin-top: 20px;">(Carregando...)</p>
+                    </ul>
                 </div>
             </div>
         </div>
@@ -151,6 +154,8 @@
                         case 'tecnico':
                             document.querySelector('.tecnico').style.display = 'block';
                             document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                            document.querySelector('.cartao-aulas-tecnico').style.display = 'block';
+                            document.querySelector('.cartao-meus-laboratorios').style.display = 'block';
                             break;
                         case 'professor':
                             document.querySelector('.professor').style.display = 'block';
