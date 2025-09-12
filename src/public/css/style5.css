@@ -383,7 +383,7 @@ nav ul .fa-solid {
 
     #sidemenu {
         left: -800px;
-
+    width: 500px;
         padding: 0;
         margin: 0;
         z-index: 1;
@@ -429,7 +429,7 @@ nav ul .fa-solid {
     nav ul .fa-solid {
         position: absolute;
         top: 100px;
-        left: 500px;
+        left: 400px;
         cursor: pointer;
         color: #ffffff;
         font-size: 60px;
@@ -1149,6 +1149,9 @@ nav ul .fa-solid {
         margin: 0;
         z-index: 1;
     }
+    .painel-principal-container {
+    margin-left: 0px;
+}
 }
 
 /* O fundo escurecido que cobre a página inteira */
