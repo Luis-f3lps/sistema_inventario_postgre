@@ -1213,7 +1213,7 @@ nav ul .fa-solid {
 .painel-principal-container {
     max-width: 1600px;
     margin: 40px auto;
-    margin-left: 250px;
+    margin-left: 400px;
     padding: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -1286,7 +1286,7 @@ nav ul .fa-solid {
     /* Estilos de espaçamento e borda que já tínhamos */
     border-bottom: 1px solid #eee;
     padding: 15px 10px; /* Adicionei um padding lateral para não colar nas bordas */
-    gap: 15px; /* Define um espaço mínimo entre os itens, útil com o flex-wrap */
+    gap: 25px; /* Define um espaço mínimo entre os itens, útil com o flex-wrap */
 }
 
 /* Garante que o último item da lista não tenha a linha separadora embaixo */
