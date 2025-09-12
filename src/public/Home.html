@@ -26,6 +26,7 @@
 
                 <li><a href="/Home"><i class="fas fa-home"></i> Home</a></li>
                 <li class="Horarios" style="display: none;"><a href="/Horario"><i class="fas fa-clock"></i> Horarios</a>
+                </li>
                 <li class="tecnico" style="display: none;"><a href="/Tela_Tecnico"><i class="fas fa-bell"></i>
                         Solicitações</a></li>
                 <li class="professor" style="display: none;"><a href="/Tela_Professor"><i class="fas fa-bell"></i>
@@ -176,11 +177,19 @@
                     fetch('/api/dashboard/meus-laboratorios').then(res => res.json()),
                     fetch('/api/aulas-meus-laboratorios').then(res => res.json())
 
-                ]).then(([solicitacoes, aulas, laboratorios]) => {
-                    // É importante garantir que as funções de renderização existam
+                    // CORREÇÃO 1: Adicione a 4ª variável para receber os dados
+                ]).then(([solicitacoes, aulasAutorizadas, meusLaboratorios, aulasNosMeusLabs]) => {
+
+                    // As chamadas existentes (usei nomes de variáveis mais claros para evitar confusão)
                     if (typeof renderizarSolicitacoes === 'function') renderizarSolicitacoes(solicitacoes);
-                    if (typeof renderizarAulasAutorizadas === 'function') renderizarAulasAutorizadas(aulas);
-                    if (typeof renderizarMeusLaboratorios === 'function') renderizarMeusLaboratorios(laboratorios);
+                    if (typeof renderizarAulasAutorizadas === 'function') renderizarAulasAutorizadas(aulasAutorizadas);
+                    if (typeof renderizarMeusLaboratorios === 'function') renderizarMeusLaboratorios(meusLaboratorios);
+
+                    // CORREÇÃO 2: Adicione a chamada para a 4ª função de renderização
+                    if (typeof renderizarAulasNosMeusLaboratorios === 'function') {
+                        renderizarAulasNosMeusLaboratorios(aulasNosMeusLabs);
+                    }
+
                 }).catch(error => console.error('Erro ao carregar dados dos painéis:', error));
             }
             // As suas funções de 'renderizar' continuam iguais
