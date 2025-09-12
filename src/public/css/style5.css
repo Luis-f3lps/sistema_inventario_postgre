@@ -1142,17 +1142,6 @@ nav ul .fa-solid {
     font-weight: 500;
 }
 
-@media only screen and (min-width: 901px) and (min-height: 1601px) {
-    #sidemenu {
-        left: -800px;
-        padding: 0;
-        margin: 0;
-        z-index: 1;
-    }
-    .painel-principal-container {
-    margin-left: 0px;
-}
-}
 
 /* O fundo escurecido que cobre a página inteira */
 .acesso-negado-overlay {
@@ -1328,4 +1317,15 @@ nav ul .fa-solid {
 .status-autorizado {
     color: #1a7a4c;
     background-color: #d1f7e5;
+}
+@media only screen and (min-width: 901px) and (min-height: 1601px) {
+    #sidemenu {
+        left: -800px;
+        padding: 0;
+        margin: 0;
+        z-index: 1;
+    }
+    .painel-principal-container {
+    margin-left: 0px;
+}
 }
