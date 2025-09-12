@@ -1220,12 +1220,13 @@ nav ul .fa-solid {
 .painel-principal-container {
     max-width: 1600px;
     margin: 40px auto;
+    margin-left: 250;
     padding: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .painel-grelha {
-    display: grid;
+    display: inline-flex;
     grid-template-columns: repeat(2, 1fr);
     /* 2 colunas de tamanho igual */
     grid-template-rows: repeat(2, auto);
@@ -1272,16 +1273,32 @@ nav ul .fa-solid {
 .lista-painel li:last-child {
     border-bottom: none;
 }
-
 .item-painel-detalhado {
-    display: flex; 
-    flex-direction: column;
+    display: flex; /* Mantém o flexbox ativo */
     
-    /* AUMENTE OU DIMINUA ESTE VALOR PARA AJUSTAR O ESPAÇAMENTO INTERNO */
-    gap: 10px; /* Ex: pode aumentar para 15px se quiser mais espaço */
-    
+    /* MUDANÇA 1: Define a direção para linha (horizontal). Como 'row' é o padrão,
+       você pode simplesmente apagar a linha 'flex-direction: column;' */
+    flex-direction: row;
+
+    /* MUDANÇA 2: Distribui o espaço ENTRE os itens */
+    justify-content: space-between;
+
+    /* MUDANÇA 3: Alinha os itens verticalmente ao centro da linha */
+    align-items: center;
+
+    /* MUDANÇA 4 (Bônus): Permite que os itens quebrem para a linha de baixo
+       em telas muito pequenas, evitando que amontoem. */
+    flex-wrap: wrap;
+
+    /* Estilos de espaçamento e borda que já tínhamos */
     border-bottom: 1px solid #eee;
-    padding: 15px 0;
+    padding: 15px 10px; /* Adicionei um padding lateral para não colar nas bordas */
+    gap: 15px; /* Define um espaço mínimo entre os itens, útil com o flex-wrap */
+}
+
+/* Garante que o último item da lista não tenha a linha separadora embaixo */
+.item-painel-detalhado:last-child {
+    border-bottom: none;
 }
 /* Etiqueta de status (reaproveitada) */
 .etiqueta-status {
