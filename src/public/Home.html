@@ -221,11 +221,13 @@
                 lista.innerHTML = laboratorios.map(l => `<li>${l.nome_laboratorio}</li>`).join('');
             }
 
+            /**
+ * Renderiza a lista de aulas agendadas nos laboratórios do técnico. (ATUALIZADO)
+ */
             function renderizarAulasNosMeusLaboratorios(aulas) {
                 const lista = document.getElementById('lista-aulas-nos-meus-laboratorios');
                 if (!lista) return;
 
-                // Limpa a mensagem "(Em breve)"
                 lista.innerHTML = '';
 
                 if (!aulas || aulas.length === 0) {
@@ -233,17 +235,21 @@
                     return;
                 }
 
-                // Cria o HTML para cada aula e junta tudo
                 lista.innerHTML = aulas.map(aula => {
                     const dataFormatada = new Date(aula.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
                     const horaInicio = aula.hora_inicio.slice(0, 5);
                     const horaFim = aula.hora_fim.slice(0, 5);
+
+                    // --- LÓGICA ADICIONADA AQUI ---
+                    // Converte o valor booleano (true/false) para uma string mais amigável
+                    const precisaTecnicoTexto = aula.precisa_tecnico ? 'Sim' : 'Não';
 
                     return `
             <li class="item-painel-detalhado">
                 <strong>${aula.nome_laboratorio}</strong>
                 <span class="detalhe-item-painel">Professor(a): ${aula.nome_professor}</span>
                 <span class="detalhe-item-painel">${dataFormatada} | ${horaInicio} - ${horaFim}</span>
+                <span class="detalhe-item-painel">Apoio Técnico: <strong>${precisaTecnicoTexto}</strong></span>
             </li>
         `;
                 }).join('');

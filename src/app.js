@@ -1719,44 +1719,40 @@ app.get("/api/dashboard/meus-laboratorios", async (req, res) => {
         res.status(500).json({ error: "Erro ao buscar laboratórios." });
     }
 });
+// Endpoint para o painel do Técnico "Aulas no meu laboratório"
+// Endpoint para o painel do Técnico "Aulas no meu laboratório" (ATUALIZADO)
 app.get("/api/aulas-meus-laboratorios", async (req, res) => {
-    // 1. Verifica se o usuário está autenticado
     if (!req.session.user || !req.session.user.email) {
         return res.status(401).json({ error: "Não autenticado." });
     }
-
     try {
-        // 2. Pega o email do técnico logado a partir da sessão
         const tecnico_email = req.session.user.email;
-
-        // 3. Constrói a consulta SQL CORRIGIDA
         const query = `
             SELECT 
                 l.nome_laboratorio, 
-                prof.nome AS nome_professor, -- <<< CAMPO CORRIGIDO
+                prof.nome AS nome_professor,
                 a.data, 
                 h.hora_inicio, 
-                h.hora_fim
+                h.hora_fim,
+                a.precisa_tecnico -- <<< CAMPO ADICIONADO AQUI
             FROM aulas a
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
             JOIN horarios h ON a.id_horario = h.id_horario
-            JOIN usuario prof ON a.professor_email = prof.email -- <<< NOVO JOIN ADICIONADO
+            JOIN usuario prof ON a.professor_email = prof.email
             WHERE 
                 l.usuario_email = $1 
                 AND a.data >= CURRENT_DATE
             ORDER BY 
                 a.data ASC, h.hora_inicio ASC
         `;
-
-        // 4. Executa a consulta
         const result = await pool.query(query, [tecnico_email]);
-
-        // 5. Retorna os resultados encontrados
         res.json(result.rows);
-
     } catch (err) {
         console.error("Erro ao buscar aulas nos laboratórios do técnico:", err);
         res.status(500).json({ error: "Erro ao buscar as aulas." });
     }
 });
+
+
+// ESTA LINHA DEVE SER A ÚLTIMA DO ARQUIVO
 export default app;
