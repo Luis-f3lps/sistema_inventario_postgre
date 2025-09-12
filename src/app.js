@@ -1720,4 +1720,46 @@ app.get("/api/dashboard/meus-laboratorios", async (req, res) => {
     }
 });
 
+app.get("/api/aulas-meus-laboratorios", async (req, res) => {
+    // 1. Verifica se o usuário está autenticado
+    if (!req.session.user || !req.session.user.email) {
+        return res.status(401).json({ error: "Não autenticado." });
+    }
+
+    try {
+        // 2. Pega o email do técnico logado a partir da sessão
+        const tecnico_email = req.session.user.email;
+
+        // 3. Constrói a consulta SQL para buscar as aulas
+        //    - O JOIN com 'laboratorio' busca o nome do laboratório e filtra pelo técnico responsável
+        //    - O JOIN com 'horarios' busca as horas de início e fim
+        //    - O filtro 'a.data >= CURRENT_DATE' garante que apenas aulas futuras sejam exibidas
+        const query = `
+            SELECT 
+                l.nome_laboratorio, 
+                a.professor_email,
+                a.data, 
+                h.hora_inicio, 
+                h.hora_fim
+            FROM aulas a
+            JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+            JOIN horarios h ON a.id_horario = h.id_horario
+            WHERE 
+                l.usuario_email = $1 
+                AND a.data >= CURRENT_DATE
+            ORDER BY 
+                a.data ASC, h.hora_inicio ASC
+        `;
+
+        // 4. Executa a consulta
+        const result = await pool.query(query, [tecnico_email]);
+
+        // 5. Retorna os resultados encontrados
+        res.json(result.rows);
+
+    } catch (err) {
+        console.error("Erro ao buscar aulas nos laboratórios do técnico:", err);
+        res.status(500).json({ error: "Erro ao buscar as aulas." });
+    }
+});
 export default app;

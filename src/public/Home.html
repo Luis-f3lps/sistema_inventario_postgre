@@ -77,7 +77,8 @@
                     </ul>
                 </div>
                 <div class="cartao-painel">
-                    <h2>Estatísticas Rápidas</h2>
+                    <h2>Aulas no meu laboratorio</h2>
+                    <ul id="lista-aulas-nos-meus-laboratorios" class="lista-painel">
                     <p style="text-align:center; color:#888; margin-top: 20px;">(Em breve)</p>
                 </div>
             </div>
@@ -170,7 +171,9 @@
                 Promise.all([
                     fetch('/api/dashboard/solicitacoes-recentes').then(res => res.json()),
                     fetch('/api/dashboard/aulas-autorizadas').then(res => res.json()),
-                    fetch('/api/dashboard/meus-laboratorios').then(res => res.json())
+                    fetch('/api/dashboard/meus-laboratorios').then(res => res.json()),
+                            fetch('/api/aulas-meus-laboratorios').then(res => res.json()) 
+
                 ]).then(([solicitacoes, aulas, laboratorios]) => {
                     // É importante garantir que as funções de renderização existam
                     if (typeof renderizarSolicitacoes === 'function') renderizarSolicitacoes(solicitacoes);
@@ -215,6 +218,34 @@
                 }
                 lista.innerHTML = laboratorios.map(l => `<li>${l.nome_laboratorio}</li>`).join('');
             }
+
+            function renderizarAulasNosMeusLaboratorios(aulas) {
+    const lista = document.getElementById('lista-aulas-nos-meus-laboratorios');
+    if (!lista) return;
+
+    // Limpa a mensagem "(Em breve)"
+    lista.innerHTML = ''; 
+
+    if (!aulas || aulas.length === 0) {
+        lista.innerHTML = '<li>Nenhuma aula futura agendada nos seus laboratórios.</li>';
+        return;
+    }
+
+    // Cria o HTML para cada aula e junta tudo
+    lista.innerHTML = aulas.map(aula => {
+        const dataFormatada = new Date(aula.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        const horaInicio = aula.hora_inicio.slice(0, 5);
+        const horaFim = aula.hora_fim.slice(0, 5);
+
+        return `
+            <li class="item-painel-detalhado">
+                <strong>${aula.nome_laboratorio}</strong>
+                <span class="detalhe-item-painel">Professor(a): ${aula.nome_professor}</span>
+                <span class="detalhe-item-painel">${dataFormatada} | ${horaInicio} - ${horaFim}</span>
+            </li>
+        `;
+    }).join('');
+}
         </script>
 </body>
 
