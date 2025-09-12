@@ -1730,7 +1730,7 @@ app.get("/api/aulas-meus-laboratorios", async (req, res) => {
         const query = `
             SELECT 
                 l.nome_laboratorio, 
-                prof.nome AS nome_usuario,
+                prof.nome_usuario AS nome_professor, -- <<< CORREÇÃO APLICADA AQUI
                 a.data, 
                 h.hora_inicio, 
                 h.hora_fim,
