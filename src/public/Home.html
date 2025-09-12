@@ -74,9 +74,11 @@
                 </div>
 
 
-<div class="cartao-painel cartao-meus-laboratorios" style="display: block;width: 401px;">
+                <div class="cartao-painel cartao-meus-laboratorios" style="display: none; width: 400px;">
                     <h2>Meus Laboratórios</h2>
-                    <ul id="lista-meus-laboratorios" class="lista-painel"><li>Quimica</li></ul>
+                    <ul id="lista-meus-laboratorios" class="lista-painel">
+                        <li>Quimica</li>
+                    </ul>
                 </div>
                 <div class="cartao-painel cartao-aulas-tecnico" style="display: none;">
                     <h2>Aulas nos meus laboratorios</h2>
@@ -159,7 +161,8 @@
                         case 'professor':
                             document.querySelector('.professor').style.display = 'block';
                             document.querySelector('.Horarios').style.display = 'block';
-
+                            document.querySelector('.cartao-aulas-solicitadas').style.display = 'block';
+                            document.querySelector('.cartao-solicitacoes').style.display = 'block';
                             break;
                     }
 
@@ -267,7 +270,7 @@
         `;
                 }).join('');
             }
-            
+
         </script>
 </body>
 
