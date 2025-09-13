@@ -48,7 +48,6 @@ function carregarDadosDoPainel(userType) {
 
     // Adiciona as chamadas de API necessárias para cada perfil
     if (userType === 'professor') {
-        promises.push(fetch('/api/dashboard/solicitacoes-recentes').then(res => res.json()));
         promises.push(fetch('/api/dashboard/aulas-autorizadas').then(res => res.json()));
     }
     if (userType === 'tecnico') {
@@ -65,6 +64,8 @@ function carregarDadosDoPainel(userType) {
         if (userType === 'professor') {
             renderizarSolicitacoes(results[0]);
             renderizarAulasAutorizadas(results[1]);
+             loadMyRequests();
+
         }
         if (userType === 'tecnico') {
             renderizarMeusLaboratorios(results[0]);
@@ -139,3 +140,54 @@ function carregarDadosDoPainel(userType) {
         `;
             }).join('');
         }
+
+        
+            async function loadMyRequests() {
+                if (!loggedInUser) return;
+
+                try {
+                    const res = await fetch(`/api/minhas-solicitacoes`);
+                    if (!res.ok) throw new Error('Erro na rede ao buscar solicitações');
+
+                    const data = await res.json();
+                    renderTable(data);
+                } catch (error) {
+                    console.error('Falha ao carregar solicitações:', error);
+                    const tbody = document.getElementById("minhas-aulas-tbody");
+                    if (tbody) {
+                        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Erro ao carregar dados. Tente novamente mais tarde.</td></tr>`;
+                    }
+                }
+            }
+
+            /**
+             * Função para renderizar a tabela na tela.
+             */
+            function renderTable(requests) {
+                const tbody = document.getElementById("minhas-aulas-tbody");
+                if (!tbody) return;
+
+                tbody.innerHTML = ""; // Limpa a tabela antes de adicionar novas linhas
+
+                if (requests.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação futura.</td></tr>`;
+                    return;
+                }
+
+                requests.forEach(r => {
+                    const tr = document.createElement("tr");
+
+                    const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                    const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : 'N/A';
+                    const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : 'N/A';
+
+                    tr.innerHTML = `
+                <td>${r.nome_laboratorio}</td>
+                <td>${dataFormatada}</td>
+                <td>${horaInicio} - ${horaFim}</td>
+                <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
+                <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
+            `;
+                    tbody.appendChild(tr);
+                });
+            }

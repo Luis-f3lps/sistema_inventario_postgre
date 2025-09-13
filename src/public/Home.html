@@ -20,11 +20,24 @@
                 <ul id="lista-aulas-autorizadas" class="lista-painel">
                 </ul>
             </div>
-            <div class="cartao-painel cartao-solicitacoes" style="display: none;">
-                <h2>Minhas Solicitações Recentes</h2>
-                <ul id="lista-solicitacoes" class="lista-painel">
-                </ul>
-            </div>
+        <div class="painel-minhas-aulas" style="display: none;">
+            <h1>Minhas Solicitações de Aula</h1>
+            <p style="text-align: center; color: #666;">Abaixo estão as suas solicitações para hoje e datas futuras.</p>
+
+            <table class="tabela-visualizacao-aulas">
+                <thead>
+                    <tr>
+                        <th>Laboratório</th>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Apoio Técnico</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="minhas-aulas-tbody">
+                </tbody>
+            </table>
+        </div>
 
 
             <div class="cartao-painel cartao-meus-laboratorios" style="display: none; width: 400px;">
