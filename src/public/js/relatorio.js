@@ -194,22 +194,31 @@ function loadLoggedInUser() {
             const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
 
             // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
-            switch (userType) {
-                case 'admin':
-                    document.querySelector('.admin-menu').style.display = 'block';
-                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-                    break;
+switch (userType) {
+                        case 'admin':
+                            if (window.location.pathname !== '/Inventario' && window.location.pathname !== '/Inventario.html') {
+                                window.location.href = '/Inventario';
+                            }
 
-                case 'tecnico':
-                    // Mostra AMBOS os menus para o técnico dentro de um único bloco
-                    document.querySelector('.tecnico').style.display = 'block';
-                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-                    break;
+                            document.querySelector('.admin-menu').style.display = 'block';
+                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
 
-                case 'professor':
-                    document.querySelector('.professor').style.display = 'block';
-                    break;
-            }
+                            break;
+                        case 'tecnico':
+                            document.querySelector('.tecnico').style.display = 'block';
+                            document.querySelector('.Home').style.display = 'block';
+                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                            document.querySelector('.cartao-aulas-tecnico').style.display = 'block';
+                            document.querySelector('.cartao-meus-laboratorios').style.display = 'block';
+                            break;
+                        case 'professor':
+                            document.querySelector('.Home').style.display = 'block';
+                            document.querySelector('.professor').style.display = 'block';
+                            document.querySelector('.Horarios').style.display = 'block';
+                            document.querySelector('.cartao-aulas-solicitadas').style.display = 'block';
+                            document.querySelector('.cartao-solicitacoes').style.display = 'block';
+                            break;
+                    }
         })
         .catch(error => console.error('Erro ao carregar usuário logado:', error));
 }
