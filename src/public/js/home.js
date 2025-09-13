@@ -48,6 +48,7 @@ function carregarDadosDoPainel(userType) {
 
     // Adiciona as chamadas de API necessárias para cada perfil
     if (userType === 'professor') {
+        promises.push(fetch('/api/dashboard/solicitacoes-recentes').then(res => res.json()));
         promises.push(fetch('/api/dashboard/aulas-autorizadas').then(res => res.json()));
     }
     if (userType === 'tecnico') {
@@ -64,7 +65,7 @@ function carregarDadosDoPainel(userType) {
         if (userType === 'professor') {
             renderizarSolicitacoes(results[0]);
             renderizarAulasAutorizadas(results[1]);
-             loadMyRequests();
+         loadMyRequests();
 
         }
         if (userType === 'tecnico') {
