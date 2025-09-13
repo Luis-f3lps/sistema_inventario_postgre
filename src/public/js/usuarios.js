@@ -1,8 +1,32 @@
     // ===================================================================
+    // FUNÇÕES GLOBAIS (acessíveis via onclick no HTML)
+    // ===================================================================
+
+    function openmenu() {
+        const sidemenu = document.getElementById("sidemenu");
+        if (sidemenu) sidemenu.style.left = "0px";
+    }
+
+    function clossmenu() {
+        const sidemenu = document.getElementById("sidemenu");
+        if (sidemenu) sidemenu.style.left = "-800px";
+    }
+
+    function opentab(tabname, event) {
+        const tablinks = document.getElementsByClassName("tab-links");
+        const tabcontents = document.getElementsByClassName("tab-contents");
+
+        Array.from(tablinks).forEach(link => link.classList.remove("active-link"));
+        Array.from(tabcontents).forEach(content => content.classList.remove("active-tab"));
+
+        document.getElementById(tabname).classList.add("active-tab");
+        event.currentTarget.classList.add("active-link");
+    }
+
+    // ===================================================================
     // PONTO DE ENTRADA PRINCIPAL DA APLICAÇÃO
     // ===================================================================
     document.addEventListener('DOMContentLoaded', () => {
-        // Inicializa todas as funcionalidades da página na ordem correta
         inicializarAplicacao();
     });
 
@@ -10,66 +34,63 @@
      * Função principal que orquestra o carregamento da página.
      */
     async function inicializarAplicacao() {
-        // 1. Carrega o menu e ativa suas funcionalidades INTERNAS
-        //    Isso resolve a condição de corrida (race condition).
-        await carregarEMontarMenu();
-
-        // 2. Verifica se o usuário está autenticado em páginas protegidas
-        if (window.location.pathname !== '/login.html') {
-            const autenticado = await verificarAutenticacao();
-            if (!autenticado) {
-                window.location.href = 'login.html';
-                return; // Para a execução se não estiver autenticado
-            }
+        // Se estiver na página de login, não faz mais nada.
+        if (window.location.pathname.includes('/login.html')) {
+            return;
         }
+        
+        // 1. Carrega o menu e, DENTRO dele, verifica o usuário. Se não estiver logado,
+        //    a função interna redireciona e para a execução.
+        const userData = await carregarEMontarMenu();
+        if (!userData) return; 
 
-        // 3. Carrega os dados específicos da página (ex: lista de usuários)
-        //    A função `loadUsers` só é chamada se o elemento da tabela existir.
+        // 2. Carrega os dados específicos da página de Usuários (só se ela estiver aberta)
         if (document.getElementById('usuarios-tbody')) {
-            loadUsers();
-            configurarFormulariosDeUsuario();
+            if (userData.tipo_usuario === 'admin') {
+                loadUsers();
+                configurarFormulariosDeUsuario();
+            } else {
+                // Se não for admin, impede o acesso à página de usuários
+                alert('Acesso negado. Apenas administradores podem ver esta página.');
+                window.location.href = 'Home.html'; // ou outra página principal
+            }
         }
     }
 
-
     // ===================================================================
-    // FUNÇÕES DO MENU
+    // FUNÇÕES DO MENU E AUTENTICAÇÃO
     // ===================================================================
 
     /**
-     * Carrega o menu.html, insere na página e ativa todas as suas funcionalidades.
+     * Carrega o menu.html, insere na página, verifica o login e ativa as funcionalidades.
+     * Retorna os dados do usuário se o login for bem-sucedido.
      */
     async function carregarEMontarMenu() {
+        const userData = await loadLoggedInUser();
+        if (!userData) return null;
+
         const menuContainer = document.getElementById('menu-container');
-        if (!menuContainer) return;
+        if (!menuContainer) return userData;
 
         try {
             const response = await fetch('menu.html');
             const menuHTML = await response.text();
             menuContainer.innerHTML = menuHTML;
-
-            // Agora que o menu GARANTIDAMENTE existe no DOM, ativamos suas funções
+            
             ativarFuncionalidadeMenu();
-            await loadLoggedInUser(); // Carrega nome e ajusta menus visíveis
-
+            preencherDadosDoMenu(userData);
+            return userData;
         } catch (error) {
             console.error('Erro ao carregar o menu:', error);
+            return userData;
         }
     }
 
     /**
-     * Adiciona os eventos de clique aos botões do menu (hambúrguer e submenus).
+     * Adiciona os eventos de clique aos botões do menu.
      */
     function ativarFuncionalidadeMenu() {
-        const sidemenu = document.getElementById("sidemenu");
-        if (!sidemenu) return;
-
-        const openBtn = sidemenu.parentElement.querySelector(".fa-bars");
-        const closeBtn = sidemenu.querySelector(".fa-circle-xmark");
-
-        if (openBtn) openBtn.addEventListener('click', () => sidemenu.style.left = "0px");
-        if (closeBtn) closeBtn.addEventListener('click', () => sidemenu.style.left = "-800px");
-
+        // As funções openmenu/clossmenu são globais para funcionar com 'onclick'
         document.querySelectorAll('.submenu > a').forEach(menu => {
             menu.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -82,78 +103,65 @@
     }
 
     /**
-     * Busca os dados do usuário logado para exibir o nome e ajustar os menus.
-     * Esta é a versão limpa e eficiente.
+     * Busca os dados do usuário logado. Se não estiver logado, REDIRECIONA.
      */
     async function loadLoggedInUser() {
         try {
             const response = await fetch('/api/usuario-logado');
             if (!response.ok) {
-                // Se a sessão expirou, pode ser tratado aqui também
-                throw new Error('Sessão inválida ou expirada.');
+                window.location.href = 'login.html';
+                return null;
             }
-            const data = await response.json();
-
-            const userNameElement = document.getElementById('user-name-text');
-            if (userNameElement) {
-                userNameElement.innerHTML = data.nome_usuario || data.nome;
-            }
-
-            const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
-            switch (userType) {
-                case 'admin':
-                    document.querySelector('.admin-menu').style.display = 'block';
-                    document.querySelector('.produto').style.display = 'block';
-                    break;
-                case 'tecnico':
-                    document.querySelector('.tecnico').style.display = 'block';
-                    document.querySelector('.produto').style.display = 'block';
-                    break;
-                case 'professor':
-                    document.querySelector('.professor').style.display = 'block';
-                    break;
-            }
+            return await response.json();
         } catch (error) {
-            console.error('Erro ao carregar usuário logado:', error);
-            // Poderia redirecionar para login aqui também se a sessão expirar
-            // window.location.href = 'login.html';
+            console.error('Erro de conexão ao verificar usuário:', error);
+            window.location.href = 'login.html';
+            return null;
         }
     }
 
+    /**
+     * Usa os dados do usuário já buscados para preencher o nome e mostrar/esconder menus.
+     */
+    function preencherDadosDoMenu(userData) {
+        const userNameElement = document.getElementById('user-name-text');
+        if (userNameElement) {
+            userNameElement.innerHTML = userData.nome_usuario || userData.nome;
+        }
 
-    // ===================================================================
-    // FUNÇÕES DE AUTENTICAÇÃO
-    // ===================================================================
-    async function verificarAutenticacao() {
-        try {
-            const response = await fetch('/api/check-auth');
-            const data = await response.json();
-            return data.Autenticado;
-        } catch {
-            return false;
+        const userType = userData.tipo_usuario ? userData.tipo_usuario.trim().toLowerCase() : '';
+        switch (userType) {
+            case 'admin':
+                document.querySelector('.admin-menu').style.display = 'block';
+                document.querySelector('.produto').style.display = 'block';
+                break;
+            case 'tecnico':
+                document.querySelector('.tecnico').style.display = 'block';
+                document.querySelector('.produto').style.display = 'block';
+                break;
+            case 'professor':
+                document.querySelector('.professor').style.display = 'block';
+                break;
         }
     }
-
 
     // ===================================================================
     // FUNÇÕES DA PÁGINA DE GERENCIAMENTO DE USUÁRIOS
     // ===================================================================
 
-    /**
-     * Busca a lista de usuários da API e preenche a tabela e os selects.
-     */
     async function loadUsers() {
         try {
             const response = await fetch('/api/usuarios');
+            if (!response.ok) throw new Error('Falha ao carregar usuários.');
+            
             const data = await response.json();
-
             const tbody = document.getElementById('usuarios-tbody');
             const selectRemove = document.getElementById('usuarios-select');
             const selectActivate = document.getElementById('usuarios-select-ativar');
 
             tbody.innerHTML = '';
-            selectRemove.innerHTML = '';
-            selectActivate.innerHTML = '';
+            selectRemove.innerHTML = '<option value="">Selecione um usuário...</option>';
+            selectActivate.innerHTML = '<option value="">Selecione um usuário...</option>';
 
             data.forEach(usuario => {
                 const tr = document.createElement('tr');
@@ -177,23 +185,20 @@
             });
         } catch (error) {
             console.error('Erro ao carregar usuários:', error);
+            showUserMessage('Não foi possível carregar a lista de usuários.', true);
         }
     }
 
-    /**
-     * Configura os event listeners para os formulários de adicionar, ativar e desativar.
-     */
     function configurarFormulariosDeUsuario() {
-        // Adicionar novo usuário
         document.getElementById('add-user-form').addEventListener('submit', async (event) => {
             event.preventDefault();
             const form = event.target;
+            // ... (código do formulário de adicionar)
             const password = form.password.value;
             const confirmPassword = form['confirm-password'].value;
 
             if (password !== confirmPassword) {
-                alert('As senhas não coincidem!');
-                return;
+                return showUserMessage('As senhas não coincidem!', true);
             }
 
             const userData = {
@@ -210,66 +215,63 @@
                     body: JSON.stringify(userData)
                 });
                 const data = await response.json();
-                alert(data.message || data.error);
+                showUserMessage(data.message || data.error, !response.ok);
                 if (response.ok) {
                     form.reset();
-                    loadUsers(); // ATUALIZA A LISTA SEM RECARREGAR A PÁGINA
+                    loadUsers();
                 }
             } catch (error) {
-                console.error('Erro ao adicionar usuário:', error);
-                alert('Ocorreu um erro. Tente novamente.');
+                showUserMessage('Ocorreu um erro de conexão. Tente novamente.', true);
             }
         });
 
-        // Desativar usuário
         document.getElementById('remove-user-form').addEventListener('submit', async (event) => {
             event.preventDefault();
+            // ... (código do formulário de desativar)
             const email = document.getElementById('usuarios-select').value;
-            if (!email) { alert('Selecione um usuário para desativar.'); return; }
+            if (!email) return showUserMessage('Selecione um usuário para desativar.', true);
 
             try {
                 const response = await fetch(`/api/usuarios/${email}`, { method: 'PATCH' });
                 const data = await response.json();
-                alert(data.message || data.error);
-                if (response.ok) {
-                    loadUsers(); // ATUALIZA A LISTA SEM RECARREGAR A PÁGINA
-                }
+                showUserMessage(data.message || data.error, !response.ok);
+                if (response.ok) loadUsers();
             } catch (error) {
-                console.error('Erro ao desativar usuário:', error);
+                showUserMessage('Ocorreu um erro de conexão. Tente novamente.', true);
             }
         });
 
-        // Ativar usuário
         document.getElementById('activate-user-form').addEventListener('submit', async (event) => {
             event.preventDefault();
+            // ... (código do formulário de ativar)
             const email = document.getElementById('usuarios-select-ativar').value;
-            if (!email) { alert('Selecione um usuário para ativar.'); return; }
+            if (!email) return showUserMessage('Selecione um usuário para ativar.', true);
             
             try {
                 const response = await fetch(`/api/usuarios/ativar/${email}`, { method: 'PATCH' });
                 const data = await response.json();
-                alert(data.message || data.error);
-                if (response.ok) {
-                    loadUsers(); // ATUALIZA A LISTA SEM RECARREGAR A PÁGINA
-                }
+                showUserMessage(data.message || data.error, !response.ok);
+                if (response.ok) loadUsers();
             } catch (error) {
-                console.error('Erro ao ativar usuário:', error);
+                showUserMessage('Ocorreu um erro de conexão. Tente novamente.', true);
             }
         });
     }
 
-    // ===================================================================
-    // FUNÇÕES GERAIS (EX: ABAS)
-    // ===================================================================
+    /**
+     * Exibe uma mensagem de status para o usuário (substituto do 'alert').
+     */
+    function showUserMessage(message, isError = false) {
+        // Para esta função funcionar, crie um <div id="user-message"></div> no seu HTML
+        const messageEl = document.getElementById('user-message');
+        if (!messageEl) {
+            alert(message); // fallback para o alert
+            return;
+        }
+        
+        messageEl.textContent = message;
+        messageEl.className = isError ? 'message-status erro' : 'message-status sucesso';
+        messageEl.style.display = 'block';
 
-    function opentab(tabname, event) {
-        const tablinks = document.getElementsByClassName("tab-links");
-        const tabcontents = document.getElementsByClassName("tab-contents");
-
-        Array.from(tablinks).forEach(link => link.classList.remove("active-link"));
-        Array.from(tabcontents).forEach(content => content.classList.remove("active-tab"));
-
-        document.getElementById(tabname).classList.add("active-tab");
-        event.currentTarget.classList.add("active-link");
+        setTimeout(() => { messageEl.style.display = 'none'; }, 5000);
     }
-
