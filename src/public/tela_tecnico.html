@@ -11,184 +11,99 @@
 
 <body>
     <!------------------Relatórios--------------->
-    <div id="header">
-        <nav>
-            <ul id="sidemenu">
-                <img src="images/logomenu.png" class="logo">
-                </br>
-                <li>
-                    <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
-                        <i class="fas fa-user"></i>
-                        <span id="user-name-text"></span>
-                    </span>
-                </li>
-                </br>
+    <header id="menu-container"></header>
 
-                <li class="Home" style="display: none;"><a href="/Home"><i class="fas fa-home"></i> Home</a></li>
-                <li class="Horarios" style="display: none;"><a href="/Horario"><i class="fas fa-clock"></i> Horarios</a>
-                </li>
-                <li class="tecnico" style="display: none;"><a href="/Tela_Tecnico"><i class="fas fa-bell"></i>
-                        Solicitações</a></li>
-                <li class="professor" style="display: none;"><a href="/Tela_Professor"><i class="fas fa-bell"></i>
-                        Solicitações Aula</a></li>
+    <div class="painel-gestao-solicitacoes">
+        <h1>Solicitações Pendentes</h1>
+        <p style="text-align: center; color: #666;">Abaixo estão as aulas que aguardam a sua aprovação.</p>
 
-                <li class="submenu produto" style="display: none;">
-                    <a href="#"><i class="fas fa-boxes"></i> Inventário <i class="fas fa-chevron-down"></i></a>
-                    <ul class="submenu-items">
-                        <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
-                        <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
-                        <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
-                    </ul>
-                </li>
-                <!-- HTML para o menu de administração -->
-                <li class="submenu admin-menu" style="display: none;">
-                    <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
-                    <ul class="submenu-items">
-                        <li><a href="/Usuarios"><i class="fas fa-users"></i> Usuários</a></li>
-                        <li><a href="/Produto"><i class="fas fa-tags"></i> Produtos</a></li>
-                        <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Laboratórios</a></li>
-                    </ul>
-                </li>
-                </br>
-                <li class="logout">
-                    <a href="/logout" style="border-top: 1px solid;">
-                        <i class="fas fa-sign-out-alt"></i> Sair
-                    </a>
-                </li>
-                <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
-            </ul>
-            <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
-        </nav>
-            </div>
+        <table class="tabela-de-aulas">
+            <thead>
+                <tr>
+                    <th>Professor</th>
+                    <th>Laboratório</th>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Apoio Técnico</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="corpo-tabela-solicitacoes">
+            </tbody>
+        </table>
+    </div>
 
-        <div class="painel-gestao-solicitacoes">
-            <h1>Solicitações Pendentes</h1>
-            <p style="text-align: center; color: #666;">Abaixo estão as aulas que aguardam a sua aprovação.</p>
-
-            <table class="tabela-de-aulas">
-                <thead>
-                    <tr>
-                        <th>Professor</th>
-                        <th>Laboratório</th>
-                        <th>Data</th>
-                        <th>Horário</th>
-                        <th>Apoio Técnico</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="corpo-tabela-solicitacoes">
-                </tbody>
-            </table>
-        </div>
-
-        <script>
-            // Pegar o nome do usuário logado
-function loadLoggedInUser() {
-    fetch('/api/usuario-logado')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Falha ao buscar usuário. Status: ' + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            const userNameElement = document.getElementById('user-name-text');
-            userNameElement.innerHTML = data.nome;
-
-            const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
-
-switch (userType) {
-                        case 'admin':
-                            document.querySelector('.admin-menu').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-
-                            break;
-                        case 'tecnico':
-                            document.querySelector('.tecnico').style.display = 'block';
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-
-                            break;
-                        case 'professor':
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('.professor').style.display = 'block';
-                            document.querySelector('.Horarios').style.display = 'block';
-
-                            break;
-                    }
-        })
-        .catch(error => console.error('Erro ao carregar usuário logado:', error));
-}
-            loadLoggedInUser();
-
-            var sidemenu = document.getElementById("sidemenu");
-            function openmenu() {
-                sidemenu.style.left = "0px";
-            }
-            function clossmenu() {
-                sidemenu.style.left = "-800px";
-            }
-
-        </script>
-
-        <script>
-            let loggedInUser = null;
-
-            async function loadLoggedInUser() {
-                try {
-                    const response = await fetch('/api/usuario-logado');
+    <script>
+        // Pegar o nome do usuário logado
+        function loadLoggedInUser() {
+            fetch('/api/usuario-logado')
+                .then(response => {
                     if (!response.ok) {
-                        window.location.href = '/login.html';
-                        return;
+                        throw new Error('Falha ao buscar usuário. Status: ' + response.status);
                     }
-                    loggedInUser = await response.json();
-                    await loadPendingRequests();
-                } catch (error) {
-                    console.error('Erro ao carregar utilizador:', error);
-                }
-            }
-            document.querySelectorAll('.submenu > a').forEach(menu => {
-                menu.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const submenuItems = this.nextElementSibling;
-                    submenuItems.classList.toggle('open');
-                    this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-                });
+                    return response.json();
+                })
+                .then(data => {
+                    const userNameElement = document.getElementById('user-name-text');
+                    userNameElement.innerHTML = data.nome;
 
-            });
+                    const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
+                })
+                .catch(error => console.error('Erro ao carregar usuário logado:', error));
+        }
+        loadLoggedInUser();
 
-            async function loadPendingRequests() {
-                const tbody = document.getElementById("corpo-tabela-solicitacoes");
-                if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
+    </script>
+
+    <script>
+        let loggedInUser = null;
+
+        async function loadLoggedInUser() {
+            try {
+                const response = await fetch('/api/usuario-logado');
+                if (!response.ok) {
+                    window.location.href = '/login.html';
                     return;
                 }
-                try {
-                    const tecnicoEmail = loggedInUser.email;
-                    const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
-                    if (!res.ok) throw new Error('Erro na rede');
+                loggedInUser = await response.json();
+                await loadPendingRequests();
+            } catch (error) {
+                console.error('Erro ao carregar utilizador:', error);
+            }
+        }
 
-                    const data = await res.json();
-                    renderTable(data);
-                } catch (error) {
-                    console.error('Falha ao carregar solicitações:', error);
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
-                }
+        async function loadPendingRequests() {
+            const tbody = document.getElementById("corpo-tabela-solicitacoes");
+            if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
+                return;
+            }
+            try {
+                const tecnicoEmail = loggedInUser.email;
+                const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
+                if (!res.ok) throw new Error('Erro na rede');
+
+                const data = await res.json();
+                renderTable(data);
+            } catch (error) {
+                console.error('Falha ao carregar solicitações:', error);
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
+            }
+        }
+
+        function renderTable(requests) {
+            const tbody = document.getElementById("corpo-tabela-solicitacoes");
+            tbody.innerHTML = "";
+
+            if (requests.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
+                return;
             }
 
-            function renderTable(requests) {
-                const tbody = document.getElementById("corpo-tabela-solicitacoes");
-                tbody.innerHTML = "";
-
-                if (requests.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
-                    return;
-                }
-
-                requests.forEach(r => {
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `
+            requests.forEach(r => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
                     <td>${r.professor}</td>
                     <td>${r.nome_laboratorio}</td>
                     <td>${new Date(r.data).toLocaleDateString()}</td>
@@ -200,46 +115,47 @@ switch (userType) {
                         <button class="botao-de-acao botao-recusar" data-id="${r.id_aula}">Não Autorizar</button>
                     </td>
                 `;
-                    tbody.appendChild(tr);
-                });
-            }
-
-            async function updateRequestStatus(id, novoStatus) {
-                try {
-                    await fetch(`/api/requests/${id}`, {
-                        method: "PATCH",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ novoStatus })
-                    });
-                    const rowToRemove = document.querySelector(`button[data-id='${id}']`).closest('tr');
-                    if (rowToRemove) {
-                        rowToRemove.style.opacity = '0';
-                        setTimeout(() => rowToRemove.remove(), 300);
-                    }
-                } catch (error) {
-                    console.error('Falha ao atualizar status:', error);
-                    alert('Não foi possível processar a sua decisão. Tente novamente.');
-                }
-            }
-
-            document.addEventListener('DOMContentLoaded', () => {
-                loadLoggedInUser();
-
-                const tbody = document.getElementById("corpo-tabela-solicitacoes");
-                tbody.addEventListener('click', (event) => {
-                    const target = event.target;
-                    const aulaId = target.dataset.id;
-
-                    if (!aulaId) return; 
-
-                    if (target.classList.contains('botao-aceitar')) {
-                        updateRequestStatus(aulaId, 'autorizado');
-                    } else if (target.classList.contains('botao-recusar')) {
-                        updateRequestStatus(aulaId, 'nao_autorizado');
-                    }
-                });
+                tbody.appendChild(tr);
             });
-        </script>
+        }
+
+        async function updateRequestStatus(id, novoStatus) {
+            try {
+                await fetch(`/api/requests/${id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ novoStatus })
+                });
+                const rowToRemove = document.querySelector(`button[data-id='${id}']`).closest('tr');
+                if (rowToRemove) {
+                    rowToRemove.style.opacity = '0';
+                    setTimeout(() => rowToRemove.remove(), 300);
+                }
+            } catch (error) {
+                console.error('Falha ao atualizar status:', error);
+                alert('Não foi possível processar a sua decisão. Tente novamente.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLoggedInUser();
+
+            const tbody = document.getElementById("corpo-tabela-solicitacoes");
+            tbody.addEventListener('click', (event) => {
+                const target = event.target;
+                const aulaId = target.dataset.id;
+
+                if (!aulaId) return;
+
+                if (target.classList.contains('botao-aceitar')) {
+                    updateRequestStatus(aulaId, 'autorizado');
+                } else if (target.classList.contains('botao-recusar')) {
+                    updateRequestStatus(aulaId, 'nao_autorizado');
+                }
+            });
+        });
+    </script>
+    <script src="js/menu.js" defer></script>
 
 </body>
 
