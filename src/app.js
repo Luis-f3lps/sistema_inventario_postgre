@@ -1485,7 +1485,6 @@ app.get('/api/tabelaregistraConsumo', Autenticado, async (req, res) => {
   });
 
   // /////////////////////////////////////////////////////////////
-// 🔹 1. Professor verifica a disponibilidade de horários
 // Endpoint que verifica a disponibilidade de horários
 app.get("/api/availability", async (req, res) => {
     try {
@@ -1496,7 +1495,7 @@ app.get("/api/availability", async (req, res) => {
              JOIN horarios h ON a.id_horario = h.id_horario
              WHERE 
                a.data = $1 
-               AND a.id_laboratorio = $2`, // <<< REMOVEMOS A LINHA DO STATUS AQUI
+               AND a.id_laboratorio = $2`, 
             [date, labId]
         );
         const occupied = result.rows.map((r) => r.hora_inicio.slice(0, 5));
@@ -1507,7 +1506,7 @@ app.get("/api/availability", async (req, res) => {
     }
 });
 
-// 🔹 2. Professor solicita uma nova aula
+// Professor solicita uma nova aula
 app.post("/api/schedule", async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: "Você precisa estar logado." });
@@ -1530,14 +1529,14 @@ app.post("/api/schedule", async (req, res) => {
         );
         res.status(201).json({ message: "Aula solicitada com sucesso!", aula: result.rows[0] });
     } catch (err) {
-        if (err.code === "23505") { // Violação de chave única
+        if (err.code === "23505") { 
             return res.status(400).json({ error: "Esse horário já está ocupado ou em análise neste laboratório" });
         }
         console.error("Erro ao solicitar aula:", err);
         res.status(500).json({ error: "Erro ao solicitar aula" });
     }
 });
-// Endpoint do Técnico para ver as solicitações (com hora_fim)
+// Endpoint do Técnico para ver as solicitações
 app.get("/api/requests", async (req, res) => {
   try {
     const { tecnico_email } = req.query;
@@ -1574,8 +1573,6 @@ app.patch("/api/requests/:id", async (req, res) => {
         const { id } = req.params;
         const { novoStatus } = req.body;
 
-        // >>> A CORREÇÃO ESTÁ AQUI <<<
-        // A validação agora permite todos os status que o front-end pode enviar
         if (!['autorizado', 'nao_autorizado', 'analisando'].includes(novoStatus)) {
             return res.status(400).json({ error: "Ação ou status inválido fornecido." });
         }
@@ -1593,7 +1590,7 @@ app.patch("/api/requests/:id", async (req, res) => {
     }
 });
 
-// Endpoint para listar todas as aulas de um professor ou técnico (CORRIGIDO)
+// Endpoint para listar todas as aulas de um professor ou técnico 
 app.get("/api/my-classes", async (req, res) => {
   try {
     const { email } = req.query;
@@ -1624,7 +1621,6 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
     }
     const professor_email = req.session.user.email;
 
-    // PASSO 1: ATUALIZAR AS AULAS PASSADAS (esta parte continua igual e correta)
     await pool.query(
       `UPDATE aulas 
        SET status = 'nao_autorizado' 
@@ -1635,7 +1631,6 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
       [professor_email]
     );
 
-    // PASSO 2: BUSCAR A LISTA FILTRADA
     const result = await pool.query(
       `SELECT 
          l.nome_laboratorio, 
@@ -1651,7 +1646,7 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
          a.professor_email = $1 
          AND a.data >= CURRENT_DATE -- <<< A MUDANÇA ESTÁ AQUI
        ORDER BY 
-         a.data ASC, h.hora_inicio ASC`, // Ordena das mais próximas para as mais distantes
+         a.data ASC, h.hora_inicio ASC`, 
       [professor_email]
     );
 
@@ -1719,8 +1714,8 @@ app.get("/api/dashboard/meus-laboratorios", async (req, res) => {
         res.status(500).json({ error: "Erro ao buscar laboratórios." });
     }
 });
+
 // Endpoint para o painel do Técnico "Aulas no meu laboratório"
-// Endpoint para o painel do Técnico "Aulas no meu laboratório" (ATUALIZADO)
 app.get("/api/aulas-meus-laboratorios", async (req, res) => {
     if (!req.session.user || !req.session.user.email) {
         return res.status(401).json({ error: "Não autenticado." });
@@ -1753,6 +1748,4 @@ app.get("/api/aulas-meus-laboratorios", async (req, res) => {
     }
 });
 
-
-// ESTA LINHA DEVE SER A ÚLTIMA DO ARQUIVO
 export default app;

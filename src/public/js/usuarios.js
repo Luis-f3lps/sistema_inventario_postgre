@@ -121,7 +121,13 @@ function loadUsers() {
 loadUsers();
 
 // Pegar o nome do usuário logado
-function loadLoggedInUser() {
+async function loadLoggedInUser() {
+                        const response = await fetch('/api/usuario-logado');
+                    if (!response.ok) {
+                        // Se não conseguir encontrar o usuário, redireciona para o login
+                        window.location.href = '/login.html';
+                        return;
+                    }
     fetch('/api/usuario-logado')
         .then(response => {
             // É uma boa prática verificar se a resposta da rede foi bem-sucedida
@@ -277,15 +283,6 @@ function removeOptionFromSelect(email, selectId) {
     });
 }
 
-document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function (e) {
-        e.preventDefault();
-        const submenuItems = this.nextElementSibling;
-        submenuItems.classList.toggle('open');
-        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-    });
-});
-
 // Inicializar as funções
 document.addEventListener('DOMContentLoaded', function () {
     loadLoggedInUser();
@@ -300,16 +297,4 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
         this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
     });
 });
-function redirecionarSeNaoAutenticado() {
-    Autenticado().then(authenticated => {
-        if (!authenticated) {
-            window.location.href = 'login.html'; // Redireciona para a página de login
-        }
-    });
-}
 
-document.addEventListener('DOMContentLoaded', function () {
-    if (window.location.pathname !== '/login.html') {
-        redirecionarSeNaoAutenticado();
-    }
-});

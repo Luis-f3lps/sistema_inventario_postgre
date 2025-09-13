@@ -95,19 +95,15 @@
         </div>
 
         <script>
-            // ÚNICO PONTO DE INÍCIO QUANDO A PÁGINA CARREGA
             document.addEventListener('DOMContentLoaded', () => {
-                // 1. Ativa a funcionalidade do menu, pois ele já está no HTML
                 ativarFuncionalidadeMenu();
 
-                // 2. Define a data de hoje no calendário (se o elemento existir)
+                //Define a data de hoje no calendário
                 const dateEl = document.getElementById('date');
                 if (dateEl) {
                     const today = new Date().toISOString().slice(0, 10);
                     dateEl.value = today;
                 }
-
-                // 3. Inicia o processo de carregar os dados do utilizador e da página
                 loadLoggedInUser();
                 inicializarPaginaDeAgendamento();
 
@@ -120,14 +116,9 @@
                     dateEl.value = today;
                 }
 
-                // Carrega os dados do usuário e, EM SEGUIDA, os horários de hoje
-                await carregarDadosDoUsuarioEHorarios(); // Esta chamada agora funcionará
+                await carregarDadosDoUsuarioEHorarios(); 
             }
 
-            /**
-             * ESTA É A FUNÇÃO QUE PRECISA SER RENOMEADA.
-             * Ela carrega o usuário e DEPOIS chama a função para carregar os horários.
-             */
             async function carregarDadosDoUsuarioEHorarios() { // <-- NOME CORRETO
                 try {
                     const response = await fetch('/api/usuario-logado');
@@ -201,7 +192,6 @@
             async function loadLoggedInUser() {
                 fetch('/api/usuario-logado')
                     .then(response => {
-                        // É uma boa prática verificar se a resposta da rede foi bem-sucedida
                         if (!response.ok) {
                             throw new Error('Falha ao buscar usuário. Status: ' + response.status);
                         }
@@ -211,10 +201,8 @@
                         const userNameElement = document.getElementById('user-name-text');
                         userNameElement.innerHTML = data.nome;
 
-                        // Correção 1: Normaliza o tipo de usuário usando a variável 'data'
                         const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
 
-                        // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
                         switch (userType) {
                             case 'admin':
                                 document.querySelector('.admin-menu').style.display = 'block';
@@ -222,7 +210,6 @@
                                 break;
 
                             case 'tecnico':
-                                // Mostra AMBOS os menus para o técnico dentro de um único bloco
                                 document.querySelector('.tecnico').style.display = 'block';
                                 document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
                                 break;
@@ -235,9 +222,6 @@
                     .catch(error => console.error('Erro ao carregar usuário logado:', error));
             }
 
-            /**
-             * Valida a data e carrega os horários disponíveis da API.
-             */
             async function loadAvailability() {
                 const dataSelecionadaStr = dateEl.value;
                 const labId = labEl.value;
@@ -324,7 +308,6 @@
                 return (endH < 10 ? '0' + endH : '' + endH) + ':00';
             }
 
-            // --- EVENT LISTENERS ---
             dateEl.addEventListener('change', loadAvailability);
             labEl.addEventListener('change', loadAvailability);
 

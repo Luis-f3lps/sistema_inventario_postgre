@@ -107,7 +107,7 @@
                 if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
                 if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
 
-                // Lógica segura para os submenus (evita erros)
+                // Lógica segura para os submenus 
                 document.querySelectorAll('.submenu > a').forEach(menu => {
                     menu.addEventListener('click', function (e) {
                         e.preventDefault();
@@ -184,22 +184,18 @@
                     fetch('/api/dashboard/meus-laboratorios').then(res => res.json()),
                     fetch('/api/aulas-meus-laboratorios').then(res => res.json())
 
-                    // CORREÇÃO 1: Adicione a 4ª variável para receber os dados
                 ]).then(([solicitacoes, aulasAutorizadas, meusLaboratorios, aulasNosMeusLabs]) => {
 
-                    // As chamadas existentes (usei nomes de variáveis mais claros para evitar confusão)
                     if (typeof renderizarSolicitacoes === 'function') renderizarSolicitacoes(solicitacoes);
                     if (typeof renderizarAulasAutorizadas === 'function') renderizarAulasAutorizadas(aulasAutorizadas);
                     if (typeof renderizarMeusLaboratorios === 'function') renderizarMeusLaboratorios(meusLaboratorios);
 
-                    // CORREÇÃO 2: Adicione a chamada para a 4ª função de renderização
                     if (typeof renderizarAulasNosMeusLaboratorios === 'function') {
                         renderizarAulasNosMeusLaboratorios(aulasNosMeusLabs);
                     }
 
                 }).catch(error => console.error('Erro ao carregar dados dos painéis:', error));
             }
-            // As suas funções de 'renderizar' continuam iguais
             function renderizarSolicitacoes(solicitacoes) {
                 const lista = document.getElementById('lista-solicitacoes');
                 if (!lista) return;
@@ -237,9 +233,6 @@
                 lista.innerHTML = laboratorios.map(l => `<li>${l.nome_laboratorio}</li>`).join('');
             }
 
-            /**
- * Renderiza a lista de aulas agendadas nos laboratórios do técnico. (ATUALIZADO)
- */
             function renderizarAulasNosMeusLaboratorios(aulas) {
                 const lista = document.getElementById('lista-aulas-nos-meus-laboratorios');
                 if (!lista) return;
@@ -256,8 +249,6 @@
                     const horaInicio = aula.hora_inicio.slice(0, 5);
                     const horaFim = aula.hora_fim.slice(0, 5);
 
-                    // --- LÓGICA ADICIONADA AQUI ---
-                    // Converte o valor booleano (true/false) para uma string mais amigável
                     const precisaTecnicoTexto = aula.precisa_tecnico ? 'Sim' : 'Não';
 
                     return `

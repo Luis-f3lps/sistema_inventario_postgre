@@ -79,7 +79,6 @@
             // Variável global para armazenar os dados do usuário logado
             let loggedInUser = null;
 
-            // --- Menu Lateral (Sidemenu) ---
             var sidemenu = document.getElementById("sidemenu");
             function openmenu() {
                 sidemenu.style.left = "0px";
@@ -88,14 +87,10 @@
                 sidemenu.style.left = "-800px";
             }
 
-            // --- Lógica para Submenus (Inventário, Administração) ---
-// --- CÓDIGO CORRIGIDO ---
 document.querySelectorAll('.submenu > a').forEach(menu => {
     menu.addEventListener('click', function (e) {
         e.preventDefault();
         const submenuItems = this.nextElementSibling;
-
-        // VERIFICA SE O SUBMENU EXISTE ANTES DE TENTAR USÁ-LO
         if (submenuItems) {
             submenuItems.classList.toggle('open');
             this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
@@ -103,10 +98,8 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
     });
 });
 
-            // --- FUNÇÃO PRINCIPAL UNIFICADA ---
-            // Esta função agora faz tudo: identifica o usuário, ajusta o menu e carrega os dados.
             async function inicializarPagina() {
-                // 1. Tenta buscar o usuário logado
+                //Tenta buscar o usuário logado
                 try {
                     const response = await fetch('/api/usuario-logado');
                     if (!response.ok) {
@@ -116,11 +109,11 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
                     }
                     loggedInUser = await response.json();
 
-                    // 2. Atualiza a interface com as informações do usuário
+                    // Atualiza a interface com as informações do usuário
                     const userNameElement = document.getElementById('user-name-text');
                     userNameElement.innerHTML = loggedInUser.nome;
 
-                    // 3. Exibe os menus corretos com base no tipo de usuário
+                    // Exibe os menus corretos com base no tipo de usuário
                     const userType = loggedInUser.tipo_usuario ? loggedInUser.tipo_usuario.trim().toLowerCase() : '';
 
                     if (userType === 'admin') {
@@ -134,20 +127,19 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
                         document.querySelector('.professor').style.display = 'block';
                     }
 
-                    // 4. Se o usuário for um professor, carrega suas solicitações de aula
+                    // Se o usuário for um professor, carrega suas solicitações de aula
                     if (userType === 'professor') {
                         await loadMyRequests();
                     }
 
                 } catch (error) {
                     console.error('Erro ao inicializar a página:', error);
-                    // Pode adicionar uma mensagem de erro na tela aqui, se desejar
                 }
             }
 
             // Função para carregar as solicitações do professor
             async function loadMyRequests() {
-                if (!loggedInUser) return; // Garante que temos um usuário
+                if (!loggedInUser) return; // Garante um usuário
 
                 try {
                     const res = await fetch(`/api/minhas-solicitacoes`);
@@ -161,7 +153,7 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
                 }
             }
 
-            // Função para renderizar (desenhar) a tabela na tela
+            // Função para renderizar a tabela na tela
             function renderTable(requests) {
                 const tbody = document.getElementById("minhas-aulas-tbody");
                 tbody.innerHTML = ""; // Limpa a tabela antes de adicionar novas linhas
@@ -188,7 +180,6 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
                 });
             }
 
-            // Ponto de Entrada: Inicia todo o processo quando a página termina de carregar
             document.addEventListener('DOMContentLoaded', inicializarPagina);
 
         </script>

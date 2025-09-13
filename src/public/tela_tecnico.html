@@ -84,7 +84,6 @@
 function loadLoggedInUser() {
     fetch('/api/usuario-logado')
         .then(response => {
-            // É uma boa prática verificar se a resposta da rede foi bem-sucedida
             if (!response.ok) {
                 throw new Error('Falha ao buscar usuário. Status: ' + response.status);
             }
@@ -94,10 +93,8 @@ function loadLoggedInUser() {
             const userNameElement = document.getElementById('user-name-text');
             userNameElement.innerHTML = data.nome;
 
-            // Correção 1: Normaliza o tipo de usuário usando a variável 'data'
             const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
 
-            // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
             switch (userType) {
                 case 'admin':
                     document.querySelector('.admin-menu').style.display = 'block';
@@ -105,7 +102,6 @@ function loadLoggedInUser() {
                     break;
 
                 case 'tecnico':
-                    // Mostra AMBOS os menus para o técnico dentro de um único bloco
                     document.querySelector('.tecnico').style.display = 'block';
                     document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
                     break;
@@ -132,7 +128,6 @@ function loadLoggedInUser() {
         <script>
             let loggedInUser = null;
 
-            // Função 1: Descobre quem está logado
             async function loadLoggedInUser() {
                 try {
                     const response = await fetch('/api/usuario-logado');
@@ -156,7 +151,6 @@ function loadLoggedInUser() {
 
             });
 
-            // Função 2: Carrega apenas as solicitações com status 'analisando'
             async function loadPendingRequests() {
                 const tbody = document.getElementById("corpo-tabela-solicitacoes");
                 if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
@@ -176,7 +170,6 @@ function loadLoggedInUser() {
                 }
             }
 
-            // Função 3: Desenha a tabela na tela
             function renderTable(requests) {
                 const tbody = document.getElementById("corpo-tabela-solicitacoes");
                 tbody.innerHTML = "";
@@ -204,7 +197,6 @@ function loadLoggedInUser() {
                 });
             }
 
-            // Função 4: Envia a decisão para a API
             async function updateRequestStatus(id, novoStatus) {
                 try {
                     await fetch(`/api/requests/${id}`, {
@@ -212,7 +204,6 @@ function loadLoggedInUser() {
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ novoStatus })
                     });
-                    // Remove a linha da tabela para dar feedback visual de que a ação foi concluída
                     const rowToRemove = document.querySelector(`button[data-id='${id}']`).closest('tr');
                     if (rowToRemove) {
                         rowToRemove.style.opacity = '0';
@@ -224,17 +215,15 @@ function loadLoggedInUser() {
                 }
             }
 
-            // Ponto de Entrada: Inicia o processo quando a página carrega
             document.addEventListener('DOMContentLoaded', () => {
                 loadLoggedInUser();
 
-                // "Ouvinte" de eventos para os cliques nos botões da tabela
                 const tbody = document.getElementById("corpo-tabela-solicitacoes");
                 tbody.addEventListener('click', (event) => {
                     const target = event.target;
                     const aulaId = target.dataset.id;
 
-                    if (!aulaId) return; // Ignora cliques fora dos botões
+                    if (!aulaId) return; 
 
                     if (target.classList.contains('botao-aceitar')) {
                         updateRequestStatus(aulaId, 'autorizado');
