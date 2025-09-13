@@ -185,6 +185,7 @@
 
                 // Se a data não estiver preenchida, não faz mais nada
                 if (!dateEl.value) return;
+                msgEl.className = 'mensagem-status';
 
                 // Agora, faz a verificação de datas passadas
                 const hojeStr = new Date().toISOString().slice(0, 10);
