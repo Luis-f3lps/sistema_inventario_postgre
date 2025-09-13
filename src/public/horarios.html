@@ -10,357 +10,262 @@
 </head>
 
 <body>
-    <!------------------Relatórios--------------->
-    <div id="header">
-        <nav>
-            <ul id="sidemenu">
-                <img src="images/logomenu.png" class="logo">
-                </br>
-                <li>
-                    <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
-                        <i class="fas fa-user"></i>
-                        <span id="user-name-text"></span>
-                    </span>
-                </li>
-                </br>
 
-                <li class="Home" style="display: none;"><a href="/Home"><i class="fas fa-home"></i> Home</a></li>
-                <li class="Horarios" style="display: none;"><a href="/Horario"><i class="fas fa-clock"></i> Horarios</a>
-                </li>
-                <li class="tecnico" style="display: none;"><a href="/Tela_Tecnico"><i class="fas fa-bell"></i>
-                        Solicitações</a></li>
-                <li class="professor" style="display: none;"><a href="/Tela_Professor"><i class="fas fa-bell"></i>
-                        Solicitações Aula</a></li>
+    <header id="menu-container"></header>
 
-                <li class="submenu produto" style="display: none;">
-                    <a href="#"><i class="fas fa-boxes"></i> Inventário <i class="fas fa-chevron-down"></i></a>
-                    <ul class="submenu-items">
-                        <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
-                        <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
-                        <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
-                    </ul>
-                </li>
-                <!-- HTML para o menu de administração -->
-                <li class="submenu admin-menu" style="display: none;">
-                    <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
-                    <ul class="submenu-items">
-                        <li><a href="/Usuarios"><i class="fas fa-users"></i> Usuários</a></li>
-                        <li><a href="/Produto"><i class="fas fa-tags"></i> Produtos</a></li>
-                        <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Laboratórios</a></li>
-                    </ul>
-                </li>
-                </br>
-                <li class="logout">
-                    <a href="/logout" style="border-top: 1px solid;">
-                        <i class="fas fa-sign-out-alt"></i> Sair
-                    </a>
-                </li>
-                <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
-            </ul>
-            <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
-        </nav>
-            </div>
+    <div class="agendamento-container">
+        <h1>Agendar Aula — Escolha data e horário</h1>
 
-        <div class="agendamento-container">
-            <h1>Agendar Aula — Escolha data e horário</h1>
+        <div class="seletor-fila">
+            <label for="lab">Laboratório</label>
+            <select id="lab">
+                <option value="1">Física (Lab 1)</option>
+                <option value="4">Química (Lab 4)</option>
+            </select>
 
-            <div class="seletor-fila">
-                <label for="lab">Laboratório</label>
-                <select id="lab">
-                    <option value="1">Física (Lab 1)</option>
-                    <option value="4">Química (Lab 4)</option>
-                </select>
-
-                <label for="date">Data</label>
-                <input id="date" type="date" />
-            </div>
-
-            <div>
-                <strong>Horários disponíveis:</strong>
-                <div id="slots" class="grade-horarios"></div>
-                <div class="texto-ajuda">Aulas de 1 hora. Manhã: 07h–11h. Tarde/Noite: 13h–22h.</div>
-            </div>
-
-            <div class="opcao-tecnico-fila">
-                <span>Precisa de acompanhamento do técnico?</span>
-                <div class="radio-options">
-                    <input type="radio" id="tecnicoSim" name="precisaTecnico" value="true">
-                    <label for="tecnicoSim">Sim</label>
-
-                    <input type="radio" id="tecnicoNao" name="precisaTecnico" value="false" checked>
-                    <label for="tecnicoNao">Não</label>
-                </div>
-            </div>
-
-            <div id="msg" class="mensagem-status"></div>
-            <button id="submitBtn" class="btn-principal" disabled>Solicitar Aula</button>
+            <label for="date">Data</label>
+            <input id="date" type="date" />
         </div>
 
-        <script>
-            // ===================================================================
-            // PONTO DE ENTRADA PRINCIPAL DA PÁGINA
-            // ===================================================================
-            document.addEventListener('DOMContentLoaded', () => {
-                inicializarPaginaDeAgendamento();
-            });
+        <div>
+            <strong>Horários disponíveis:</strong>
+            <div id="slots" class="grade-horarios"></div>
+            <div class="texto-ajuda">Aulas de 1 hora. Manhã: 07h–11h. Tarde/Noite: 13h–22h.</div>
+        </div>
 
-            // ===================================================================
-            // VARIÁVEIS GLOBAIS DA PÁGINA
-            // ===================================================================
-            let loggedInUser = null;
-            const slotsEl = document.getElementById('slots');
-            const dateEl = document.getElementById('date');
-            const labEl = document.getElementById('lab');
-            const submitBtn = document.getElementById('submitBtn');
-            const msgEl = document.getElementById('msg');
-            let occupiedSlots = [];
-            let selectedSlot = null;
+        <div class="opcao-tecnico-fila">
+            <span>Precisa de acompanhamento do técnico?</span>
+            <div class="radio-options">
+                <input type="radio" id="tecnicoSim" name="precisaTecnico" value="true">
+                <label for="tecnicoSim">Sim</label>
 
-            // ===================================================================
-            // LÓGICA DE INICIALIZAÇÃO E FLUXO
-            // ===================================================================
+                <input type="radio" id="tecnicoNao" name="precisaTecnico" value="false" checked>
+                <label for="tecnicoNao">Não</label>
+            </div>
+        </div>
 
-            /**
-             * Orquestra o carregamento da página na ordem correta.
-             */
-            async function inicializarPaginaDeAgendamento() {
-                // Ativa os botões do menu lateral primeiro
-                ativarFuncionalidadeMenu();
+        <div id="msg" class="mensagem-status"></div>
+        <button id="submitBtn" class="btn-principal" disabled>Solicitar Aula</button>
+    </div>
 
-                // Define a data de hoje no calendário
-                dateEl.value = new Date().toISOString().slice(0, 10);
+    <script>
+        // ===================================================================
+        // PONTO DE ENTRADA PRINCIPAL DA PÁGINA
+        // ===================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            inicializarPaginaDeAgendamento();
+        });
 
-                // Adiciona os "ouvintes" de eventos para interações do usuário
-                dateEl.addEventListener('change', loadAvailability);
-                labEl.addEventListener('change', loadAvailability);
-                submitBtn.addEventListener('click', submeterAgendamento);
+        // ===================================================================
+        // VARIÁVEIS GLOBAIS DA PÁGINA
+        // ===================================================================
+        let loggedInUser = null;
+        const slotsEl = document.getElementById('slots');
+        const dateEl = document.getElementById('date');
+        const labEl = document.getElementById('lab');
+        const submitBtn = document.getElementById('submitBtn');
+        const msgEl = document.getElementById('msg');
+        let occupiedSlots = [];
+        let selectedSlot = null;
 
-                // Carrega os dados do usuário. Se o login for válido, continua.
-                loggedInUser = await loadLoggedInUser();
-                if (loggedInUser) {
-                    // **AQUI ESTÁ A CORREÇÃO PRINCIPAL**
-                    // Carrega os horários para a data de hoje AUTOMATICAMENTE
-                    await loadAvailability();
-                }
+        // ===================================================================
+        // LÓGICA DE INICIALIZAÇÃO E FLUXO
+        // ===================================================================
+
+        /**
+         * Orquestra o carregamento da página na ordem correta.
+         */
+        async function inicializarPaginaDeAgendamento() {
+            // Ativa os botões do menu lateral primeiro
+            ativarFuncionalidadeMenu();
+
+            // Define a data de hoje no calendário
+            dateEl.value = new Date().toISOString().slice(0, 10);
+
+            // Adiciona os "ouvintes" de eventos para interações do usuário
+            dateEl.addEventListener('change', loadAvailability);
+            labEl.addEventListener('change', loadAvailability);
+            submitBtn.addEventListener('click', submeterAgendamento);
+
+            // Carrega os dados do usuário. Se o login for válido, continua.
+            loggedInUser = await loadLoggedInUser();
+            if (loggedInUser) {
+                // **AQUI ESTÁ A CORREÇÃO PRINCIPAL**
+                // Carrega os horários para a data de hoje AUTOMATICAMENTE
+                await loadAvailability();
             }
+        }
 
-            /**
-             * Busca os dados do usuário logado. Se não estiver logado, redireciona.
-             */
-            async function loadLoggedInUser() {
-                try {
-                    const response = await fetch('/api/usuario-logado');
-                    if (!response.ok) {
-                        window.location.href = 'login.html';
-                        return null;
-                    }
-                    const userData = await response.json();
-
-                    // Preenche o nome e ajusta os menus visíveis
-                    preencherDadosDoMenu(userData);
-
-                    return userData; // Retorna os dados para uso em outras funções
-                } catch (error) {
-                    console.error('Erro de conexão ao verificar usuário:', error);
+        /**
+         * Busca os dados do usuário logado. Se não estiver logado, redireciona.
+         */
+        async function loadLoggedInUser() {
+            try {
+                const response = await fetch('/api/usuario-logado');
+                if (!response.ok) {
                     window.location.href = 'login.html';
                     return null;
                 }
+                const userData = await response.json();
+
+                // Preenche o nome e ajusta os menus visíveis
+                preencherDadosDoMenu(userData);
+
+                return userData; // Retorna os dados para uso em outras funções
+            } catch (error) {
+                console.error('Erro de conexão ao verificar usuário:', error);
+                window.location.href = 'login.html';
+                return null;
             }
+        }
 
-            // ===================================================================
-            // LÓGICA PRINCIPAL DE AGENDAMENTO
-            // ===================================================================
+        // ===================================================================
+        // LÓGICA PRINCIPAL DE AGENDAMENTO
+        // ===================================================================
 
-            /**
-             * Busca na API os horários já ocupados para a data e lab selecionados.
-             */
-            /**
-             * Busca na API os horários já ocupados para a data e lab selecionados.
-             */
-            async function loadAvailability() {
-                // Garante que os elementos essenciais existem
-                if (!dateEl || !labEl || !slotsEl || !msgEl || !submitBtn) return;
+        /**
+         * Busca na API os horários já ocupados para a data e lab selecionados.
+         */
+        /**
+         * Busca na API os horários já ocupados para a data e lab selecionados.
+         */
+        async function loadAvailability() {
+            // Garante que os elementos essenciais existem
+            if (!dateEl || !labEl || !slotsEl || !msgEl || !submitBtn) return;
 
-                // --- CORREÇÃO PRINCIPAL: Limpa a mensagem logo no início ---
-                // Desta forma, sempre que a função é chamada, a tela fica limpa.
-                msgEl.style.display = 'none';
+            // --- CORREÇÃO PRINCIPAL: Limpa a mensagem logo no início ---
+            // Desta forma, sempre que a função é chamada, a tela fica limpa.
+            msgEl.style.display = 'none';
 
-                // Se a data não estiver preenchida, não faz mais nada
-                if (!dateEl.value) return;
-                msgEl.className = 'mensagem-status';
+            // Se a data não estiver preenchida, não faz mais nada
+            if (!dateEl.value) return;
+            msgEl.className = 'mensagem-status';
 
-                // Agora, faz a verificação de datas passadas
-                const hojeStr = new Date().toISOString().slice(0, 10);
-                if (dateEl.value < hojeStr) {
-                    slotsEl.innerHTML = ''; // Limpa a área de horários
-                    msgEl.textContent = 'Não é possível agendar em datas passadas.';
-                    msgEl.className = 'mensagem-status erro';
-                    msgEl.style.display = 'block'; // Mostra a mensagem de erro específica
-                    submitBtn.disabled = true;
-                    return; // Para a execução
-                }
-
-                // Reseta o estado da interface para a nova busca
-                slotsEl.innerHTML = '<p>Carregando horários...</p>';
+            // Agora, faz a verificação de datas passadas
+            const hojeStr = new Date().toISOString().slice(0, 10);
+            if (dateEl.value < hojeStr) {
+                slotsEl.innerHTML = ''; // Limpa a área de horários
+                msgEl.textContent = 'Não é possível agendar em datas passadas.';
+                msgEl.className = 'mensagem-status erro';
+                msgEl.style.display = 'block'; // Mostra a mensagem de erro específica
                 submitBtn.disabled = true;
-                selectedSlot = null;
-
-                // Busca os dados na API
-                try {
-                    const res = await fetch(`/api/availability?date=${dateEl.value}&labId=${labEl.value}`);
-                    if (!res.ok) throw new Error('Falha ao buscar horários.');
-
-                    const data = await res.json();
-                    occupiedSlots = data.occupied || [];
-
-                    renderSlots(); // Chama a função para desenhar os botões
-
-                } catch (error) {
-                    console.error('Erro ao carregar disponibilidade:', error);
-                    slotsEl.innerHTML = '<p style="color: red;">Erro ao carregar horários. Tente novamente.</p>';
-                }
+                return; // Para a execução
             }
 
-            /**
-             * Desenha os botões de horário (disponíveis e ocupados) na tela.
-             */
-            function renderSlots() {
-                const allSlots = generateAllSlots();
-                slotsEl.innerHTML = '';
+            // Reseta o estado da interface para a nova busca
+            slotsEl.innerHTML = '<p>Carregando horários...</p>';
+            submitBtn.disabled = true;
+            selectedSlot = null;
 
-                allSlots.forEach(hour => {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'bloco-horario';
-                    btn.textContent = `${hour} — ${formatEnd(hour)}`;
-                    btn.dataset.hour = hour;
+            // Busca os dados na API
+            try {
+                const res = await fetch(`/api/availability?date=${dateEl.value}&labId=${labEl.value}`);
+                if (!res.ok) throw new Error('Falha ao buscar horários.');
 
-                    if (occupiedSlots.includes(hour)) {
-                        btn.classList.add('occupied');
-                        btn.disabled = true;
-                    } else {
-                        btn.addEventListener('click', () => {
-                            selectedSlot = (selectedSlot === btn.dataset.hour && selectedSlot !== null) ? null : btn.dataset.hour;
-                            updateSelectionUI();
-                        });
-                    }
-                    slotsEl.appendChild(btn);
-                });
-                updateSelectionUI();
+                const data = await res.json();
+                occupiedSlots = data.occupied || [];
+
+                renderSlots(); // Chama a função para desenhar os botões
+
+            } catch (error) {
+                console.error('Erro ao carregar disponibilidade:', error);
+                slotsEl.innerHTML = '<p style="color: red;">Erro ao carregar horários. Tente novamente.</p>';
             }
+        }
 
-            /**
-             * Atualiza a interface para destacar o horário selecionado.
-             */
-            function updateSelectionUI() {
-                document.querySelectorAll('.bloco-horario').forEach(el => {
-                    el.classList.remove('selected');
-                    if (!el.disabled && el.dataset.hour === selectedSlot) {
-                        el.classList.add('selected');
-                    }
-                });
-                submitBtn.disabled = !selectedSlot;
-            }
+        /**
+         * Desenha os botões de horário (disponíveis e ocupados) na tela.
+         */
+        function renderSlots() {
+            const allSlots = generateAllSlots();
+            slotsEl.innerHTML = '';
 
-            /**
-             * Envia o novo agendamento para a API.
-             */
-            async function submeterAgendamento() {
-                if (!selectedSlot || !loggedInUser) return;
+            allSlots.forEach(hour => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'bloco-horario';
+                btn.textContent = `${hour} — ${formatEnd(hour)}`;
+                btn.dataset.hour = hour;
 
-                const payload = {
-                    labId: labEl.value,
-                    date: dateEl.value,
-                    hour: selectedSlot,
-                    precisa_tecnico: document.querySelector('input[name="precisaTecnico"]:checked').value === 'true'
-                };
-
-                try {
-                    const res = await fetch('/api/schedule', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                if (occupiedSlots.includes(hour)) {
+                    btn.classList.add('occupied');
+                    btn.disabled = true;
+                } else {
+                    btn.addEventListener('click', () => {
+                        selectedSlot = (selectedSlot === btn.dataset.hour && selectedSlot !== null) ? null : btn.dataset.hour;
+                        updateSelectionUI();
                     });
-                    const result = await res.json();
-                    if (!res.ok) throw new Error(result.error || 'Ocorreu um erro');
-
-                    // Exibe mensagem de sucesso
-                    msgEl.textContent = result.message;
-                    msgEl.className = 'mensagem-status sucesso';
-                    msgEl.style.display = 'block';
-
-                    await loadAvailability(); // Recarrega os horários
-                } catch (err) {
-                    msgEl.textContent = 'Erro ao enviar: ' + err.message;
-                    msgEl.className = 'mensagem-status erro';
-                    msgEl.style.display = 'block';
                 }
-            }
+                slotsEl.appendChild(btn);
+            });
+            updateSelectionUI();
+        }
 
-            // ===================================================================
-            // FUNÇÕES DO MENU E AUXILIARES
-            // ===================================================================
+        /**
+         * Atualiza a interface para destacar o horário selecionado.
+         */
+        function updateSelectionUI() {
+            document.querySelectorAll('.bloco-horario').forEach(el => {
+                el.classList.remove('selected');
+                if (!el.disabled && el.dataset.hour === selectedSlot) {
+                    el.classList.add('selected');
+                }
+            });
+            submitBtn.disabled = !selectedSlot;
+        }
 
-            function ativarFuncionalidadeMenu() {
-                const sideMenu = document.getElementById("sidemenu");
-                const openMenuBtn = document.querySelector(".fa-bars");
-                const closeMenuBtn = document.querySelector(".fa-circle-xmark");
+        /**
+         * Envia o novo agendamento para a API.
+         */
+        async function submeterAgendamento() {
+            if (!selectedSlot || !loggedInUser) return;
 
-                if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
-                if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
+            const payload = {
+                labId: labEl.value,
+                date: dateEl.value,
+                hour: selectedSlot,
+                precisa_tecnico: document.querySelector('input[name="precisaTecnico"]:checked').value === 'true'
+            };
 
-                document.querySelectorAll('.submenu > a').forEach(menu => {
-                    menu.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        const submenuItems = this.nextElementSibling;
-                        const icon = this.querySelector('.fas.fa-chevron-down');
-                        if (submenuItems) submenuItems.classList.toggle('open');
-                        if (icon) icon.classList.toggle('rotate');
-                    });
+            try {
+                const res = await fetch('/api/schedule', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
-            }
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error || 'Ocorreu um erro');
 
-            function preencherDadosDoMenu(userData) {
-                const userNameElement = document.getElementById('user-name-text');
-                if (userNameElement) {
-                    userNameElement.innerHTML = userData.nome_usuario || userData.nome;
-                }
-                const userType = userData.tipo_usuario ? userData.tipo_usuario.trim().toLowerCase() : '';
-                const show = (selector) => {
-                    const el = document.querySelector(selector);
-                    if (el) el.style.display = 'list-item';
-                };
-                switch (userType) {
-                    case 'admin':
-                        show('.admin-menu');
-                        show('.produto');
-                        break;
-                    case 'tecnico':
-                        show('.tecnico');
-                        show('.produto');
-                        break;
-                    case 'professor':
-                        show('.professor');
-                        show('.Horarios');
-                        show('.Home');
-                        break;
-                }
-            }
+                // Exibe mensagem de sucesso
+                msgEl.textContent = result.message;
+                msgEl.className = 'mensagem-status sucesso';
+                msgEl.style.display = 'block';
 
-            function generateAllSlots() {
-                const arr = [];
-                for (let h = 7; h < 11; h++) arr.push(formatHour(h));
-                for (let h = 13; h < 22; h++) arr.push(formatHour(h));
-                return arr;
+                await loadAvailability(); // Recarrega os horários
+            } catch (err) {
+                msgEl.textContent = 'Erro ao enviar: ' + err.message;
+                msgEl.className = 'mensagem-status erro';
+                msgEl.style.display = 'block';
             }
+        }
 
-            function formatHour(h) { return (h < 10 ? '0' : '') + h + ':00'; }
 
-            function formatEnd(start) {
-                const endH = parseInt(start.split(':')[0]) + 1;
-                return formatHour(endH);
-            }
-        </script>
+        function generateAllSlots() {
+            const arr = [];
+            for (let h = 7; h < 11; h++) arr.push(formatHour(h));
+            for (let h = 13; h < 22; h++) arr.push(formatHour(h));
+            return arr;
+        }
+
+        function formatHour(h) { return (h < 10 ? '0' : '') + h + ':00'; }
+
+        function formatEnd(start) {
+            const endH = parseInt(start.split(':')[0]) + 1;
+            return formatHour(endH);
+        }
+    </script>
+    <script src="js/menu.js" defer></script>
+
 </body>
 
 </html>
