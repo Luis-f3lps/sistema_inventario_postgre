@@ -172,22 +172,49 @@
             /**
              * Busca na API os horários já ocupados para a data e lab selecionados.
              */
+            /**
+             * Busca na API os horários já ocupados para a data e lab selecionados.
+             */
             async function loadAvailability() {
+                // Garante que os elementos essenciais existem
+                if (!dateEl || !labEl || !slotsEl || !msgEl || !submitBtn) return;
+
+                // Se a data não estiver preenchida, não faz nada
                 if (!dateEl.value) return;
 
+                // --- CORREÇÃO ADICIONADA AQUI ---
+                // Esconde qualquer mensagem de erro ou sucesso de ações anteriores
+                msgEl.style.display = 'none';
+
+                // Verificação de datas passadas
+                const hojeStr = new Date().toISOString().slice(0, 10);
+                if (dateEl.value < hojeStr) {
+                    slotsEl.innerHTML = ''; // Limpa a área de horários
+                    msgEl.textContent = 'Não é possível agendar em datas passadas.';
+                    msgEl.className = 'mensagem-status erro';
+                    msgEl.style.display = 'block';
+                    submitBtn.disabled = true;
+                    return; // Para a execução
+                }
+
+                // Reseta o estado da interface para a nova busca
                 slotsEl.innerHTML = '<p>Carregando horários...</p>';
                 submitBtn.disabled = true;
                 selectedSlot = null;
 
+                // Busca os dados na API
                 try {
                     const res = await fetch(`/api/availability?date=${dateEl.value}&labId=${labEl.value}`);
                     if (!res.ok) throw new Error('Falha ao buscar horários.');
+
                     const data = await res.json();
                     occupiedSlots = data.occupied || [];
-                    renderSlots();
+
+                    renderSlots(); // Chama a função para desenhar os botões
+
                 } catch (error) {
                     console.error('Erro ao carregar disponibilidade:', error);
-                    slotsEl.innerHTML = '<p style="color: red;">Erro ao carregar horários.</p>';
+                    slotsEl.innerHTML = '<p style="color: red;">Erro ao carregar horários. Tente novamente.</p>';
                 }
             }
 
