@@ -179,20 +179,20 @@
                 // Garante que os elementos essenciais existem
                 if (!dateEl || !labEl || !slotsEl || !msgEl || !submitBtn) return;
 
-                // Se a data não estiver preenchida, não faz nada
-                if (!dateEl.value) return;
-
-                // --- CORREÇÃO ADICIONADA AQUI ---
-                // Esconde qualquer mensagem de erro ou sucesso de ações anteriores
+                // --- CORREÇÃO PRINCIPAL: Limpa a mensagem logo no início ---
+                // Desta forma, sempre que a função é chamada, a tela fica limpa.
                 msgEl.style.display = 'none';
 
-                // Verificação de datas passadas
+                // Se a data não estiver preenchida, não faz mais nada
+                if (!dateEl.value) return;
+
+                // Agora, faz a verificação de datas passadas
                 const hojeStr = new Date().toISOString().slice(0, 10);
                 if (dateEl.value < hojeStr) {
                     slotsEl.innerHTML = ''; // Limpa a área de horários
                     msgEl.textContent = 'Não é possível agendar em datas passadas.';
                     msgEl.className = 'mensagem-status erro';
-                    msgEl.style.display = 'block';
+                    msgEl.style.display = 'block'; // Mostra a mensagem de erro específica
                     submitBtn.disabled = true;
                     return; // Para a execução
                 }
