@@ -175,15 +175,6 @@
             async function loadAvailability() {
                 if (!dateEl.value) return;
 
-                if (dateEl.value < hojeStr) {
-                    slotsEl.innerHTML = ''; // Limpa os horários
-                    msgEl.textContent = 'Não é possível agendar em datas passadas.';
-                    msgEl.className = 'mensagem-status erro';
-                    msgEl.style.display = 'block';
-                    submitBtn.disabled = true;
-                    return; // Para a execução
-                }
-
                 slotsEl.innerHTML = '<p>Carregando horários...</p>';
                 submitBtn.disabled = true;
                 selectedSlot = null;
