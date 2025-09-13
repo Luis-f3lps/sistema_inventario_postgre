@@ -12,7 +12,7 @@
 <body>
     <!------------------Relatórios--------------->
     <div id="header">
-    <header id="menu-container"></header>
+        <header id="menu-container"></header>
 
 
         <div class="painel-minhas-aulas">
@@ -37,29 +37,11 @@
             // Variável global para armazenar os dados do usuário logado
             let loggedInUser = null;
 
-            // Funções do menu lateral
-            var sidemenu = document.getElementById("sidemenu");
-            function openmenu() {
-                if (sidemenu) sidemenu.style.left = "0px";
-            }
-            function clossmenu() {
-                if (sidemenu) sidemenu.style.left = "-800px";
-            }
 
             /**
              * Função principal que orquestra o carregamento da página.
              */
             async function inicializarPagina() {
-                // Ativa a funcionalidade do submenu primeiro
-                document.querySelectorAll('.submenu > a').forEach(menu => {
-                    menu.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        const submenuItems = this.nextElementSibling;
-                        const icon = this.querySelector('.fas.fa-chevron-down');
-                        if (submenuItems) submenuItems.classList.toggle('open');
-                        if (icon) icon.classList.toggle('rotate');
-                    });
-                });
 
                 // Tenta buscar o usuário logado
                 try {
@@ -84,25 +66,8 @@
                         if (el) el.style.display = 'list-item'; // 'list-item' é semanticamente melhor para <li>
                     };
 
-                    switch (userType) {
-                        case 'admin':
-                            showMenuItem('.admin-menu');
-                            showMenuItem('.produto');
-                            break;
-                        case 'tecnico':
-                            showMenuItem('.tecnico');
-                            showMenuItem('.produto');
-                            break;
-                        case 'professor':
-                            showMenuItem('.Home');
-                            showMenuItem('.professor');
-                            showMenuItem('.Horarios');
+                    await loadMyRequests();
 
-                            // --- CORREÇÃO ADICIONADA AQUI ---
-                            // Se o usuário é professor, chama a função para carregar a tabela
-                            await loadMyRequests();
-                            break;
-                    }
                 } catch (error) {
                     console.error('Erro ao inicializar a página:', error);
                     // Em caso de erro, redireciona para o login por segurança
@@ -166,7 +131,7 @@
             // Ponto de entrada do script
             document.addEventListener('DOMContentLoaded', inicializarPagina);
 
-        </script>    
+        </script>
         <script src="js/menu.js" defer></script>
 
 </body>
