@@ -30,7 +30,7 @@ function inicializarDashboard(userData) {
             showDashboardCard('.cartao-meus-laboratorios');
             break;
         case 'professor':
-            showDashboardCard('.cartao-aulas-autorizadas'); // Corrigido para corresponder à sua lógica anterior
+            showDashboardCard('.cartao-aulas-solicitadas'); // Corrigido para corresponder à sua lógica anterior
             showDashboardCard('.cartao-solicitacoes');
             break;
         // Admin não precisa de painéis aqui, pois é redirecionado
