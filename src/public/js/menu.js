@@ -92,38 +92,63 @@ function ativarFuncionalidadeMenu() {
 /**
  * Preenche o nome do usuário e mostra/esconde os links do menu apropriados.
  */
+/**
+ * Preenche o nome do usuário e mostra/esconde os links do menu e os painéis do dashboard.
+ * (VERSÃO CORRIGIDA E ORGANIZADA)
+ */
 function preencherDadosDoMenu(userData) {
+    // --- Preenche o nome do usuário ---
     const userNameElement = document.getElementById('user-name-text');
     if (userNameElement) {
         userNameElement.textContent = userData.nome_usuario || userData.nome;
     }
 
     const userType = userData.tipo_usuario ? userData.tipo_usuario.trim().toLowerCase() : '';
-    const show = (selector) => {
+
+    // --- Funções Auxiliares para mostrar elementos ---
+    const showMenuItem = (selector) => {
         const el = document.querySelector(selector);
-        if (el) el.style.display = 'list-item';
+        if (el) el.style.display = 'list-item'; // 'list-item' é o correto para <li>
+    };
+    const showDashboardCard = (selector) => {
+        const el = document.querySelector(selector);
+        if (el) el.style.display = 'block'; // 'block' é o correto para <div>
     };
 
+    // --- Lógica de Exibição ---
+
+    // 1. Esconde todos os painéis para começar do zero
+    document.querySelectorAll('.cartao-painel').forEach(card => card.style.display = 'none');
+
+    // 2. Mostra os menus e painéis corretos para cada tipo de usuário
     switch (userType) {
         case 'admin':
             if (window.location.pathname !== '/Inventario' && window.location.pathname !== '/Inventario.html') {
                 window.location.href = '/Inventario';
                 return;
             }
-            show('.admin-menu');
-            show('.produto');
+            showMenuItem('.admin-menu');
+            showMenuItem('.produto');
             break;
-                    case 'tecnico':
-                        document.querySelector('.tecnico').style.display = 'block';
-                        document.querySelector('.Home').style.display = 'block';
-                        document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
 
-                        break;
-                    case 'professor':
-                        document.querySelector('.Home').style.display = 'block';
-                        document.querySelector('.professor').style.display = 'block';
-                        document.querySelector('.Horarios').style.display = 'block';
+        case 'tecnico':
+            // Mostra os menus do técnico
+            showMenuItem('.tecnico');
+            showMenuItem('.Home');
+            showMenuItem('.produto');
+            // Mostra os painéis do técnico
+            showDashboardCard('.cartao-aulas-tecnico');
+            showDashboardCard('.cartao-meus-laboratorios');
+            break;
 
-                        break;
+        case 'professor':
+            // Mostra os menus do professor
+            showMenuItem('.Home');
+            showMenuItem('.professor');
+            showMenuItem('.Horarios');
+            // Mostra os painéis do professor (usando a classe corrigida)
+            showDashboardCard('.cartao-aulas-autorizadas'); // <--- CORRIGIDO
+            showDashboardCard('.cartao-solicitacoes');
+            break;
     }
 }
