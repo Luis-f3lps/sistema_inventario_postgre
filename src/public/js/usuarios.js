@@ -1,93 +1,161 @@
-
-var sidemenu = document.getElementById("sidemenu");
-function openmenu() {
-    sidemenu.style.left = "0px";
-}
-function clossmenu() {
-    sidemenu.style.left = "-800px";
-}
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    const menuContainer = document.getElementById('menu-container');
-    if (menuContainer) {
-        fetch('menu.html')
-            .then(response => response.text())
-            .then(data => {
-                menuContainer.innerHTML = data;
-                // O código para fazer os botões do menu funcionar vai aqui...
-            })
-            .catch(error => console.error('Erro ao carregar o menu:', error));
-    }
-});
-document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function (e) {
-        e.preventDefault();
-        const submenuItems = this.nextElementSibling;
-        submenuItems.classList.toggle('open');
-        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
+    // ===================================================================
+    // PONTO DE ENTRADA PRINCIPAL DA APLICAÇÃO
+    // ===================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        // Inicializa todas as funcionalidades da página na ordem correta
+        inicializarAplicacao();
     });
-});
-// Autenticado
-function Autenticado() {
-    return fetch('/api/check-auth', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-        .then(response => response.json())
-        .then(data => data.Autenticado)
-        .catch(() => false);
-}
 
-function redirecionarSeNaoAutenticado() {
-    Autenticado().then(authenticated => {
-        if (!authenticated) {
-            window.location.href = 'login.html';
+    /**
+     * Função principal que orquestra o carregamento da página.
+     */
+    async function inicializarAplicacao() {
+        // 1. Carrega o menu e ativa suas funcionalidades INTERNAS
+        //    Isso resolve a condição de corrida (race condition).
+        await carregarEMontarMenu();
+
+        // 2. Verifica se o usuário está autenticado em páginas protegidas
+        if (window.location.pathname !== '/login.html') {
+            const autenticado = await verificarAutenticacao();
+            if (!autenticado) {
+                window.location.href = 'login.html';
+                return; // Para a execução se não estiver autenticado
+            }
         }
-    });
-}
 
-document.addEventListener('DOMContentLoaded', function () {
-    if (window.location.pathname !== '/login.html') {
-        redirecionarSeNaoAutenticado();
-    }
-});
-
-// opentab
-function opentab(tabname) {
-    var tablinks = document.getElementsByClassName("tab-links");
-    var tabcontents = document.getElementsByClassName("tab-contents");
-
-    Array.from(tablinks).forEach(link => link.classList.remove("active-link"));
-
-    Array.from(tabcontents).forEach(content => {
-        content.classList.remove("active-tab");
-        if (content.id === tabname) {
-            content.classList.add("active-tab");
+        // 3. Carrega os dados específicos da página (ex: lista de usuários)
+        //    A função `loadUsers` só é chamada se o elemento da tabela existir.
+        if (document.getElementById('usuarios-tbody')) {
+            loadUsers();
+            configurarFormulariosDeUsuario();
         }
-    });
+    }
 
-    event.currentTarget.classList.add("active-link");
-}
 
-// Load Users
-function loadUsers() {
-    fetch('/api/usuarios')
-        .then(response => response.json())
-        .then(data => {
+    // ===================================================================
+    // FUNÇÕES DO MENU
+    // ===================================================================
+
+    /**
+     * Carrega o menu.html, insere na página e ativa todas as suas funcionalidades.
+     */
+    async function carregarEMontarMenu() {
+        const menuContainer = document.getElementById('menu-container');
+        if (!menuContainer) return;
+
+        try {
+            const response = await fetch('menu.html');
+            const menuHTML = await response.text();
+            menuContainer.innerHTML = menuHTML;
+
+            // Agora que o menu GARANTIDAMENTE existe no DOM, ativamos suas funções
+            ativarFuncionalidadeMenu();
+            await loadLoggedInUser(); // Carrega nome e ajusta menus visíveis
+
+        } catch (error) {
+            console.error('Erro ao carregar o menu:', error);
+        }
+    }
+
+    /**
+     * Adiciona os eventos de clique aos botões do menu (hambúrguer e submenus).
+     */
+    function ativarFuncionalidadeMenu() {
+        const sidemenu = document.getElementById("sidemenu");
+        if (!sidemenu) return;
+
+        const openBtn = sidemenu.parentElement.querySelector(".fa-bars");
+        const closeBtn = sidemenu.querySelector(".fa-circle-xmark");
+
+        if (openBtn) openBtn.addEventListener('click', () => sidemenu.style.left = "0px");
+        if (closeBtn) closeBtn.addEventListener('click', () => sidemenu.style.left = "-800px");
+
+        document.querySelectorAll('.submenu > a').forEach(menu => {
+            menu.addEventListener('click', function (e) {
+                e.preventDefault();
+                const submenuItems = this.nextElementSibling;
+                const icon = this.querySelector('.fas.fa-chevron-down');
+                if (submenuItems) submenuItems.classList.toggle('open');
+                if (icon) icon.classList.toggle('rotate');
+            });
+        });
+    }
+
+    /**
+     * Busca os dados do usuário logado para exibir o nome e ajustar os menus.
+     * Esta é a versão limpa e eficiente.
+     */
+    async function loadLoggedInUser() {
+        try {
+            const response = await fetch('/api/usuario-logado');
+            if (!response.ok) {
+                // Se a sessão expirou, pode ser tratado aqui também
+                throw new Error('Sessão inválida ou expirada.');
+            }
+            const data = await response.json();
+
+            const userNameElement = document.getElementById('user-name-text');
+            if (userNameElement) {
+                userNameElement.innerHTML = data.nome_usuario || data.nome;
+            }
+
+            const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
+            switch (userType) {
+                case 'admin':
+                    document.querySelector('.admin-menu').style.display = 'block';
+                    document.querySelector('.produto').style.display = 'block';
+                    break;
+                case 'tecnico':
+                    document.querySelector('.tecnico').style.display = 'block';
+                    document.querySelector('.produto').style.display = 'block';
+                    break;
+                case 'professor':
+                    document.querySelector('.professor').style.display = 'block';
+                    break;
+            }
+        } catch (error) {
+            console.error('Erro ao carregar usuário logado:', error);
+            // Poderia redirecionar para login aqui também se a sessão expirar
+            // window.location.href = 'login.html';
+        }
+    }
+
+
+    // ===================================================================
+    // FUNÇÕES DE AUTENTICAÇÃO
+    // ===================================================================
+    async function verificarAutenticacao() {
+        try {
+            const response = await fetch('/api/check-auth');
+            const data = await response.json();
+            return data.Autenticado;
+        } catch {
+            return false;
+        }
+    }
+
+
+    // ===================================================================
+    // FUNÇÕES DA PÁGINA DE GERENCIAMENTO DE USUÁRIOS
+    // ===================================================================
+
+    /**
+     * Busca a lista de usuários da API e preenche a tabela e os selects.
+     */
+    async function loadUsers() {
+        try {
+            const response = await fetch('/api/usuarios');
+            const data = await response.json();
+
             const tbody = document.getElementById('usuarios-tbody');
             const selectRemove = document.getElementById('usuarios-select');
             const selectActivate = document.getElementById('usuarios-select-ativar');
 
-            // Limpar o tbody antes de adicionar novos usuários
             tbody.innerHTML = '';
-            selectRemove.innerHTML = ''; // Limpar também o select de remoção
-            selectActivate.innerHTML = ''; // Limpar também o select de ativação
+            selectRemove.innerHTML = '';
+            selectActivate.innerHTML = '';
 
             data.forEach(usuario => {
-                // Adicionar à tabela
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${usuario.nome_usuario}</td>
@@ -96,205 +164,112 @@ function loadUsers() {
                     <td>${usuario.status}</td>
                 `;
                 tbody.appendChild(tr);
-                if (usuario.status === 'ativado') {
-                    // Adicionar ao select de desativação
-                    const optionRemove = document.createElement('option');
-                    optionRemove.value = usuario.email;
-                    optionRemove.textContent = `${usuario.nome_usuario} (${usuario.status})`;
-                    selectRemove.appendChild(optionRemove);
-                }
 
-                // Adicionar ao select de ativação, se o usuário estiver desativado
-                if (usuario.status === 'desativado') {
-                    const optionActivate = document.createElement('option');
-                    optionActivate.value = usuario.email;
-                    optionActivate.textContent = `${usuario.nome_usuario} (${usuario.status})`;
-                    selectActivate.appendChild(optionActivate);
+                const option = document.createElement('option');
+                option.value = usuario.email;
+                option.textContent = `${usuario.nome_usuario} (${usuario.email})`;
+                
+                if (usuario.status === 'ativado') {
+                    selectRemove.appendChild(option);
+                } else if (usuario.status === 'desativado') {
+                    selectActivate.appendChild(option);
                 }
             });
-        })
-        .catch(error => console.error('Erro ao carregar usuários:', error));
-}
-
-
-// Chame a função para carregar os usuários
-loadUsers();
-
-// Pegar o nome do usuário logado
-async function loadLoggedInUser() {
-                        const response = await fetch('/api/usuario-logado');
-                    if (!response.ok) {
-                        // Se não conseguir encontrar o usuário, redireciona para o login
-                        window.location.href = '/login.html';
-                        return;
-                    }
-    fetch('/api/usuario-logado')
-        .then(response => {
-            // É uma boa prática verificar se a resposta da rede foi bem-sucedida
-            if (!response.ok) {
-                throw new Error('Falha ao buscar usuário. Status: ' + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            const userNameElement = document.getElementById('user-name-text');
-            userNameElement.innerHTML = data.nome;
-
-            // Correção 1: Normaliza o tipo de usuário usando a variável 'data'
-            const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
-
-            // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
-            switch (userType) {
-                case 'admin':
-                    document.querySelector('.admin-menu').style.display = 'block';
-                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-                    break;
-
-                case 'tecnico':
-                    // Mostra AMBOS os menus para o técnico dentro de um único bloco
-                    document.querySelector('.tecnico').style.display = 'block';
-                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-                    break;
-
-                case 'professor':
-                    document.querySelector('.professor').style.display = 'block';
-                    break;
-            }
-        })
-        .catch(error => console.error('Erro ao carregar usuário logado:', error));
-}
-loadLoggedInUser();
-
-
-// Adicionar novo usuário
-document.getElementById('add-user-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-
-    const username = document.getElementById('username').value;
-    const email = document.getElementById('email').value;
-    const userType = document.getElementById('type').value; // Novo campo para o tipo de usuário
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirm-password').value;
-
-    if (password !== confirmPassword) {
-        alert('As senhas não coincidem!');
-        return;
+        } catch (error) {
+            console.error('Erro ao carregar usuários:', error);
+        }
     }
 
-    fetch('/api/usuarios', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ nome_usuario: username, email: email, tipo_usuario: userType, senha: password }) // Inclua o tipo de usuário aqui
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                alert(data.message);
+    /**
+     * Configura os event listeners para os formulários de adicionar, ativar e desativar.
+     */
+    function configurarFormulariosDeUsuario() {
+        // Adicionar novo usuário
+        document.getElementById('add-user-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const form = event.target;
+            const password = form.password.value;
+            const confirmPassword = form['confirm-password'].value;
 
-                // Adicionar o novo usuário na tabela
-                const tbody = document.getElementById('usuarios-tbody');
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                <td>${username}</td>
-                <td>${email}</td>
-            `;
-                tbody.appendChild(tr);
-
-                // Adicionar o novo usuário no select para remoção
-                const select = document.getElementById('usuarios-select');
-                const option = document.createElement('option');
-                option.value = email;
-                option.textContent = username;
-                select.appendChild(option);
-
-                // Limpar o formulário
-                document.getElementById('add-user-form').reset();
-                // Recarregar a página para atualizar os dados
-                location.reload();
+            if (password !== confirmPassword) {
+                alert('As senhas não coincidem!');
+                return;
             }
-        })
-        .catch(error => console.error('Erro ao adicionar usuário:', error));
-});
 
-// Desativar usuário
-document.getElementById('remove-user-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-    const email = document.getElementById('usuarios-select').value;
+            const userData = {
+                nome_usuario: form.username.value,
+                email: form.email.value,
+                tipo_usuario: form.type.value,
+                senha: password
+            };
 
-    fetch(`/api/usuarios/${email}`, {
-        method: 'PATCH', // Usar PATCH para desativar
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                alert(data.message);
-                // Recarregar a página para atualizar os dados
-                location.reload();
+            try {
+                const response = await fetch('/api/usuarios', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                const data = await response.json();
+                alert(data.message || data.error);
+                if (response.ok) {
+                    form.reset();
+                    loadUsers(); // ATUALIZA A LISTA SEM RECARREGAR A PÁGINA
+                }
+            } catch (error) {
+                console.error('Erro ao adicionar usuário:', error);
+                alert('Ocorreu um erro. Tente novamente.');
             }
-        })
-        .catch(error => console.error('Erro ao desativar usuário:', error));
-});
+        });
 
-// Ativar usuário
-document.getElementById('activate-user-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-    const email = document.getElementById('usuarios-select-ativar').value;
+        // Desativar usuário
+        document.getElementById('remove-user-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const email = document.getElementById('usuarios-select').value;
+            if (!email) { alert('Selecione um usuário para desativar.'); return; }
 
-    fetch(`/api/usuarios/ativar/${email}`, {
-        method: 'PATCH', // Usar PATCH para ativar
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                alert(data.message);
-                // Recarregar a página 
-                location.reload();
+            try {
+                const response = await fetch(`/api/usuarios/${email}`, { method: 'PATCH' });
+                const data = await response.json();
+                alert(data.message || data.error);
+                if (response.ok) {
+                    loadUsers(); // ATUALIZA A LISTA SEM RECARREGAR A PÁGINA
+                }
+            } catch (error) {
+                console.error('Erro ao desativar usuário:', error);
             }
-        })
-        .catch(error => console.error('Erro ao ativar usuário:', error));
-});
+        });
 
-// Função para atualizar o status do usuário na tabela
-function updateUserStatus(email, status) {
-    const rows = document.querySelectorAll(`#usuarios-tbody tr`);
-    rows.forEach(row => {
-        if (row.cells[1].textContent === email) {
-            row.cells[2].textContent = status; // Atualiza o status na tabela
-        }
-    });
-}
+        // Ativar usuário
+        document.getElementById('activate-user-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const email = document.getElementById('usuarios-select-ativar').value;
+            if (!email) { alert('Selecione um usuário para ativar.'); return; }
+            
+            try {
+                const response = await fetch(`/api/usuarios/ativar/${email}`, { method: 'PATCH' });
+                const data = await response.json();
+                alert(data.message || data.error);
+                if (response.ok) {
+                    loadUsers(); // ATUALIZA A LISTA SEM RECARREGAR A PÁGINA
+                }
+            } catch (error) {
+                console.error('Erro ao ativar usuário:', error);
+            }
+        });
+    }
 
-// Função para remover uma opção de um select
-function removeOptionFromSelect(email, selectId) {
-    const select = document.getElementById(selectId);
-    const options = select.querySelectorAll('option');
-    options.forEach(option => {
-        if (option.value === email) {
-            option.remove();
-        }
-    });
-}
+    // ===================================================================
+    // FUNÇÕES GERAIS (EX: ABAS)
+    // ===================================================================
 
-// Inicializar as funções
-document.addEventListener('DOMContentLoaded', function () {
-    loadLoggedInUser();
-});
+    function opentab(tabname, event) {
+        const tablinks = document.getElementsByClassName("tab-links");
+        const tabcontents = document.getElementsByClassName("tab-contents");
 
-// Coisa legal do submenu
-document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function (e) {
-        e.preventDefault();
-        const submenuItems = this.nextElementSibling;
-        submenuItems.classList.toggle('open');
-        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-    });
-});
+        Array.from(tablinks).forEach(link => link.classList.remove("active-link"));
+        Array.from(tabcontents).forEach(content => content.classList.remove("active-tab"));
+
+        document.getElementById(tabname).classList.add("active-tab");
+        event.currentTarget.classList.add("active-link");
+    }
 
