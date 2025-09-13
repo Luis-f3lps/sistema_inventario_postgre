@@ -1715,7 +1715,7 @@ app.get("/api/dashboard/meus-laboratorios", async (req, res) => {
     }
 });
 
-// Endpoint para o painel do Técnico "Aulas no meu laboratório"
+// Endpoint para o painel do Técnico "Aulas no meu laboratório" (ATUALIZADO)
 app.get("/api/aulas-meus-laboratorios", async (req, res) => {
     if (!req.session.user || !req.session.user.email) {
         return res.status(401).json({ error: "Não autenticado." });
@@ -1725,11 +1725,11 @@ app.get("/api/aulas-meus-laboratorios", async (req, res) => {
         const query = `
             SELECT 
                 l.nome_laboratorio, 
-                prof.nome_usuario AS nome_professor, -- <<< CORREÇÃO APLICADA AQUI
+                prof.nome_usuario AS nome_professor, 
                 a.data, 
                 h.hora_inicio, 
                 h.hora_fim,
-                a.precisa_tecnico -- <<< CAMPO ADICIONADO AQUI
+                a.precisa_tecnico
             FROM aulas a
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
             JOIN horarios h ON a.id_horario = h.id_horario
@@ -1737,6 +1737,7 @@ app.get("/api/aulas-meus-laboratorios", async (req, res) => {
             WHERE 
                 l.usuario_email = $1 
                 AND a.data >= CURRENT_DATE
+                AND a.status = 'autorizado' 
             ORDER BY 
                 a.data ASC, h.hora_inicio ASC
         `;
@@ -1747,5 +1748,4 @@ app.get("/api/aulas-meus-laboratorios", async (req, res) => {
         res.status(500).json({ error: "Erro ao buscar as aulas." });
     }
 });
-
 export default app;
