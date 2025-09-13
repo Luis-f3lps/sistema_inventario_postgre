@@ -278,10 +278,6 @@ function loadLoggedInUser() {
             // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
 switch (userType) {
                         case 'admin':
-                            if (window.location.pathname !== '/Inventario' && window.location.pathname !== '/Inventario.html') {
-                                window.location.href = '/Inventario';
-                            }
-
                             document.querySelector('.admin-menu').style.display = 'block';
                             document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
 
