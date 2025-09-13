@@ -881,7 +881,6 @@ nav ul .fa-solid {
 /* --- Estilo do Painel de Aulas do Professor --- */
 .painel-minhas-aulas {
     max-width: 900px;
-    margin: 40px auto;
     padding: 30px;
     background-color: #ffffff;
     border-radius: 12px;
@@ -951,7 +950,6 @@ nav ul .fa-solid {
 /* --- Estilo do Painel de Aulas do Professor --- */
 .painel-minhas-aulas {
     max-width: 900px;
-    margin: 40px auto;
     padding: 30px;
     background-color: #ffffff;
     border-radius: 12px;
