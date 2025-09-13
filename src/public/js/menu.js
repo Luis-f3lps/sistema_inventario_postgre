@@ -1,4 +1,4 @@
-// Conteúdo do arquivo: js/menu.js
+// Conteúdo do arquivo: js/menu.js (CORRIGIDO)
 
 /**
  * Ponto de entrada: espera o HTML da página carregar para iniciar.
@@ -11,7 +11,30 @@ document.addEventListener('DOMContentLoaded', () => {
  * Orquestra o carregamento do menu e a verificação de login.
  */
 async function inicializarMenuEAutenticacao() {
-    // Tenta buscar o usuário logado. Se não conseguir, redireciona para o login.
+    
+    // --- PASSO 1: CARREGAR O HTML DO MENU ---
+    // Esta parte estava faltando.
+    const menuContainer = document.getElementById('menu-container');
+    if (menuContainer) {
+        try {
+            const response = await fetch('menu.html');
+            if(response.ok) {
+                menuContainer.innerHTML = await response.text();
+            } else {
+                // Se não encontrar o menu.html, exibe um erro visível
+                menuContainer.innerHTML = '<p style="color: red; text-align: center;">Erro: menu.html não pôde ser carregado.</p>';
+            }
+        } catch (error) { 
+            console.error("Erro ao carregar menu.html:", error); 
+        }
+    } else {
+        console.error('O elemento <div id="menu-container"></div> não foi encontrado no seu HTML principal.');
+        // Se o container não existe, não há como continuar.
+        return; 
+    }
+
+    // --- PASSO 2: VERIFICAR O LOGIN E PREENCHER OS DADOS ---
+    // Esta parte do código já estava correta.
     const userData = await verificarLogin();
     if (!userData) return; // Para a execução se o usuário não estiver logado
 
@@ -20,14 +43,12 @@ async function inicializarMenuEAutenticacao() {
     preencherDadosDoMenu(userData);
 
     // Dispara um evento para avisar a outros scripts (como o home.js) que o menu está pronto
-    // e envia os dados do usuário para que não precisem ser buscados novamente.
     document.dispatchEvent(new CustomEvent('menuReady', { detail: { userData } }));
 }
 
 /**
  * Busca os dados do usuário logado na API.
  * Se não estiver logado, redireciona para a página de login.
- * Se estiver, retorna os dados do usuário.
  */
 async function verificarLogin() {
     try {
@@ -45,7 +66,7 @@ async function verificarLogin() {
 }
 
 /**
- * Adiciona os eventos de clique aos botões do menu (hambúrguer e submenus).
+ * Adiciona os eventos de clique aos botões do menu.
  */
 function ativarFuncionalidadeMenu() {
     const sideMenu = document.getElementById("sidemenu");
@@ -85,23 +106,26 @@ function preencherDadosDoMenu(userData) {
 
     switch (userType) {
         case 'admin':
-            // Lógica de redirecionamento para o admin
             if (window.location.pathname !== '/Inventario' && window.location.pathname !== '/Inventario.html') {
                 window.location.href = '/Inventario';
-                return; // Para a execução para evitar piscar da página
+                return;
             }
             show('.admin-menu');
             show('.produto');
             break;
-        case 'tecnico':
-            show('.tecnico');
-            show('.Home');
-            show('.produto');
-            break;
-        case 'professor':
-            show('.Home');
-            show('.professor');
-            show('.Horarios');
-            break;
+                    case 'tecnico':
+                        document.querySelector('.tecnico').style.display = 'block';
+                        document.querySelector('.Home').style.display = 'block';
+                        document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                        document.querySelector('.cartao-aulas-tecnico').style.display = 'block';
+                        document.querySelector('.cartao-meus-laboratorios').style.display = 'block';
+                        break;
+                    case 'professor':
+                        document.querySelector('.Home').style.display = 'block';
+                        document.querySelector('.professor').style.display = 'block';
+                        document.querySelector('.Horarios').style.display = 'block';
+                        document.querySelector('.cartao-aulas-solicitadas').style.display = 'block';
+                        document.querySelector('.cartao-solicitacoes').style.display = 'block';
+                        break;
     }
 }
