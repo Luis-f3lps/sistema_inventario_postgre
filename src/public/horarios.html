@@ -115,51 +115,8 @@
                     const today = new Date().toISOString().slice(0, 10);
                     dateEl.value = today;
                 }
-
-                await carregarDadosDoUsuarioEHorarios(); 
             }
 
-            async function carregarDadosDoUsuarioEHorarios() { // <-- NOME CORRETO
-                try {
-                    const response = await fetch('/api/usuario-logado');
-                    if (!response.ok) {
-                        window.location.href = '/login.html';
-                        return;
-                    }
-                    loggedInUser = await response.json();
-
-                    const userNameElement = document.getElementById('user-name-text');
-                    userNameElement.innerHTML = loggedInUser.nome;
-
-                    const userType = loggedInUser.tipo_usuario ? loggedInUser.tipo_usuario.trim().toLowerCase() : '';
-switch (userType) {
-                        case 'admin':
-                            document.querySelector('.admin-menu').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-
-                            break;
-                        case 'tecnico':
-                            document.querySelector('.tecnico').style.display = 'block';
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-                            document.querySelector('.cartao-aulas-tecnico').style.display = 'block';
-                            document.querySelector('.cartao-meus-laboratorios').style.display = 'block';
-                            break;
-                        case 'professor':
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('.professor').style.display = 'block';
-                            document.querySelector('.Horarios').style.display = 'block';
-                            document.querySelector('.cartao-aulas-solicitadas').style.display = 'block';
-                            document.querySelector('.cartao-solicitacoes').style.display = 'block';
-                            break;
-                    }
-
-                    await loadAvailability();
-
-                } catch (error) {
-                    console.error('Erro ao carregar dados do usuário:', error);
-                }
-            }
             function ativarFuncionalidadeMenu() {
                 const sideMenu = document.getElementById("sidemenu");
                 const openMenuBtn = document.querySelector(".fa-bars");
@@ -208,31 +165,31 @@ switch (userType) {
                         userNameElement.innerHTML = data.nome;
 
                         const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
-switch (userType) {
-                        case 'admin':
-                            if (window.location.pathname !== '/Inventario' && window.location.pathname !== '/Inventario.html') {
-                                window.location.href = '/Inventario';
-                            }
+                        switch (userType) {
+                            case 'admin':
+                                if (window.location.pathname !== '/Inventario' && window.location.pathname !== '/Inventario.html') {
+                                    window.location.href = '/Inventario';
+                                }
 
-                            document.querySelector('.admin-menu').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                                document.querySelector('.admin-menu').style.display = 'block';
+                                document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
 
-                            break;
-                        case 'tecnico':
-                            document.querySelector('.tecnico').style.display = 'block';
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-                            document.querySelector('.cartao-aulas-tecnico').style.display = 'block';
-                            document.querySelector('.cartao-meus-laboratorios').style.display = 'block';
-                            break;
-                        case 'professor':
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('.professor').style.display = 'block';
-                            document.querySelector('.Horarios').style.display = 'block';
-                            document.querySelector('.cartao-aulas-solicitadas').style.display = 'block';
-                            document.querySelector('.cartao-solicitacoes').style.display = 'block';
-                            break;
-                    }
+                                break;
+                            case 'tecnico':
+                                document.querySelector('.tecnico').style.display = 'block';
+                                document.querySelector('.Home').style.display = 'block';
+                                document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                                document.querySelector('.cartao-aulas-tecnico').style.display = 'block';
+                                document.querySelector('.cartao-meus-laboratorios').style.display = 'block';
+                                break;
+                            case 'professor':
+                                document.querySelector('.Home').style.display = 'block';
+                                document.querySelector('.professor').style.display = 'block';
+                                document.querySelector('.Horarios').style.display = 'block';
+                                document.querySelector('.cartao-aulas-solicitadas').style.display = 'block';
+                                document.querySelector('.cartao-solicitacoes').style.display = 'block';
+                                break;
+                        }
                     })
                     .catch(error => console.error('Erro ao carregar usuário logado:', error));
             }
