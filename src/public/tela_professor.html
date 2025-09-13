@@ -12,54 +12,8 @@
 <body>
     <!------------------Relatórios--------------->
     <div id="header">
-        <nav>
-            <ul id="sidemenu">
-                <img src="images/logomenu.png" class="logo">
-                </br>
-                <li>
-                    <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
-                        <i class="fas fa-user"></i>
-                        <span id="user-name-text"></span>
-                    </span>
-                </li>
-                </br>
+        <header id="menu-container"></header>
 
-                <li class="Home" style="display: none;"><a href="/Home"><i class="fas fa-home"></i> Home</a></li>
-                <li class="Horarios" style="display: none;"><a href="/Horario"><i class="fas fa-clock"></i> Horarios</a>
-                </li>
-                <li class="tecnico" style="display: none;"><a href="/Tela_Tecnico"><i class="fas fa-bell"></i>
-                        Solicitações</a></li>
-                <li class="professor" style="display: none;"><a href="/Tela_Professor"><i class="fas fa-bell"></i>
-                        Solicitações Aula</a></li>
-
-                <li class="submenu produto" style="display: none;">
-                    <a href="#"><i class="fas fa-boxes"></i> Inventário <i class="fas fa-chevron-down"></i></a>
-                    <ul class="submenu-items">
-                        <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
-                        <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
-                        <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
-                    </ul>
-                </li>
-                <!-- HTML para o menu de administração -->
-                <li class="submenu admin-menu" style="display: none;">
-                    <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
-                    <ul class="submenu-items">
-                        <li><a href="/Usuarios"><i class="fas fa-users"></i> Usuários</a></li>
-                        <li><a href="/Produto"><i class="fas fa-tags"></i> Produtos</a></li>
-                        <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Laboratórios</a></li>
-                    </ul>
-                </li>
-                </br>
-                <li class="logout">
-                    <a href="/logout" style="border-top: 1px solid;">
-                        <i class="fas fa-sign-out-alt"></i> Sair
-                    </a>
-                </li>
-                <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
-            </ul>
-            <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
-        </nav>
-            </div>
 
         <div class="painel-minhas-aulas">
             <h1>Minhas Solicitações de Aula</h1>
@@ -83,29 +37,10 @@
             // Variável global para armazenar os dados do usuário logado
             let loggedInUser = null;
 
-            // Funções do menu lateral
-            var sidemenu = document.getElementById("sidemenu");
-            function openmenu() {
-                if (sidemenu) sidemenu.style.left = "0px";
-            }
-            function clossmenu() {
-                if (sidemenu) sidemenu.style.left = "-800px";
-            }
-
             /**
              * Função principal que orquestra o carregamento da página.
              */
             async function inicializarPagina() {
-                // Ativa a funcionalidade do submenu primeiro
-                document.querySelectorAll('.submenu > a').forEach(menu => {
-                    menu.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        const submenuItems = this.nextElementSibling;
-                        const icon = this.querySelector('.fas.fa-chevron-down');
-                        if (submenuItems) submenuItems.classList.toggle('open');
-                        if (icon) icon.classList.toggle('rotate');
-                    });
-                });
 
                 // Tenta buscar o usuário logado
                 try {
@@ -125,30 +60,6 @@
                     // Exibe os menus corretos com base no tipo de usuário
                     const userType = loggedInUser.tipo_usuario ? loggedInUser.tipo_usuario.trim().toLowerCase() : '';
 
-                    const showMenuItem = (selector) => {
-                        const el = document.querySelector(selector);
-                        if (el) el.style.display = 'list-item'; // 'list-item' é semanticamente melhor para <li>
-                    };
-
-                    switch (userType) {
-                        case 'admin':
-                            showMenuItem('.admin-menu');
-                            showMenuItem('.produto');
-                            break;
-                        case 'tecnico':
-                            showMenuItem('.tecnico');
-                            showMenuItem('.produto');
-                            break;
-                        case 'professor':
-                            showMenuItem('.Home');
-                            showMenuItem('.professor');
-                            showMenuItem('.Horarios');
-
-                            // --- CORREÇÃO ADICIONADA AQUI ---
-                            // Se o usuário é professor, chama a função para carregar a tabela
-                            await loadMyRequests();
-                            break;
-                    }
                 } catch (error) {
                     console.error('Erro ao inicializar a página:', error);
                     // Em caso de erro, redireciona para o login por segurança
@@ -213,6 +124,8 @@
             document.addEventListener('DOMContentLoaded', inicializarPagina);
 
         </script>
+        <script src="js/menu.js" defer></script>
+
 </body>
 
 </html>
