@@ -286,15 +286,13 @@ switch (userType) {
                             document.querySelector('.tecnico').style.display = 'block';
                             document.querySelector('.Home').style.display = 'block';
                             document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-                            document.querySelector('.cartao-aulas-tecnico').style.display = 'block';
-                            document.querySelector('.cartao-meus-laboratorios').style.display = 'block';
+
                             break;
                         case 'professor':
                             document.querySelector('.Home').style.display = 'block';
                             document.querySelector('.professor').style.display = 'block';
                             document.querySelector('.Horarios').style.display = 'block';
-                            document.querySelector('.cartao-aulas-solicitadas').style.display = 'block';
-                            document.querySelector('.cartao-solicitacoes').style.display = 'block';
+
                             break;
                     }
         })
