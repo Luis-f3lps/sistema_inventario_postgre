@@ -1815,13 +1815,15 @@ app.get("/api/aulas-meus-laboratorios", async (req, res) => {
 // Endpoint para buscar todos os horários possíveis cadastrados no banco
 app.get("/api/horarios", async (req, res) => {
     try {
-        // Busca todos os horários e ordena para garantir a sequência correta
         const result = await pool.query(
-            "SELECT id_horario, hora_inicio, hora_fim FROM horarios ORDER BY hora_inicio ASC"
+            "SELECT hora_inicio, hora_fim FROM horarios ORDER BY hora_inicio ASC"
         );
         
-        // Formata os dados para enviar apenas o que o frontend precisa (a hora de início)
-        const horariosFormatados = result.rows.map(h => h.hora_inicio.slice(0, 5));
+        // Agora, formata para enviar um objeto com início e fim
+        const horariosFormatados = result.rows.map(h => ({
+            inicio: h.hora_inicio.slice(0, 5), // "07:20"
+            fim: h.hora_fim.slice(0, 5)        // "08:10"
+        }));
         
         res.json(horariosFormatados);
 

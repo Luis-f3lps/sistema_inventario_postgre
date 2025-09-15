@@ -133,20 +133,22 @@ async function loadAvailability() {
 function renderSlots() {
     slotsEl.innerHTML = '';
 
-    // Usa a lista de horários que veio do banco de dados
-    availableSlotsFromDB.forEach(hour => {
+    // availableSlotsFromDB agora é um array de objetos, ex: [{inicio: "07:20", fim: "08:10"}]
+    availableSlotsFromDB.forEach(horario => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'bloco-horario';
-        btn.textContent = `${hour} — ${formatEnd(hour)}`;
-        btn.dataset.hour = hour;
+        
+        // Usa os valores de início e fim diretamente para criar o texto do botão
+        btn.textContent = `${horario.inicio} — ${horario.fim}`;
+        btn.dataset.hour = horario.inicio; // O valor para salvar continua sendo a hora de início
 
-        if (occupiedSlots.includes(hour)) {
+        if (occupiedSlots.includes(horario.inicio)) {
             btn.classList.add('occupied');
             btn.disabled = true;
         } else {
             btn.addEventListener('click', () => {
-                selectedSlot = (selectedSlot === btn.dataset.hour) ? null : btn.dataset.hour;
+                selectedSlot = (selectedSlot === horario.inicio) ? null : horario.inicio;
                 updateSelectionUI();
             });
         }
