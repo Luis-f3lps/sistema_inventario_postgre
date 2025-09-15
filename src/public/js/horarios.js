@@ -4,7 +4,7 @@ document.addEventListener('menuReady', (event) => {
 });
 
 // ===================================================================
-// VARIÁVEIS GLOBAIS
+// VARIÁVEIS GLOBAIS DA PÁGINA
 // ===================================================================
 let loggedInUser = null;
 const slotsEl = document.getElementById('slots');
@@ -14,48 +14,115 @@ const disciplinaEl = document.getElementById('disciplina-select2');
 const submitBtn = document.getElementById('submitBtn');
 const msgEl = document.getElementById('msg');
 let occupiedSlots = [];
-let availableSlotsFromDB = []; // << NOVO: Armazena os horários vindos do BD
+let selectedSlot = null;
 
 /**
- * Orquestra o carregamento da página.
+ * Orquestra o carregamento da página de agendamento.
+ * (VERSÃO CORRETA E COMPLETA)
+ */
+/**
+ * Orquestra o carregamento da página de agendamento.
+ * (VERSÃO CORRETA E COMPLETA)
  */
 async function inicializarPaginaDeAgendamento(userData) {
-    loggedInUser = userData;
+    loggedInUser = userData; // Guarda os dados do usuário que o menu.js já buscou
 
+    // 1. Define a data inicial como hoje e impede a seleção de datas passadas
     const todayString = new Date().toISOString().slice(0, 10);
     dateEl.value = todayString;
     dateEl.min = todayString;
 
+    // 2. Adiciona os "ouvintes" de eventos que disparam a atualização dos horários
+    //    Esta parte estava faltando no seu código.
     dateEl.addEventListener('change', loadAvailability);
     labEl.addEventListener('change', loadAvailability);
     submitBtn.addEventListener('click', submeterAgendamento);
 
-    // Carrega os dados dos selects e a lista de horários possíveis
+    // 3. Carrega os dados dos selects (laboratórios e disciplinas)
     await loadLaboratorios();
     await loadDisciplinas();
-    await fetchHorariosFromAPI(); // << NOVO: Busca os horários da API
-    
-    // Carrega a disponibilidade para a seleção inicial
+        await fetchHorariosFromAPI(); // << NOVO: Busca os horários da API
+
+    // 4. Carrega a disponibilidade de horários para a seleção inicial (data de hoje)
     await loadAvailability();
 }
 
 /**
- * NOVO: Busca a lista de todos os horários possíveis da API.
+ * Carrega a lista de laboratórios na caixa de seleção.
  */
-async function fetchHorariosFromAPI() {
+async function loadLaboratorios() {
     try {
-        const response = await fetch('/api/horarios');
-        if (!response.ok) throw new Error('Falha ao buscar lista de horários.');
-        availableSlotsFromDB = await response.json(); // Salva na variável global
+        const response = await fetch('/api/lab32');
+        if (!response.ok) throw new Error('Falha ao carregar laboratórios');
+        const data = await response.json();
+        
+        labEl.innerHTML = '<option value="">Selecione um Laboratório</option>'; 
+        data.forEach(laboratorio => {
+            const option = document.createElement('option');
+            option.value = laboratorio.id_laboratorio;
+            option.textContent = laboratorio.nome_laboratorio;
+            labEl.appendChild(option);
+        });
     } catch (error) {
-        console.error("Erro ao buscar horários da API:", error);
-        slotsEl.innerHTML = '<p style="color: red;">Não foi possível carregar os horários.</p>';
+        console.error('Erro ao carregar laboratórios:', error);
+    }
+}
+
+/**
+ * Carrega a lista de disciplinas do professor logado.
+ */
+async function loadDisciplinas() {
+    try {
+        const response = await fetch('/api/minhas-disciplinas');
+        if (!response.ok) throw new Error('Falha ao carregar disciplinas');
+        const data = await response.json();
+        
+        if (!disciplinaEl) return;
+        disciplinaEl.innerHTML = '<option value="">Selecione uma disciplina</option>'; 
+        data.forEach(disciplina => {
+            const option = document.createElement('option');
+            option.value = disciplina.id_disciplina;
+            option.textContent = disciplina.nome_disciplina;
+            disciplinaEl.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar disciplinas:', error);
+    }
+}
+
+/**
+ * Busca na API os horários já ocupados.
+ */
+async function loadAvailability() {
+    let labIdParaBuscar = labEl.value;
+    if (!labIdParaBuscar && labEl.options.length > 1) {
+        labIdParaBuscar = labEl.options[1].value;
+    }
+
+    if (!labIdParaBuscar) {
+        slotsEl.innerHTML = '<p>Não há laboratórios disponíveis para agendamento.</p>';
+        return;
+    }
+    
+    msgEl.style.display = 'none';
+    slotsEl.innerHTML = '<p>Carregando horários...</p>';
+    submitBtn.disabled = true;
+    selectedSlot = null;
+
+    try {
+        const res = await fetch(`/api/availability?date=${dateEl.value}&labId=${labIdParaBuscar}`);
+        if (!res.ok) throw new Error('Falha ao buscar horários.');
+        const data = await res.json();
+        occupiedSlots = data.occupied || [];
+        renderSlots();
+    } catch (error) {
+        console.error('Erro ao carregar disponibilidade:', error);
+        slotsEl.innerHTML = '<p style="color: red;">Erro ao carregar horários.</p>';
     }
 }
 
 /**
  * Renderiza os botões de horário.
- * ATUALIZADO: Não usa mais a função 'generateAllSlots'.
  */
 function renderSlots() {
     slotsEl.innerHTML = ''; // Limpa a área
@@ -138,12 +205,7 @@ async function submeterAgendamento() {
 }
 
 // Funções auxiliares
-function generateAllSlots() {
-    const arr = [];
-    for (let h = 7; h < 11; h++) arr.push(formatHour(h));
-    for (let h = 13; h < 22; h++) arr.push(formatHour(h));
-    return arr;
-}
+
 function formatHour(h) { return (h < 10 ? '0' : '') + h + ':00'; }
 function formatEnd(start) {
     const endH = parseInt(start.split(':')[0]) + 1;
