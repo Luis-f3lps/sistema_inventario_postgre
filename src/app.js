@@ -1561,28 +1561,37 @@ app.get("/api/availability", async (req, res) => {
     }
 });
 
-// Professor solicita uma nova aula
+// Professor solicita uma nova aula (VERSÃO CORRIGIDA)
 app.post("/api/schedule", async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: "Você precisa estar logado." });
     }
     try {
         const professor_email = req.session.user.email;
-        const { labId, date, hour, precisa_tecnico } = req.body;
+        
+        // --- MUDANÇA 1: Captura os novos campos do corpo da requisição ---
+        const { labId, date, hour, precisa_tecnico, link_roteiro, id_disciplina } = req.body;
+
+        // Validação básica para garantir que os campos essenciais chegaram
+        if (!labId || !date || !hour || !id_disciplina) {
+            return res.status(400).json({ error: "Dados incompletos para o agendamento." });
+        }
 
         const horario = await pool.query("SELECT id_horario FROM horarios WHERE hora_inicio = $1::time", [hour]);
         if (horario.rowCount === 0) return res.status(400).json({ error: "Horário inválido" });
         
         const id_horario = horario.rows[0].id_horario;
 
-        // Insere a aula com o status 'analisando' por defeito
+        // --- MUDANÇA 2: Atualiza a consulta INSERT ---
         const result = await pool.query(
-            `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico)
-             VALUES ($1, $2, $3, $4, $5)
+            `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico, link_roteiro, id_disciplina)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)
              RETURNING *`,
-            [professor_email, labId, date, id_horario, precisa_tecnico]
+            [professor_email, labId, date, id_horario, precisa_tecnico, link_roteiro, id_disciplina]
         );
+        
         res.status(201).json({ message: "Aula solicitada com sucesso!", aula: result.rows[0] });
+
     } catch (err) {
         if (err.code === "23505") { 
             return res.status(400).json({ error: "Esse horário já está ocupado ou em análise neste laboratório" });

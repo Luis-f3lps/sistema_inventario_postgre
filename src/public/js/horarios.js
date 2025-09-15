@@ -20,8 +20,12 @@ let selectedSlot = null;
  * Orquestra o carregamento da página de agendamento.
  * (VERSÃO CORRETA E COMPLETA)
  */
+/**
+ * Orquestra o carregamento da página de agendamento.
+ * (VERSÃO CORRETA E COMPLETA)
+ */
 async function inicializarPaginaDeAgendamento(userData) {
-    loggedInUser = userData;
+    loggedInUser = userData; // Guarda os dados do usuário que o menu.js já buscou
 
     // 1. Define a data inicial como hoje e impede a seleção de datas passadas
     const todayString = new Date().toISOString().slice(0, 10);
@@ -29,15 +33,16 @@ async function inicializarPaginaDeAgendamento(userData) {
     dateEl.min = todayString;
 
     // 2. Adiciona os "ouvintes" de eventos que disparam a atualização dos horários
+    //    Esta parte estava faltando no seu código.
     dateEl.addEventListener('change', loadAvailability);
     labEl.addEventListener('change', loadAvailability);
     submitBtn.addEventListener('click', submeterAgendamento);
 
-    // 3. Carrega os dados dos selects
+    // 3. Carrega os dados dos selects (laboratórios e disciplinas)
     await loadLaboratorios();
     await loadDisciplinas();
     
-    // 4. Carrega a disponibilidade de horários para a seleção inicial
+    // 4. Carrega a disponibilidade de horários para a seleção inicial (data de hoje)
     await loadAvailability();
 }
 
