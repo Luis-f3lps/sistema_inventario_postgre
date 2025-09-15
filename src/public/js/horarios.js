@@ -21,16 +21,11 @@ let selectedSlot = null;
 async function inicializarPaginaDeAgendamento(userData) {
     loggedInUser = userData;
 
-    const todayString = new Date().toISOString().slice(0, 10);
-    dateEl.value = todayString;
-    dateEl.min = todayString;
+    // ... (código para configurar a data e os event listeners) ...
 
-    dateEl.addEventListener('change', loadAvailability);
-    labEl.addEventListener('change', loadAvailability);
-    submitBtn.addEventListener('click', submeterAgendamento);
-
-    // Carrega os laboratórios PRIMEIRO
+    // Carrega os laboratórios E as disciplinas
     await loadLaboratorios();
+    await loadDisciplinas(); // <<< ADICIONE ESTA LINHA
     
     // DEPOIS, carrega a disponibilidade dos horários
     await loadAvailability();
@@ -41,7 +36,7 @@ async function inicializarPaginaDeAgendamento(userData) {
  */
 async function loadLaboratorios() {
     try {
-        const response = await fetch('/api/lab'); // Usa a API correta
+        const response = await fetch('/api/lab32'); // Usa a API correta
         if (!response.ok) throw new Error('Falha ao carregar laboratórios');
         
         const data = await response.json();
@@ -125,50 +120,84 @@ async function loadAvailability() {
 
         /**
          * Envia o novo agendamento para a API.
-         */
-        async function submeterAgendamento() {
-            if (!selectedSlot || !loggedInUser) return;
+         *//**
+ * Envia o novo agendamento para a API, incluindo a disciplina selecionada.
+ */
+async function submeterAgendamento() {
+    if (!selectedSlot || !loggedInUser) return;
 
-            const payload = {
-                labId: labEl.value,
-                date: dateEl.value,
-                hour: selectedSlot,
-                precisa_tecnico: document.querySelector('input[name="precisaTecnico"]:checked').value === 'true'
-            };
+    // 1. Pega o valor do novo select de disciplina
+    const disciplinaSelect = document.getElementById('disciplina-select2');
+    const disciplinaId = disciplinaSelect.value;
 
-            try {
-                const res = await fetch('/api/schedule', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await res.json();
-                if (!res.ok) throw new Error(result.error || 'Ocorreu um erro');
+    // Validação: Garante que uma disciplina foi selecionada
+    if (!disciplinaId) {
+        msgEl.textContent = 'Por favor, selecione uma disciplina.';
+        msgEl.className = 'mensagem-status erro';
+        msgEl.style.display = 'block';
+        return;
+    }
+    
+    // 2. Monta o payload com todos os dados do formulário
+    const payload = {
+        labId: labEl.value,
+        date: dateEl.value,
+        hour: selectedSlot,
+        precisa_tecnico: document.querySelector('input[name="precisaTecnico"]:checked').value === 'true',
+        link_roteiro: document.getElementById('link_roteiro').value,
+        id_disciplina: disciplinaId // <<< CAMPO ADICIONADO AQUI
+    };
 
-                // Exibe mensagem de sucesso
-                msgEl.textContent = result.message;
-                msgEl.className = 'mensagem-status sucesso';
-                msgEl.style.display = 'block';
+    // 3. Envia os dados para a API (o resto da função continua igual)
+    try {
+        const res = await fetch('/api/schedule', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Ocorreu um erro');
 
-                await loadAvailability(); // Recarrega os horários
-            } catch (err) {
-                msgEl.textContent = 'Erro ao enviar: ' + err.message;
-                msgEl.className = 'mensagem-status erro';
-                msgEl.style.display = 'block';
-            }
-        }
+        // Limpa o formulário e exibe a mensagem de sucesso
+        document.getElementById('link_roteiro').value = '';
+        disciplinaSelect.selectedIndex = 0; // Volta para a primeira opção
 
+        msgEl.textContent = result.message;
+        msgEl.className = 'mensagem-status sucesso';
+        msgEl.style.display = 'block';
 
-        function generateAllSlots() {
-            const arr = [];
-            for (let h = 7; h < 11; h++) arr.push(formatHour(h));
-            for (let h = 13; h < 22; h++) arr.push(formatHour(h));
-            return arr;
-        }
+        await loadAvailability(); // Recarrega os horários
+        
+    } catch (err) {
+        msgEl.textContent = 'Erro ao enviar: ' + err.message;
+        msgEl.className = 'mensagem-status erro';
+        msgEl.style.display = 'block';
+    }
+}
+/**
+ * Carrega a lista de disciplinas do professor logado na caixa de seleção.
+ */
+async function loadDisciplinas() {
+    try {
+        const response = await fetch('/api/minhas-disciplinas');
+        if (!response.ok) throw new Error('Falha ao carregar disciplinas');
+        
+        const data = await response.json();
+        
+        const select = document.getElementById('disciplina-select2');
+        if (!select) return; // Garante que o elemento existe
 
-        function formatHour(h) { return (h < 10 ? '0' : '') + h + ':00'; }
+        // Limpa opções antigas, mantendo a primeira
+        select.innerHTML = '<option value="">Selecione uma disciplina</option>'; 
+        
+        data.forEach(disciplina => {
+            const option = document.createElement('option');
+            option.value = disciplina.id_disciplina;
+            option.textContent = disciplina.nome_disciplina;
+            select.appendChild(option);
+        });
 
-        function formatEnd(start) {
-            const endH = parseInt(start.split(':')[0]) + 1;
-            return formatHour(endH);
-        }
+    } catch (error) {
+        console.error('Erro ao carregar disciplinas:', error);
+    }
+}

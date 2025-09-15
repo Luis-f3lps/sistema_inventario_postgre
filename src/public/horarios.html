@@ -17,12 +17,14 @@
         <h1>Agendar Aula — Escolha data e horário</h1>
 
         <div class="seletor-fila">
-            <label for="lab">Laboratório</label>
-                                    <select id="laboratorios-select2" name="laboratorio">
-                                        <option value="">Todos os Laboratórios</option>
-                                        <!-- Opções serão preenchidas dinamicamente -->
-                                    </select>
-
+            <select id="laboratorios-select2" name="laboratorio">
+                <option value="">Todos os Laboratórios</option>
+                <!-- Opções serão preenchidas dinamicamente -->
+            </select>
+            <select id="disciplina-select2" name="disciplinas">
+                <option value="">Minhas disciplinas</option>
+                <!-- Opções serão preenchidas dinamicamente -->
+            </select>
             <label for="date">Data</label>
             <input id="date" type="date" />
         </div>
@@ -43,7 +45,11 @@
                 <label for="tecnicoNao">Não</label>
             </div>
         </div>
+        <div class="opcao-tecnico-fila">
+            <label for="link_roteiro">Link do Roteiro da Aula (Opcional)</label>
 
+            <input type="url" id="link_roteiro" name="link_roteiro" placeholder="https://exemplo.com/roteiro.pdf">
+        </div>
         <div id="msg" class="mensagem-status"></div>
         <button id="submitBtn" class="btn-principal" disabled>Solicitar Aula</button>
     </div>

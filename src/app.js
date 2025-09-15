@@ -513,7 +513,62 @@ app.get('/api/lab', Autenticado, async (req, res) => {
     res.status(500).json({ message: 'Erro ao buscar laboratórios' });
   }
 });
-  
+
+  // Obter laboratórios com base no tipo de usuário
+app.get('/api/lab32', Autenticado, async (req, res) => {
+  try {
+    const { tipo_usuario, email } = req.session.user; // Obtém o tipo de usuário e o email do usuário logado
+
+    let query;
+    let params = [];
+
+    // Caso seja administrador, retorna todos os laboratórios; caso contrário, retorna apenas os laboratórios atribuídos ao usuário
+    if (tipo_usuario === 'professor') {
+      query = 'SELECT id_laboratorio, nome_laboratorio FROM laboratorio';
+    } else {
+      query = 'SELECT id_laboratorio, nome_laboratorio FROM laboratorio WHERE usuario_email = $1';
+      params.push(email); // Adiciona o email do usuário como parâmetro
+    }
+
+    // Executa a consulta e pega as linhas retornadas
+    const { rows: labs } = await pool.query(query, params);
+    res.json(labs);
+  } catch (error) {
+    console.error('Erro ao buscar laboratórios:', error);
+    res.status(500).json({ message: 'Erro ao buscar laboratórios' });
+  }
+});
+
+// Endpoint para buscar as disciplinas de um professor logado
+app.get("/api/minhas-disciplinas", async (req, res) => {
+    // 1. Verifica se o usuário está logado
+    if (!req.session.user || !req.session.user.email) {
+        return res.status(401).json({ error: "Não autenticado." });
+    }
+
+    try {
+        // 2. Pega o email do professor a partir da sessão
+        const professor_email = req.session.user.email;
+
+        // 3. Busca no banco de dados todas as disciplinas associadas a esse email
+        const query = `
+            SELECT id_disciplina, nome_disciplina 
+            FROM disciplina 
+            WHERE professor_email_responsavel = $1 
+            ORDER BY nome_disciplina ASC
+        `;
+        
+        const result = await pool.query(query, [professor_email]);
+
+        // 4. Retorna a lista de disciplinas em formato JSON
+        res.json(result.rows);
+
+    } catch (err) {
+        console.error("Erro ao buscar disciplinas do professor:", err);
+        res.status(500).json({ error: "Erro ao buscar as disciplinas." });
+    }
+});
+
   app.delete('/api/excluir-produto/:idproduto', Autenticado, async (req, res) => {
     const { idproduto } = req.params;
   
