@@ -146,7 +146,7 @@ function renderizarAulasNosMeusLaboratorios(aulas) {
     lista.innerHTML = '';
 
     if (!aulas || aulas.length === 0) {
-        lista.innerHTML = '<li>Nenhuma aula futura agendada nos seus laboratórios.</li>';
+        lista.innerHTML = '<li>Nenhuma aula futura autorizada nos seus laboratórios.</li>';
         return;
     }
 
@@ -154,16 +154,20 @@ function renderizarAulasNosMeusLaboratorios(aulas) {
         const dataFormatada = new Date(aula.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
         const horaInicio = aula.hora_inicio.slice(0, 5);
         const horaFim = aula.hora_fim.slice(0, 5);
-
         const precisaTecnicoTexto = aula.precisa_tecnico ? 'Sim' : 'Não';
+
+        // Lógica para criar o link do roteiro apenas se ele existir
+        const linkRoteiroHtml = aula.link_roteiro
+            ? `<a href="${aula.link_roteiro}" target="_blank" class="link-roteiro">Ver Roteiro</a>`
+            : 'N/A';
 
         return `
             <li class="item-painel-detalhado">
-                <strong >${aula.nome_laboratorio}</strong>
-                <span class="detalhe-item-painel" >Professor(a): ${aula.nome_professor}</span>
+                <strong>${aula.nome_laboratorio}</strong>
+                <span class="detalhe-item-painel">Disciplina: ${aula.nome_disciplina}</span> <span class="detalhe-item-painel">Professor(a): ${aula.nome_professor}</span>
                 <span class="detalhe-item-painel">${dataFormatada} | ${horaInicio} - ${horaFim}</span>
                 <span class="detalhe-item-painel">Apoio Técnico: <strong>${precisaTecnicoTexto}</strong></span>
-            </li>
+                <span class="detalhe-item-painel">Roteiro: ${linkRoteiroHtml}</span> </li>
         `;
     }).join('');
 }

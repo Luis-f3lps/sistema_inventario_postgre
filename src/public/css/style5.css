@@ -1018,13 +1018,14 @@ nav ul .fa-solid {
 
 /* --- Estilo do Painel de Gestão --- */
 .painel-gestao-solicitacoes {
-    max-width: 1100px;
+    max-width: 1450px;
     margin: 40px auto;
     padding: 30px;
     background-color: #ffffff;
     border-radius: 12px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-left: 400px;
 }
 
 .painel-gestao-solicitacoes h1 {
@@ -1326,8 +1327,6 @@ nav ul .fa-solid {
     width: 100%;
     overflow-x: auto; /* A MÁGICA ACONTECE AQUI */
     -webkit-overflow-scrolling: touch; /* Melhora a experiência de rolagem em celulares */
-    border: 1px solid #ddd; /* Borda sutil opcional */
-    border-radius: 8px; /* Cantos arredondados opcionais */
 }
 
 /* Garante que a tabela use o espaço e tenha um tamanho mínimo */
