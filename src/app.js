@@ -1602,33 +1602,36 @@ app.post("/api/schedule", async (req, res) => {
 });
 // Endpoint do Técnico para ver as solicitações
 app.get("/api/requests", async (req, res) => {
-  try {
-    const { tecnico_email } = req.query;
-    const result = await pool.query(
-      `SELECT 
-         a.id_aula, 
-         u.nome_usuario as professor, 
-         l.nome_laboratorio, 
-         a.data, 
-         h.hora_inicio, 
-         h.hora_fim, -- <<< ADICIONADO AQUI
-         a.precisa_tecnico, 
-         a.status
-       FROM aulas a
-       JOIN usuario u ON a.professor_email = u.email
-       JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-       JOIN horarios h ON a.id_horario = h.id_horario
-       WHERE 
-         l.usuario_email = $1 AND a.status IN ('analisando', 'autorizado') 
-       ORDER BY 
-         a.data, h.hora_inicio`,
-      [tecnico_email]
-    );
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Erro ao buscar solicitações:", err);
-    res.status(500).json({ error: "Erro ao buscar solicitações" });
-  }
+    try {
+        const { tecnico_email } = req.query;
+        const query = `
+            SELECT 
+                a.id_aula, 
+                u.nome_usuario AS professor, 
+                l.nome_laboratorio, 
+                d.nome_disciplina, -- <<< ADICIONADO AQUI
+                a.link_roteiro,      -- <<< ADICIONADO AQUI
+                a.data, 
+                h.hora_inicio, 
+                h.hora_fim,
+                a.precisa_tecnico, 
+                a.status
+            FROM aulas a
+            JOIN usuario u ON a.professor_email = u.email
+            JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+            JOIN horarios h ON a.id_horario = h.id_horario
+            JOIN disciplina d ON a.id_disciplina = d.id_disciplina -- <<< NOVO JOIN
+            WHERE 
+                l.usuario_email = $1 AND a.status IN ('analisando', 'autorizado') 
+            ORDER BY 
+                a.data, h.hora_inicio
+        `;
+        const result = await pool.query(query, [tecnico_email]);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Erro ao buscar solicitações:", err);
+        res.status(500).json({ error: "Erro ao buscar solicitações" });
+    }
 });
 
 // Endpoint do Técnico para autorizar/negar/reverter (CORRIGIDO)
