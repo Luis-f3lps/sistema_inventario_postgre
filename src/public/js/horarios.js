@@ -57,8 +57,19 @@ async function loadLaboratorios() {
  * Busca na API os horários já ocupados.
  */
 async function loadAvailability() {
-    if (!dateEl.value || !labEl.value) { // Garante que um lab foi selecionado
-        slotsEl.innerHTML = '<p>Por favor, selecione um laboratório.</p>';
+    if (!dateEl) return; // Garante que o elemento de data existe
+
+    // LÓGICA CORRIGIDA:
+    // Pega o valor do laboratório selecionado. Se nenhum for selecionado (valor vazio),
+    // ele tenta pegar o valor do primeiro laboratório real da lista (índice 1).
+    let labIdParaBuscar = labEl.value;
+    if (!labIdParaBuscar && labEl.options.length > 1) {
+        labIdParaBuscar = labEl.options[1].value;
+    }
+
+    // Se, mesmo depois de tentar, não houver um ID de laboratório, mostra a mensagem.
+    if (!labIdParaBuscar) {
+        slotsEl.innerHTML = '<p>Não há laboratórios disponíveis para agendamento.</p>';
         return;
     }
     
@@ -68,7 +79,8 @@ async function loadAvailability() {
     selectedSlot = null;
 
     try {
-        const res = await fetch(`/api/availability?date=${dateEl.value}&labId=${labEl.value}`);
+        // Usa a variável 'labIdParaBuscar' que agora sempre terá um valor (se houver labs)
+        const res = await fetch(`/api/availability?date=${dateEl.value}&labId=${labIdParaBuscar}`);
         if (!res.ok) throw new Error('Falha ao buscar horários.');
         
         const data = await res.json();
