@@ -1,10 +1,11 @@
+// Ouve o evento do menu.js para saber quando começar a trabalhar
 document.addEventListener('menuReady', (event) => {
     const { userData } = event.detail;
     inicializarPaginaDeAgendamento(userData);
 });
 
 // ===================================================================
-// VARIÁVEIS GLOBAIS DA PÁGINA
+// VARIÁVEIS GLOBAIS
 // ===================================================================
 let loggedInUser = null;
 const slotsEl = document.getElementById('slots');
@@ -15,36 +16,41 @@ const submitBtn = document.getElementById('submitBtn');
 const msgEl = document.getElementById('msg');
 let occupiedSlots = [];
 let selectedSlot = null;
+let availableSlotsFromDB = []; // Armazena os horários vindos do banco de dados
 
 /**
  * Orquestra o carregamento da página de agendamento.
- * (VERSÃO CORRETA E COMPLETA)
- */
-/**
- * Orquestra o carregamento da página de agendamento.
- * (VERSÃO CORRETA E COMPLETA)
  */
 async function inicializarPaginaDeAgendamento(userData) {
-    loggedInUser = userData; // Guarda os dados do usuário que o menu.js já buscou
+    loggedInUser = userData;
 
-    // 1. Define a data inicial como hoje e impede a seleção de datas passadas
     const todayString = new Date().toISOString().slice(0, 10);
     dateEl.value = todayString;
     dateEl.min = todayString;
 
-    // 2. Adiciona os "ouvintes" de eventos que disparam a atualização dos horários
-    //    Esta parte estava faltando no seu código.
     dateEl.addEventListener('change', loadAvailability);
     labEl.addEventListener('change', loadAvailability);
     submitBtn.addEventListener('click', submeterAgendamento);
 
-    // 3. Carrega os dados dos selects (laboratórios e disciplinas)
+    // Carrega os dados na ordem correta
     await loadLaboratorios();
     await loadDisciplinas();
-        await fetchHorariosFromAPI(); // << NOVO: Busca os horários da API
+    await fetchHorariosFromAPI(); // Busca os horários possíveis da API
+    await loadAvailability();     // Verifica a disponibilidade desses horários
+}
 
-    // 4. Carrega a disponibilidade de horários para a seleção inicial (data de hoje)
-    await loadAvailability();
+/**
+ * Busca a lista de todos os horários possíveis da API e a armazena.
+ */
+async function fetchHorariosFromAPI() {
+    try {
+        const response = await fetch('/api/horarios');
+        if (!response.ok) throw new Error('Falha ao buscar lista de horários.');
+        availableSlotsFromDB = await response.json();
+    } catch (error) {
+        console.error("Erro ao buscar horários da API:", error);
+        slotsEl.innerHTML = '<p style="color: red;">Não foi possível carregar os horários.</p>';
+    }
 }
 
 /**
@@ -91,7 +97,7 @@ async function loadDisciplinas() {
 }
 
 /**
- * Busca na API os horários já ocupados.
+ * Busca na API os horários já ocupados para a data e lab selecionados.
  */
 async function loadAvailability() {
     let labIdParaBuscar = labEl.value;
@@ -100,7 +106,7 @@ async function loadAvailability() {
     }
 
     if (!labIdParaBuscar) {
-        slotsEl.innerHTML = '<p>Não há laboratórios disponíveis para agendamento.</p>';
+        slotsEl.innerHTML = '<p>Selecione um laboratório para ver os horários.</p>';
         return;
     }
     
@@ -122,10 +128,10 @@ async function loadAvailability() {
 }
 
 /**
- * Renderiza os botões de horário.
+ * Renderiza os botões de horário usando os dados do banco.
  */
 function renderSlots() {
-    slotsEl.innerHTML = ''; // Limpa a área
+    slotsEl.innerHTML = '';
 
     // Usa a lista de horários que veio do banco de dados
     availableSlotsFromDB.forEach(hour => {
@@ -205,9 +211,10 @@ async function submeterAgendamento() {
 }
 
 // Funções auxiliares
-
 function formatHour(h) { return (h < 10 ? '0' : '') + h + ':00'; }
 function formatEnd(start) {
     const endH = parseInt(start.split(':')[0]) + 1;
     return formatHour(endH);
 }
+
+// A função 'generateAllSlots' foi removida pois não é mais necessária.
