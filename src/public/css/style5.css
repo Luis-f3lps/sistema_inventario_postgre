@@ -1319,3 +1319,30 @@ nav ul .fa-solid {
     margin-left: 0px;
 }
 }
+/* Adicione este código ao final do seu arquivo CSS */
+
+/* Container que permite a rolagem horizontal */
+.container-tabela-responsiva {
+    width: 100%;
+    overflow-x: auto; /* A MÁGICA ACONTECE AQUI */
+    -webkit-overflow-scrolling: touch; /* Melhora a experiência de rolagem em celulares */
+    border: 1px solid #ddd; /* Borda sutil opcional */
+    border-radius: 8px; /* Cantos arredondados opcionais */
+}
+
+/* Garante que a tabela use o espaço e tenha um tamanho mínimo */
+.tabela-de-aulas {
+    width: 100%; /* Faz a tabela tentar ocupar todo o espaço do container */
+    min-width: 900px; /* IMPORTANTE: Força a tabela a ter no mínimo 900px. 
+                         Se o container for menor que isso, a barra de rolagem aparece.
+                         Ajuste este valor conforme necessário. */
+    border-collapse: collapse; /* Remove espaços entre as células */
+}
+
+/* Melhora a legibilidade das células */
+.tabela-de-aulas th,
+.tabela-de-aulas td {
+    padding: 12px 15px;
+    text-align: left;
+    white-space: nowrap; /* Impede que o texto quebre em várias linhas */
+}

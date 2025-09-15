@@ -16,22 +16,27 @@
     <div class="painel-gestao-solicitacoes">
         <h1>Solicitações Pendentes</h1>
         <p style="text-align: center; color: #666;">Abaixo estão as aulas que aguardam a sua aprovação.</p>
+        <div class="container-tabela-responsiva">
 
-<table class="tabela-de-aulas">
-    <thead>
-        <tr>
-            <th>Professor</th>
-            <th>Laboratório</th>
-            <th>Disciplina</th>  <th>Data</th>
-            <th>Horário</th>
-            <th>Apoio Técnico</th>
-            <th>Status</th>
-            <th>Roteiro</th>     <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody id="corpo-tabela-solicitacoes">
-        </tbody>
-</table>
+            <table class="tabela-de-aulas">
+                <thead>
+                    <tr>
+                        <th>Professor</th>
+                        <th>Laboratório</th>
+                        <th>Disciplina</th>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Apoio Técnico</th>
+                        <th>Status</th>
+                        <th>Roteiro</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="corpo-tabela-solicitacoes">
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
     <script>
@@ -92,28 +97,28 @@
             }
         }
 
-// Dentro do seu arquivo js/tela-tecnico.js
+        // Dentro do seu arquivo js/tela-tecnico.js
 
-function renderTable(requests) {
-    const tbody = document.getElementById("corpo-tabela-solicitacoes");
-    tbody.innerHTML = "";
+        function renderTable(requests) {
+            const tbody = document.getElementById("corpo-tabela-solicitacoes");
+            tbody.innerHTML = "";
 
-    if (requests.length === 0) {
-        // Ajuste o colspan para o novo número de colunas
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
-        return;
-    }
+            if (requests.length === 0) {
+                // Ajuste o colspan para o novo número de colunas
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
+                return;
+            }
 
-    requests.forEach(r => {
-        const tr = document.createElement("tr");
-        const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-        
-        // Lógica para o link do roteiro
-        const linkRoteiroHtml = r.link_roteiro 
-            ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Link</a>` 
-            : 'N/A'; // Mostra 'N/A' se não houver link
+            requests.forEach(r => {
+                const tr = document.createElement("tr");
+                const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
-        tr.innerHTML = `
+                // Lógica para o link do roteiro
+                const linkRoteiroHtml = r.link_roteiro
+                    ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Link</a>`
+                    : 'N/A'; // Mostra 'N/A' se não houver link
+
+                tr.innerHTML = `
             <td>${r.professor}</td>
             <td>${r.nome_laboratorio}</td>
             <td>${r.nome_disciplina}</td>      <td>${dataFormatada}</td>
@@ -125,9 +130,9 @@ function renderTable(requests) {
                 <button class="botao-de-acao botao-recusar" data-id="${r.id_aula}">Não Autorizar</button>
             </td>
         `;
-        tbody.appendChild(tr);
-    });
-}
+                tbody.appendChild(tr);
+            });
+        }
 
         async function updateRequestStatus(id, novoStatus) {
             try {
