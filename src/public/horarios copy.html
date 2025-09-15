@@ -143,7 +143,21 @@
                     await loadAvailability();
                 }
             }
-
+function loadLaboratorios2() {
+    fetch('/api/laboratorios')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('laboratorios-select2');
+            select.innerHTML = '<option value="">Todos os Laboratórios</option>'; // Adiciona a opção "Todos os Laboratórios"
+            data.forEach(laboratorio => {
+                const option = document.createElement('option');
+                option.value = laboratorio.id_laboratorio;
+                option.textContent = laboratorio.nome_laboratorio;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Erro ao carregar laboratórios:', error));
+}
             /**
              * Busca os dados do usuário logado. Se não estiver logado, redireciona.
              */

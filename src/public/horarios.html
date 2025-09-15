@@ -18,10 +18,10 @@
 
         <div class="seletor-fila">
             <label for="lab">Laboratório</label>
-            <select id="lab">
-                <option value="1">Física (Lab 1)</option>
-                <option value="4">Química (Lab 4)</option>
-            </select>
+                                    <select id="laboratorios-select2" name="laboratorio">
+                                        <option value="">Todos os Laboratórios</option>
+                                        <!-- Opções serão preenchidas dinamicamente -->
+                                    </select>
 
             <label for="date">Data</label>
             <input id="date" type="date" />
@@ -95,7 +95,21 @@
                 await loadAvailability();
             }
         }
-
+function loadLaboratorios2() {
+    fetch('/api/laboratorios')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('laboratorios-select2');
+            select.innerHTML = '<option value="">Todos os Laboratórios</option>'; // Adiciona a opção "Todos os Laboratórios"
+            data.forEach(laboratorio => {
+                const option = document.createElement('option');
+                option.value = laboratorio.id_laboratorio;
+                option.textContent = laboratorio.nome_laboratorio;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Erro ao carregar laboratórios:', error));
+}
         /**
          * Busca os dados do usuário logado. Se não estiver logado, redireciona.
          */
