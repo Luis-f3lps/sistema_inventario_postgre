@@ -49,91 +49,66 @@
     </div>
 
     <script>
-        // ===================================================================
-        // PONTO DE ENTRADA PRINCIPAL DA PÁGINA
-        // ===================================================================
-        document.addEventListener('DOMContentLoaded', () => {
-            inicializarPaginaDeAgendamento();
-            loadLaboratorios();
+document.addEventListener('menuReady', (event) => {
+    const { userData } = event.detail;
+    inicializarPaginaDeAgendamento(userData);
+});
 
-        });
+// ===================================================================
+// VARIÁVEIS GLOBAIS DA PÁGINA DE AGENDAMENTO
+// ===================================================================
+let loggedInUser = null;
+const slotsEl = document.getElementById('slots');
+const dateEl = document.getElementById('date');
+// CORREÇÃO: O ID correto do select de laboratórios
+const labEl = document.getElementById('laboratorios-select2');
+const submitBtn = document.getElementById('submitBtn');
+const msgEl = document.getElementById('msg');
+let occupiedSlots = [];
+let selectedSlot = null;
 
-        // ===================================================================
-        // VARIÁVEIS GLOBAIS DA PÁGINA
-        // ===================================================================
-        let loggedInUser = null;
-        const slotsEl = document.getElementById('slots');
-        const dateEl = document.getElementById('date');
-        const labEl = document.getElementById('lab');
-        const submitBtn = document.getElementById('submitBtn');
-        const msgEl = document.getElementById('msg');
-        let occupiedSlots = [];
-        let selectedSlot = null;
+/**
+ * Orquestra o carregamento da página de agendamento.
+ */
+async function inicializarPaginaDeAgendamento(userData) {
+    loggedInUser = userData; // Guarda os dados do usuário que o menu.js já buscou
 
-        // ===================================================================
-        // LÓGICA DE INICIALIZAÇÃO E FLUXO
-        // ===================================================================
+    // Define a data de hoje e o limite mínimo no calendário
+    const todayString = new Date().toISOString().slice(0, 10);
+    dateEl.value = todayString;
+    dateEl.min = todayString;
 
-        /**
-         * Orquestra o carregamento da página na ordem correta.
-         */
-        async function inicializarPaginaDeAgendamento() {
-            // Ativa os botões do menu lateral primeiro
-            ativarFuncionalidadeMenu();
+    // Adiciona os "ouvintes" de eventos
+    dateEl.addEventListener('change', loadAvailability);
+    labEl.addEventListener('change', loadAvailability);
+    submitBtn.addEventListener('click', submeterAgendamento);
 
-            // Define a data de hoje no calendário
-            dateEl.value = new Date().toISOString().slice(0, 10);
-
-            // Adiciona os "ouvintes" de eventos para interações do usuário
-            dateEl.addEventListener('change', loadAvailability);
-            labEl.addEventListener('change', loadAvailability);
-            submitBtn.addEventListener('click', submeterAgendamento);
-
-            // Carrega os dados do usuário. Se o login for válido, continua.
-            loggedInUser = await loadLoggedInUser();
-            if (loggedInUser) {
-                // **AQUI ESTÁ A CORREÇÃO PRINCIPAL**
-                // Carrega os horários para a data de hoje AUTOMATICAMENTE
-                await loadAvailability();
-            }
-        }
-function loadLaboratorios() {
-    fetch('/api/lab')
-        .then(response => response.json())
-        .then(data => {
-            const select = document.getElementById('laboratorios-select2');
-            select.innerHTML = '<option value="">Todos os Laboratórios</option>'; // Adiciona a opção "Todos os Laboratórios"
-            data.forEach(laboratorio => {
-                const option = document.createElement('option');
-                option.value = laboratorio.id_laboratorio;
-                option.textContent = laboratorio.nome_laboratorio;
-                select.appendChild(option);
-            });
-        })
-        .catch(error => console.error('Erro ao carregar laboratórios:', error));
+    // Carrega os laboratórios no select e DEPOIS os horários
+    await loadLaboratorios();
+    await loadAvailability();
 }
-        /**
-         * Busca os dados do usuário logado. Se não estiver logado, redireciona.
-         */
-        async function loadLoggedInUser() {
-            try {
-                const response = await fetch('/api/usuario-logado');
-                if (!response.ok) {
-                    window.location.href = 'login.html';
-                    return null;
-                }
-                const userData = await response.json();
 
-                // Preenche o nome e ajusta os menus visíveis
-                preencherDadosDoMenu(userData);
-
-                return userData; // Retorna os dados para uso em outras funções
-            } catch (error) {
-                console.error('Erro de conexão ao verificar usuário:', error);
-                window.location.href = 'login.html';
-                return null;
-            }
-        }
+/**
+ * Carrega a lista de laboratórios na caixa de seleção.
+ */
+async function loadLaboratorios() {
+    try {
+        const response = await fetch('/api/lab');
+        if (!response.ok) throw new Error('Falha ao carregar laboratórios');
+        const data = await response.json();
+        
+        // Limpa opções antigas, mantendo a primeira
+        labEl.innerHTML = '<option value="">Selecione um Laboratório</option>'; 
+        data.forEach(laboratorio => {
+            const option = document.createElement('option');
+            option.value = laboratorio.id_laboratorio;
+            option.textContent = laboratorio.nome_laboratorio;
+            labEl.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar laboratórios:', error);
+    }
+}
 
         // ===================================================================
         // LÓGICA PRINCIPAL DE AGENDAMENTO
