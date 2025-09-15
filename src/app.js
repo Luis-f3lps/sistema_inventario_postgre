@@ -1724,42 +1724,67 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
   }
 });
 
-// Endpoint para o painel "Minhas Solicitações" (últimas 6 pendentes/recusadas)
-app.get("/api/dashboard/solicitacoes-recentes", async (req, res) => {
-    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+// Endpoint para o professor ver as suas próprias solicitações futuras (VERSÃO ATUALIZADA)
+app.get("/api/minhas-solicitacoes", async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: "Utilizador não autenticado." });
+    }
     try {
         const professor_email = req.session.user.email;
+
+        // A lógica de UPDATE para aulas passadas continua a mesma...
+        // ...
+
+        // Buscando a lista com os novos campos
         const result = await pool.query(
             `SELECT 
-               l.nome_laboratorio, a.data, h.hora_inicio, h.hora_fim, a.status
-             FROM aulas a
-             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-             JOIN horarios h ON a.id_horario = h.id_horario -- Join adicionado
-             WHERE a.professor_email = $1 AND a.status IN ('analisando', 'nao_autorizado', 'autorizado', 'concluido')
-             ORDER BY a.data DESC
-             LIMIT 6`,
+                l.nome_laboratorio, 
+                d.nome_disciplina, -- <<< ADICIONADO
+                a.link_roteiro,      -- <<< ADICIONADO
+                a.data, 
+                h.hora_inicio, 
+                h.hora_fim,
+                a.precisa_tecnico, 
+                a.status
+            FROM aulas a
+            JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+            JOIN horarios h ON a.id_horario = h.id_horario
+            JOIN disciplina d ON a.id_disciplina = d.id_disciplina -- <<< NOVO JOIN
+            WHERE 
+                a.professor_email = $1 
+                AND a.data >= CURRENT_DATE
+            ORDER BY 
+                a.data ASC, h.hora_inicio ASC`,
             [professor_email]
         );
         res.json(result.rows);
     } catch (err) {
-        res.status(500).json({ error: "Erro ao buscar solicitações recentes." });
+        // ... seu catch block ...
     }
 });
 
-// Endpoint para o painel "Próximas Aulas" (próximas 6 autorizadas)
+// Endpoint para o painel "Próximas Aulas" (VERSÃO ATUALIZADA)
 app.get("/api/dashboard/aulas-autorizadas", async (req, res) => {
     if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
     try {
         const professor_email = req.session.user.email;
         const result = await pool.query(
             `SELECT 
-               l.nome_laboratorio, a.data, h.hora_inicio, h.hora_fim -- Coluna adicionada
-             FROM aulas a
-             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-             JOIN horarios h ON a.id_horario = h.id_horario
-             WHERE a.professor_email = $1 AND a.status = 'autorizado' AND a.data >= CURRENT_DATE
-             ORDER BY a.data ASC, h.hora_inicio ASC
-             LIMIT 6`,
+                l.nome_laboratorio, 
+                d.nome_disciplina, -- <<< ADICIONADO
+                a.link_roteiro,      -- <<< ADICIONADO
+                a.data, 
+                h.hora_inicio, 
+                h.hora_fim
+            FROM aulas a
+            JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+            JOIN horarios h ON a.id_horario = h.id_horario
+            JOIN disciplina d ON a.id_disciplina = d.id_disciplina -- <<< NOVO JOIN
+            WHERE a.professor_email = $1 
+              AND a.status = 'autorizado' 
+              AND a.data >= CURRENT_DATE
+            ORDER BY a.data ASC, h.hora_inicio ASC
+            LIMIT 6`,
             [professor_email]
         );
         res.json(result.rows);

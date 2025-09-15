@@ -95,22 +95,30 @@ function renderTable(requests) {
     const tbody = document.getElementById("minhas-aulas-tbody");
     if (!tbody) return;
     tbody.innerHTML = "";
+
+    // Lembre-se de ajustar o colspan para o novo número de colunas (7)
     if (requests.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Você não tem nenhuma solicitação futura.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7">Você não tem nenhuma solicitação futura.</td></tr>`;
         return;
     }
+
     requests.forEach(r => {
         const tr = document.createElement("tr");
         const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
         const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : 'N/A';
         const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : 'N/A';
+        const linkRoteiroHtml = r.link_roteiro 
+            ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Link</a>` 
+            : 'N/A';
 
         tr.innerHTML = `
             <td>${r.nome_laboratorio}</td>
+            <td>${r.nome_disciplina}</td>
             <td>${dataFormatada}</td>
             <td>${horaInicio} - ${horaFim}</td>
             <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
             <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
+            <td>${linkRoteiroHtml}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -120,16 +128,27 @@ function renderizarAulasAutorizadas(aulas) {
     const lista = document.getElementById('lista-aulas-autorizadas');
     if (!lista) return;
     if (aulas.length === 0) {
-        lista.innerHTML = '<li>Nenhuma aula autorizada futura.</li>'; return;
+        lista.innerHTML = '<li>Nenhuma aula autorizada futura.</li>'; 
+        return;
     }
-    lista.innerHTML = aulas.map(a => `
-            <li>
-                <span>${a.nome_laboratorio}</span>
-                <span>${new Date(a.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} | ${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}</span>
-            </li>
-        `).join('');
-}
+    lista.innerHTML = aulas.map(a => {
+        const dataFormatada = new Date(a.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        const horaInicio = a.hora_inicio.slice(0, 5);
+        const horaFim = a.hora_fim.slice(0, 5);
+        const linkRoteiroHtml = a.link_roteiro 
+            ? `<a href="${a.link_roteiro}" target="_blank" class="link-roteiro">Ver Roteiro</a>` 
+            : 'N/A';
 
+        return `
+            <li class="item-painel-detalhado">
+                <strong>${a.nome_laboratorio}</strong>
+                <span class="detalhe-item-painel">Disciplina: ${a.nome_disciplina}</span>
+                <span class="detalhe-item-painel">${dataFormatada} | ${horaInicio} - ${horaFim}</span>
+                <span class="detalhe-item-painel">Roteiro: ${linkRoteiroHtml}</span>
+            </li>
+        `;
+    }).join('');
+}
 function renderizarMeusLaboratorios(laboratorios) {
     const lista = document.getElementById('lista-meus-laboratorios');
     if (!lista) return;
