@@ -54,6 +54,8 @@
         // ===================================================================
         document.addEventListener('DOMContentLoaded', () => {
             inicializarPaginaDeAgendamento();
+            loadLaboratorios();
+
         });
 
         // ===================================================================
@@ -95,8 +97,8 @@
                 await loadAvailability();
             }
         }
-function loadLaboratorios2() {
-    fetch('/api/laboratorios')
+function loadLaboratorios() {
+    fetch('/api/lab')
         .then(response => response.json())
         .then(data => {
             const select = document.getElementById('laboratorios-select2');
