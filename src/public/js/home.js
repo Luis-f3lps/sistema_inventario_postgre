@@ -96,12 +96,11 @@ function renderTable(requests) {
     if (!tbody) return;
     tbody.innerHTML = "";
 
-    // Lembre-se de ajustar o colspan para o novo número de colunas (7)
+    // O colspan agora precisa ser 7 (lab, disciplina, data, horário, apoio, status, roteiro)
     if (requests.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7">Você não tem nenhuma solicitação futura.</td></tr>`;
         return;
     }
-
     requests.forEach(r => {
         const tr = document.createElement("tr");
         const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
@@ -114,7 +113,7 @@ function renderTable(requests) {
         tr.innerHTML = `
             <td>${r.nome_laboratorio}</td>
             <td>${r.nome_disciplina}</td>
-            <td>${horaInicio} - ${horaFim}</td>
+            <td>${dataFormatada}</td>      <td>${horaInicio} - ${horaFim}</td>
             <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
             <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
             <td>${linkRoteiroHtml}</td>
@@ -148,6 +147,7 @@ function renderizarAulasAutorizadas(aulas) {
         `;
     }).join('');
 }
+
 function renderizarMeusLaboratorios(laboratorios) {
     const lista = document.getElementById('lista-meus-laboratorios');
     if (!lista) return;

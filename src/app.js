@@ -1682,46 +1682,47 @@ app.get("/api/my-classes", async (req, res) => {
 
 // Endpoint para o professor ver as suas próprias solicitações futuras
 app.get("/api/minhas-solicitacoes", async (req, res) => {
-  try {
-    if (!req.session.user) {
-        return res.status(401).json({ error: "Utilizador não autenticado." });
+    try {
+        if (!req.session.user) {
+            return res.status(401).json({ error: "Utilizador não autenticado." });
+        }
+        const professor_email = req.session.user.email;
+
+        // Atualiza o status de aulas passadas que ainda estão em análise
+        await pool.query(
+            `UPDATE aulas SET status = 'nao_autorizado' 
+             WHERE professor_email = $1 AND status = 'analisando' AND data < CURRENT_DATE`,
+            [professor_email]
+        );
+
+        // Busca a lista completa com todos os campos necessários
+        const result = await pool.query(
+            `SELECT 
+                l.nome_laboratorio, 
+                d.nome_disciplina,
+                a.link_roteiro,
+                a.data, 
+                h.hora_inicio, 
+                h.hora_fim,
+                a.precisa_tecnico, 
+                a.status
+            FROM aulas a
+            JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+            JOIN horarios h ON a.id_horario = h.id_horario
+            JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+            WHERE 
+                a.professor_email = $1 
+                AND a.data >= CURRENT_DATE
+            ORDER BY 
+                a.data ASC, h.hora_inicio ASC`,
+            [professor_email]
+        );
+
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Erro ao buscar ou atualizar solicitações do professor:", err);
+        res.status(500).json({ error: "Erro ao processar as suas solicitações." });
     }
-    const professor_email = req.session.user.email;
-
-    await pool.query(
-      `UPDATE aulas 
-       SET status = 'nao_autorizado' 
-       WHERE 
-         professor_email = $1 
-         AND status = 'analisando' 
-         AND data < CURRENT_DATE`,
-      [professor_email]
-    );
-
-    const result = await pool.query(
-      `SELECT 
-         l.nome_laboratorio, 
-         a.data, 
-         h.hora_inicio, 
-         h.hora_fim,
-         a.precisa_tecnico, 
-         a.status
-       FROM aulas a
-       JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-       JOIN horarios h ON a.id_horario = h.id_horario
-       WHERE 
-         a.professor_email = $1 
-         AND a.data >= CURRENT_DATE -- <<< A MUDANÇA ESTÁ AQUI
-       ORDER BY 
-         a.data ASC, h.hora_inicio ASC`, 
-      [professor_email]
-    );
-
-    res.json(result.rows);
-  } catch (err) {
-    console.error("Erro ao buscar ou atualizar solicitações do professor:", err);
-    res.status(500).json({ error: "Erro ao processar as suas solicitações." });
-  }
 });
 
 // Endpoint para o professor ver as suas próprias solicitações futuras (VERSÃO ATUALIZADA)
