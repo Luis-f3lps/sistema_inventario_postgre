@@ -1812,4 +1812,22 @@ app.get("/api/aulas-meus-laboratorios", async (req, res) => {
         res.status(500).json({ error: "Erro ao buscar as aulas." });
     }
 });
+// Endpoint para buscar todos os horários possíveis cadastrados no banco
+app.get("/api/horarios", async (req, res) => {
+    try {
+        // Busca todos os horários e ordena para garantir a sequência correta
+        const result = await pool.query(
+            "SELECT id_horario, hora_inicio, hora_fim FROM horarios ORDER BY hora_inicio ASC"
+        );
+        
+        // Formata os dados para enviar apenas o que o frontend precisa (a hora de início)
+        const horariosFormatados = result.rows.map(h => h.hora_inicio.slice(0, 5));
+        
+        res.json(horariosFormatados);
+
+    } catch (err) {
+        console.error("Erro ao buscar a lista de horários:", err);
+        res.status(500).json({ error: "Erro ao buscar horários." });
+    }
+});
 export default app;
