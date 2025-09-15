@@ -114,7 +114,6 @@ function renderTable(requests) {
         tr.innerHTML = `
             <td>${r.nome_laboratorio}</td>
             <td>${r.nome_disciplina}</td>
-            <td>${dataFormatada}</td>
             <td>${horaInicio} - ${horaFim}</td>
             <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
             <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
