@@ -31,6 +31,16 @@ async function inicializarPaginaDeAgendamento(userData) {
     dateEl.addEventListener('change', loadAvailability);
     labEl.addEventListener('change', loadAvailability);
     submitBtn.addEventListener('click', submeterAgendamento);
+    // --- LÓGICA NOVA ADICIONADA AQUI ---
+    // 3. Adiciona os "ouvintes" para os botões de rádio do técnico
+    const radioTecnico = document.querySelectorAll('input[name="precisaTecnico"]');
+    radioTecnico.forEach(radio => {
+        radio.addEventListener('change', toggleRoteiroVisibility);
+    });
+
+    // 4. Garante que o campo de roteiro comece no estado correto (escondido)
+    toggleRoteiroVisibility();
+    // --- FIM DA LÓGICA NOVA ---
 
     // Carrega os dados na ordem correta
     await loadLaboratorios();
@@ -219,4 +229,19 @@ function formatEnd(start) {
     return formatHour(endH);
 }
 
-// A função 'generateAllSlots' foi removida pois não é mais necessária.
+/**
+ * Mostra ou esconde o campo de link do roteiro com base na seleção do técnico.
+ */
+function toggleRoteiroVisibility() {
+    const roteiroContainer = document.getElementById('roteiro-container');
+    const precisaTecnicoSim = document.getElementById('tecnicoSim');
+
+    if (roteiroContainer && precisaTecnicoSim) {
+        // Se o "Sim" estiver marcado, mostra o campo. Caso contrário, esconde.
+        if (precisaTecnicoSim.checked) {
+            roteiroContainer.style.display = 'block'; // ou 'flex', dependendo do seu CSS
+        } else {
+            roteiroContainer.style.display = 'none';
+        }
+    }
+}

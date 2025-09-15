@@ -45,11 +45,10 @@
                 <label for="tecnicoNao">Não</label>
             </div>
         </div>
-        <div class="opcao-tecnico-fila">
-            <label for="link_roteiro">Link do Roteiro da Aula (Opcional)</label>
-
-            <input type="url" id="link_roteiro" name="link_roteiro" placeholder="https://exemplo.com/roteiro.pdf">
-        </div>
+<div class="opcao-tecnico-fila" id="roteiro-container" style="display: none;">
+    <label for="link_roteiro">Link do Roteiro da Aula (Opcional)</label>
+    <input type="url" id="link_roteiro" name="link_roteiro" placeholder="https://exemplo.com/roteiro.pdf">
+</div>
         <div id="msg" class="mensagem-status"></div>
         <button id="submitBtn" class="btn-principal" disabled>Solicitar Aula</button>
     </div>
