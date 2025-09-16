@@ -158,34 +158,39 @@ function renderizarMeusLaboratorios(laboratorios) {
 }
 
 function renderizarAulasNosMeusLaboratorios(aulas) {
-    const lista = document.getElementById('lista-aulas-nos-meus-laboratorios');
-    if (!lista) return;
+    // 1. Alvo agora é o corpo da nova tabela
+    const tbody = document.getElementById('corpo-tabela-aulas-tecnico');
+    if (!tbody) return;
 
-    lista.innerHTML = '';
+    tbody.innerHTML = '';
 
+    // 2. Mensagem de "vazio" ajustada para tabela (colspan com 8 colunas)
     if (!aulas || aulas.length === 0) {
-        lista.innerHTML = '<li>Nenhuma aula futura autorizada nos seus laboratórios.</li>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Nenhuma aula futura autorizada nos seus laboratórios.</td></tr>';
         return;
     }
 
-    lista.innerHTML = aulas.map(aula => {
+    // 3. Lógica de renderização agora cria <tr> e <td>
+    aulas.forEach(aula => {
+        const tr = document.createElement('tr');
+
         const dataFormatada = new Date(aula.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
         const horaInicio = aula.hora_inicio.slice(0, 5);
         const horaFim = aula.hora_fim.slice(0, 5);
         const precisaTecnicoTexto = aula.precisa_tecnico ? 'Sim' : 'Não';
-
-        // Lógica para criar o link do roteiro apenas se ele existir
         const linkRoteiroHtml = aula.link_roteiro
             ? `<a href="${aula.link_roteiro}" target="_blank" class="link-roteiro">Ver Roteiro</a>`
             : 'N/A';
 
-        return `
-            <li class="item-painel-detalhado">
-                <strong>${aula.nome_laboratorio}</strong>
-                <span class="detalhe-item-painel">Disciplina: ${aula.nome_disciplina}</span> <span class="detalhe-item-painel">Professor(a): ${aula.nome_professor}</span>
-                <span class="detalhe-item-painel">${dataFormatada} | ${horaInicio} - ${horaFim}</span>
-                <span class="detalhe-item-painel">Apoio Técnico: <strong>${precisaTecnicoTexto}</strong></span>
-                <span class="detalhe-item-painel">Roteiro: ${linkRoteiroHtml}</span> </li>
+        tr.innerHTML = `
+            <td>${aula.nome_laboratorio}</td>
+            <td>${aula.nome_disciplina}</td>
+            <td>${aula.nome_professor}</td>
+            <td>${dataFormatada}</td>
+            <td>${horaInicio} - ${horaFim}</td>
+            <td>${aula.numero_discentes}</td> <td>${precisaTecnicoTexto}</td>
+            <td>${linkRoteiroHtml}</td>
         `;
-    }).join('');
+        tbody.appendChild(tr);
+    });
 }
