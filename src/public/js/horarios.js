@@ -192,6 +192,8 @@ function updateSelectionUI() {
  */
 async function submeterAgendamento() {
     if (!selectedSlot || !loggedInUser) return;
+    
+    // Validações de campos
     if (!disciplinaEl.value) {
         msgEl.textContent = 'Por favor, selecione uma disciplina.';
         msgEl.className = 'mensagem-status erro';
@@ -199,13 +201,25 @@ async function submeterAgendamento() {
         return;
     }
     
+    // --- MUDANÇA 1: Pega e valida o número de discentes ---
+    const numeroDiscentesEl = document.getElementById('numero_discentes');
+    const numeroDiscentes = numeroDiscentesEl.value;
+    if (!numeroDiscentes || parseInt(numeroDiscentes) <= 0) {
+        msgEl.textContent = 'Por favor, insira um número válido de discentes.';
+        msgEl.className = 'mensagem-status erro';
+        msgEl.style.display = 'block';
+        return;
+    }
+    
+    // --- MUDANÇA 2: Adiciona o campo ao payload ---
     const payload = {
         labId: labEl.value,
         date: dateEl.value,
         hour: selectedSlot,
         precisa_tecnico: document.querySelector('input[name="precisaTecnico"]:checked').value === 'true',
         link_roteiro: document.getElementById('link_roteiro').value,
-        id_disciplina: disciplinaEl.value
+        id_disciplina: disciplinaEl.value,
+        numero_discentes: numeroDiscentes // <<< ADICIONADO AQUI
     };
 
     try {
@@ -216,11 +230,16 @@ async function submeterAgendamento() {
         });
         const result = await res.json();
         if (!res.ok) throw new Error(result.error || 'Ocorreu um erro');
+
+        // Limpa os campos do formulário após o sucesso
         document.getElementById('link_roteiro').value = '';
+        numeroDiscentesEl.value = ''; // Limpa o campo de discentes
         disciplinaEl.selectedIndex = 0;
+        
         msgEl.textContent = result.message;
         msgEl.className = 'mensagem-status sucesso';
         msgEl.style.display = 'block';
+        
         await loadAvailability();
     } catch (err) {
         msgEl.textContent = 'Erro ao enviar: ' + err.message;

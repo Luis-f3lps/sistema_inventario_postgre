@@ -1561,41 +1561,47 @@ app.get("/api/availability", async (req, res) => {
     }
 });
 
-// Professor solicita uma nova aula (VERSÃO CORRIGIDA)
+// Professor solicita uma nova aula (VERSÃO FINAL E COMPLETA)
 app.post("/api/schedule", async (req, res) => {
+    // 1. Verifica a autenticação
     if (!req.session.user) {
         return res.status(401).json({ error: "Você precisa estar logado." });
     }
+
     try {
         const professor_email = req.session.user.email;
         
-        // --- MUDANÇA 1: Captura os novos campos do corpo da requisição ---
-        const { labId, date, hour, precisa_tecnico, link_roteiro, id_disciplina } = req.body;
+        // --- MUDANÇA 1: Captura também o 'numero_discentes' ---
+        const { labId, date, hour, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes } = req.body;
 
         // Validação básica para garantir que os campos essenciais chegaram
-        if (!labId || !date || !hour || !id_disciplina) {
+        if (!labId || !date || !hour || !id_disciplina || !numero_discentes) {
             return res.status(400).json({ error: "Dados incompletos para o agendamento." });
         }
 
-        const horario = await pool.query("SELECT id_horario FROM horarios WHERE hora_inicio = $1::time", [hour]);
-        if (horario.rowCount === 0) return res.status(400).json({ error: "Horário inválido" });
-        
+        // Busca o id_horario (lógica existente e correta)
+        const horario = await pool.query("SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1", [hour]);
+        if (horario.rowCount === 0) {
+            return res.status(400).json({ error: "Horário inválido" });
+        }
         const id_horario = horario.rows[0].id_horario;
 
-        // --- MUDANÇA 2: Atualiza a consulta INSERT ---
+        // --- MUDANÇA 2: Atualiza a consulta INSERT para incluir o novo campo ---
         const result = await pool.query(
-            `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico, link_roteiro, id_disciplina)
-             VALUES ($1, $2, $3, $4, $5, $6, $7)
+            `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
              RETURNING *`,
-            [professor_email, labId, date, id_horario, precisa_tecnico, link_roteiro, id_disciplina]
+            [professor_email, labId, date, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes]
         );
         
         res.status(201).json({ message: "Aula solicitada com sucesso!", aula: result.rows[0] });
 
     } catch (err) {
+        // Tratamento de erro de chave duplicada (horário já ocupado)
         if (err.code === "23505") { 
             return res.status(400).json({ error: "Esse horário já está ocupado ou em análise neste laboratório" });
         }
+        // Tratamento de outros erros
         console.error("Erro ao solicitar aula:", err);
         res.status(500).json({ error: "Erro ao solicitar aula" });
     }
