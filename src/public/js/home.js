@@ -107,7 +107,7 @@ function renderTable(requests) {
         const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : 'N/A';
         const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : 'N/A';
         const linkRoteiroHtml = r.link_roteiro 
-            ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Roteiro</a>` 
+            ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver</a>` 
             : 'N/A';
 
         tr.innerHTML = `
@@ -179,7 +179,7 @@ function renderizarAulasNosMeusLaboratorios(aulas) {
         const horaFim = aula.hora_fim.slice(0, 5);
         const precisaTecnicoTexto = aula.precisa_tecnico ? 'Sim' : 'Não';
         const linkRoteiroHtml = aula.link_roteiro
-            ? `<a href="${aula.link_roteiro}" target="_blank" class="link-roteiro">Ver Roteiro</a>`
+            ? `<a href="${aula.link_roteiro}" target="_blank" class="link-roteiro">Ver</a>`
             : 'N/A';
 
         tr.innerHTML = `
