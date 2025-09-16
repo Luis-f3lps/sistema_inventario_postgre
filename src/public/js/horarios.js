@@ -79,11 +79,18 @@ async function loadLaboratorios() {
             option.textContent = laboratorio.nome_laboratorio;
             labEl.appendChild(option);
         });
+
+        // --- ALTERAÇÃO PRINCIPAL AQUI ---
+        // Se houver laboratórios na lista (data.length > 0),
+        // define o valor do select para o ID do primeiro laboratório.
+        if (data.length > 0) {
+            labEl.value = data[0].id_laboratorio;
+        }
+
     } catch (error) {
         console.error('Erro ao carregar laboratórios:', error);
     }
 }
-
 /**
  * Carrega a lista de disciplinas do professor logado.
  */
