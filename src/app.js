@@ -1622,7 +1622,7 @@ app.get("/api/requests", async (req, res) => {
             JOIN horarios h ON a.id_horario = h.id_horario
             JOIN disciplina d ON a.id_disciplina = d.id_disciplina -- <<< NOVO JOIN
             WHERE 
-                l.usuario_email = $1 AND a.status IN ('analisando', 'autorizado') 
+                l.usuario_email = $1 AND a.status IN ('analisando') 
             ORDER BY 
                 a.data, h.hora_inicio
         `;

@@ -107,7 +107,7 @@ function renderTable(requests) {
         const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : 'N/A';
         const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : 'N/A';
         const linkRoteiroHtml = r.link_roteiro 
-            ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Link</a>` 
+            ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Roteiro</a>` 
             : 'N/A';
 
         tr.innerHTML = `
