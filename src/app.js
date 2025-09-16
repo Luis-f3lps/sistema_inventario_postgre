@@ -1615,8 +1615,9 @@ app.get("/api/requests", async (req, res) => {
                 a.id_aula, 
                 u.nome_usuario AS professor, 
                 l.nome_laboratorio, 
-                d.nome_disciplina, -- <<< ADICIONADO AQUI
-                a.link_roteiro,      -- <<< ADICIONADO AQUI
+                d.nome_disciplina,
+                a.link_roteiro,
+                a.numero_discentes, -- <<< ADICIONADO AQUI
                 a.data, 
                 h.hora_inicio, 
                 h.hora_fim,
@@ -1626,7 +1627,7 @@ app.get("/api/requests", async (req, res) => {
             JOIN usuario u ON a.professor_email = u.email
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
             JOIN horarios h ON a.id_horario = h.id_horario
-            JOIN disciplina d ON a.id_disciplina = d.id_disciplina -- <<< NOVO JOIN
+            JOIN disciplina d ON a.id_disciplina = d.id_disciplina
             WHERE 
                 l.usuario_email = $1 AND a.status IN ('analisando') 
             ORDER BY 

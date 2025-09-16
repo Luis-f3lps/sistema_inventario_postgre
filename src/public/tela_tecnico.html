@@ -28,6 +28,7 @@
                         <th>Horário</th>
                         <th>Apoio Técnico</th>
                         <th>Status</th>
+                        <th>Numero Discente</th>
                         <th>Roteiro</th>
                         <th>Ações</th>
                     </tr>
@@ -98,41 +99,43 @@
         }
 
         // Dentro do seu arquivo js/tela-tecnico.js
+function renderTable(requests) {
+    const tbody = document.getElementById("corpo-tabela-solicitacoes");
+    tbody.innerHTML = "";
 
-        function renderTable(requests) {
-            const tbody = document.getElementById("corpo-tabela-solicitacoes");
-            tbody.innerHTML = "";
+    if (requests.length === 0) {
+        // Ajuste o colspan para o novo número de colunas (10)
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
+        return;
+    }
 
-            if (requests.length === 0) {
-                // Ajuste o colspan para o novo número de colunas
-                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
-                return;
-            }
+    requests.forEach(r => {
+        const tr = document.createElement("tr");
+        const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
-            requests.forEach(r => {
-                const tr = document.createElement("tr");
-                const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        // Lógica para o link do roteiro
+        const linkRoteiroHtml = r.link_roteiro
+            ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Link</a>`
+            : 'N/A'; // Mostra 'N/A' se não houver link
 
-                // Lógica para o link do roteiro
-                const linkRoteiroHtml = r.link_roteiro
-                    ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Link</a>`
-                    : 'N/A'; // Mostra 'N/A' se não houver link
-
-                tr.innerHTML = `
+        // Adicionada a nova coluna para o número de discentes: <td>${r.numero_discentes}</td>
+        tr.innerHTML = `
             <td>${r.professor}</td>
             <td>${r.nome_laboratorio}</td>
-            <td>${r.nome_disciplina}</td>      <td>${dataFormatada}</td>
+            <td>${r.nome_disciplina}</td>
+            <td>${dataFormatada}</td>
             <td style="white-space: nowrap;">${r.hora_inicio.slice(0, 5)} - ${r.hora_fim.slice(0, 5)}</td>
-            <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
+            <td>${r.numero_discentes}</td> <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
             <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
-            <td>${linkRoteiroHtml}</td>        <td class="celula-de-acoes">
+            <td>${linkRoteiroHtml}</td>
+            <td class="celula-de-acoes">
                 <button class="botao-de-acao botao-aceitar" data-id="${r.id_aula}">Autorizar</button>
                 <button class="botao-de-acao botao-recusar" data-id="${r.id_aula}">Não Autorizar</button>
             </td>
         `;
-                tbody.appendChild(tr);
-            });
-        }
+        tbody.appendChild(tr);
+    });
+}
 
         async function updateRequestStatus(id, novoStatus) {
             try {
