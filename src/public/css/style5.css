@@ -1000,14 +1000,14 @@ nav ul .fa-solid {
 
 /* --- Estilo do Painel de Gestão --- */
 .painel-gestao-solicitacoes {
-    max-width: 1450px;
+    max-width: 1550px;
     margin: 40px auto;
     padding: 30px;
     background-color: #ffffff;
     border-radius: 12px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin-left: 400px;
+    margin-left: 350px;
 }
 
 .painel-gestao-solicitacoes h1 {
