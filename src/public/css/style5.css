@@ -1211,6 +1211,7 @@ nav ul .fa-solid {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 20px;
+    min-width: 600px;
 }
 
 .cartao-painel h2 {
