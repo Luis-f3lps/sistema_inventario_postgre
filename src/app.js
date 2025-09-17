@@ -127,6 +127,9 @@ app.get('/Home', (req, res) => {
 app.get('/Horario', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'horarios.html'));
 });
+app.get('/agendamento-recorrente', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'agendamento-recorrente.html'));
+});
 app.get('/Tela_Tecnico', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'tela_tecnico.html'));
 });
