@@ -63,27 +63,27 @@
         </div>
 
 
-        <div class="cartao-painel cartao-aulas-tecnico" style="display: none;">
-            <h2>Aulas nos Meus Laboratórios</h2>
-            <div class="container-tabela-responsiva">
-                <table class="tabela-de-aulas">
-                    <thead>
-                        <tr>
-                            <th>Laboratório</th>
-                            <th>Disciplina</th>
-                            <th>Professor</th>
-                            <th>Data</th>
-                            <th>Horário</th>
-                            <th>Discentes</th>
-                            <th>Apoio Técnico</th>
-                            <th>Roteiro</th>
-                        </tr>
-                    </thead>
-                    <tbody id="corpo-tabela-aulas-tecnico">
-                    </tbody>
-                </table>
-            </div>
-        </div>
+<div class="cartao-painel cartao-aulas-tecnico" style="display: none;">
+    
+    <div class="calendario-header">
+        <button type="button" id="btn-mes-anterior-tecnico" title="Mês Anterior">&lt;</button>
+        <h2 id="calendario-titulo-tecnico" style="border-bottom: none; margin: 0;">Aulas nos Meus Laboratórios</h2>
+        <button type="button" id="btn-proximo-mes-tecnico" title="Próximo Mês">&gt;</button>
+    </div>
+    
+    <div class="calendario-dias-semana">
+        <div class="dia-semana">DOM</div>
+        <div class="dia-semana">SEG</div>
+        <div class="dia-semana">TER</div>
+        <div class="dia-semana">QUA</div>
+        <div class="dia-semana">QUI</div>
+        <div class="dia-semana">SEX</div>
+        <div class="dia-semana">SÁB</div>
+    </div>
+    
+    <div class="calendario-grid" id="calendario-grid-tecnico"></div>
+    
+</div>
 
     </div>
 

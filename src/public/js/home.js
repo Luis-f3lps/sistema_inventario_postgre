@@ -25,10 +25,6 @@ async function inicializarDashboard(userData) {
     mesExibido = hoje.getMonth(); // 0 = Janeiro, 11 = Dezembro
     anoExibido = hoje.getFullYear();
 
-    // Adiciona os eventos de clique aos botões de navegação do calendário
-    document.getElementById('btn-mes-anterior')?.addEventListener('click', mostrarMesAnterior);
-    document.getElementById('btn-proximo-mes')?.addEventListener('click', mostrarProximoMes);
-
     // Mostra/esconde painéis com base no perfil do usuário
     const userType = userData.tipo_usuario ? userData.tipo_usuario.trim().toLowerCase() : '';
     const showElement = (selector) => {
@@ -42,10 +38,16 @@ async function inicializarDashboard(userData) {
         case 'tecnico':
             showElement('.cartao-aulas-tecnico');
             showElement('.cartao-meus-laboratorios');
+            // Configura os botões do calendário do técnico
+            document.getElementById('btn-mes-anterior-tecnico')?.addEventListener('click', mostrarMesAnteriorTecnico);
+            document.getElementById('btn-proximo-mes-tecnico')?.addEventListener('click', mostrarProximoMesTecnico);
             break;
         case 'professor':
             showElement('.cartao-aulas-autorizadas');
             showElement('.painel-minhas-aulas');
+            // Configura os botões do calendário do professor
+            document.getElementById('btn-mes-anterior')?.addEventListener('click', mostrarMesAnteriorProfessor);
+            document.getElementById('btn-proximo-mes')?.addEventListener('click', mostrarProximoMesProfessor);
             break;
     }
 
@@ -58,27 +60,32 @@ async function inicializarDashboard(userData) {
     }
 }
 
-/**
- * Funções de navegação do calendário (são assíncronas para buscar novos dados).
- */
-async function mostrarMesAnterior() {
+// --- Funções de Navegação do Calendário (Professor) ---
+async function mostrarMesAnteriorProfessor() {
     mesExibido--;
-    if (mesExibido < 0) {
-        mesExibido = 11; // Volta para Dezembro
-        anoExibido--;
-    }
-    const novasAulas = await fetchAulasDoCalendario(anoExibido, mesExibido + 1);
-    renderizarCalendario(novasAulas, anoExibido, mesExibido);
+    if (mesExibido < 0) { mesExibido = 11; anoExibido--; }
+    const novasAulas = await fetchAulasDoCalendarioProfessor(anoExibido, mesExibido + 1);
+    renderizarCalendarioProfessor(novasAulas, anoExibido, mesExibido);
+}
+async function mostrarProximoMesProfessor() {
+    mesExibido++;
+    if (mesExibido > 11) { mesExibido = 0; anoExibido++; }
+    const novasAulas = await fetchAulasDoCalendarioProfessor(anoExibido, mesExibido + 1);
+    renderizarCalendarioProfessor(novasAulas, anoExibido, mesExibido);
 }
 
-async function mostrarProximoMes() {
+// --- Funções de Navegação do Calendário (Técnico) ---
+async function mostrarMesAnteriorTecnico() {
+    mesExibido--;
+    if (mesExibido < 0) { mesExibido = 11; anoExibido--; }
+    const novasAulas = await fetchAulasDoCalendarioTecnico(anoExibido, mesExibido + 1);
+    renderizarCalendarioTecnico(novasAulas, anoExibido, mesExibido);
+}
+async function mostrarProximoMesTecnico() {
     mesExibido++;
-    if (mesExibido > 11) {
-        mesExibido = 0; // Volta para Janeiro
-        anoExibido++;
-    }
-    const novasAulas = await fetchAulasDoCalendario(anoExibido, mesExibido + 1);
-    renderizarCalendario(novasAulas, anoExibido, mesExibido);
+    if (mesExibido > 11) { mesExibido = 0; anoExibido++; }
+    const novasAulas = await fetchAulasDoCalendarioTecnico(anoExibido, mesExibido + 1);
+    renderizarCalendarioTecnico(novasAulas, anoExibido, mesExibido);
 }
 
 
@@ -86,60 +93,59 @@ async function mostrarProximoMes() {
 // BUSCA DE DADOS (FETCH)
 // ===================================================================
 
-/**
- * Busca as aulas para um mês/ano específico na nova API do calendário.
- */
-async function fetchAulasDoCalendario(ano, mes) {
+async function fetchAulasDoCalendarioProfessor(ano, mes) {
     try {
         const response = await fetch(`/api/calendario/aulas-autorizadas?ano=${ano}&mes=${mes}`);
-        if (!response.ok) throw new Error('Falha ao buscar dados do calendário');
+        if (!response.ok) throw new Error('Falha ao buscar dados do calendário do professor');
         return await response.json();
     } catch (error) {
-        console.error("Erro ao buscar aulas para o calendário:", error);
-        return []; // Retorna um array vazio em caso de erro
+        console.error("Erro ao buscar aulas para o calendário do professor:", error);
+        return [];
     }
 }
 
-/**
- * Busca os dados para os diferentes painéis na carga inicial da página.
- */
+async function fetchAulasDoCalendarioTecnico(ano, mes) {
+    try {
+        const response = await fetch(`/api/calendario/aulas-tecnico?ano=${ano}&mes=${mes}`);
+        if (!response.ok) throw new Error('Falha ao buscar dados do calendário do técnico');
+        return await response.json();
+    } catch (error) {
+        console.error("Erro ao buscar aulas para o calendário do técnico:", error);
+        return [];
+    }
+}
+
 async function carregarDadosDosPaineis(userType) {
-    if (userType === 'professor') {
-        const aulasDoMesAtual = await fetchAulasDoCalendario(anoExibido, mesExibido + 1);
-        renderizarCalendario(aulasDoMesAtual, anoExibido, mesExibido);
-    } 
-    else if (userType === 'tecnico') {
-        try {
-            const [meusLaboratorios, aulasNosMeusLabs] = await Promise.all([
+    try {
+        if (userType === 'professor') {
+            const aulasDoMesAtual = await fetchAulasDoCalendarioProfessor(anoExibido, mesExibido + 1);
+            renderizarCalendarioProfessor(aulasDoMesAtual, anoExibido, mesExibido);
+        } 
+        else if (userType === 'tecnico') {
+            const [meusLaboratorios, aulasDoMesAtualTecnico] = await Promise.all([
                 fetch('/api/dashboard/meus-laboratorios').then(res => res.json()),
-                fetch('/api/aulas-meus-laboratorios').then(res => res.json())
+                fetchAulasDoCalendarioTecnico(anoExibido, mesExibido + 1)
             ]);
             renderizarMeusLaboratorios(meusLaboratorios);
-            renderizarAulasNosMeusLaboratorios(aulasNosMeusLabs);
-        } catch (error) {
-            console.error('Erro ao carregar dados dos painéis do técnico:', error);
+            renderizarCalendarioTecnico(aulasDoMesAtualTecnico, anoExibido, mesExibido);
         }
+    } catch(error) {
+        console.error('Erro ao carregar dados dos painéis:', error);
     }
 }
 
-/**
- * Carrega a tabela de solicitações do professor.
- */
 async function loadMyRequests() {
     try {
         const res = await fetch(`/api/minhas-solicitacoes`);
-        if (!res.ok) throw new Error('Erro na rede ao buscar solicitações');
+        if (!res.ok) throw new Error('Erro ao buscar solicitações');
         const data = await res.json();
         renderTable(data);
     } catch (error) {
         console.error('Falha ao carregar solicitações:', error);
         const tbody = document.getElementById("minhas-aulas-tbody");
-        if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="7">Erro ao carregar dados.</td></tr>`;
-        }
+        if (tbody) tbody.innerHTML = `<tr><td colspan="7">Erro ao carregar dados.</td></tr>`;
     }
 }
-
 
 // ===================================================================
 // FUNÇÕES DE RENDERIZAÇÃO (Exibição dos dados na tela)
@@ -179,16 +185,11 @@ function renderTable(requests) {
 /**
  * Renderiza o CALENDÁRIO para um mês e ano específicos.
  */
-function renderizarCalendario(aulas, ano, mes) {
-    const grid = document.getElementById('calendario-grid');
-    const titulo = document.getElementById('calendario-titulo');
-    if (!grid || !titulo) return;
-
+function renderizarBaseCalendario(grid, titulo, aulas, ano, mes, formatarTooltip) {
     const dataBase = new Date(ano, mes, 1);
     const nomeDoMes = dataBase.toLocaleString('pt-BR', { month: 'long' });
     titulo.textContent = `${nomeDoMes.toUpperCase()} • ${ano}`;
 
-    // Agrupa as aulas por dia para fácil acesso
     const aulasPorDia = {};
     aulas.forEach(aula => {
         const dataAula = new Date(aula.data);
@@ -211,32 +212,33 @@ function renderizarCalendario(aulas, ano, mes) {
     for (let dia = 1; dia <= diasNoMes; dia++) {
         let classesCss = "dia-calendario";
         let eventosDoDia = '';
-
         if (dia === hoje.getDate() && mes === hoje.getMonth() && ano === hoje.getFullYear()) {
             classesCss += " hoje";
         }
         if (aulasPorDia[dia]) {
             classesCss += " tem-aula";
-            
-            // --- LÓGICA DO TOOLTIP ATUALIZADA AQUI ---
-            eventosDoDia = `<div class="tooltip">${aulasPorDia[dia].map(a => {
-                const horaInicio = a.hora_inicio.slice(0, 5);
-                const horaFim = a.hora_fim.slice(0, 5); // Pega a hora_fim
-                
-                return `
-                    <p>
-                        <strong>${horaInicio} - ${horaFim}</strong><br>
-                        ${a.nome_disciplina}<br>
-                        <em>(${a.nome_laboratorio})</em>
-                    </p>
-                `;
-            }).join('')}</div>`;
+            eventosDoDia = `<div class="tooltip">${aulasPorDia[dia].map(formatarTooltip).join('')}</div>`;
         }
-
         grid.innerHTML += `<div class="${classesCss}"><span>${dia}</span>${eventosDoDia}</div>`;
     }
 }
+function renderizarCalendarioProfessor(aulas, ano, mes) {
+    const grid = document.getElementById('calendario-grid');
+    const titulo = document.getElementById('calendario-titulo');
+    if (!grid || !titulo) return;
+    renderizarBaseCalendario(grid, titulo, aulas, ano, mes, (aula) => 
+        `<p><strong>${aula.hora_inicio.slice(0,5)} - ${aula.hora_fim.slice(0,5)}:</strong> ${aula.nome_disciplina}<br><em>(${aula.nome_laboratorio})</em></p>`
+    );
+}
 
+function renderizarCalendarioTecnico(aulas, ano, mes) {
+    const grid = document.getElementById('calendario-grid-tecnico');
+    const titulo = document.getElementById('calendario-titulo-tecnico');
+    if (!grid || !titulo) return;
+    renderizarBaseCalendario(grid, titulo, aulas, ano, mes, (aula) =>
+        `<p><strong>${aula.hora_inicio.slice(0,5)} - ${aula.hora_fim.slice(0,5)}:</strong> ${aula.nome_disciplina}<br><em>(Prof: ${aula.nome_professor})</em></p>`
+    );
+}
 /**
  * Renderiza a lista de laboratórios do técnico.
  */
