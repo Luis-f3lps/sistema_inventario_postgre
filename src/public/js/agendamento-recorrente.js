@@ -22,11 +22,21 @@ async function inicializarPagina(userData) {
     // Carrega os selects de laboratórios e disciplinas
     await loadLaboratorios(); 
     await loadDisciplinas();
-    toggleRoteiroVisibility();
 
     // Carrega os checkboxes de horários
     await loadHorariosCheckboxes();
+    // --- CORREÇÃO: Adiciona os 'ouvintes' para os botões de rádio ---
+    const radioTecnico = document.querySelectorAll('input[name="precisaTecnico"]');
+    radioTecnico.forEach(radio => {
+        radio.addEventListener('change', toggleRoteiroVisibility);
+    });
+    // Garante que o campo de roteiro comece no estado correto (escondido)
+    toggleRoteiroVisibility();
+    // --- FIM DA CORREÇÃO ---
 
+    if (submitBtn) {
+        submitBtn.addEventListener('click', submeterAgendamentoRecorrente);
+    }
     // Adiciona o listener ao botão de submit
     if (submitBtn) {
         submitBtn.addEventListener('click', submeterAgendamentoRecorrente);
