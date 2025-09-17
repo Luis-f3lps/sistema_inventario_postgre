@@ -1544,3 +1544,42 @@ nav ul .fa-solid {
 .tooltip p:last-child {
     border-bottom: none;
 }
+/* Adicione ao seu arquivo style5.css */
+
+.calendario-header {
+    display: flex;
+    justify-content: space-between; /* Espaça os itens (botões e título) */
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+#calendario-titulo {
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-size: 1.2em;
+}
+
+.calendario-header button {
+    background: none;
+    border: none;
+    font-size: 1.8em;
+    font-weight: bold;
+    cursor: pointer;
+    color: var(--cor-primaria);
+    padding: 0 15px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.calendario-header button:hover {
+    background-color: #e7f1ff; /* Azul bem claro */
+}
+
+/* Nova grade para os nomes dos dias (DOM, SEG...) */
+.calendario-dias-semana {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-bottom: 5px; /* Espaço antes dos dias do calendário */
+}

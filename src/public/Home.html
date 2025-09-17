@@ -16,20 +16,25 @@
     <div class="painel-grelha" id="painel-grelha">
 
 <div class="cartao-painel cartao-aulas-autorizadas" style="display: none;">
-    <h2 id="calendario-titulo" style="border-bottom: none;">Próximas Aulas</h2>
     
-    <div class="calendario-container">
-        <div class="calendario-header">
-            <div class="dia-semana">DOM</div>
-            <div class="dia-semana">SEG</div>
-            <div class="dia-semana">TER</div>
-            <div class="dia-semana">QUA</div>
-            <div class="dia-semana">QUI</div>
-            <div class="dia-semana">SEX</div>
-            <div class="dia-semana">SÁB</div>
-        </div>
-        <div class="calendario-grid" id="calendario-grid"></div>
+    <div class="calendario-header">
+        <button type="button" id="btn-mes-anterior" title="Mês Anterior">&lt;</button>
+        <h2 id="calendario-titulo" style="border-bottom: none; margin: 0;">Próximas Aulas</h2>
+        <button type="button" id="btn-proximo-mes" title="Próximo Mês">&gt;</button>
     </div>
+    
+    <div class="calendario-dias-semana">
+        <div class="dia-semana">DOM</div>
+        <div class="dia-semana">SEG</div>
+        <div class="dia-semana">TER</div>
+        <div class="dia-semana">QUA</div>
+        <div class="dia-semana">QUI</div>
+        <div class="dia-semana">SEX</div>
+        <div class="dia-semana">SÁB</div>
+    </div>
+    
+    <div class="calendario-grid" id="calendario-grid"></div>
+    
 </div>
 
         <div class="cartao-painel painel-minhas-aulas" style="display: none;">
