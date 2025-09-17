@@ -1366,3 +1366,11 @@ nav ul .fa-solid {
     transform: translateY(0); /* Remove o efeito de levantar ao clicar */
     box-shadow: 0 2px 5px rgba(0, 91, 179, 0.2); /* Sombra menor */
 }
+.agendamento-container h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    font-size: 1.5em;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+}
