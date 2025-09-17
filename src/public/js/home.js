@@ -134,7 +134,7 @@ function renderizarAulasAutorizadas(aulas) {
         const horaInicio = a.hora_inicio.slice(0, 5);
         const horaFim = a.hora_fim.slice(0, 5);
         const linkRoteiroHtml = a.link_roteiro 
-            ? `<a href="${a.link_roteiro}" target="_blank" class="link-roteiro">Ver Roteiro</a>` 
+            ? `<a href="${a.link_roteiro}" target="_blank" class="link-roteiro">Ver</a>` 
             : 'N/A';
 
         return `
