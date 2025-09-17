@@ -22,6 +22,7 @@ async function inicializarPagina(userData) {
     // Carrega os selects de laboratórios e disciplinas
     await loadLaboratorios(); 
     await loadDisciplinas();
+    toggleRoteiroVisibility();
 
     // Carrega os checkboxes de horários
     await loadHorariosCheckboxes();
