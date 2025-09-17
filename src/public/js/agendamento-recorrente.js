@@ -174,7 +174,7 @@ function toggleRoteiroVisibility() {
     if (roteiroContainer && precisaTecnicoSim) {
         // Se o "Sim" estiver marcado, mostra o campo. Caso contrário, esconde.
         if (precisaTecnicoSim.checked) {
-            roteiroContainer.style.display = 'block'; // ou 'flex', dependendo do seu CSS
+            roteiroContainer.style.display = 'flex'; // ou 'flex', dependendo do seu CSS
         } else {
             roteiroContainer.style.display = 'none';
         }

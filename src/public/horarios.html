@@ -14,12 +14,14 @@
     <header id="menu-container"></header>
 
     <div class="agendamento-container">
-        <h1>Agendar Aula — Escolha data e horário</h1>
-    <div class="link-destacado" style="margin-bottom: 30px;">
-        <a href="/agendamento-recorrente.html">
-            <i class="fas fa-calendar-alt"></i> Agendar Aulas Recorrentes (Ex: Semestre)
-        </a>
-    </div>        <div class="seletor-fila">
+        <h1>Agendar Aulas</h1>
+        <div class="link-destacado" style="margin-bottom: 30px;">
+            <a href="/agendamento-recorrente.html">
+                <i class="fas fa-calendar-alt"></i> Agendar Aulas Recorrentes
+            </a>
+        </div>
+        <h2>Agendar aulas avulsas</h2>
+        <div class="seletor-fila">
             <select id="laboratorios-select2" name="laboratorio">
                 <option value="">Selecione um Laboratório</option>
                 <!-- Opções serão preenchidas dinamicamente -->
@@ -48,26 +50,19 @@
                 <label for="tecnicoNao">Não</label>
             </div>
         </div>
-            <div class="opcao-tecnico-fila">
-        <label for="numero_discentes">Número de Discentes</label>
-        <input 
-            type="number" 
-            id="numero_discentes" 
-            name="numero_discentes" 
-            min="1" 
-            placeholder="Ex: 25" 
-            required 
-        />
-    </div>
+        <div class="opcao-tecnico-fila">
+            <label for="numero_discentes">Número de Discentes</label>
+            <input type="number" id="numero_discentes" name="numero_discentes" min="1" placeholder="Ex: 25" required />
+        </div>
 
-    <div class="opcao-tecnico-fila" id="roteiro-container" style="display: none;">
-        <label for="link_roteiro">Link do Roteiro da Aula (Opcional)</label>
-        <input type="url" id="link_roteiro" name="link_roteiro" placeholder="https://exemplo.com/roteiro.pdf">
-    </div>
-<div class="opcao-tecnico-fila" id="roteiro-container" style="display: none;">
-    <label for="link_roteiro">Link do Roteiro da Aula (Opcional)</label>
-    <input type="url" id="link_roteiro" name="link_roteiro" placeholder="https://exemplo.com/roteiro.pdf">
-</div>
+        <div class="opcao-tecnico-fila" id="roteiro-container" style="display: none;">
+            <label for="link_roteiro">Link do Roteiro da Aula (Opcional)</label>
+            <input type="url" id="link_roteiro" name="link_roteiro" placeholder="https://exemplo.com/roteiro.pdf">
+        </div>
+        <div class="opcao-tecnico-fila" id="roteiro-container" style="display: none;">
+            <label for="link_roteiro">Link do Roteiro da Aula (Opcional)</label>
+            <input type="url" id="link_roteiro" name="link_roteiro" placeholder="https://exemplo.com/roteiro.pdf">
+        </div>
         <div id="msg" class="mensagem-status"></div>
         <button id="submitBtn" class="btn-principal" disabled>Solicitar Aula</button>
     </div>
