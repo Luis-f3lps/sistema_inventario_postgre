@@ -1810,34 +1810,34 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
 });
 
 
-// Endpoint para o painel "Próximas Aulas" (VERSÃO ATUALIZADA)
 app.get("/api/dashboard/aulas-autorizadas", async (req, res) => {
-  if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
-  try {
-    const professor_email = req.session.user.email;
-    const result = await pool.query(
-      `SELECT 
+    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+    try {
+        const professor_email = req.session.user.email;
+        const result = await pool.query(
+            `SELECT 
                 l.nome_laboratorio, 
-                d.nome_disciplina, -- <<< ADICIONADO
-                a.link_roteiro,      -- <<< ADICIONADO
+                d.nome_disciplina,
+                a.link_roteiro,
                 a.data, 
                 h.hora_inicio, 
-                h.hora_fim
+                h.hora_fim,
+                a.precisa_tecnico -- <<< ADICIONADO AQUI
             FROM aulas a
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
             JOIN horarios h ON a.id_horario = h.id_horario
-            JOIN disciplina d ON a.id_disciplina = d.id_disciplina -- <<< NOVO JOIN
+            JOIN disciplina d ON a.id_disciplina = d.id_disciplina
             WHERE a.professor_email = $1 
               AND a.status = 'autorizado' 
               AND a.data >= CURRENT_DATE
             ORDER BY a.data ASC, h.hora_inicio ASC
             LIMIT 6`,
-      [professor_email]
-    );
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: "Erro ao buscar aulas autorizadas." });
-  }
+            [professor_email]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: "Erro ao buscar aulas autorizadas." });
+    }
 });
 // Endpoint para o painel "Meus Laboratórios"
 app.get("/api/dashboard/meus-laboratorios", async (req, res) => {

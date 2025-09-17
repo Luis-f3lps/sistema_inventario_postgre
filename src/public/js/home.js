@@ -136,6 +136,9 @@ function renderizarAulasAutorizadas(aulas) {
         const linkRoteiroHtml = a.link_roteiro 
             ? `<a href="${a.link_roteiro}" target="_blank" class="link-roteiro">Ver</a>` 
             : 'N/A';
+        
+        // LÓGICA ADICIONADA: Converte o valor true/false para "Sim" ou "Não"
+        const precisaTecnicoTexto = a.precisa_tecnico ? 'Sim' : 'Não';
 
         return `
             <li class="item-painel-detalhado">
@@ -143,11 +146,11 @@ function renderizarAulasAutorizadas(aulas) {
                 <span class="detalhe-item-painel">Disciplina: ${a.nome_disciplina}</span>
                 <span class="detalhe-item-painel">${dataFormatada} | ${horaInicio} - ${horaFim}</span>
                 <span class="detalhe-item-painel">Roteiro: ${linkRoteiroHtml}</span>
+                <span class="detalhe-item-painel">Apoio Técnico: <strong>${precisaTecnicoTexto}</strong></span>
             </li>
         `;
     }).join('');
 }
-
 function renderizarMeusLaboratorios(laboratorios) {
     const lista = document.getElementById('lista-meus-laboratorios');
     if (!lista) return;
