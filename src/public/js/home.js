@@ -106,15 +106,10 @@ function renderTable(requests) {
         const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
         const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : 'N/A';
         const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : 'N/A';
-        let linkCorrigido = aula.link_roteiro;
-        
-        if (linkCorrigido && !/^(https?:\/\/|^\/\/)/i.test(linkCorrigido)) {
-            linkCorrigido = `//${linkCorrigido}`;
-        }
-        
-        const linkRoteiroHtml = linkCorrigido
-            ? `<a href="${linkCorrigido}" target="_blank" class="link-roteiro">Ver Roteiro</a>`
+        const linkRoteiroHtml = r.link_roteiro 
+            ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver</a>` 
             : 'N/A';
+
         tr.innerHTML = `
             <td>${r.nome_laboratorio}</td>
             <td>${r.nome_disciplina}</td>
@@ -183,15 +178,10 @@ function renderizarAulasNosMeusLaboratorios(aulas) {
         const horaInicio = aula.hora_inicio.slice(0, 5);
         const horaFim = aula.hora_fim.slice(0, 5);
         const precisaTecnicoTexto = aula.precisa_tecnico ? 'Sim' : 'Não';
-        let linkCorrigido = aula.link_roteiro;
-        
-        if (linkCorrigido && !/^(https?:\/\/|^\/\/)/i.test(linkCorrigido)) {
-            linkCorrigido = `//${linkCorrigido}`;
-        }
-        
-        const linkRoteiroHtml = linkCorrigido
-            ? `<a href="${linkCorrigido}" target="_blank" class="link-roteiro">Ver Roteiro</a>`
+        const linkRoteiroHtml = aula.link_roteiro
+            ? `<a href="${aula.link_roteiro}" target="_blank" class="link-roteiro">Ver</a>`
             : 'N/A';
+
         tr.innerHTML = `
             <td>${aula.nome_laboratorio}</td>
             <td>${aula.nome_disciplina}</td>
