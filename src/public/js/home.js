@@ -188,6 +188,7 @@ function renderizarCalendario(aulas, ano, mes) {
     const nomeDoMes = dataBase.toLocaleString('pt-BR', { month: 'long' });
     titulo.textContent = `${nomeDoMes.toUpperCase()} • ${ano}`;
 
+    // Agrupa as aulas por dia para fácil acesso
     const aulasPorDia = {};
     aulas.forEach(aula => {
         const dataAula = new Date(aula.data);
@@ -210,15 +211,28 @@ function renderizarCalendario(aulas, ano, mes) {
     for (let dia = 1; dia <= diasNoMes; dia++) {
         let classesCss = "dia-calendario";
         let eventosDoDia = '';
+
         if (dia === hoje.getDate() && mes === hoje.getMonth() && ano === hoje.getFullYear()) {
             classesCss += " hoje";
         }
         if (aulasPorDia[dia]) {
             classesCss += " tem-aula";
-            eventosDoDia = `<div class="tooltip">${aulasPorDia[dia].map(a => 
-                `<p><strong>${a.hora_inicio.slice(0,5)}:</strong> ${a.nome_disciplina}</p>`
-            ).join('')}</div>`;
+            
+            // --- LÓGICA DO TOOLTIP ATUALIZADA AQUI ---
+            eventosDoDia = `<div class="tooltip">${aulasPorDia[dia].map(a => {
+                const horaInicio = a.hora_inicio.slice(0, 5);
+                const horaFim = a.hora_fim.slice(0, 5); // Pega a hora_fim
+                
+                return `
+                    <p>
+                        <strong>${horaInicio} - ${horaFim}</strong><br>
+                        ${a.nome_disciplina}<br>
+                        <em>(${a.nome_laboratorio})</em>
+                    </p>
+                `;
+            }).join('')}</div>`;
         }
+
         grid.innerHTML += `<div class="${classesCss}"><span>${dia}</span>${eventosDoDia}</div>`;
     }
 }
