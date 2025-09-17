@@ -1329,3 +1329,40 @@ nav ul .fa-solid {
     text-align: left;
     white-space: nowrap; /* Impede que o texto quebre em várias linhas */
 }
+#sidemenu .link-destacado {
+    margin: 25px 0; /* Adiciona um espaço extra acima e abaixo para ele se destacar */
+    padding: 0 15px; /* Adiciona um padding lateral para não colar nas bordas do menu */
+}
+
+/* Estiliza o link <a> para parecer um botão moderno */
+#sidemenu .link-destacado a {
+    display: flex; /* Essencial para alinhar o ícone e o texto */
+    align-items: center;
+    justify-content: center; /* Centraliza o conteúdo */
+    gap: 10px; /* Cria um espaço entre o ícone e o texto */
+
+    background: linear-gradient(45deg, #007bff, #0056b3); /* Fundo em gradiente azul */
+    color: #ffffff; /* Texto branco */
+    text-align: center;
+    padding: 14px; /* Espaçamento interno para criar o "corpo" do botão */
+    border-radius: 8px; /* Cantos arredondados */
+    font-weight: bold;
+    font-size: 1.1em;
+    text-decoration: none; /* Remove o sublinhado padrão do link */
+    
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Sombra suave para dar profundidade */
+    transition: all 0.3s ease; /* Animação suave para todas as transições */
+}
+
+/* Efeito ao passar o mouse por cima do botão */
+#sidemenu .link-destacado a:hover {
+    background: linear-gradient(45deg, #0056b3, #007bff); /* Inverte o gradiente */
+    transform: translateY(-3px); /* Efeito de "levantar" o botão */
+    box-shadow: 0 7px 14px rgba(0, 0, 0, 0.25); /* Aumenta a sombra */
+}
+
+/* Efeito ao clicar no botão */
+#sidemenu .link-destacado a:active {
+    transform: translateY(0); /* Remove o efeito de levantar ao clicar */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* Diminui a sombra */
+}
