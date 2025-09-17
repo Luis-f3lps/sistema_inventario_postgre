@@ -1,32 +1,35 @@
-// Ouve o evento do menu.js para saber quando começar a trabalhar
+// ===================================================================
+// ESTADO GLOBAL DA PÁGINA
+// ===================================================================
+let mesExibido;
+let anoExibido;
+
+/**
+ * Ponto de entrada: ouve o evento do menu.js para iniciar a lógica do dashboard.
+ */
 document.addEventListener('menuReady', (event) => {
     const { userData } = event.detail;
     inicializarDashboard(userData);
 });
 
+
 // ===================================================================
-// VARIÁVEIS DE ESTADO DO CALENDÁRIO
+// INICIALIZAÇÃO E NAVEGAÇÃO
 // ===================================================================
-let mesExibido;
-let anoExibido;
-let todasAsAulas = []; // Guarda os dados das aulas para o calendário
 
 /**
- * Orquestra a exibição e o carregamento dos painéis e da tabela.
+ * Orquestra a exibição e o carregamento dos painéis.
  */
-function inicializarDashboard(userData) {
-    // Define o estado inicial do calendário para o mês e ano atuais
+async function inicializarDashboard(userData) {
     const hoje = new Date();
-    mesExibido = hoje.getMonth();
+    mesExibido = hoje.getMonth(); // 0 = Janeiro, 11 = Dezembro
     anoExibido = hoje.getFullYear();
 
-    // Configura os cliques dos botões de navegação do calendário
-    const btnAnterior = document.getElementById('btn-mes-anterior');
-    const btnProximo = document.getElementById('btn-proximo-mes');
-    if (btnAnterior) btnAnterior.addEventListener('click', mostrarMesAnterior);
-    if (btnProximo) btnProximo.addEventListener('click', mostrarProximoMes);
+    // Adiciona os eventos de clique aos botões de navegação do calendário
+    document.getElementById('btn-mes-anterior')?.addEventListener('click', mostrarMesAnterior);
+    document.getElementById('btn-proximo-mes')?.addEventListener('click', mostrarProximoMes);
 
-    // Mostra/esconde painéis com base no perfil
+    // Mostra/esconde painéis com base no perfil do usuário
     const userType = userData.tipo_usuario ? userData.tipo_usuario.trim().toLowerCase() : '';
     const showElement = (selector) => {
         const el = document.querySelector(selector);
@@ -46,84 +49,78 @@ function inicializarDashboard(userData) {
             break;
     }
 
-    // Carrega os dados para os painéis visíveis
-    carregarDadosDosPaineis(userType);
-
-    // Carrega a tabela do professor
+    // Carrega os dados iniciais para os painéis visíveis
+    await carregarDadosDosPaineis(userType);
+    
+    // Carrega a tabela principal de solicitações se o usuário for professor
     if (userType === 'professor') {
         loadMyRequests();
     }
 }
 
 /**
- * Funções de navegação do calendário.
+ * Funções de navegação do calendário (são assíncronas para buscar novos dados).
  */
-function mostrarMesAnterior() {
+async function mostrarMesAnterior() {
     mesExibido--;
     if (mesExibido < 0) {
-        mesExibido = 11;
+        mesExibido = 11; // Volta para Dezembro
         anoExibido--;
     }
-    renderizarCalendario(todasAsAulas, anoExibido, mesExibido);
+    const novasAulas = await fetchAulasDoCalendario(anoExibido, mesExibido + 1);
+    renderizarCalendario(novasAulas, anoExibido, mesExibido);
 }
 
-function mostrarProximoMes() {
+async function mostrarProximoMes() {
     mesExibido++;
     if (mesExibido > 11) {
-        mesExibido = 0;
+        mesExibido = 0; // Volta para Janeiro
         anoExibido++;
     }
-    renderizarCalendario(todasAsAulas, anoExibido, mesExibido);
+    const novasAulas = await fetchAulasDoCalendario(anoExibido, mesExibido + 1);
+    renderizarCalendario(novasAulas, anoExibido, mesExibido);
+}
+
+
+// ===================================================================
+// BUSCA DE DADOS (FETCH)
+// ===================================================================
+
+/**
+ * Busca as aulas para um mês/ano específico na nova API do calendário.
+ */
+async function fetchAulasDoCalendario(ano, mes) {
+    try {
+        const response = await fetch(`/api/calendario/aulas-autorizadas?ano=${ano}&mes=${mes}`);
+        if (!response.ok) throw new Error('Falha ao buscar dados do calendário');
+        return await response.json();
+    } catch (error) {
+        console.error("Erro ao buscar aulas para o calendário:", error);
+        return []; // Retorna um array vazio em caso de erro
+    }
 }
 
 /**
- * Busca os dados para os painéis com base no tipo de usuário.
+ * Busca os dados para os diferentes painéis na carga inicial da página.
  */
-function carregarDadosDosPaineis(userType) {
-    const promises = [];
-
+async function carregarDadosDosPaineis(userType) {
     if (userType === 'professor') {
-        promises.push(fetch('/api/dashboard/aulas-autorizadas').then(res => res.json()));
-    }
-    if (userType === 'tecnico') {
-        promises.push(fetch('/api/dashboard/meus-laboratorios').then(res => res.json()));
-        promises.push(fetch('/api/aulas-meus-laboratorios').then(res => res.json()));
-    }
-
-    if (promises.length === 0) return;
-
-    Promise.all(promises).then(results => {
-        if (userType === 'professor') {
-            todasAsAulas = results[0];
-            renderizarCalendario(todasAsAulas, anoExibido, mesExibido);
+        const aulasDoMesAtual = await fetchAulasDoCalendario(anoExibido, mesExibido + 1);
+        renderizarCalendario(aulasDoMesAtual, anoExibido, mesExibido);
+    } 
+    else if (userType === 'tecnico') {
+        try {
+            const [meusLaboratorios, aulasNosMeusLabs] = await Promise.all([
+                fetch('/api/dashboard/meus-laboratorios').then(res => res.json()),
+                fetch('/api/aulas-meus-laboratorios').then(res => res.json())
+            ]);
+            renderizarMeusLaboratorios(meusLaboratorios);
+            renderizarAulasNosMeusLaboratorios(aulasNosMeusLabs);
+        } catch (error) {
+            console.error('Erro ao carregar dados dos painéis do técnico:', error);
         }
-        if (userType === 'tecnico') {
-            renderizarMeusLaboratorios(results[0]);
-            renderizarAulasNosMeusLaboratorios(results[1]);
-        }
-    }).catch(error => console.error('Erro ao carregar dados dos painéis:', error));
-}
-
-// ===================================================================
-// FUNÇÃO AUXILIAR (REUTILIZÁVEL)
-// ===================================================================
-/**
- * Formata um link de roteiro para garantir que seja externo e abre em nova aba.
- */
-function formatarLinkRoteiro(url, textoLink = 'Ver') {
-    if (!url) {
-        return 'N/A';
     }
-    let linkCorrigido = url;
-    if (!/^(https?:\/\/|^\/\/)/i.test(linkCorrigido)) {
-        linkCorrigido = `//${linkCorrigido}`;
-    }
-    return `<a href="${linkCorrigido}" target="_blank" class="link-roteiro">${textoLink}</a>`;
 }
-
-// ===================================================================
-// FUNÇÕES DE RENDERIZAÇÃO
-// ===================================================================
 
 /**
  * Carrega a tabela de solicitações do professor.
@@ -142,6 +139,11 @@ async function loadMyRequests() {
         }
     }
 }
+
+
+// ===================================================================
+// FUNÇÕES DE RENDERIZAÇÃO (Exibição dos dados na tela)
+// ===================================================================
 
 /**
  * Renderiza a tabela de solicitações do professor.
@@ -208,7 +210,6 @@ function renderizarCalendario(aulas, ano, mes) {
     for (let dia = 1; dia <= diasNoMes; dia++) {
         let classesCss = "dia-calendario";
         let eventosDoDia = '';
-
         if (dia === hoje.getDate() && mes === hoje.getMonth() && ano === hoje.getFullYear()) {
             classesCss += " hoje";
         }
@@ -218,7 +219,6 @@ function renderizarCalendario(aulas, ano, mes) {
                 `<p><strong>${a.hora_inicio.slice(0,5)}:</strong> ${a.nome_disciplina}</p>`
             ).join('')}</div>`;
         }
-
         grid.innerHTML += `<div class="${classesCss}"><span>${dia}</span>${eventosDoDia}</div>`;
     }
 }
@@ -229,11 +229,9 @@ function renderizarCalendario(aulas, ano, mes) {
 function renderizarMeusLaboratorios(laboratorios) {
     const lista = document.getElementById('lista-meus-laboratorios');
     if (!lista) return;
-    if (laboratorios.length === 0) {
-        lista.innerHTML = '<li>Você não é responsável por nenhum laboratório.</li>'; 
-        return;
-    }
-    lista.innerHTML = laboratorios.map(l => `<li>${l.nome_laboratorio}</li>`).join('');
+    lista.innerHTML = laboratorios.length === 0
+        ? '<li>Você não é responsável por nenhum laboratório.</li>'
+        : laboratorios.map(l => `<li>${l.nome_laboratorio}</li>`).join('');
 }
 
 /**
@@ -249,22 +247,29 @@ function renderizarAulasNosMeusLaboratorios(aulas) {
     }
     aulas.forEach(aula => {
         const tr = document.createElement('tr');
-        const dataFormatada = new Date(aula.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-        const horaInicio = aula.hora_inicio.slice(0, 5);
-        const horaFim = aula.hora_fim.slice(0, 5);
-        const precisaTecnicoTexto = aula.precisa_tecnico ? 'Sim' : 'Não';
         const linkRoteiroHtml = formatarLinkRoteiro(aula.link_roteiro, 'Ver Roteiro');
-
         tr.innerHTML = `
             <td>${aula.nome_laboratorio}</td>
             <td>${aula.nome_disciplina}</td>
             <td>${aula.nome_professor}</td>
-            <td>${dataFormatada}</td>
-            <td>${horaInicio} - ${horaFim}</td>
+            <td>${new Date(aula.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</td>
+            <td>${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(0, 5)}</td>
             <td>${aula.numero_discentes}</td>
-            <td>${precisaTecnicoTexto}</td>
+            <td>${aula.precisa_tecnico ? 'Sim' : 'Não'}</td>
             <td>${linkRoteiroHtml}</td>
         `;
         tbody.appendChild(tr);
     });
+}
+
+// ===================================================================
+// FUNÇÃO AUXILIAR
+// ===================================================================
+function formatarLinkRoteiro(url, textoLink = 'Ver') {
+    if (!url) return 'N/A';
+    let linkCorrigido = url.trim();
+    if (linkCorrigido && !/^(https?:\/\/|^\/\/)/i.test(linkCorrigido)) {
+        linkCorrigido = `//${linkCorrigido}`;
+    }
+    return `<a href="${linkCorrigido}" target="_blank" class="link-roteiro">${textoLink}</a>`;
 }

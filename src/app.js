@@ -1911,4 +1911,40 @@ app.get("/api/horarios", async (req, res) => {
     res.status(500).json({ error: "Erro ao buscar horários." });
   }
 });
+// Endpoint para buscar aulas autorizadas para o calendário por mês/ano
+app.get("/api/calendario/aulas-autorizadas", async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+    try {
+        const professor_email = req.session.user.email;
+        const { ano, mes } = req.query; // Pega o ano e o mês da URL (ex: ?ano=2025&mes=9)
+
+        // Validação básica
+        if (!ano || !mes) {
+            return res.status(400).json({ error: "Ano e mês são obrigatórios." });
+        }
+
+        const result = await pool.query(
+            `SELECT 
+                l.nome_laboratorio, 
+                d.nome_disciplina,
+                a.data, 
+                h.hora_inicio
+            FROM aulas a
+            JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+            JOIN horarios h ON a.id_horario = h.id_horario
+            JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+            WHERE a.professor_email = $1 
+              AND a.status = 'autorizado' 
+              -- Filtra pelo ano e mês exatos da data da aula
+              AND EXTRACT(YEAR FROM a.data) = $2
+              AND EXTRACT(MONTH FROM a.data) = $3
+            ORDER BY a.data ASC, h.hora_inicio ASC`,
+            [professor_email, ano, mes] // Passa ano e mês como parâmetros
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Erro ao buscar aulas para o calendário:", err);
+        res.status(500).json({ error: "Erro ao buscar aulas para o calendário." });
+    }
+});
 export default app;
