@@ -1430,3 +1430,117 @@ nav ul .fa-solid {
     font-weight: bold;
     color: #0056b3;
 }
+
+.calendario-container {
+    width: 100%;
+}
+
+/* Título do mês (SETEMBRO • 2025) */
+#calendario-titulo {
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--cor-texto-principal);
+    margin-bottom: 20px;
+}
+
+/* Container da grade de dias (DOM, SEG, TER...) */
+.calendario-header, .calendario-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 colunas iguais */
+    gap: 5px;
+}
+
+.calendario-header .dia-semana {
+    font-weight: bold;
+    text-align: center;
+    padding: 10px 0;
+    color: var(--cor-texto-secundario);
+}
+
+/* Célula de cada dia do calendário */
+.dia-calendario {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    background-color: #fff;
+    border: 1px solid #f0f0f0;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.dia-calendario.dia-vazio {
+    background-color: transparent;
+    border: none;
+}
+
+/* Estilo para o dia de HOJE */
+.dia-calendario.hoje span {
+    background-color: var(--cor-primaria);
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Estilo para dias que TÊM AULA */
+.dia-calendario.tem-aula {
+    background-color: #e7f1ff; /* Azul bem claro */
+    font-weight: bold;
+    color: var(--cor-primaria-hover);
+    cursor: pointer;
+}
+
+.dia-calendario.tem-aula::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background-color: var(--cor-sucesso); /* Ponto verde indicando evento */
+    border-radius: 50%;
+}
+
+/* Tooltip (caixa de informações) que aparece ao passar o mouse */
+.dia-calendario .tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 110%; /* Aparece acima do dia */
+    left: 50%;
+    transform: translateX(-50%);
+    
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    width: 250px; /* Largura do tooltip */
+    z-index: 10;
+    
+    font-size: 0.85em;
+    text-align: left;
+    white-space: normal;
+    
+    transition: opacity 0.3s;
+}
+
+.dia-calendario:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip p {
+    margin: 0;
+    padding: 4px 0;
+    border-bottom: 1px solid #555;
+}
+.tooltip p:last-child {
+    border-bottom: none;
+}

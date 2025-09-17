@@ -122,74 +122,34 @@ function renderTable(requests) {
     });
 }
 
-/**
- * Renderiza um CALENDÁRIO para o mês atual, destacando os dias com aulas autorizadas.
- */
 function renderizarAulasAutorizadas(aulas) {
-    const grid = document.getElementById('calendario-grid');
-    const titulo = document.getElementById('calendario-titulo');
-    if (!grid || !titulo) return;
-
-    // Pega a data de hoje para saber qual mês e ano renderizar
-    const hoje = new Date();
-    const mesAtual = hoje.getMonth();
-    const anoAtual = hoje.getFullYear();
-
-    // Formata o título do calendário
-    const nomeDoMes = hoje.toLocaleString('pt-BR', { month: 'long' });
-    titulo.textContent = `${nomeDoMes.toUpperCase()} • ${anoAtual}`;
-
-    // Agrupa as aulas por dia para fácil acesso
-    const aulasPorDia = {};
-    aulas.forEach(aula => {
-        const dataAula = new Date(aula.data);
-        // Considera apenas aulas do mês/ano atual
-        if (dataAula.getMonth() === mesAtual && dataAula.getFullYear() === anoAtual) {
-            const dia = dataAula.getUTCDate();
-            if (!aulasPorDia[dia]) {
-                aulasPorDia[dia] = [];
-            }
-            aulasPorDia[dia].push(aula);
-        }
-    });
-
-    // Lógica para desenhar o calendário
-    const primeiroDiaDoMes = new Date(anoAtual, mesAtual, 1).getDay(); // 0=Dom, 1=Seg...
-    const diasNoMes = new Date(anoAtual, mesAtual + 1, 0).getDate();
-
-    grid.innerHTML = ''; // Limpa o calendário anterior
-
-    // 1. Cria as células vazias para os dias antes do dia 1
-    for (let i = 0; i < primeiroDiaDoMes; i++) {
-        grid.innerHTML += `<div class="dia-calendario dia-vazio"></div>`;
+    const lista = document.getElementById('lista-aulas-autorizadas');
+    if (!lista) return;
+    if (aulas.length === 0) {
+        lista.innerHTML = '<li>Nenhuma aula autorizada futura.</li>'; 
+        return;
     }
+    lista.innerHTML = aulas.map(a => {
+        const dataFormatada = new Date(a.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        const horaInicio = a.hora_inicio.slice(0, 5);
+        const horaFim = a.hora_fim.slice(0, 5);
+        const linkRoteiroHtml = a.link_roteiro 
+            ? `<a href="${a.link_roteiro}" target="_blank" class="link-roteiro">Ver</a>` 
+            : 'N/A';
+        
+        // LÓGICA ADICIONADA: Converte o valor true/false para "Sim" ou "Não"
+        const precisaTecnicoTexto = a.precisa_tecnico ? 'Sim' : 'Não';
 
-    // 2. Cria as células para cada dia do mês
-    for (let dia = 1; dia <= diasNoMes; dia++) {
-        let classesCss = "dia-calendario";
-        let eventosDoDia = '';
-
-        // Verifica se é o dia de hoje
-        if (dia === hoje.getDate() && mesAtual === hoje.getMonth() && anoAtual === hoje.getFullYear()) {
-            classesCss += " hoje";
-        }
-
-        // Verifica se há aulas neste dia
-        if (aulasPorDia[dia]) {
-            classesCss += " tem-aula";
-            // Cria o conteúdo do tooltip com os detalhes da(s) aula(s)
-            eventosDoDia = `<div class="tooltip">${aulasPorDia[dia].map(a => 
-                `<p><strong>${a.hora_inicio.slice(0,5)}:</strong> ${a.nome_disciplina} (${a.nome_laboratorio})</p>`
-            ).join('')}</div>`;
-        }
-
-        grid.innerHTML += `
-            <div class="${classesCss}">
-                <span>${dia}</span>
-                ${eventosDoDia}
-            </div>
+        return `
+            <li class="item-painel-detalhado">
+                <strong>${a.nome_laboratorio}</strong>
+                <span class="detalhe-item-painel">Disciplina: ${a.nome_disciplina}</span>
+                <span class="detalhe-item-painel">${dataFormatada} | ${horaInicio} - ${horaFim}</span>
+                <span class="detalhe-item-painel">Roteiro: ${linkRoteiroHtml}</span>
+                <span class="detalhe-item-painel">Apoio Técnico: <strong>${precisaTecnicoTexto}</strong></span>
+            </li>
         `;
-    }
+    }).join('');
 }
 function renderizarMeusLaboratorios(laboratorios) {
     const lista = document.getElementById('lista-meus-laboratorios');
