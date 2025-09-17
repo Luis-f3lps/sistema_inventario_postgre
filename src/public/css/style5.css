@@ -1490,10 +1490,11 @@ nav ul .fa-solid {
 
 /* Estilo para dias que TÊM AULA */
 .dia-calendario.tem-aula {
-    background-color: #e7f1ff; /* Azul bem claro */
+    background-color: #569af9;
     font-weight: bold;
     color: var(--cor-primaria-hover);
     cursor: pointer;
+    color: aliceblue;
 }
 
 .dia-calendario.tem-aula::after {
