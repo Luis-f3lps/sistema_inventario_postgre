@@ -1366,11 +1366,67 @@ nav ul .fa-solid {
     transform: translateY(0); /* Remove o efeito de levantar ao clicar */
     box-shadow: 0 2px 5px rgba(0, 91, 179, 0.2); /* Sombra menor */
 }
-.agendamento-container h2 {
-    text-align: center;
-    color: #2c3e50;
-    margin-bottom: 30px;
-    font-size: 1.5em;
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 15px;
+.grade-horarios-recorrente {
+    display: grid;
+    /* Cria colunas responsivas: elas se ajustam ao tamanho da tela */
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px; /* Espaçamento entre os horários */
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+/* O estilo de cada item (o "botão" que contém o checkbox e o texto) */
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espaço entre o quadradinho do checkbox e o texto */
+    
+    padding: 12px;
+    border: 2px solid #dee2e6; /* Borda sutil */
+    border-radius: 8px;
+    background-color: #ffffff;
+    cursor: pointer;
+    
+    transition: all 0.2s ease-in-out; /* Animação suave para todas as mudanças */
+}
+
+/* Efeito ao passar o mouse por cima */
+.checkbox-item:hover {
+    border-color: #007bff; /* Borda fica azul */
+    transform: translateY(-2px); /* Efeito de levantar */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* O quadradinho do checkbox em si */
+.checkbox-item input[type="checkbox"] {
+    /* Deixa o checkbox maior e mais fácil de clicar */
+    width: 1.3em;
+    height: 1.3em;
+    cursor: pointer;
+    accent-color: #007bff; /* Cor do checkbox quando marcado (moderno) */
+}
+
+/* O texto (label) do horário */
+.checkbox-item label {
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    user-select: none; /* Impede que o texto seja selecionado ao clicar */
+}
+
+
+/* --- A MÁGICA DA SELEÇÃO --- */
+
+/* Quando o checkbox DENTRO do item está MARCADO... */
+.checkbox-item:has(input:checked) {
+    background-color: #e7f1ff; /* ... o fundo do item todo fica azul claro */
+    border-color: #007bff;     /* ... e a borda fica azul forte */
+}
+
+/* E o texto (label) também muda de cor e peso */
+.checkbox-item:has(input:checked) label {
+    font-weight: bold;
+    color: #0056b3;
 }
