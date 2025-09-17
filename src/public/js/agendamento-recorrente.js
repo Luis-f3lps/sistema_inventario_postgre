@@ -157,3 +157,16 @@ async function submeterAgendamentoRecorrente() {
         msgEl.style.display = 'block';
     }
 }
+function toggleRoteiroVisibility() {
+    const roteiroContainer = document.getElementById('roteiro-container');
+    const precisaTecnicoSim = document.getElementById('tecnicoSim');
+
+    if (roteiroContainer && precisaTecnicoSim) {
+        // Se o "Sim" estiver marcado, mostra o campo. Caso contrário, esconde.
+        if (precisaTecnicoSim.checked) {
+            roteiroContainer.style.display = 'block'; // ou 'flex', dependendo do seu CSS
+        } else {
+            roteiroContainer.style.display = 'none';
+        }
+    }
+}
