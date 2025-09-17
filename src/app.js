@@ -1609,6 +1609,80 @@ app.post("/api/schedule", async (req, res) => {
     res.status(500).json({ error: "Erro ao solicitar aula" });
   }
 });
+
+// Adicione este endpoint ao seu arquivo de rotas do backend
+app.post("/api/schedule-recurring", async (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: "Você precisa estar logado." });
+    }
+
+    const client = await pool.connect();
+
+    try {
+        const professor_email = req.session.user.email;
+        const { 
+            labId, disciplinaId, diaDaSemana, dataInicio, dataFim, 
+            horarios, precisa_tecnico, link_roteiro, numero_discentes 
+        } = req.body;
+
+        if (!labId || !disciplinaId || !diaDaSemana || !dataInicio || !dataFim || !horarios || horarios.length === 0) {
+            return res.status(400).json({ error: "Dados incompletos." });
+        }
+
+        await client.query('BEGIN');
+
+        const datasParaAgendar = [];
+        let dataAtual = new Date(dataInicio);
+        const dataFinal = new Date(dataFim);
+        
+        while (dataAtual <= dataFinal) {
+            if (dataAtual.getUTCDay() == diaDaSemana) {
+                datasParaAgendar.push(new Date(dataAtual));
+            }
+            dataAtual.setUTCDate(dataAtual.getUTCDate() + 1);
+        }
+
+        if (datasParaAgendar.length === 0) {
+            return res.status(400).json({ error: "Nenhum dia correspondente no período." });
+        }
+
+        for (const data of datasParaAgendar) {
+            for (const hora of horarios) {
+                const horarioRes = await client.query("SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1", [hora]);
+                if (horarioRes.rowCount === 0) {
+                    await client.query('ROLLBACK');
+                    return res.status(400).json({ error: `Horário inválido: ${hora}` });
+                }
+                const id_horario = horarioRes.rows[0].id_horario;
+
+                await client.query(
+                    `INSERT INTO aulas (
+                        professor_email, id_laboratorio, data, id_horario, precisa_tecnico, 
+                        link_roteiro, id_disciplina, numero_discentes, status
+                     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'analisando')`,
+                    [
+                        professor_email, labId, data, id_horario, precisa_tecnico, 
+                        link_roteiro, disciplinaId, numero_discentes
+                    ]
+                );
+            }
+        }
+
+        await client.query('COMMIT');
+        res.status(201).json({ message: `${datasParaAgendar.length * horarios.length} aula(s) solicitada(s) com sucesso!` });
+
+    } catch (err) {
+        await client.query('ROLLBACK');
+        if (err.code === "23505") {
+            return res.status(409).json({ error: "Conflito: Um ou mais horários já estão ocupados." });
+        }
+        console.error("Erro no agendamento recorrente:", err);
+        res.status(500).json({ error: "Erro interno no servidor." });
+    } finally {
+        client.release();
+    }
+});
+
 // Endpoint do Técnico para ver as solicitações
 app.get("/api/requests", async (req, res) => {
   try {
@@ -1735,44 +1809,6 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
   }
 });
 
-// Endpoint para o professor ver as suas próprias solicitações futuras (VERSÃO ATUALIZADA)
-app.get("/api/minhas-solicitacoes", async (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).json({ error: "Utilizador não autenticado." });
-  }
-  try {
-    const professor_email = req.session.user.email;
-
-    // A lógica de UPDATE para aulas passadas continua a mesma...
-    // ...
-
-    // Buscando a lista com os novos campos
-    const result = await pool.query(
-      `SELECT 
-                l.nome_laboratorio, 
-                d.nome_disciplina, -- <<< ADICIONADO
-                a.link_roteiro,      -- <<< ADICIONADO
-                a.data, 
-                h.hora_inicio, 
-                h.hora_fim,
-                a.precisa_tecnico, 
-                a.status
-            FROM aulas a
-            JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-            JOIN horarios h ON a.id_horario = h.id_horario
-            JOIN disciplina d ON a.id_disciplina = d.id_disciplina -- <<< NOVO JOIN
-            WHERE 
-                a.professor_email = $1 
-                AND a.data >= CURRENT_DATE
-            ORDER BY 
-                a.data ASC, h.hora_inicio ASC`,
-      [professor_email]
-    );
-    res.json(result.rows);
-  } catch (err) {
-    // ... seu catch block ...
-  }
-});
 
 // Endpoint para o painel "Próximas Aulas" (VERSÃO ATUALIZADA)
 app.get("/api/dashboard/aulas-autorizadas", async (req, res) => {
@@ -1818,7 +1854,7 @@ app.get("/api/dashboard/meus-laboratorios", async (req, res) => {
   }
 });
 
-// Endpoint para o painel do Técnico "Aulas no meu laboratório" (ATUALIZADO)
+// Endpoint para o painel do Técnico "Aulas no meu laboratório" 
 app.get("/api/aulas-meus-laboratorios", async (req, res) => {
     if (!req.session.user || !req.session.user.email) {
         return res.status(401).json({ error: "Não autenticado." });
