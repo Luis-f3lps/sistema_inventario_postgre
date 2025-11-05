@@ -1479,14 +1479,15 @@ nav ul .fa-solid {
 
 /* Estilo para o dia de HOJE */
 .dia-calendario.hoje span {
-    background-color: var(--cor-primaria);
-    color: white;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
+    background-color: #ff0000;
+    color: #ffffff;
+    border-radius: 5%;
+    width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
+    font-weight: bold;
 }
 
 /* Estilo para dias que TÊM AULA */
