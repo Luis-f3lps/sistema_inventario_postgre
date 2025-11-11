@@ -44,8 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSubmenuListeners();
 });
 
-// Chame a função para carregar os usuários
-loadUsers();
+
 
 // Pegar o nome do usuário logado
 async function loadLoggedInUser() {
@@ -93,7 +92,6 @@ switch (userType) {
         })
         .catch(error => console.error('Erro ao carregar usuário logado:', error));
 }
-loadLoggedInUser();
 
 async function loadDisciplinas() {
     try {
