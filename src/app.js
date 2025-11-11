@@ -124,6 +124,9 @@ app.get('/Relatorio', (req, res) => {
 app.get('/Home', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'Home.html'));
 })
+app.get('/Disciplinas', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'disciplinas.html'));
+})
 app.get('/Horario', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'horarios.html'));
 });
@@ -1983,7 +1986,9 @@ app.get("/api/calendario/aulas-tecnico", async (req, res) => {
         res.status(500).json({ error: "Erro ao buscar aulas para o calendário." });
     }
 });
-router.get('/disciplinas', async (req, res) => {
+app.get('/api/disciplinas', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+
     try {
         const query = 'SELECT * FROM "disciplina" ORDER BY nome_disciplina, status';
         const result = await pool.query(query);
@@ -1994,7 +1999,9 @@ router.get('/disciplinas', async (req, res) => {
     }
 });
 
-router.post('/disciplinas', async (req, res) => {
+app.post('/api/disciplinas', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+
     const { nome_disciplina, professor_email_responsavel } = req.body;
 
     if (!nome_disciplina || !professor_email_responsavel) {
@@ -2023,7 +2030,9 @@ router.post('/disciplinas', async (req, res) => {
     }
 });
 
-router.patch('/disciplinas/desativar/:id', async (req, res) => {
+app.patch('/api/disciplinas/desativar/:id', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+
     const { id } = req.params;
     try {
         const query = `
@@ -2049,7 +2058,9 @@ router.patch('/disciplinas/desativar/:id', async (req, res) => {
     }
 });
 
-router.patch('/disciplinas/ativar/:id', async (req, res) => {
+app.patch('/api/disciplinas/ativar/:id', async (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+
     const { id } = req.params;
     try {
         const query = `
