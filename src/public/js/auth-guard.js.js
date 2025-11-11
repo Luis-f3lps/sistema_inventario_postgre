@@ -2,6 +2,7 @@
 const paginasAdmin = [
     '/Usuarios', // Adapte para os nomes exatos das suas páginas
     '/Produto',
+        '/Disciplinas',
     '/Laboratorio'
 ];
 

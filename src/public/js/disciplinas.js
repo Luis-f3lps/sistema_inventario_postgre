@@ -44,43 +44,56 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSubmenuListeners();
 });
 
+// Chame a função para carregar os usuários
+loadUsers();
+
+// Pegar o nome do usuário logado
 async function loadLoggedInUser() {
-    try {
-        const response = await fetch('/api/usuario-logado');
-        if (!response.ok) {
-            console.error('Falha ao buscar usuário. Redirecionando para login.');
-            return;
-        }
-
-        const data = await response.json();
-        const userNameElement = document.getElementById('user-name-text');
-        if (userNameElement) {
+                        const response = await fetch('/api/usuario-logado');
+                    if (!response.ok) {
+                        // Se não conseguir encontrar o usuário, redireciona para o login
+                        window.location.href = '/login.html';
+                        return;
+                    }
+    fetch('/api/usuario-logado')
+        .then(response => {
+            // É uma boa prática verificar se a resposta da rede foi bem-sucedida
+            if (!response.ok) {
+                throw new Error('Falha ao buscar usuário. Status: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const userNameElement = document.getElementById('user-name-text');
             userNameElement.innerHTML = data.nome;
-        }
 
-        const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
+            // Correção 1: Normaliza o tipo de usuário usando a variável 'data'
+            const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
 
-        switch (userType) {
-            case 'admin':
-                document.querySelector('.admin-menu')?.style.display = 'block';
-                document.querySelector('#sidemenu > li.submenu.produto')?.style.display = 'block';
-                break;
-            case 'tecnico':
-                document.querySelector('.tecnico')?.style.display = 'block';
-                document.querySelector('.Home')?.style.display = 'block';
-                document.querySelector('#sidemenu > li.submenu.produto')?.style.display = 'block';
-                break;
-            case 'professor':
-                document.querySelector('.Home')?.style.display = 'block';
-                document.querySelector('.professor')?.style.display = 'block';
-                document.querySelector('.Horarios')?.style.display = 'block';
-                break;
-        }
-    } catch (error) {
-        console.error('Erro ao carregar usuário logado:', error);
-    }
+            // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
+switch (userType) {
+                        case 'admin':
+                            document.querySelector('.admin-menu').style.display = 'block';
+                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+
+                            break;
+                        case 'tecnico':
+                            document.querySelector('.tecnico').style.display = 'block';
+                            document.querySelector('.Home').style.display = 'block';
+                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+
+                            break;
+                        case 'professor':
+                            document.querySelector('.Home').style.display = 'block';
+                            document.querySelector('.professor').style.display = 'block';
+                            document.querySelector('.Horarios').style.display = 'block';
+
+                            break;
+                    }
+        })
+        .catch(error => console.error('Erro ao carregar usuário logado:', error));
 }
-
+loadLoggedInUser();
 
 async function loadDisciplinas() {
     try {
