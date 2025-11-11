@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupSubmenuListeners();
 });
+/* eslint-disable no-unused-vars */
 
 /**
  * Gerencia a troca de abas (tabs).
@@ -56,20 +57,19 @@ function opentab(event, tabname) {
         link.classList.remove("active-link");
     });
 
-    // 2. Pega todos os "conteúdos" e esconde eles
+    // 2. Pega todos os "conteúdos" e esconde eles (remove a classe)
     const tabcontents = document.getElementsByClassName("tab-contents");
     Array.from(tabcontents).forEach(content => {
         content.classList.remove("active-tab");
     });
 
-    // 3. Mostra o conteúdo da aba clicada
+    // 3. Mostra o conteúdo da aba clicada (adiciona a classe)
     const activeTab = document.getElementById(tabname);
     if (activeTab) {
         activeTab.classList.add("active-tab");
     }
     
     // 4. Adiciona a classe ativa de volta apenas no link que foi clicado
-    // (É por isso que precisamos do 'event')
     if (event && event.currentTarget) {
         event.currentTarget.classList.add("active-link");
     }
