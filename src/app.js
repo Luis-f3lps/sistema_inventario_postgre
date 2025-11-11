@@ -1983,4 +1983,95 @@ app.get("/api/calendario/aulas-tecnico", async (req, res) => {
         res.status(500).json({ error: "Erro ao buscar aulas para o calendário." });
     }
 });
+router.get('/disciplinas', async (req, res) => {
+    try {
+        const query = 'SELECT * FROM "disciplina" ORDER BY nome_disciplina, status';
+        const result = await pool.query(query);
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: 'Erro ao buscar disciplinas no servidor.' });
+    }
+});
+
+router.post('/disciplinas', async (req, res) => {
+    const { nome_disciplina, professor_email_responsavel } = req.body;
+
+    if (!nome_disciplina || !professor_email_responsavel) {
+        return res.status(400).json({ error: 'Nome da disciplina e e-mail do professor são obrigatórios.' });
+    }
+
+    try {
+        const query = `
+            INSERT INTO "disciplina" (nome_disciplina, professor_email_responsavel) 
+            VALUES ($1, $2) 
+            RETURNING *
+        `;
+        const result = await pool.query(query, [nome_disciplina, professor_email_responsavel]);
+        
+        res.status(201).json({ 
+            message: 'Disciplina adicionada com sucesso!', 
+            disciplina: result.rows[0] 
+        });
+
+    } catch (err) {
+        console.error(err.message);
+        if (err.code === '23503') {
+            return res.status(400).json({ error: 'Erro: O professor com este e-mail não existe no cadastro de usuários.' });
+        }
+        res.status(500).json({ error: 'Erro ao adicionar disciplina.' });
+    }
+});
+
+router.patch('/disciplinas/desativar/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const query = `
+            UPDATE "disciplina" 
+            SET status = 'desativado' 
+            WHERE id_disciplina = $1 
+            RETURNING *
+        `;
+        const result = await pool.query(query, [id]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Disciplina não encontrada.' });
+        }
+
+        res.json({ 
+            message: 'Disciplina desativada com sucesso!', 
+            disciplina: result.rows[0] 
+        });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: 'Erro ao desativar disciplina.' });
+    }
+});
+
+router.patch('/disciplinas/ativar/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const query = `
+            UPDATE "disciplina" 
+            SET status = 'ativado' 
+            WHERE id_disciplina = $1 
+            RETURNING *
+        `;
+        const result = await pool.query(query, [id]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Disciplina não encontrada.' });
+        }
+
+        res.json({ 
+            message: 'Disciplina ativada com sucesso!', 
+            disciplina: result.rows[0] 
+        });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: 'Erro ao ativar disciplina.' });
+    }
+});
 export default app;
