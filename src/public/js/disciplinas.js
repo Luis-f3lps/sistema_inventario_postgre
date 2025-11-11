@@ -44,7 +44,36 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSubmenuListeners();
 });
 
+/**
+ * Gerencia a troca de abas (tabs).
+ * @param {Event} event - O objeto do evento de clique.
+ * @param {string} tabname - O ID do conteúdo da aba para abrir.
+ */
+function opentab(event, tabname) {
+    // 1. Pega todos os "botões" (links) e remove a classe ativa
+    const tablinks = document.getElementsByClassName("tab-links");
+    Array.from(tablinks).forEach(link => {
+        link.classList.remove("active-link");
+    });
 
+    // 2. Pega todos os "conteúdos" e esconde eles
+    const tabcontents = document.getElementsByClassName("tab-contents");
+    Array.from(tabcontents).forEach(content => {
+        content.classList.remove("active-tab");
+    });
+
+    // 3. Mostra o conteúdo da aba clicada
+    const activeTab = document.getElementById(tabname);
+    if (activeTab) {
+        activeTab.classList.add("active-tab");
+    }
+    
+    // 4. Adiciona a classe ativa de volta apenas no link que foi clicado
+    // (É por isso que precisamos do 'event')
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add("active-link");
+    }
+}
 
 // Pegar o nome do usuário logado
 async function loadLoggedInUser() {
