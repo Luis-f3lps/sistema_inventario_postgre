@@ -32,7 +32,7 @@ function Autenticado() {
 function redirecionarSeNaoAutenticado() {
     Autenticado().then(authenticated => {
         if (!authenticated) {
-            window.location.href = 'login.html'; // Redireciona para a página de login
+            window.location.href = 'login.html';
         }
     });
 }
@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// Função para abrir abas
 function opentab(tabname) {
     var tablinks = document.getElementsByClassName("tab-links");
     var tabcontents = document.getElementsByClassName("tab-contents");
@@ -60,8 +59,7 @@ function opentab(tabname) {
     document.querySelector(`.tab-links[onclick="opentab('${tabname}')"]`).classList.add("active-link");
 }
 
-// Função para carregar dados de produtos e preencher a tabela
-function loadProdutos(page = 1, limit = 20) { // Ajustando o limite padrão
+function loadProdutos(page = 1, limit = 20) {
     fetch(`/api/produtosPag?page=${page}&limit=${limit}`)
         .then(response => {
             if (!response.ok) {
@@ -71,9 +69,8 @@ function loadProdutos(page = 1, limit = 20) { // Ajustando o limite padrão
         })
         .then(data => {
             const tbody = document.getElementById('produto-tbody');
-            tbody.innerHTML = ''; // Limpar a tabela
+            tbody.innerHTML = '';
 
-            // Verifique se há dados
             if (!data || !data.data || !Array.isArray(data.data)) {
                 console.error('Dados inválidos recebidos:', data);
                 return;
@@ -97,13 +94,12 @@ function loadProdutos(page = 1, limit = 20) { // Ajustando o limite padrão
 }
 
 
-// Função para carregar produtos no select
 function loadProdutosSelect() {
     fetch('/api/produto')
         .then(response => response.json())
         .then(data => {
             const select = document.getElementById('id_produto');
-            select.innerHTML = ''; // Limpa o select antes 
+            select.innerHTML = '';
 
             data.forEach(produto => {
                 const option = document.createElement('option');
@@ -121,11 +117,9 @@ document.addEventListener('DOMContentLoaded', function () {
     loadproduto();
 });
 
-// Pegar o nome do usuário logado
 function loadLoggedInUser() {
     fetch('/api/usuario-logado')
         .then(response => {
-            // É uma boa prática verificar se a resposta da rede foi bem-sucedida
             if (!response.ok) {
                 throw new Error('Falha ao buscar usuário. Status: ' + response.status);
             }
@@ -135,29 +129,27 @@ function loadLoggedInUser() {
             const userNameElement = document.getElementById('user-name-text');
             userNameElement.innerHTML = data.nome;
 
-            // Correção 1: Normaliza o tipo de usuário usando a variável 'data'
             const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
 
-            // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
-switch (userType) {
-                        case 'admin':
-                            document.querySelector('.admin-menu').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+            switch (userType) {
+                case 'admin':
+                    document.querySelector('.admin-menu').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
 
-                            break;
-                        case 'tecnico':
-                            document.querySelector('.tecnico').style.display = 'block';
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                    break;
+                case 'tecnico':
+                    document.querySelector('.tecnico').style.display = 'block';
+                    document.querySelector('.Home').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
 
-                            break;
-                        case 'professor':
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('.professor').style.display = 'block';
-                            document.querySelector('.Horarios').style.display = 'block';
+                    break;
+                case 'professor':
+                    document.querySelector('.Home').style.display = 'block';
+                    document.querySelector('.professor').style.display = 'block';
+                    document.querySelector('.Horarios').style.display = 'block';
 
-                            break;
-                    }
+                    break;
+            }
         })
         .catch(error => console.error('Erro ao carregar usuário logado:', error));
 }
@@ -168,7 +160,7 @@ function loadproduto(page = 1, limit = 20) {
         .then(response => response.json())
         .then(data => {
             const tbody = document.getElementById('produto-tbody');
-            tbody.innerHTML = ''; // Limpar a tabela
+            tbody.innerHTML = ''; 
             data.data.forEach(produto => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -190,7 +182,7 @@ function loadproduto(page = 1, limit = 20) {
 
 function updatePagination(totalPages, currentPage) {
     const paginationDiv = document.getElementById('pagination');
-    paginationDiv.innerHTML = ''; // Limpar a paginação
+    paginationDiv.innerHTML = ''; 
 
     for (let i = 1; i <= totalPages; i++) {
         const button = document.createElement('button');

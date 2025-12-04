@@ -7,7 +7,6 @@ document.addEventListener('menuReady', (event) => {
 // ===================================================================
 // VARIÁVEIS GLOBAIS DESTA PÁGINA
 // ===================================================================
-// DECLARAÇÕES QUE ESTAVAM FALTANDO:
 const labEl = document.getElementById('laboratorios-select2');
 const disciplinaEl = document.getElementById('disciplina-select2');
 const dataInicioEl = document.getElementById('data-inicio');
@@ -19,34 +18,25 @@ const msgEl = document.getElementById('msg');
 
 // Função principal de inicialização
 async function inicializarPagina(userData) {
-    // Carrega os selects de laboratórios e disciplinas
     await loadLaboratorios(); 
     await loadDisciplinas();
 
-    // Carrega os checkboxes de horários
     await loadHorariosCheckboxes();
-    // --- CORREÇÃO: Adiciona os 'ouvintes' para os botões de rádio ---
     const radioTecnico = document.querySelectorAll('input[name="precisaTecnico"]');
     radioTecnico.forEach(radio => {
         radio.addEventListener('change', toggleRoteiroVisibility);
     });
-    // Garante que o campo de roteiro comece no estado correto (escondido)
     toggleRoteiroVisibility();
-    // --- FIM DA CORREÇÃO ---
 
     if (submitBtn) {
         submitBtn.addEventListener('click', submeterAgendamentoRecorrente);
     }
-    // Adiciona o listener ao botão de submit
     if (submitBtn) {
         submitBtn.addEventListener('click', submeterAgendamentoRecorrente);
     }
 }
 
-/**
- * Carrega a lista de laboratórios na caixa de seleção.
- * (Função necessária que foi adicionada)
- */
+
 async function loadLaboratorios() {
     try {
         const response = await fetch('/api/lab32');
@@ -65,10 +55,7 @@ async function loadLaboratorios() {
     }
 }
 
-/**
- * Carrega a lista de disciplinas do professor logado.
- * (Função necessária que foi adicionada)
- */
+
 async function loadDisciplinas() {
     try {
         const response = await fetch('/api/minhas-disciplinas');
@@ -88,9 +75,7 @@ async function loadDisciplinas() {
     }
 }
 
-/**
- * Carrega os horários da API e cria CHECKBOXES para seleção múltipla.
- */
+
 async function loadHorariosCheckboxes() {
     const container = document.getElementById('horarios-checkboxes');
     if (!container) return;
@@ -110,29 +95,23 @@ async function loadHorariosCheckboxes() {
     }
 }
 
-/**
- * Função para enviar a solicitação de agendamento recorrente.
- */
+
 async function submeterAgendamentoRecorrente() {
-    // 1. Coletar todos os dados do formulário
     const horariosSelecionados = [];
     document.querySelectorAll('input[name="horarios"]:checked').forEach(checkbox => {
         horariosSelecionados.push(checkbox.value);
     });
 
-    // Validações
     if (!labEl.value) { return alert("Por favor, selecione um laboratório."); }
     if (!disciplinaEl.value) { return alert("Por favor, selecione uma disciplina."); }
     if (!dataInicioEl.value || !dataFimEl.value) { return alert("Por favor, selecione um período de datas."); }
     if (dataFimEl.value < dataInicioEl.value) { return alert("A data final não pode ser anterior à data inicial."); }
     if (horariosSelecionados.length === 0) { return alert("Selecione pelo menos um horário."); }
 
-    // Pega os outros campos (exemplo)
     const precisaTecnico = document.querySelector('input[name="precisaTecnico"]:checked').value === 'true';
     const numeroDiscentes = document.getElementById('numero_discentes').value;
     const linkRoteiro = document.getElementById('link_roteiro').value;
 
-    // 2. Montar o payload
     const payload = {
         labId: labEl.value,
         disciplinaId: disciplinaEl.value,
@@ -145,7 +124,6 @@ async function submeterAgendamentoRecorrente() {
         link_roteiro: linkRoteiro
     };
 
-    // 3. Fazer a chamada fetch para a NOVA rota
     try {
         const response = await fetch('/api/schedule-recurring', {
             method: 'POST',
@@ -172,9 +150,8 @@ function toggleRoteiroVisibility() {
     const precisaTecnicoSim = document.getElementById('tecnicoSim');
 
     if (roteiroContainer && precisaTecnicoSim) {
-        // Se o "Sim" estiver marcado, mostra o campo. Caso contrário, esconde.
         if (precisaTecnicoSim.checked) {
-            roteiroContainer.style.display = 'flex'; // ou 'flex', dependendo do seu CSS
+            roteiroContainer.style.display = 'flex'; 
         } else {
             roteiroContainer.style.display = 'none';
         }

@@ -1,12 +1,9 @@
-// Ouve o evento do menu.js para saber quando começar a trabalhar
 document.addEventListener('menuReady', (event) => {
     const { userData } = event.detail;
     inicializarPaginaDeAgendamento(userData);
 });
 
-// ===================================================================
-// VARIÁVEIS GLOBAIS
-// ===================================================================
+
 let loggedInUser = null;
 const slotsEl = document.getElementById('slots');
 const dateEl = document.getElementById('date');
@@ -16,11 +13,7 @@ const submitBtn = document.getElementById('submitBtn');
 const msgEl = document.getElementById('msg');
 let occupiedSlots = [];
 let selectedSlot = null;
-let availableSlotsFromDB = []; // Armazena os horários vindos do banco de dados
-
-/**
- * Orquestra o carregamento da página de agendamento.
- */
+let availableSlotsFromDB = [];
 async function inicializarPaginaDeAgendamento(userData) {
     loggedInUser = userData;
 
@@ -31,27 +24,21 @@ async function inicializarPaginaDeAgendamento(userData) {
     dateEl.addEventListener('change', loadAvailability);
     labEl.addEventListener('change', loadAvailability);
     submitBtn.addEventListener('click', submeterAgendamento);
-    // --- LÓGICA NOVA ADICIONADA AQUI ---
-    // 3. Adiciona os "ouvintes" para os botões de rádio do técnico
+
     const radioTecnico = document.querySelectorAll('input[name="precisaTecnico"]');
     radioTecnico.forEach(radio => {
         radio.addEventListener('change', toggleRoteiroVisibility);
     });
 
-    // 4. Garante que o campo de roteiro comece no estado correto (escondido)
     toggleRoteiroVisibility();
-    // --- FIM DA LÓGICA NOVA ---
 
-    // Carrega os dados na ordem correta
     await loadLaboratorios();
     await loadDisciplinas();
-    await fetchHorariosFromAPI(); // Busca os horários possíveis da API
-    await loadAvailability();     // Verifica a disponibilidade desses horários
+    await fetchHorariosFromAPI();
+    await loadAvailability();
 }
 
-/**
- * Busca a lista de todos os horários possíveis da API e a armazena.
- */
+
 async function fetchHorariosFromAPI() {
     try {
         const response = await fetch('/api/horarios');
@@ -63,16 +50,13 @@ async function fetchHorariosFromAPI() {
     }
 }
 
-/**
- * Carrega a lista de laboratórios na caixa de seleção.
- */
 async function loadLaboratorios() {
     try {
         const response = await fetch('/api/lab32');
         if (!response.ok) throw new Error('Falha ao carregar laboratórios');
         const data = await response.json();
-        
-        labEl.innerHTML = '<option value="">Selecione um Laboratório</option>'; 
+
+        labEl.innerHTML = '<option value="">Selecione um Laboratório</option>';
         data.forEach(laboratorio => {
             const option = document.createElement('option');
             option.value = laboratorio.id_laboratorio;
@@ -80,9 +64,6 @@ async function loadLaboratorios() {
             labEl.appendChild(option);
         });
 
-        // --- ALTERAÇÃO PRINCIPAL AQUI ---
-        // Se houver laboratórios na lista (data.length > 0),
-        // define o valor do select para o ID do primeiro laboratório.
         if (data.length > 0) {
             labEl.value = data[0].id_laboratorio;
         }
@@ -91,17 +72,15 @@ async function loadLaboratorios() {
         console.error('Erro ao carregar laboratórios:', error);
     }
 }
-/**
- * Carrega a lista de disciplinas do professor logado.
- */
+
 async function loadDisciplinas() {
     try {
         const response = await fetch('/api/minhas-disciplinas');
         if (!response.ok) throw new Error('Falha ao carregar disciplinas');
         const data = await response.json();
-        
+
         if (!disciplinaEl) return;
-        disciplinaEl.innerHTML = '<option value="">Selecione uma disciplina</option>'; 
+        disciplinaEl.innerHTML = '<option value="">Selecione uma disciplina</option>';
         data.forEach(disciplina => {
             const option = document.createElement('option');
             option.value = disciplina.id_disciplina;
@@ -113,9 +92,6 @@ async function loadDisciplinas() {
     }
 }
 
-/**
- * Busca na API os horários já ocupados para a data e lab selecionados.
- */
 async function loadAvailability() {
     let labIdParaBuscar = labEl.value;
     if (!labIdParaBuscar && labEl.options.length > 1) {
@@ -126,7 +102,7 @@ async function loadAvailability() {
         slotsEl.innerHTML = '<p>Selecione um laboratório para ver os horários.</p>';
         return;
     }
-    
+
     msgEl.style.display = 'none';
     slotsEl.innerHTML = '<p>Carregando horários...</p>';
     submitBtn.disabled = true;
@@ -144,21 +120,17 @@ async function loadAvailability() {
     }
 }
 
-/**
- * Renderiza os botões de horário usando os dados do banco.
- */
+
 function renderSlots() {
     slotsEl.innerHTML = '';
 
-    // availableSlotsFromDB agora é um array de objetos, ex: [{inicio: "07:20", fim: "08:10"}]
     availableSlotsFromDB.forEach(horario => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'bloco-horario';
-        
-        // Usa os valores de início e fim diretamente para criar o texto do botão
+
         btn.textContent = `${horario.inicio} — ${horario.fim}`;
-        btn.dataset.hour = horario.inicio; // O valor para salvar continua sendo a hora de início
+        btn.dataset.hour = horario.inicio;
 
         if (occupiedSlots.includes(horario.inicio)) {
             btn.classList.add('occupied');
@@ -174,9 +146,6 @@ function renderSlots() {
     updateSelectionUI();
 }
 
-/**
- * Atualiza a interface para destacar o horário selecionado.
- */
 function updateSelectionUI() {
     document.querySelectorAll('.bloco-horario').forEach(el => {
         el.classList.remove('selected');
@@ -187,21 +156,16 @@ function updateSelectionUI() {
     submitBtn.disabled = !selectedSlot;
 }
 
-/**
- * Envia o novo agendamento para a API.
- */
 async function submeterAgendamento() {
     if (!selectedSlot || !loggedInUser) return;
-    
-    // Validações de campos
+
     if (!disciplinaEl.value) {
         msgEl.textContent = 'Por favor, selecione uma disciplina.';
         msgEl.className = 'mensagem-status erro';
         msgEl.style.display = 'block';
         return;
     }
-    
-    // --- MUDANÇA 1: Pega e valida o número de discentes ---
+
     const numeroDiscentesEl = document.getElementById('numero_discentes');
     const numeroDiscentes = numeroDiscentesEl.value;
     if (!numeroDiscentes || parseInt(numeroDiscentes) <= 0) {
@@ -210,8 +174,7 @@ async function submeterAgendamento() {
         msgEl.style.display = 'block';
         return;
     }
-    
-    // --- MUDANÇA 2: Adiciona o campo ao payload ---
+
     const payload = {
         labId: labEl.value,
         date: dateEl.value,
@@ -219,7 +182,7 @@ async function submeterAgendamento() {
         precisa_tecnico: document.querySelector('input[name="precisaTecnico"]:checked').value === 'true',
         link_roteiro: document.getElementById('link_roteiro').value,
         id_disciplina: disciplinaEl.value,
-        numero_discentes: numeroDiscentes // <<< ADICIONADO AQUI
+        numero_discentes: numeroDiscentes
     };
 
     try {
@@ -231,15 +194,14 @@ async function submeterAgendamento() {
         const result = await res.json();
         if (!res.ok) throw new Error(result.error || 'Ocorreu um erro');
 
-        // Limpa os campos do formulário após o sucesso
         document.getElementById('link_roteiro').value = '';
-        numeroDiscentesEl.value = ''; // Limpa o campo de discentes
+        numeroDiscentesEl.value = '';
         disciplinaEl.selectedIndex = 0;
-        
+
         msgEl.textContent = result.message;
         msgEl.className = 'mensagem-status sucesso';
         msgEl.style.display = 'block';
-        
+
         await loadAvailability();
     } catch (err) {
         msgEl.textContent = 'Erro ao enviar: ' + err.message;
@@ -248,24 +210,19 @@ async function submeterAgendamento() {
     }
 }
 
-// Funções auxiliares
 function formatHour(h) { return (h < 10 ? '0' : '') + h + ':00'; }
 function formatEnd(start) {
     const endH = parseInt(start.split(':')[0]) + 1;
     return formatHour(endH);
 }
 
-/**
- * Mostra ou esconde o campo de link do roteiro com base na seleção do técnico.
- */
 function toggleRoteiroVisibility() {
     const roteiroContainer = document.getElementById('roteiro-container');
     const precisaTecnicoSim = document.getElementById('tecnicoSim');
 
     if (roteiroContainer && precisaTecnicoSim) {
-        // Se o "Sim" estiver marcado, mostra o campo. Caso contrário, esconde.
         if (precisaTecnicoSim.checked) {
-            roteiroContainer.style.display = 'flex'; // ou 'flex', dependendo do seu CSS
+            roteiroContainer.style.display = 'flex';
         } else {
             roteiroContainer.style.display = 'none';
         }

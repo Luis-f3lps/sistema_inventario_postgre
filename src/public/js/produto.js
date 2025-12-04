@@ -33,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.text())
             .then(data => {
                 menuContainer.innerHTML = data;
-                // O código para fazer os botões do menu funcionar vai aqui...
             })
             .catch(error => console.error('Erro ao carregar o menu:', error));
     }
@@ -46,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-// Função para abrir abas
 function opentab(tabname) {
     var tablinks = document.getElementsByClassName("tab-links");
     var tabcontents = document.getElementsByClassName("tab-contents");
@@ -63,7 +61,6 @@ function opentab(tabname) {
     document.querySelector(`.tab-links[onclick="opentab('${tabname}')"]`).classList.add("active-link");
 }
 
-// Função para carregar dados de produtos e preencher a tabela
 function loadProdutos(page = 1, limit = 20) { // Ajustando o limite padrão
     fetch(`/api/produtosPag?page=${page}&limit=${limit}`)
         .then(response => {
@@ -76,7 +73,6 @@ function loadProdutos(page = 1, limit = 20) { // Ajustando o limite padrão
             const tbody = document.getElementById('produto-tbody');
             tbody.innerHTML = ''; // Limpar a tabela
 
-            // Verifique se há dados
             if (!data || !data.data || !Array.isArray(data.data)) {
                 console.error('Dados inválidos recebidos:', data);
                 return;
@@ -99,13 +95,8 @@ function loadProdutos(page = 1, limit = 20) { // Ajustando o limite padrão
         .catch(error => console.error('Erro ao carregar produtos:', error));
 }
 
-
-
-// Chame a função para carregar os usuários
 loadProdutos();
 
-
-// Função para carregar produtos no select
 function loadProdutosSelect() {
     fetch('/api/produto')
         .then(response => {
@@ -134,11 +125,9 @@ function loadProdutosSelect() {
 }
 
 
-// Função para enviar o formulário
 document.getElementById('add-produto-form').addEventListener('submit', function (event) {
     event.preventDefault();
 
-    // Captura os valores dos campos do formulário
     const sigla = document.getElementById('sigla').value;
     const concentracao = document.getElementById('concentracao').value;
     const densidade = document.getElementById('densidade').value;
@@ -147,7 +136,6 @@ document.getElementById('add-produto-form').addEventListener('submit', function 
     const ncm = document.getElementById('ncm').value;
     const quantidade = document.getElementById('quantidade').value;
 
-    // Cria o objeto de dados para enviar
     const data = {
         sigla: sigla,
         concentracao: concentracao,
@@ -180,15 +168,12 @@ document.getElementById('add-produto-form').addEventListener('submit', function 
         .catch(error => console.error('Erro ao adicionar produto:', error));
 });
 
-
-// Chamar as funções para carregar produtos e selecionar produtos ao carregar a página
 document.addEventListener('DOMContentLoaded', function () {
     loadProdutos();
     loadProdutosSelect();
     loadproduto();
 });
 
-// menu
 document.querySelectorAll('.submenu > a').forEach(menu => {
     menu.addEventListener('click', function (e) {
         e.preventDefault();
@@ -198,11 +183,9 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
     });
 });
 
-// Pegar o nome do usuário logado
 function loadLoggedInUser() {
     fetch('/api/usuario-logado')
         .then(response => {
-            // É uma boa prática verificar se a resposta da rede foi bem-sucedida
             if (!response.ok) {
                 throw new Error('Falha ao buscar usuário. Status: ' + response.status);
             }
@@ -212,37 +195,34 @@ function loadLoggedInUser() {
             const userNameElement = document.getElementById('user-name-text');
             userNameElement.innerHTML = data.nome;
 
-            // Correção 1: Normaliza o tipo de usuário usando a variável 'data'
             const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
 
-            // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
-switch (userType) {
-                        case 'admin':
-                            document.querySelector('.admin-menu').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+            switch (userType) {
+                case 'admin':
+                    document.querySelector('.admin-menu').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
 
-                            break;
-                        case 'tecnico':
-                            document.querySelector('.tecnico').style.display = 'block';
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                    break;
+                case 'tecnico':
+                    document.querySelector('.tecnico').style.display = 'block';
+                    document.querySelector('.Home').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
 
-                            break;
-                        case 'professor':
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('.professor').style.display = 'block';
-                            document.querySelector('.Horarios').style.display = 'block';
+                    break;
+                case 'professor':
+                    document.querySelector('.Home').style.display = 'block';
+                    document.querySelector('.professor').style.display = 'block';
+                    document.querySelector('.Horarios').style.display = 'block';
 
-                            break;
-                    }
+                    break;
+            }
         })
         .catch(error => console.error('Erro ao carregar usuário logado:', error));
 }
 loadLoggedInUser();
 
-// Função para carregar siglas no select
 function carregarsiglas() {
-    fetch('/api/siglas') // Endpoint para obter a lista de siglas
+    fetch('/api/siglas')
         .then(response => response.json())
         .then(data => {
             const select = document.getElementById('sigla-select');
@@ -258,7 +238,6 @@ function carregarsiglas() {
         .catch(error => console.error('Erro ao carregar siglas:', error));
 }
 
-// Função para excluir o produto
 function excluirproduto(idproduto) {
     fetch(`/api/excluir-produto/${idproduto}`, {
         method: 'DELETE',
@@ -276,13 +255,11 @@ function excluirproduto(idproduto) {
             carregarsiglas(); // Atualiza os siglas após exclusão
         })
         .catch(error => {
-            // Mostrar mensagem de erro
             alert(`Erro: ${error.message}`);
             console.error('Erro ao excluir o produto:', error);
         });
 }
 
-// Delete-produto-form
 document.getElementById('delete-produto-form').addEventListener('submit', function (event) {
     event.preventDefault();
 
@@ -295,21 +272,18 @@ document.getElementById('delete-produto-form').addEventListener('submit', functi
     if (confirm('Tem certeza que deseja excluir este produto?')) {
         excluirproduto(idproduto);
         loadProdutos();
-        carregarsiglas(); // Atualiza os siglas 
+        carregarsiglas();
     }
 });
 
-// Carrega os siglas ao inicializar a página
 document.addEventListener('DOMContentLoaded', carregarsiglas);
 
-
-// load produto
 function loadproduto(page = 1, limit = 20) {
     fetch(`/api/produtoPag?page=${page}&limit=${limit}`)
         .then(response => response.json())
         .then(data => {
             const tbody = document.getElementById('produto-tbody');
-            tbody.innerHTML = ''; // Limpar a tabela
+            tbody.innerHTML = '';
             data.data.forEach(produto => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -329,10 +303,9 @@ function loadproduto(page = 1, limit = 20) {
         .catch(error => console.error('Erro ao carregar produtos:', error));
 }
 
-// Pagination
 function updatePagination(totalPages, currentPage) {
     const paginationDiv = document.getElementById('pagination');
-    paginationDiv.innerHTML = ''; // Limpar a paginação
+    paginationDiv.innerHTML = '';
 
     for (let i = 1; i <= totalPages; i++) {
         const button = document.createElement('button');
@@ -348,7 +321,6 @@ function updatePagination(totalPages, currentPage) {
     }
 }
 
-// Generate-pdf-produto
 function geradorPdfproduto() {
     fetch('/generate-pdf-produto', {
         method: 'GET',

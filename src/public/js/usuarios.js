@@ -15,13 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.text())
             .then(data => {
                 menuContainer.innerHTML = data;
-                // O código para fazer os botões do menu funcionar vai aqui...
             })
             .catch(error => console.error('Erro ao carregar o menu:', error));
     }
 });
 
-// Autenticado
 function Autenticado() {
     return fetch('/api/check-auth', {
         method: 'GET',
@@ -48,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// opentab
 function opentab(tabname) {
     var tablinks = document.getElementsByClassName("tab-links");
     var tabcontents = document.getElementsByClassName("tab-contents");
@@ -65,7 +62,6 @@ function opentab(tabname) {
     event.currentTarget.classList.add("active-link");
 }
 
-// Load Users
 function loadUsers() {
     fetch('/api/usuarios')
         .then(response => response.json())
@@ -74,13 +70,11 @@ function loadUsers() {
             const selectRemove = document.getElementById('usuarios-select');
             const selectActivate = document.getElementById('usuarios-select-ativar');
 
-            // Limpar o tbody antes de adicionar novos usuários
             tbody.innerHTML = '';
             selectRemove.innerHTML = ''; // Limpar também o select de remoção
             selectActivate.innerHTML = ''; // Limpar também o select de ativação
 
             data.forEach(usuario => {
-                // Adicionar à tabela
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${usuario.nome_usuario}</td>
@@ -90,14 +84,12 @@ function loadUsers() {
                 `;
                 tbody.appendChild(tr);
                 if (usuario.status === 'ativado') {
-                    // Adicionar ao select de desativação
                     const optionRemove = document.createElement('option');
                     optionRemove.value = usuario.email;
                     optionRemove.textContent = `${usuario.nome_usuario} (${usuario.status})`;
                     selectRemove.appendChild(optionRemove);
                 }
 
-                // Adicionar ao select de ativação, se o usuário estiver desativado
                 if (usuario.status === 'desativado') {
                     const optionActivate = document.createElement('option');
                     optionActivate.value = usuario.email;
@@ -109,21 +101,16 @@ function loadUsers() {
         .catch(error => console.error('Erro ao carregar usuários:', error));
 }
 
-
-// Chame a função para carregar os usuários
 loadUsers();
 
-// Pegar o nome do usuário logado
 async function loadLoggedInUser() {
-                        const response = await fetch('/api/usuario-logado');
-                    if (!response.ok) {
-                        // Se não conseguir encontrar o usuário, redireciona para o login
-                        window.location.href = '/login.html';
-                        return;
-                    }
+    const response = await fetch('/api/usuario-logado');
+    if (!response.ok) {
+        window.location.href = '/login.html';
+        return;
+    }
     fetch('/api/usuario-logado')
         .then(response => {
-            // É uma boa prática verificar se a resposta da rede foi bem-sucedida
             if (!response.ok) {
                 throw new Error('Falha ao buscar usuário. Status: ' + response.status);
             }
@@ -133,36 +120,33 @@ async function loadLoggedInUser() {
             const userNameElement = document.getElementById('user-name-text');
             userNameElement.innerHTML = data.nome;
 
-            // Correção 1: Normaliza o tipo de usuário usando a variável 'data'
             const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
 
-            // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
-switch (userType) {
-                        case 'admin':
-                            document.querySelector('.admin-menu').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+            switch (userType) {
+                case 'admin':
+                    document.querySelector('.admin-menu').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
 
-                            break;
-                        case 'tecnico':
-                            document.querySelector('.tecnico').style.display = 'block';
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                    break;
+                case 'tecnico':
+                    document.querySelector('.tecnico').style.display = 'block';
+                    document.querySelector('.Home').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
 
-                            break;
-                        case 'professor':
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('.professor').style.display = 'block';
-                            document.querySelector('.Horarios').style.display = 'block';
+                    break;
+                case 'professor':
+                    document.querySelector('.Home').style.display = 'block';
+                    document.querySelector('.professor').style.display = 'block';
+                    document.querySelector('.Horarios').style.display = 'block';
 
-                            break;
-                    }
+                    break;
+            }
         })
         .catch(error => console.error('Erro ao carregar usuário logado:', error));
 }
 loadLoggedInUser();
 
 
-// Adicionar novo usuário
 document.getElementById('add-user-form').addEventListener('submit', function (event) {
     event.preventDefault();
 
@@ -191,7 +175,6 @@ document.getElementById('add-user-form').addEventListener('submit', function (ev
             } else {
                 alert(data.message);
 
-                // Adicionar o novo usuário na tabela
                 const tbody = document.getElementById('usuarios-tbody');
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -200,29 +183,25 @@ document.getElementById('add-user-form').addEventListener('submit', function (ev
             `;
                 tbody.appendChild(tr);
 
-                // Adicionar o novo usuário no select para remoção
                 const select = document.getElementById('usuarios-select');
                 const option = document.createElement('option');
                 option.value = email;
                 option.textContent = username;
                 select.appendChild(option);
 
-                // Limpar o formulário
                 document.getElementById('add-user-form').reset();
-                // Recarregar a página para atualizar os dados
                 location.reload();
             }
         })
         .catch(error => console.error('Erro ao adicionar usuário:', error));
 });
 
-// Desativar usuário
 document.getElementById('remove-user-form').addEventListener('submit', function (event) {
     event.preventDefault();
     const email = document.getElementById('usuarios-select').value;
 
     fetch(`/api/usuarios/${email}`, {
-        method: 'PATCH', // Usar PATCH para desativar
+        method: 'PATCH',
     })
         .then(response => response.json())
         .then(data => {
@@ -230,20 +209,18 @@ document.getElementById('remove-user-form').addEventListener('submit', function 
                 alert(data.error);
             } else {
                 alert(data.message);
-                // Recarregar a página para atualizar os dados
                 location.reload();
             }
         })
         .catch(error => console.error('Erro ao desativar usuário:', error));
 });
 
-// Ativar usuário
 document.getElementById('activate-user-form').addEventListener('submit', function (event) {
     event.preventDefault();
     const email = document.getElementById('usuarios-select-ativar').value;
 
     fetch(`/api/usuarios/ativar/${email}`, {
-        method: 'PATCH', // Usar PATCH para ativar
+        method: 'PATCH',
     })
         .then(response => response.json())
         .then(data => {
@@ -251,14 +228,12 @@ document.getElementById('activate-user-form').addEventListener('submit', functio
                 alert(data.error);
             } else {
                 alert(data.message);
-                // Recarregar a página 
                 location.reload();
             }
         })
         .catch(error => console.error('Erro ao ativar usuário:', error));
 });
 
-// Função para atualizar o status do usuário na tabela
 function updateUserStatus(email, status) {
     const rows = document.querySelectorAll(`#usuarios-tbody tr`);
     rows.forEach(row => {
@@ -268,7 +243,6 @@ function updateUserStatus(email, status) {
     });
 }
 
-// Função para remover uma opção de um select
 function removeOptionFromSelect(email, selectId) {
     const select = document.getElementById(selectId);
     const options = select.querySelectorAll('option');
@@ -279,12 +253,10 @@ function removeOptionFromSelect(email, selectId) {
     });
 }
 
-// Inicializar as funções
 document.addEventListener('DOMContentLoaded', function () {
     loadLoggedInUser();
 });
 
-// Coisa legal do submenu
 document.querySelectorAll('.submenu > a').forEach(menu => {
     menu.addEventListener('click', function (e) {
         e.preventDefault();

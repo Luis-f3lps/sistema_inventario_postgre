@@ -15,7 +15,6 @@ document.getElementById('login-form').addEventListener('submit', function (event
         .then(data => {
             const errorMessage = document.getElementById('error-message');
             if (data.success) {
-                // Login bem-sucedido, redirecionar 
                 window.location.href = '/Home';
             } else {
                 errorMessage.innerText = data.error;

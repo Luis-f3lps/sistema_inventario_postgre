@@ -175,12 +175,9 @@ document.addEventListener('DOMContentLoaded', function () {
     loadtabelaregistraconsumos();
 });
 
-
-// Pegar o nome do usuário logado
 function loadLoggedInUser() {
     fetch('/api/usuario-logado')
         .then(response => {
-            // É uma boa prática verificar se a resposta da rede foi bem-sucedida
             if (!response.ok) {
                 throw new Error('Falha ao buscar usuário. Status: ' + response.status);
             }
@@ -190,29 +187,27 @@ function loadLoggedInUser() {
             const userNameElement = document.getElementById('user-name-text');
             userNameElement.innerHTML = data.nome;
 
-            // Correção 1: Normaliza o tipo de usuário usando a variável 'data'
             const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
 
-            // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
-switch (userType) {
-                        case 'admin':
-                            document.querySelector('.admin-menu').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+            switch (userType) {
+                case 'admin':
+                    document.querySelector('.admin-menu').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
 
-                            break;
-                        case 'tecnico':
-                            document.querySelector('.tecnico').style.display = 'block';
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                    break;
+                case 'tecnico':
+                    document.querySelector('.tecnico').style.display = 'block';
+                    document.querySelector('.Home').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
 
-                            break;
-                        case 'professor':
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('.professor').style.display = 'block';
-                            document.querySelector('.Horarios').style.display = 'block';
+                    break;
+                case 'professor':
+                    document.querySelector('.Home').style.display = 'block';
+                    document.querySelector('.professor').style.display = 'block';
+                    document.querySelector('.Horarios').style.display = 'block';
 
-                            break;
-                    }
+                    break;
+            }
         })
         .catch(error => console.error('Erro ao carregar usuário logado:', error));
 }
@@ -254,7 +249,6 @@ document.getElementById('filter-form2').addEventListener('submit', function (eve
         return;
     }
 
-    // Carregar a primeira página com o filtro aplicado
     loadEntradas(1, startDate, endDate);
 });
 
@@ -379,7 +373,6 @@ function updatePagination(totalPages, currentPage, startDate = '', endDate = '')
     }
 }
 
-// Carregar a primeira página ao iniciar
 document.addEventListener('DOMContentLoaded', function () {
     loadEntradas(1); // Carregar a primeira página sem filtro
     loadLaboratorios2();
@@ -389,23 +382,19 @@ function updatePaginationConsumos(totalPages, currentPage, startDate = '', endDa
     const paginationDiv = document.getElementById('pagination2');
     paginationDiv.innerHTML = '';
 
-    // Loop para criar botões de paginação
     for (let i = 1; i <= totalPages; i++) {
         const button = document.createElement('button');
         button.textContent = i;
         button.classList.add('pagination-button');
 
-        // Destacar a página atual
         if (i === currentPage) {
             button.classList.add('active');
         }
 
-        // Adicionar evento de clique para carregar a página correspondente
         button.addEventListener('click', () => {
             loadConsumos(i, startDate, endDate, laboratorio); // Carrega a página clicada com filtros
         });
 
-        // Adiciona o botão ao contêiner de paginação
         paginationDiv.appendChild(button);
     }
 }

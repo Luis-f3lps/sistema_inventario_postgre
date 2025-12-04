@@ -16,7 +16,6 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
 });
 
 
-// Função para verificar se o usuário está autenticado
 function Autenticado() {
     return fetch('/api/check-auth', {
         method: 'GET',
@@ -29,7 +28,6 @@ function Autenticado() {
         .catch(() => false);
 }
 
-// Função para redirecionar se o usuário não estiver autenticado
 function redirecionarSeNaoAutenticado() {
     Autenticado().then(authenticated => {
         if (!authenticated) {
@@ -38,7 +36,6 @@ function redirecionarSeNaoAutenticado() {
     });
 }
 
-// Verifica autenticação ao carregar a página
 document.addEventListener('DOMContentLoaded', function () {
     if (window.location.pathname !== '/login.html') {
         redirecionarSeNaoAutenticado();
@@ -48,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function () {
     loadsiglasEntrada();
 });
 
-// Função genérica para carregar opções em um select
 function loadSelectOptions(url, selectId) {
 }
 
@@ -65,8 +61,8 @@ fetch('/api/lab')
 
         data.forEach(lab => {
             const option = document.createElement('option');
-            option.value = lab.id_laboratorio; // Use o ID do laboratório
-            option.textContent = lab.nome_laboratorio; // Use o nome do laboratório
+            option.value = lab.id_laboratorio;
+            option.textContent = lab.nome_laboratorio;
             select.appendChild(option);
         });
     })
@@ -97,12 +93,9 @@ fetch('/api/est')
         console.error('Erro ao carregar produto:', error);
     });
 
-// Função para carregar siglas de entrada
 function loadsiglasEntrada() {
-    // Implemente a lógica para carregar siglas de entrada aqui, se necessário
 }
 
-// Função para abrir a aba correspondente
 function opentab(tabname) {
     document.querySelectorAll('.tab-links').forEach(link => link.classList.remove('active-link'));
     document.querySelectorAll('.tab-contents').forEach(content => content.classList.remove('active-tab'));
@@ -111,7 +104,6 @@ function opentab(tabname) {
     event.currentTarget.classList.add('active-link');
 }
 
-// Manipulador de eventos para os submenus
 document.querySelectorAll('.submenu > a').forEach(menu => {
     menu.addEventListener('click', function (e) {
         e.preventDefault();
@@ -121,11 +113,9 @@ document.querySelectorAll('.submenu > a').forEach(menu => {
     });
 });
 
-// Pegar o nome do usuário logado
 function loadLoggedInUser() {
     fetch('/api/usuario-logado')
         .then(response => {
-            // É uma boa prática verificar se a resposta da rede foi bem-sucedida
             if (!response.ok) {
                 throw new Error('Falha ao buscar usuário. Status: ' + response.status);
             }
@@ -135,35 +125,32 @@ function loadLoggedInUser() {
             const userNameElement = document.getElementById('user-name-text');
             userNameElement.innerHTML = data.nome;
 
-            // Correção 1: Normaliza o tipo de usuário usando a variável 'data'
             const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
 
-            // Correção 2: Usa uma estrutura 'switch' para um código mais limpo e organizado
-switch (userType) {
-                        case 'admin':
-                            document.querySelector('.admin-menu').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+            switch (userType) {
+                case 'admin':
+                    document.querySelector('.admin-menu').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
 
-                            break;
-                        case 'tecnico':
-                            document.querySelector('.tecnico').style.display = 'block';
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
+                    break;
+                case 'tecnico':
+                    document.querySelector('.tecnico').style.display = 'block';
+                    document.querySelector('.Home').style.display = 'block';
+                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
 
-                            break;
-                        case 'professor':
-                            document.querySelector('.Home').style.display = 'block';
-                            document.querySelector('.professor').style.display = 'block';
-                            document.querySelector('.Horarios').style.display = 'block';
+                    break;
+                case 'professor':
+                    document.querySelector('.Home').style.display = 'block';
+                    document.querySelector('.professor').style.display = 'block';
+                    document.querySelector('.Horarios').style.display = 'block';
 
-                            break;
-                    }
+                    break;
+            }
         })
         .catch(error => console.error('Erro ao carregar usuário logado:', error));
 }
 loadLoggedInUser();
 
-// Carregar siglas no select de entrada de produto
 function loadsiglasEntrada() {
     fetch('/api/siglas')
         .then(response => response.json())
@@ -181,20 +168,17 @@ function loadsiglasEntrada() {
         .catch(error => console.error('Erro ao carregar siglas:', error));
 }
 
-// Chama a função quando a página for carregada
 document.addEventListener('DOMContentLoaded', function () {
     loadsiglasEntrada();
 });
-// Manipulador de envio do formulário de entrada
 document.getElementById('entrada-form').addEventListener('submit', function (event) {
-    event.preventDefault(); // Previne o comportamento padrão de envio do formulário
+    event.preventDefault();
 
     const idproduto = document.getElementById('produto-entrada-select').value;
     const quantidade = parseInt(document.getElementById('quantidade-entrada').value, 10);
     const dataEntrada = document.getElementById('data-entrada').value;
     const descricao = document.getElementById('descricao-entrada').value;
 
-    // Validação dos campos
     if (!idproduto || isNaN(quantidade) || quantidade <= 0 || !dataEntrada || !descricao) {
         alert('Todos os campos são obrigatórios e a quantidade deve ser maior que zero.');
         return;
@@ -207,7 +191,6 @@ document.getElementById('entrada-form').addEventListener('submit', function (eve
         descricao: descricao
     };
 
-    // Envia os dados para registrar a entrada e atualizar o produto
     fetch('/api/registrar_entrada', {
         method: 'POST',
         headers: {
@@ -236,13 +219,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const data_consumo = document.getElementById('data_consumo').value;
         const descricao = document.getElementById('descricao_comsumo').value; // Corrigido para usar o ID correto
 
-        // Verifica se todos os campos estão preenchidos
         if (!idproduto || isNaN(quantidade) || quantidade <= 0 || !laboratorio || !data_consumo || !descricao) {
             alert('Por favor, preencha todos os campos e a quantidade deve ser maior que zero.');
             return;
         }
 
-        // Cria o objeto de dados para enviar
         const consumoData = {
             data_consumo: data_consumo,
             id_produto: idproduto,
@@ -251,7 +232,6 @@ document.addEventListener('DOMContentLoaded', function () {
             descricao: descricao
         };
 
-        // Enviar os dados corretamente
         fetch('/api/registrar_consumo', {
             method: 'POST',
             headers: {
@@ -272,7 +252,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Carregar os IDs de entrada no select
     fetch('/api/entradas')
         .then(response => response.json())
         .then(data => {
@@ -286,7 +265,6 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(error => console.error('Erro ao carregar IDs de entrada:', error));
 
-    // Manipulador de envio do formulário
     document.getElementById('entrada-form').addEventListener('submit', function (event) {
         event.preventDefault(); // Previne o comportamento padrão de envio do formulário
 
@@ -295,7 +273,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const quantidade = parseInt(document.getElementById('quantidade-entrada').value); // Quantidade
         const dataEntrada = document.getElementById('data-entrada').value; // Data de entrada
 
-        // Validação dos campos
         if (!idEntrada || !idProduto || !quantidade || !dataEntrada) {
             alert('Todos os campos são obrigatórios.');
             return;
@@ -308,7 +285,6 @@ document.addEventListener('DOMContentLoaded', function () {
             data_entrada: dataEntrada,
         };
 
-        // Envia os dados para atualizar a entrada
         fetch('/api/edita_registrar_entrada', {
             method: 'PUT',
             headers: {
