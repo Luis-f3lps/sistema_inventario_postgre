@@ -420,8 +420,7 @@ nav ul .fa-solid {
 
     nav ul .fa-solid {
         position: absolute;
-        top: 100px;
-        left: 400px;
+        left: 420px;
         cursor: pointer;
         color: #ffffff;
         font-size: 60px;
@@ -458,11 +457,15 @@ nav ul .fa-solid {
         font-size: 40px;
         align-items: center;
     }
-
+.painel-grelha {
+    display: block;}
+    .lista-painel li {
+    font-size: 24px;
+}
     #sidemenu {
         position: fixed;
         left: 0;
-        top: 84%;
+        top: 70%;
         transform: translateY(-50%);
         padding: 0;
         margin: 0;
@@ -1030,7 +1033,6 @@ nav ul .fa-solid {
     padding: 15px;
     text-align: left;
     font-weight: 600;
-    text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
