@@ -1184,7 +1184,6 @@ nav ul .fa-solid {
     }
 }
 
-/* --- Estilo do Painel Principal (Dashboard) --- */
 .painel-principal-container {
     max-width: 1600px;
     margin: 40px auto;
@@ -1196,15 +1195,15 @@ nav ul .fa-solid {
 .painel-grelha {
     display: inline-block;
     grid-template-columns: repeat(2, 1fr);
-    /* 2 colunas de tamanho igual */
     grid-template-rows: repeat(2, auto);
-    /* 2 linhas de altura automática */
     gap: 30px;
-    /* Espaço entre os cartões */
+}
+@media (min-width: 1280px) {
+.painel-grelha {
     margin-left: 400px;
 }
+}
 
-/* Estilo individual de cada "cartão" do painel */
 .cartao-painel {
     max-width: 1450px;
     padding: 30px;
