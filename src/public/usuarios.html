@@ -12,9 +12,55 @@
 </head>
 
 <body>
-        <div class="menu">
-            <header id="menu-container"></header>
-        </div>
+    <div id="header">
+        <nav>
+            <ul id="sidemenu">
+                <img src="images/logomenu.png" class="logo">
+                </br>
+                <li>
+                    <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
+                        <i class="fas fa-user"></i>
+                        <span id="user-name-text"></span>
+                    </span>
+                </li>
+                </br>
+
+                <li class="Home" style="display: none;"><a href="/Home"><i class="fas fa-home"></i> Home</a></li>
+                <li class="Horarios" style="display: none;"><a href="/Horario"><i class="fas fa-clock"></i> Horarios</a>
+                </li>
+                <li class="tecnico" style="display: none;"><a href="/Tela_Tecnico"><i class="fas fa-bell"></i>
+                        Solicitações</a></li>
+                <li class="professor" style="display: none;"><a href="/Tela_Professor"><i class="fas fa-bell"></i>
+                        Solicitações Aula</a></li>
+
+                <li class="submenu produto" style="display: none;">
+                    <a href="#"><i class="fas fa-boxes"></i> Inventário <i class="fas fa-chevron-down"></i></a>
+                    <ul class="submenu-items">
+                        <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
+                        <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
+                        <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+                    </ul>
+                </li>
+                <!-- HTML para o menu de administração -->
+                <li class="submenu admin-menu" style="display: none;">
+                    <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
+                    <ul class="submenu-items">
+                        <li><a href="/Usuarios"><i class="fas fa-users"></i> Usuários</a></li>
+                        <li><a href="/Produto"><i class="fas fa-tags"></i> Produtos</a></li>
+                        <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Laboratórios</a></li>
+                    </ul>
+                </li>
+                </br>
+                <li class="logout">
+                    <a href="/logout" style="border-top: 1px solid;">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                </li>
+                <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
+            </ul>
+            <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
+        </nav>
+    </div>
 
     <div class="container">
         <div id="about">
