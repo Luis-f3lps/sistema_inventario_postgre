@@ -10,81 +10,87 @@
 </head>
 
 <body>
-    <!------------------Relatórios--------------->
-    <header id="menu-container"></header>
+    <div class="tudo">
 
-    <div class="painel-grelha" id="painel-grelha">
-
-<div class="cartao-painel cartao-aulas-autorizadas" style="display: none;">
-    
-    <div class="calendario-header">
-        <button type="button" id="btn-mes-anterior" title="Mês Anterior">&lt;</button>
-        <h2 id="calendario-titulo" style="border-bottom: none; margin: 0;">Próximas Aulas</h2>
-        <button type="button" id="btn-proximo-mes" title="Próximo Mês">&gt;</button>
-    </div>
-    
-    <div class="calendario-dias-semana">
-        <div class="dia-semana">DOM</div>
-        <div class="dia-semana">SEG</div>
-        <div class="dia-semana">TER</div>
-        <div class="dia-semana">QUA</div>
-        <div class="dia-semana">QUI</div>
-        <div class="dia-semana">SEX</div>
-        <div class="dia-semana">SÁB</div>
-    </div>
-    
-    <div class="calendario-grid" id="calendario-grid"></div>
-    
-</div>
-
-        <div class="cartao-painel painel-minhas-aulas" style="display: none;">
-            <h2>Minhas Solicitações de Aula</h2>
-            <table class="tabela-visualizacao-aulas">
-                <thead>
-                    <tr>
-                        <th>Laboratório</th>
-                        <th>Disciplina</th>
-                        <th>Data</th>
-                        <th>Horário</th>
-                        <th>Apoio Técnico</th>
-                        <th>Status</th>                        
-                        <th>Roteiro</th>
-
-                    </tr>
-                </thead>
-                <tbody id="minhas-aulas-tbody">
-                </tbody>
-            </table>
+        <div class="menu">
+            <header id="menu-container"></header>
         </div>
+        <div class="conteudo">
 
-        <div class="cartao-painel cartao-meus-laboratorios" style="display: none; width: 300px;">
-            <h2>Meus Laboratórios</h2>
-            <ul id="lista-meus-laboratorios" class="lista-painel"></ul>
+            <div class="painel-grelha" id="painel-grelha">
+                <div class="cartao-painel cartao-aulas-autorizadas" style="display: none;">
+
+                    <div class="calendario-header">
+                        <button type="button" id="btn-mes-anterior" title="Mês Anterior">&lt;</button>
+                        <h2 id="calendario-titulo" style="border-bottom: none; margin: 0;">Próximas Aulas</h2>
+                        <button type="button" id="btn-proximo-mes" title="Próximo Mês">&gt;</button>
+                    </div>
+
+                    <div class="calendario-dias-semana">
+                        <div class="dia-semana">DOM</div>
+                        <div class="dia-semana">SEG</div>
+                        <div class="dia-semana">TER</div>
+                        <div class="dia-semana">QUA</div>
+                        <div class="dia-semana">QUI</div>
+                        <div class="dia-semana">SEX</div>
+                        <div class="dia-semana">SÁB</div>
+                    </div>
+
+                    <div class="calendario-grid" id="calendario-grid"></div>
+
+                </div>
+
+                <div class="cartao-painel painel-minhas-aulas" style="display: none;">
+                    <h2>Minhas Solicitações de Aula</h2>
+                    <table class="tabela-visualizacao-aulas">
+                        <thead>
+                            <tr>
+                                <th>Laboratório</th>
+                                <th>Disciplina</th>
+                                <th>Data</th>
+                                <th>Horário</th>
+                                <th>Apoio Técnico</th>
+                                <th>Status</th>
+                                <th>Roteiro</th>
+
+                            </tr>
+                        </thead>
+                        <tbody id="minhas-aulas-tbody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="cartao-painel cartao-meus-laboratorios" style="display: none; width: 300px;">
+                    <h2>Meus Laboratórios</h2>
+                    <ul id="lista-meus-laboratorios" class="lista-painel"></ul>
+                </div>
+
+
+                <div class="cartao-painel cartao-aulas-tecnico" style="display: none;">
+
+                    <div class="calendario-header">
+                        <button type="button" id="btn-mes-anterior-tecnico" title="Mês Anterior">&lt;</button>
+                        <h2 id="calendario-titulo-tecnico" style="border-bottom: none; margin: 0;">Aulas nos Meus
+                            Laboratórios</h2>
+                        <button type="button" id="btn-proximo-mes-tecnico" title="Próximo Mês">&gt;</button>
+                    </div>
+
+                    <div class="calendario-dias-semana">
+                        <div class="dia-semana">DOM</div>
+                        <div class="dia-semana">SEG</div>
+                        <div class="dia-semana">TER</div>
+                        <div class="dia-semana">QUA</div>
+                        <div class="dia-semana">QUI</div>
+                        <div class="dia-semana">SEX</div>
+                        <div class="dia-semana">SÁB</div>
+                    </div>
+
+                    <div class="calendario-grid" id="calendario-grid-tecnico"></div>
+
+                </div>
+
+            </div>
         </div>
-
-
-<div class="cartao-painel cartao-aulas-tecnico" style="display: none;">
-    
-    <div class="calendario-header">
-        <button type="button" id="btn-mes-anterior-tecnico" title="Mês Anterior">&lt;</button>
-        <h2 id="calendario-titulo-tecnico" style="border-bottom: none; margin: 0;">Aulas nos Meus Laboratórios</h2>
-        <button type="button" id="btn-proximo-mes-tecnico" title="Próximo Mês">&gt;</button>
-    </div>
-    
-    <div class="calendario-dias-semana">
-        <div class="dia-semana">DOM</div>
-        <div class="dia-semana">SEG</div>
-        <div class="dia-semana">TER</div>
-        <div class="dia-semana">QUA</div>
-        <div class="dia-semana">QUI</div>
-        <div class="dia-semana">SEX</div>
-        <div class="dia-semana">SÁB</div>
-    </div>
-    
-    <div class="calendario-grid" id="calendario-grid-tecnico"></div>
-    
-</div>
-
     </div>
 
     <script src="js/menu.js" defer></script>
