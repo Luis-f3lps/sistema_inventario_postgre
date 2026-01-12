@@ -131,7 +131,7 @@ function loadLoggedInUser() {
                 case 'admin':
                     document.querySelector('.admin-menu').style.display = 'block';
                     document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-
+document.querySelector('#Aba02').style.display = 'contents';
                     break;
                 case 'tecnico':
                     document.querySelector('.tecnico').style.display = 'block';
