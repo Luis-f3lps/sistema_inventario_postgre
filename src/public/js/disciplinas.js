@@ -133,6 +133,8 @@ async function loadDisciplinas() {
       tr.innerHTML = `
                 <td>${disciplina.nome_disciplina}</td>
                 <td>${disciplina.professor_email_responsavel}</td>
+                                <td>${disciplina.status}</td>
+
             `;
       tbody.appendChild(tr);
 
