@@ -42,9 +42,9 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /**
- * Gerencia a troca de abas
+ * 
  * @param {Event} event
- * @param {string} tabname - O ID do conteúdo da aba para abrir.
+ * @param {string} tabname 
  */
 function opentab(event, tabname) {
   const tablinks = document.getElementsByClassName("tab-links");

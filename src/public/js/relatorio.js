@@ -47,7 +47,7 @@ function Autenticado() {
 function redirecionarSeNaoAutenticado() {
     Autenticado().then(authenticated => {
         if (!authenticated) {
-            window.location.href = 'login.html'; // Redireciona para a página de login
+            window.location.href = 'login.html';
         }
     });
 }
@@ -129,7 +129,7 @@ function geradorPdfConsumo() {
 function formatDate(dateString) {
     const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
     const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', options); // Formato dd/mm/yyyy
+    return date.toLocaleDateString('pt-BR', options); 
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function () {
         event.preventDefault();
         const startDate = document.getElementById('start-date').value;
         const endDate = document.getElementById('end-date').value;
-        const laboratorio = document.getElementById('laboratorios-select2').value || 'todos'; // "todos" para não filtrar
+        const laboratorio = document.getElementById('laboratorios-select2').value || 'todos'; 
         loadConsumos(startDate, endDate, laboratorio);
     });
 
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 document.getElementById('filter-form2').addEventListener('submit', function (event) {
-    event.preventDefault(); // Previne o comportamento padrão do formulário
+    event.preventDefault(); 
 
     const startDate = document.getElementById('entrada-start-date').value;
     const endDate = document.getElementById('entrada-end-date').value;
@@ -257,7 +257,7 @@ function loadEntradas(page = 1, startDate = '', endDate = '') {
     fetch(url)
         .then(response => response.json())
         .then(data => {
-            console.log('Dados recebidos da API:', data); // Debugging: Verificar a resposta da API
+            console.log('Dados recebidos da API:', data);
 
             if (Array.isArray(data.data)) {
                 updateTable(data.data);
@@ -325,11 +325,11 @@ function geradorPdfEntradatipo2() {
 function generatePDFConsumo() {
     const startDate = document.getElementById('start-date').value;
     const endDate = document.getElementById('end-date').value;
-    const laboratorio = document.getElementById('laboratorios-select2').value || 'todos'; // Pega o valor do select
+    const laboratorio = document.getElementById('laboratorios-select2').value || 'todos';
 
     const url = `/generate-pdf-consumo?start_date=${encodeURIComponent(startDate || '')}&end_date=${encodeURIComponent(endDate || '')}&laboratorio=${encodeURIComponent(laboratorio)}`;
 
-    console.log('URL da requisição:', url); // Adicione este log para verificar a URL
+    console.log('URL da requisição:', url); 
 
     fetch(url, {
         method: 'GET',
@@ -367,14 +367,14 @@ function updatePagination(totalPages, currentPage, startDate = '', endDate = '')
             button.classList.add('active');
         }
         button.addEventListener('click', () => {
-            loadEntradas(i, startDate, endDate); // Carregar a página clicada
+            loadEntradas(i, startDate, endDate); 
         });
         paginationDiv.appendChild(button);
     }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    loadEntradas(1); // Carregar a primeira página sem filtro
+    loadEntradas(1); 
     loadLaboratorios2();
 });
 
@@ -392,7 +392,7 @@ function updatePaginationConsumos(totalPages, currentPage, startDate = '', endDa
         }
 
         button.addEventListener('click', () => {
-            loadConsumos(i, startDate, endDate, laboratorio); // Carrega a página clicada com filtros
+            loadConsumos(i, startDate, endDate, laboratorio);
         });
 
         paginationDiv.appendChild(button);
@@ -404,7 +404,7 @@ function loadLaboratorios2() {
         .then(response => response.json())
         .then(data => {
             const select = document.getElementById('laboratorios-select2');
-            select.innerHTML = '<option value="">Todos os Laboratórios</option>'; // Adiciona a opção "Todos os Laboratórios"
+            select.innerHTML = '<option value="">Todos os Laboratórios</option>'; 
             data.forEach(laboratorio => {
                 const option = document.createElement('option');
                 option.value = laboratorio.id_laboratorio;

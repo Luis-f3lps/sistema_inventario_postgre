@@ -490,18 +490,13 @@ nav ul li a {
 
     i.fa-circle-xmark {
         color: #ff4d4d;
-        /* Cor do ícone (vermelho) */
         cursor: pointer;
-        /* Cursor de ponteiro ao passar o mouse */
         transition: transform 0.3s ease, color 0.3s ease;
-        /* Transição suave para animações */
     }
 
     i.fa-circle-xmark:hover {
         color: #e60000;
-        /* Cor mais escura ao passar o mouse */
         transform: scale(1.2);
-        /* Aumenta o ícone em 20% ao passar o mouse */
     }
 
     img {
@@ -552,27 +547,21 @@ nav ul li a {
     }
 }
 
-/* O fundo escurecido que cobre a página inteira */
 .acesso-negado-overlay {
     position: fixed;
-    /* Fica fixo na tela, mesmo com scroll */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
-    /* Preto com 70% de transparência */
     z-index: 1000;
-    /* Garante que fica por cima de tudo */
     display: flex;
     justify-content: center;
     align-items: center;
     opacity: 0;
     animation: fadeIn 0.3s forwards;
-    /* Animação de entrada */
 }
 
-/* A caixa de diálogo com a mensagem */
 .acesso-negado-caixa {
     background-color: #fff;
     padding: 40px;
@@ -581,15 +570,12 @@ nav ul li a {
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
     transform: scale(0.9);
     animation: popIn 0.3s 0.1s forwards;
-    /* Animação de entrada */
     max-width: 400px;
 }
 
-/* Ícone de cadeado */
 .acesso-negado-caixa .fas.fa-lock {
     font-size: 50px;
     color: #e74c3c;
-    /* Vermelho */
     margin-bottom: 20px;
 }
 
@@ -605,7 +591,6 @@ nav ul li a {
     font-size: 1.1em;
 }
 
-/* Animações */
 @keyframes fadeIn {
     to {
         opacity: 1;

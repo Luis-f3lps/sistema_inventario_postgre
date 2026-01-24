@@ -41,7 +41,7 @@ async function verificarAcessoAdmin() {
             const utilizador = await response.json();
 
             if (utilizador.tipo_usuario.trim().toLowerCase() !== 'admin') {
-                mostrarAvisoDeAcessoNegado(); // ...mostra o aviso e redireciona.
+                mostrarAvisoDeAcessoNegado(); 
             }
 
         } catch (error) {

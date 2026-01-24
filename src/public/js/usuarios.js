@@ -71,8 +71,8 @@ function loadUsers() {
             const selectActivate = document.getElementById('usuarios-select-ativar');
 
             tbody.innerHTML = '';
-            selectRemove.innerHTML = ''; // Limpar também o select de remoção
-            selectActivate.innerHTML = ''; // Limpar também o select de ativação
+            selectRemove.innerHTML = ''; 
+            selectActivate.innerHTML = ''; 
 
             data.forEach(usuario => {
                 const tr = document.createElement('tr');
@@ -152,7 +152,7 @@ document.getElementById('add-user-form').addEventListener('submit', function (ev
 
     const username = document.getElementById('username').value;
     const email = document.getElementById('email').value;
-    const userType = document.getElementById('type').value; // Novo campo para o tipo de usuário
+    const userType = document.getElementById('type').value; 
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
 
@@ -166,7 +166,7 @@ document.getElementById('add-user-form').addEventListener('submit', function (ev
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ nome_usuario: username, email: email, tipo_usuario: userType, senha: password }) // Inclua o tipo de usuário aqui
+        body: JSON.stringify({ nome_usuario: username, email: email, tipo_usuario: userType, senha: password }) 
     })
         .then(response => response.json())
         .then(data => {
@@ -238,7 +238,7 @@ function updateUserStatus(email, status) {
     const rows = document.querySelectorAll(`#usuarios-tbody tr`);
     rows.forEach(row => {
         if (row.cells[1].textContent === email) {
-            row.cells[2].textContent = status; // Atualiza o status na tabela
+            row.cells[2].textContent = status; 
         }
     });
 }

@@ -166,7 +166,6 @@ app.get('/Laboratorio', Autenticado, (req, res) => {
 // Rota para obter o usuário logado
 app.get('/api/usuario-logado', async (req, res) => {
   if (req.session.user) {
-    // Você pode fazer uma consulta ao banco de dados para confirmar a validade da sessão, se necessário
     const { email, nome, tipo_usuario } = req.session.user;
 
     res.json({

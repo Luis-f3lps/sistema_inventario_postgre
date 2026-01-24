@@ -1,12 +1,9 @@
-// Ouve o evento do menu.js para saber quando começar a trabalhar
 document.addEventListener('menuReady', (event) => {
     const { userData } = event.detail;
     inicializarPagina(userData);
 });
 
-// ===================================================================
-// VARIÁVEIS GLOBAIS DESTA PÁGINA
-// ===================================================================
+
 const labEl = document.getElementById('laboratorios-select2');
 const disciplinaEl = document.getElementById('disciplina-select2');
 const dataInicioEl = document.getElementById('data-inicio');
@@ -16,7 +13,6 @@ const submitBtn = document.getElementById('submitBtnRecorrente');
 const msgEl = document.getElementById('msg');
 
 
-// Função principal de inicialização
 async function inicializarPagina(userData) {
     await loadLaboratorios(); 
     await loadDisciplinas();

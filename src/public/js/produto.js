@@ -226,12 +226,12 @@ function carregarsiglas() {
         .then(response => response.json())
         .then(data => {
             const select = document.getElementById('sigla-select');
-            select.innerHTML = '<option value="">Selecione um produto</option>'; // Limpa e adiciona a opção padrão
+            select.innerHTML = '<option value="">Selecione um produto</option>'; 
 
             data.forEach(sigla => {
                 const option = document.createElement('option');
-                option.value = sigla.id_produto; // Define o valor como o id_produto
-                option.textContent = sigla.sigla; // Define o texto como a sigla
+                option.value = sigla.id_produto; 
+                option.textContent = sigla.sigla;
                 select.appendChild(option);
             });
         })
@@ -252,7 +252,7 @@ function excluirproduto(idproduto) {
         })
         .then(data => {
             alert(data.message || 'produto excluído com sucesso');
-            carregarsiglas(); // Atualiza os siglas após exclusão
+            carregarsiglas(); 
         })
         .catch(error => {
             alert(`Erro: ${error.message}`);
@@ -315,7 +315,7 @@ function updatePagination(totalPages, currentPage) {
             button.classList.add('active');
         }
         button.addEventListener('click', () => {
-            loadproduto(i); // Carregar a tabela para a página clicada
+            loadproduto(i); 
         });
         paginationDiv.appendChild(button);
     }

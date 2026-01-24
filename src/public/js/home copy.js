@@ -1,35 +1,22 @@
-// ===================================================================
-// ESTADO GLOBAL DA PÁGINA
-// ===================================================================
+
 let mesExibido;
 let anoExibido;
 
-/**
- * Ponto de entrada: ouve o evento do menu.js para iniciar a lógica do dashboard.
- */
+
 document.addEventListener('menuReady', (event) => {
     const { userData } = event.detail;
     inicializarDashboard(userData);
 });
 
 
-// ===================================================================
-// INICIALIZAÇÃO E NAVEGAÇÃO
-// ===================================================================
-
-/**
- * Orquestra a exibição e o carregamento dos painéis.
- */
 async function inicializarDashboard(userData) {
     const hoje = new Date();
-    mesExibido = hoje.getMonth(); // 0 = Janeiro, 11 = Dezembro
+    mesExibido = hoje.getMonth(); 
     anoExibido = hoje.getFullYear();
 
-    // Adiciona os eventos de clique aos botões de navegação do calendário
     document.getElementById('btn-mes-anterior')?.addEventListener('click', mostrarMesAnterior);
     document.getElementById('btn-proximo-mes')?.addEventListener('click', mostrarProximoMes);
 
-    // Mostra/esconde painéis com base no perfil do usuário
     const userType = userData.tipo_usuario ? userData.tipo_usuario.trim().toLowerCase() : '';
     const showElement = (selector) => {
         const el = document.querySelector(selector);
@@ -49,22 +36,18 @@ async function inicializarDashboard(userData) {
             break;
     }
 
-    // Carrega os dados iniciais para os painéis visíveis
     await carregarDadosDosPaineis(userType);
     
-    // Carrega a tabela principal de solicitações se o usuário for professor
     if (userType === 'professor') {
         loadMyRequests();
     }
 }
 
-/**
- * Funções de navegação do calendário (são assíncronas para buscar novos dados).
- */
+
 async function mostrarMesAnterior() {
     mesExibido--;
     if (mesExibido < 0) {
-        mesExibido = 11; // Volta para Dezembro
+        mesExibido = 11; 
         anoExibido--;
     }
     const novasAulas = await fetchAulasDoCalendario(anoExibido, mesExibido + 1);
@@ -74,7 +57,7 @@ async function mostrarMesAnterior() {
 async function mostrarProximoMes() {
     mesExibido++;
     if (mesExibido > 11) {
-        mesExibido = 0; // Volta para Janeiro
+        mesExibido = 0; 
         anoExibido++;
     }
     const novasAulas = await fetchAulasDoCalendario(anoExibido, mesExibido + 1);
@@ -82,13 +65,7 @@ async function mostrarProximoMes() {
 }
 
 
-// ===================================================================
-// BUSCA DE DADOS (FETCH)
-// ===================================================================
 
-/**
- * Busca as aulas para um mês/ano específico na nova API do calendário.
- */
 async function fetchAulasDoCalendario(ano, mes) {
     try {
         const response = await fetch(`/api/calendario/aulas-autorizadas?ano=${ano}&mes=${mes}`);
@@ -96,13 +73,10 @@ async function fetchAulasDoCalendario(ano, mes) {
         return await response.json();
     } catch (error) {
         console.error("Erro ao buscar aulas para o calendário:", error);
-        return []; // Retorna um array vazio em caso de erro
+        return []; 
     }
 }
 
-/**
- * Busca os dados para os diferentes painéis na carga inicial da página.
- */
 async function carregarDadosDosPaineis(userType) {
     if (userType === 'professor') {
         const aulasDoMesAtual = await fetchAulasDoCalendario(anoExibido, mesExibido + 1);
@@ -122,9 +96,7 @@ async function carregarDadosDosPaineis(userType) {
     }
 }
 
-/**
- * Carrega a tabela de solicitações do professor.
- */
+
 async function loadMyRequests() {
     try {
         const res = await fetch(`/api/minhas-solicitacoes`);
@@ -141,13 +113,6 @@ async function loadMyRequests() {
 }
 
 
-// ===================================================================
-// FUNÇÕES DE RENDERIZAÇÃO (Exibição dos dados na tela)
-// ===================================================================
-
-/**
- * Renderiza a tabela de solicitações do professor.
- */
 function renderTable(requests) {
     const tbody = document.getElementById("minhas-aulas-tbody");
     if (!tbody) return;
@@ -176,9 +141,6 @@ function renderTable(requests) {
     });
 }
 
-/**
- * Renderiza o CALENDÁRIO para um mês e ano específicos.
- */
 function renderizarCalendario(aulas, ano, mes) {
     const grid = document.getElementById('calendario-grid');
     const titulo = document.getElementById('calendario-titulo');
@@ -188,7 +150,6 @@ function renderizarCalendario(aulas, ano, mes) {
     const nomeDoMes = dataBase.toLocaleString('pt-BR', { month: 'long' });
     titulo.textContent = `${nomeDoMes.toUpperCase()} • ${ano}`;
 
-    // Agrupa as aulas por dia para fácil acesso
     const aulasPorDia = {};
     aulas.forEach(aula => {
         const dataAula = new Date(aula.data);
@@ -218,10 +179,9 @@ function renderizarCalendario(aulas, ano, mes) {
         if (aulasPorDia[dia]) {
             classesCss += " tem-aula";
             
-            // --- LÓGICA DO TOOLTIP ATUALIZADA AQUI ---
             eventosDoDia = `<div class="tooltip">${aulasPorDia[dia].map(a => {
                 const horaInicio = a.hora_inicio.slice(0, 5);
-                const horaFim = a.hora_fim.slice(0, 5); // Pega a hora_fim
+                const horaFim = a.hora_fim.slice(0, 5); 
                 
                 return `
                     <p>
@@ -237,9 +197,7 @@ function renderizarCalendario(aulas, ano, mes) {
     }
 }
 
-/**
- * Renderiza a lista de laboratórios do técnico.
- */
+
 function renderizarMeusLaboratorios(laboratorios) {
     const lista = document.getElementById('lista-meus-laboratorios');
     if (!lista) return;
@@ -248,9 +206,7 @@ function renderizarMeusLaboratorios(laboratorios) {
         : laboratorios.map(l => `<li>${l.nome_laboratorio}</li>`).join('');
 }
 
-/**
- * Renderiza a tabela de aulas nos laboratórios do técnico.
- */
+
 function renderizarAulasNosMeusLaboratorios(aulas) {
     const tbody = document.getElementById('corpo-tabela-aulas-tecnico');
     if (!tbody) return;
@@ -276,9 +232,6 @@ function renderizarAulasNosMeusLaboratorios(aulas) {
     });
 }
 
-// ===================================================================
-// FUNÇÃO AUXILIAR
-// ===================================================================
 function formatarLinkRoteiro(url, textoLink = 'Ver') {
     if (!url) return 'N/A';
     let linkCorrigido = url.trim();

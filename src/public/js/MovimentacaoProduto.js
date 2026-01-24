@@ -156,12 +156,12 @@ function loadsiglasEntrada() {
         .then(response => response.json())
         .then(data => {
             const select = document.getElementById('produto-entrada-select');
-            select.innerHTML = ''; // Limpa o select antes  
+            select.innerHTML = '';   
 
             data.forEach(sigla => {
                 const option = document.createElement('option');
-                option.value = sigla.id_produto; // Usar id_produto como valor
-                option.textContent = sigla.sigla; // Exibir a sigla como texto da opção
+                option.value = sigla.id_produto;
+                option.textContent = sigla.sigla; 
                 select.appendChild(option);
             });
         })
@@ -211,13 +211,13 @@ document.getElementById('entrada-form').addEventListener('submit', function (eve
 
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('consumo-form').addEventListener('submit', function (event) {
-        event.preventDefault(); // Previne o comportamento padrão de envio do formulário
+        event.preventDefault();
 
         const idproduto = document.getElementById('sigla-select').value;
         const quantidade = parseInt(document.getElementById('quantidade').value, 10);
         const laboratorio = document.getElementById('laboratorio-select').value;
         const data_consumo = document.getElementById('data_consumo').value;
-        const descricao = document.getElementById('descricao_comsumo').value; // Corrigido para usar o ID correto
+        const descricao = document.getElementById('descricao_comsumo').value; 
 
         if (!idproduto || isNaN(quantidade) || quantidade <= 0 || !laboratorio || !data_consumo || !descricao) {
             alert('Por favor, preencha todos os campos e a quantidade deve ser maior que zero.');
@@ -266,12 +266,12 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(error => console.error('Erro ao carregar IDs de entrada:', error));
 
     document.getElementById('entrada-form').addEventListener('submit', function (event) {
-        event.preventDefault(); // Previne o comportamento padrão de envio do formulário
+        event.preventDefault(); 
 
-        const idEntrada = document.getElementById('id-select').value; // ID da entrada selecionada
-        const idProduto = document.getElementById('produto-entrada-select').value; // ID do produto
-        const quantidade = parseInt(document.getElementById('quantidade-entrada').value); // Quantidade
-        const dataEntrada = document.getElementById('data-entrada').value; // Data de entrada
+        const idEntrada = document.getElementById('id-select').value; 
+        const idProduto = document.getElementById('produto-entrada-select').value; 
+        const quantidade = parseInt(document.getElementById('quantidade-entrada').value); 
+        const dataEntrada = document.getElementById('data-entrada').value; 
 
         if (!idEntrada || !idProduto || !quantidade || !dataEntrada) {
             alert('Todos os campos são obrigatórios.');
@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const entradaData = {
-            id_entrada: idEntrada, // Incluindo o ID da entrada
+            id_entrada: idEntrada,
             id_produto: idProduto,
             quantidade: quantidade,
             data_entrada: dataEntrada,

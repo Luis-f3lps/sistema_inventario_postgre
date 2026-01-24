@@ -10,7 +10,6 @@
 </head>
 
 <body>
-    <!------------------Relatórios--------------->
     <div id="header">
         <header id="menu-container"></header>
 
@@ -34,16 +33,8 @@
             </table>
         </div>
         <script>
-            // Variável global para armazenar os dados do usuário logado
             let loggedInUser = null;
-
-
-            /**
-             * Função principal que orquestra o carregamento da página.
-             */
             async function inicializarPagina() {
-
-                // Tenta buscar o usuário logado
                 try {
                     const response = await fetch('/api/usuario-logado');
                     if (!response.ok) {
@@ -52,32 +43,26 @@
                     }
                     loggedInUser = await response.json();
 
-                    // Atualiza a interface com as informações do usuário
                     const userNameElement = document.getElementById('user-name-text');
                     if (userNameElement) {
                         userNameElement.innerHTML = loggedInUser.nome_usuario || loggedInUser.nome;
                     }
 
-                    // Exibe os menus corretos com base no tipo de usuário
                     const userType = loggedInUser.tipo_usuario ? loggedInUser.tipo_usuario.trim().toLowerCase() : '';
 
                     const showMenuItem = (selector) => {
                         const el = document.querySelector(selector);
-                        if (el) el.style.display = 'list-item'; // 'list-item' é semanticamente melhor para <li>
+                        if (el) el.style.display = 'list-item'; 
                     };
 
                     await loadMyRequests();
 
                 } catch (error) {
                     console.error('Erro ao inicializar a página:', error);
-                    // Em caso de erro, redireciona para o login por segurança
                     window.location.href = '/login.html';
                 }
             }
 
-            /**
-             * Função para carregar as solicitações do professor.
-             */
             async function loadMyRequests() {
                 if (!loggedInUser) return;
 
@@ -96,15 +81,11 @@
                 }
             }
 
-            /**
-             * Função para renderizar a tabela na tela.
-             */
             function renderTable(requests) {
                 const tbody = document.getElementById("minhas-aulas-tbody");
                 if (!tbody) return;
 
-                tbody.innerHTML = ""; // Limpa a tabela antes de adicionar novas linhas
-
+                tbody.innerHTML = ""; 
                 if (requests.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação futura.</td></tr>`;
                     return;
@@ -128,7 +109,6 @@
                 });
             }
 
-            // Ponto de entrada do script
             document.addEventListener('DOMContentLoaded', inicializarPagina);
 
         </script>
