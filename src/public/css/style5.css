@@ -521,10 +521,8 @@ nav ul .fa-solid {
     }
 }
 
-/* Estilo para os botões de horário (slots) */
 .slot {
     background-color: #f0f0f0;
-    /* Cor padrão para horários livres */
     border: 1px solid #ccc;
     color: #333;
     padding: 8px 12px;
@@ -532,30 +530,22 @@ nav ul .fa-solid {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s;
-    /* Efeito suave de transição */
 }
 
-/* Efeito ao passar o mouse sobre um horário livre */
 .slot:not(.occupied):hover {
     background-color: #e0e0e0;
 }
 
-/* Estilo para o botão de horário SELECIONADO */
 .slot.selected {
     background-color: #007bff;
-    /* Cor de destaque (azul) */
     color: #ffffff;
-    /* Cor do texto (branco) */
     border-color: #0056b3;
 }
 
-/* Estilo para horários já ocupados */
 .slot.occupied {
     background-color: #dc3545;
-    /* Cor para ocupado (vermelho) */
     color: #ffffff;
     cursor: not-allowed;
-    /* Muda o cursor para indicar que não é clicável */
     opacity: 0.7;
 }
 
@@ -580,14 +570,12 @@ nav ul .fa-solid {
     display: flex;
     align-items: center;
     gap: 20px;
-    /* Espaço entre a pergunta e as opções */
 }
 
 .radio-options {
     display: flex;
     align-items: center;
     gap: 10px;
-    /* Espaço entre o "Sim" e o "Não" */
 }
 
 .radio-options label {
@@ -596,7 +584,6 @@ nav ul .fa-solid {
 
 .btn-deauthorize {
     background-color: #d9534f;
-    /* Cor vermelha, igual ao de recusar */
     color: white;
     padding: 5px 10px;
     border: none;
@@ -604,7 +591,6 @@ nav ul .fa-solid {
     cursor: pointer;
 }
 
-/* --- Estilo Geral do Container de Agendamento --- */
 .agendamento-container {
     max-width: 900px;
     margin: 40px auto;
@@ -616,7 +602,6 @@ nav ul .fa-solid {
     color: #333;
 }
 
-/* --- Título Principal --- */
 .agendamento-container h1 {
     text-align: center;
     color: #2c3e50;
@@ -626,7 +611,6 @@ nav ul .fa-solid {
     padding-bottom: 15px;
 }
 
-/* --- Fila de Seleção (Laboratório e Data) --- */
 .seletor-fila {
     display: flex;
     align-items: center;
@@ -639,7 +623,6 @@ nav ul .fa-solid {
     margin-right: -10px;
 }
 
-/* Estilo para os campos de formulário */
 .seletor-fila select,
 .seletor-fila input[type="date"] {
     flex-grow: 1;
@@ -657,7 +640,6 @@ nav ul .fa-solid {
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
-/* --- Seção da Grade de Horários --- */
 .grade-horarios {
     display: flex;
     flex-wrap: wrap;
@@ -675,7 +657,6 @@ nav ul .fa-solid {
     text-align: center;
 }
 
-/* --- Blocos de Horário (Slots) --- */
 .bloco-horario {
     background-color: #e9ecef;
     border: 1px solid #ced4da;
@@ -706,7 +687,6 @@ nav ul .fa-solid {
     opacity: 0.8;
 }
 
-/* --- Fila de Opção do Técnico (Rádio Sim/Não) --- */
 .opcao-tecnico-fila {
     margin-top: 25px;
     margin-bottom: 25px;
@@ -724,7 +704,6 @@ nav ul .fa-solid {
 }
 
 .radio-options {
-    /* Mantido pois é interno ao componente */
     display: flex;
     gap: 10px;
 }
@@ -733,7 +712,6 @@ nav ul .fa-solid {
     margin-left: 5px;
 }
 
-/* --- Botão Principal e Mensagens --- */
 .btn-principal {
     display: block;
     width: 100%;
@@ -767,10 +745,8 @@ nav ul .fa-solid {
     display: none;
 }
 
-/* --- Estilo do Container Principal da Gestão de Aulas --- */
 .gestao-aulas-container {
     max-width: 1100px;
-    /* Mais largo para tabelas */
     margin: 40px auto;
     padding: 30px;
     background-color: #ffffff;
@@ -787,15 +763,12 @@ nav ul .fa-solid {
     font-weight: 600;
 }
 
-/* --- Estilo da Tabela de Solicitações --- */
 .tabela-solicitacoes {
     width: 100%;
     border-collapse: collapse;
-    /* Remove espaços entre as células */
     margin-top: 20px;
 }
 
-/* Cabeçalho da Tabela */
 .tabela-solicitacoes thead th {
     background-color: #f2f6fa;
     color: #34495e;
@@ -807,24 +780,20 @@ nav ul .fa-solid {
     letter-spacing: 0.5px;
 }
 
-/* Corpo e Linhas da Tabela */
 .tabela-solicitacoes tbody td {
     padding: 15px;
     border-bottom: 1px solid #e0e6ed;
     color: #555;
 }
 
-/* Efeito de Zebrado (cores alternadas) para melhor leitura */
 .tabela-solicitacoes tbody tr:nth-child(even) {
     background-color: #f9fafc;
 }
 
 .tabela-solicitacoes tbody tr:hover {
     background-color: #e9f2ff;
-    /* Destaque ao passar o mouse */
 }
 
-/* --- Estilos para os Status e Botões (dentro da tabela) --- */
 .status-aula {
     font-weight: bold;
     text-transform: capitalize;
@@ -849,13 +818,11 @@ nav ul .fa-solid {
     background-color: #fce8e6;
 }
 
-/* Container para os botões de ação */
 .celula-acoes {
     display: flex;
     gap: 10px;
 }
 
-/* Botões de Ação */
 .btn-acao {
     padding: 8px 12px;
     border: none;
@@ -892,7 +859,6 @@ nav ul .fa-solid {
     font-weight: 600;
 }
 
-/* --- Tabela de Visualização de Aulas --- */
 .tabela-visualizacao-aulas {
     width: 100%;
     border-collapse: collapse;
@@ -918,7 +884,6 @@ nav ul .fa-solid {
     background-color: #f1f9ff;
 }
 
-/* --- Estilos para os Status (reaproveitados da tela do técnico) --- */
 .etiqueta-status {
     font-weight: bold;
     text-transform: capitalize;
@@ -953,7 +918,6 @@ nav ul .fa-solid {
     font-weight: 600;
 }
 
-/* --- Tabela de Visualização de Aulas --- */
 .tabela-visualizacao-aulas {
     width: 100%;
     border-collapse: collapse;
@@ -979,7 +943,6 @@ nav ul .fa-solid {
     background-color: #f1f9ff;
 }
 
-/* --- Estilos para os Status (reaproveitados da tela do técnico) --- */
 .etiqueta-status {
     font-weight: bold;
     text-transform: capitalize;
@@ -1005,7 +968,6 @@ nav ul .fa-solid {
     background-color: #fce8e6;
 }
 
-/* --- Estilo do Painel de Gestão --- */
 .painel-gestao-solicitacoes {
     max-width: 1550px;
     margin: 40px auto;
@@ -1030,7 +992,6 @@ nav ul .fa-solid {
     font-weight: 600;
 }
 
-/* --- Estilo da Tabela --- */
 .tabela-de-aulas {
     width: 100%;
     border-collapse: collapse;
@@ -1059,7 +1020,6 @@ nav ul .fa-solid {
     background-color: #e9f2ff;
 }
 
-/* --- Estilos para Status e Botões --- */
 .etiqueta-status {
     font-weight: bold;
     text-transform: capitalize;
@@ -1115,11 +1075,8 @@ nav ul .fa-solid {
 
 .mensagem-status.erro {
     display: block !important;
-    /* Garante que a mensagem seja visível */
     background-color: #fce8e6;
-    /* Fundo vermelho claro */
     color: #b92c2c;
-    /* Cor do texto vermelho escuro */
     border: 1px solid #f5c6cb;
     padding: 15px;
     border-radius: 8px;
@@ -1128,27 +1085,21 @@ nav ul .fa-solid {
 }
 
 
-/* O fundo escurecido que cobre a página inteira */
 .acesso-negado-overlay {
     position: fixed;
-    /* Fica fixo na tela, mesmo com scroll */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
-    /* Preto com 70% de transparência */
     z-index: 1000;
-    /* Garante que fica por cima de tudo */
     display: flex;
     justify-content: center;
     align-items: center;
     opacity: 0;
     animation: fadeIn 0.3s forwards;
-    /* Animação de entrada */
 }
 
-/* A caixa de diálogo com a mensagem */
 .acesso-negado-caixa {
     background-color: #fff;
     padding: 40px;
@@ -1157,15 +1108,12 @@ nav ul .fa-solid {
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
     transform: scale(0.9);
     animation: popIn 0.3s 0.1s forwards;
-    /* Animação de entrada */
     max-width: 400px;
 }
 
-/* Ícone de cadeado */
 .acesso-negado-caixa .fas.fa-lock {
     font-size: 50px;
     color: #e74c3c;
-    /* Vermelho */
     margin-bottom: 20px;
 }
 
@@ -1181,7 +1129,6 @@ nav ul .fa-solid {
     font-size: 1.1em;
 }
 
-/* Animações */
 @keyframes fadeIn {
     to {
         opacity: 1;
@@ -1234,13 +1181,11 @@ nav ul .fa-solid {
     padding-bottom: 15px;
 }
 
-/* Lista dentro de cada cartão */
 .lista-painel {
     list-style: none;
     padding: 0;
     margin: 0;
     flex-grow: 1;
-    /* Faz a lista ocupar o espaço disponível */
 }
 
 .lista-painel li {
@@ -1257,36 +1202,19 @@ nav ul .fa-solid {
 
 .item-painel-detalhado {
     display: flex;
-    /* Mantém o flexbox ativo */
-
-    /* MUDANÇA 1: Define a direção para linha (horizontal). Como 'row' é o padrão,
-       você pode simplesmente apagar a linha 'flex-direction: column;' */
     flex-direction: row;
-
-    /* MUDANÇA 2: Distribui o espaço ENTRE os itens */
     justify-content: space-between;
-
-    /* MUDANÇA 3: Alinha os itens verticalmente ao centro da linha */
     align-items: center;
-
-    /* MUDANÇA 4 (Bônus): Permite que os itens quebrem para a linha de baixo
-       em telas muito pequenas, evitando que amontoem. */
     flex-wrap: wrap;
-
-    /* Estilos de espaçamento e borda que já tínhamos */
     border-bottom: 1px solid #eee;
     padding: 15px 10px;
-    /* Adicionei um padding lateral para não colar nas bordas */
     gap: 25px;
-    /* Define um espaço mínimo entre os itens, útil com o flex-wrap */
 }
 
-/* Garante que o último item da lista não tenha a linha separadora embaixo */
 .item-painel-detalhado:last-child {
     border-bottom: none;
 }
 
-/* Etiqueta de status (reaproveitada) */
 .etiqueta-status {
     font-weight: bold;
     text-transform: capitalize;
@@ -1325,163 +1253,109 @@ nav ul .fa-solid {
     }
 }
 
-/* Adicione este código ao final do seu arquivo CSS */
 
-/* Container que permite a rolagem horizontal */
 .container-tabela-responsiva {
     width: 100%;
     overflow-x: auto;
-    /* A MÁGICA ACONTECE AQUI */
     -webkit-overflow-scrolling: touch;
-    /* Melhora a experiência de rolagem em celulares */
 }
 
-/* Garante que a tabela use o espaço e tenha um tamanho mínimo */
 .tabela-de-aulas {
     width: 100%;
-    /* Faz a tabela tentar ocupar todo o espaço do container */
     min-width: 900px;
-    /* IMPORTANTE: Força a tabela a ter no mínimo 900px. 
-                         Se o container for menor que isso, a barra de rolagem aparece.
-                         Ajuste este valor conforme necessário. */
     border-collapse: collapse;
-    /* Remove espaços entre as células */
 }
 
-/* Melhora a legibilidade das células */
 .tabela-de-aulas th,
 .tabela-de-aulas td {
     padding: 12px 15px;
     text-align: left;
     white-space: nowrap;
-    /* Impede que o texto quebre em várias linhas */
 }
 
 .link-destacado a {
     display: flex;
-    /* Alinha o ícone e o texto lado a lado */
     align-items: center;
-    /* Centraliza verticalmente */
     justify-content: center;
-    /* Centraliza horizontalmente */
     gap: 12px;
-    /* Espaço entre o ícone e o texto */
 
     background: linear-gradient(45deg, #007bff, #0056b3);
-    /* Fundo em gradiente azul */
     color: #ffffff;
-    /* Texto branco */
 
     padding: 15px 25px;
-    /* Espaçamento interno (vertical, horizontal) */
     border-radius: 8px;
-    /* Cantos arredondados */
 
     font-weight: bold;
     font-size: 1.1em;
     text-decoration: none;
-    /* Remove o sublinhado do link */
 
     box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
-    /* Sombra suave azulada */
     transition: all 0.3s ease;
-    /* Animação suave para todas as transições */
 }
 
-/* Estiliza o ícone dentro do link */
 .link-destacado a i {
     font-size: 1.2em;
-    /* Deixa o ícone um pouco maior que o texto */
 }
 
-/* Efeito ao passar o mouse por cima do botão */
 .link-destacado a:hover {
     background: linear-gradient(45deg, #0056b3, #007bff);
-    /* Inverte o gradiente */
     transform: translateY(-3px);
-    /* Efeito de "levantar" o botão */
     box-shadow: 0 7px 15px rgba(0, 91, 179, 0.3);
-    /* Sombra mais forte */
 }
 
-/* Efeito ao clicar no botão */
 .link-destacado a:active {
     transform: translateY(0);
-    /* Remove o efeito de levantar ao clicar */
     box-shadow: 0 2px 5px rgba(0, 91, 179, 0.2);
-    /* Sombra menor */
 }
 
 .grade-horarios-recorrente {
     display: grid;
-    /* Cria colunas responsivas: elas se ajustam ao tamanho da tela */
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 12px;
-    /* Espaçamento entre os horários */
     margin-top: 15px;
     padding: 10px;
     background-color: #f8f9fa;
     border-radius: 8px;
 }
 
-/* O estilo de cada item (o "botão" que contém o checkbox e o texto) */
 .checkbox-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    /* Espaço entre o quadradinho do checkbox e o texto */
-
     padding: 12px;
     border: 2px solid #dee2e6;
-    /* Borda sutil */
     border-radius: 8px;
     background-color: #ffffff;
     cursor: pointer;
-
     transition: all 0.2s ease-in-out;
-    /* Animação suave para todas as mudanças */
 }
 
-/* Efeito ao passar o mouse por cima */
 .checkbox-item:hover {
     border-color: #007bff;
-    /* Borda fica azul */
     transform: translateY(-2px);
-    /* Efeito de levantar */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* O quadradinho do checkbox em si */
 .checkbox-item input[type="checkbox"] {
-    /* Deixa o checkbox maior e mais fácil de clicar */
     width: 1.3em;
     height: 1.3em;
     cursor: pointer;
     accent-color: #007bff;
-    /* Cor do checkbox quando marcado (moderno) */
 }
 
-/* O texto (label) do horário */
 .checkbox-item label {
     font-weight: 500;
     color: #333;
     cursor: pointer;
     user-select: none;
-    /* Impede que o texto seja selecionado ao clicar */
 }
 
 
-/* --- A MÁGICA DA SELEÇÃO --- */
-
-/* Quando o checkbox DENTRO do item está MARCADO... */
 .checkbox-item:has(input:checked) {
     background-color: #e7f1ff;
-    /* ... o fundo do item todo fica azul claro */
     border-color: #007bff;
-    /* ... e a borda fica azul forte */
 }
 
-/* E o texto (label) também muda de cor e peso */
 .checkbox-item:has(input:checked) label {
     font-weight: bold;
     color: #0056b3;
@@ -1491,7 +1365,6 @@ nav ul .fa-solid {
     width: 100%;
 }
 
-/* Título do mês (SETEMBRO • 2025) */
 #calendario-titulo {
     text-align: center;
     font-size: 1.2em;
@@ -1500,12 +1373,10 @@ nav ul .fa-solid {
     margin-bottom: 20px;
 }
 
-/* Container da grade de dias (DOM, SEG, TER...) */
 .calendario-header,
 .calendario-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    /* 7 colunas iguais */
     gap: 5px;
 }
 
@@ -1516,7 +1387,6 @@ nav ul .fa-solid {
     color: var(--cor-texto-secundario);
 }
 
-/* Célula de cada dia do calendário */
 .dia-calendario {
     position: relative;
     display: flex;
@@ -1534,7 +1404,6 @@ nav ul .fa-solid {
     border: none;
 }
 
-/* Estilo para o dia de HOJE */
 .dia-calendario.hoje span {
     background-color: #ff0000;
     color: #ffffff;
@@ -1547,7 +1416,6 @@ nav ul .fa-solid {
     font-weight: bold;
 }
 
-/* Estilo para dias que TÊM AULA */
 .dia-calendario.tem-aula {
     background-color: #569af9;
     font-weight: bold;
@@ -1565,17 +1433,14 @@ nav ul .fa-solid {
     width: 6px;
     height: 6px;
     background-color: var(--cor-sucesso);
-    /* Ponto verde indicando evento */
     border-radius: 50%;
 }
 
-/* Tooltip (caixa de informações) que aparece ao passar o mouse */
 .dia-calendario .tooltip {
     visibility: hidden;
     opacity: 0;
     position: absolute;
     bottom: 110%;
-    /* Aparece acima do dia */
     left: 50%;
     transform: translateX(-50%);
 
@@ -1584,7 +1449,6 @@ nav ul .fa-solid {
     padding: 10px;
     border-radius: 6px;
     width: 250px;
-    /* Largura do tooltip */
     z-index: 10;
 
     font-size: 0.85em;
@@ -1609,12 +1473,10 @@ nav ul .fa-solid {
     border-bottom: none;
 }
 
-/* Adicione ao seu arquivo style5.css */
 
 .calendario-header {
     display: flex;
     justify-content: space-between;
-    /* Espaça os itens (botões e título) */
     align-items: center;
     margin-bottom: 15px;
 }
@@ -1640,14 +1502,11 @@ nav ul .fa-solid {
 
 .calendario-header button:hover {
     background-color: #e7f1ff;
-    /* Azul bem claro */
 }
 
-/* Nova grade para os nomes dos dias (DOM, SEG...) */
 .calendario-dias-semana {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 5px;
     margin-bottom: 5px;
-    /* Espaço antes dos dias do calendário */
 }

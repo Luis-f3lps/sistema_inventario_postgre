@@ -23,19 +23,15 @@ html {
     position: fixed;
     left: 0;
     top: 50%;
-    /* Isso posiciona o menu no meio da altura da página */
     transform: translateY(-50%);
-    /* Isso centraliza verticalmente o menu */
     padding: 0;
     margin: 0;
     z-index: 1;
-    /* Definindo um z-index menor */
 }
 
 #sidemenu li {
     display: block;
     margin-bottom: 10px;
-    /* Espaçamento entre os itens do menu */
 }
 
 #sidemenu li a {
@@ -57,7 +53,6 @@ html {
 #sidemenu li {
     display: block;
     margin-bottom: 10px;
-    /* Espaçamento entre os itens do menu */
 }
 
 #sidemenu li span {

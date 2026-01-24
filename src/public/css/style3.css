@@ -268,14 +268,12 @@ select {
     border: 2px solid #4CAF50;
     border-radius: 5px;
     appearance: none;
-    /* Remove default arrow icon */
     background-color: white;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%234CAF50' width='24px' height='24px'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
     background-position: right 10px top 50%;
     background-repeat: no-repeat;
     background-size: 20px;
     padding-right: 30px;
-    /* Space for arrow icon */
     width: 300px;
     transition: border-color 0.3s ease;
 }
@@ -542,7 +540,6 @@ nav ul li a {
     }
 }
 
-/* O fundo escurecido que cobre a página inteira */
 .acesso-negado-overlay {
     position: fixed;
     top: 0;
