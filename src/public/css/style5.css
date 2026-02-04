@@ -499,11 +499,6 @@ nav ul .fa-solid {
         border-radius: 4px;
         border: 2px solid #000000;
     }
-
-    .tabela-visualizacao-aulas {
-        margin-left: 170px;
-
-    }
 }
 
 @media only screen and (max-width: 1080px) and (max-height: 2340px) {
@@ -927,7 +922,6 @@ nav ul .fa-solid {
     width: 60%;
     border-collapse: collapse;
     margin-top: 20px;
-    margin-left: 500px;
 }
 
 .tabela-visualizacao-aulas thead th {
@@ -1169,7 +1163,7 @@ nav ul .fa-solid {
 }
 
 .cartao-painel {
-    max-width: 1450px;
+    max-width: 850px;
     padding: 30px;
     background-color: #ffffff;
     border-radius: 12px;
