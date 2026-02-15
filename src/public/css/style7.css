@@ -10,6 +10,7 @@
     --text-light: #b8c7ce;
     --white: #ffffff;
     --border-color: #d2d6de;
+    --input-border: #ccc;
 }
 
 * {
@@ -121,89 +122,173 @@ nav {
     cursor: pointer;
 }
 
-#header {
-    margin-left: 18%;
-    width: 82%;
+.agendamento-container {
+    margin-left: 19%; 
+    width: 80%; 
     padding: 2%;
+    margin-top: 2%;
+    margin-bottom: 2%;
+    background-color: var(--white);
+    border-radius: 3px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+    border-top: 3px solid var(--primary-color);
+    transition: margin-left 0.3s, width 0.3s;
     display: flex;
     flex-direction: column;
     gap: 20px;
-    transition: margin-left 0.3s, width 0.3s;
 }
 
-.painel-minhas-aulas {
-    background-color: var(--white);
-    width: 100%;
-    border-radius: 3px;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
-    border-top: 3px solid var(--secondary-color);
-    padding: 2%;
-    margin-top: 1%;
-}
-
-.painel-minhas-aulas h1 {
-    font-size: 22px;
-    margin-bottom: 10px;
+.agendamento-container h1 {
+    font-size: 24px;
     color: var(--text-color);
-    border-bottom: 1px solid #f4f4f4;
     padding-bottom: 10px;
-    width: 100%;
-}
-
-.painel-minhas-aulas p {
-    font-size: 14px;
-    color: #777;
-    margin-bottom: 20px;
-    width: 100%;
-}
-
-.tabela-visualizacao-aulas {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    font-size: 14px;
-}
-
-.tabela-visualizacao-aulas th {
-    background-color: #f9fafc;
-    color: #444;
-    font-weight: 600;
-    text-align: left;
-    padding: 12px;
-    border-bottom: 2px solid var(--border-color);
-}
-
-.tabela-visualizacao-aulas td {
-    padding: 12px;
     border-bottom: 1px solid #eee;
-    color: #555;
-    vertical-align: middle;
+    margin-bottom: 10px;
 }
 
-.tabela-visualizacao-aulas tr:hover {
-    background-color: #f5f5f5;
-}
-
-.etiqueta-status {
-    padding: 4px 8px;
+.link-destacado a {
+    display: inline-block;
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 500;
+    border: 1px solid var(--secondary-color);
+    padding: 8px 12px;
     border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: #fff;
-    background-color: #999;
+    transition: background 0.3s, color 0.3s;
 }
 
-.status-aprovado, .status-confirmado {
+.link-destacado a:hover {
+    background-color: var(--secondary-color);
+    color: var(--white);
+}
+
+.seletor-fila, .opcao-tecnico-fila {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+label {
+    font-weight: 700;
+    font-size: 14px;
+    color: #444;
+}
+
+select, input[type="date"], input[type="number"], input[type="url"], input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    background-color: #fff;
+    color: #555;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+select:focus, input:focus {
+    border-color: var(--secondary-color);
+    outline: none;
+}
+
+.grade-horarios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.grade-horarios button, 
+.grade-horarios .slot {
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: all 0.2s;
+}
+
+.grade-horarios button:hover,
+.grade-horarios .slot:hover {
+    background-color: #e0e0e0;
+}
+
+.grade-horarios button.selected,
+.grade-horarios .slot.selected {
     background-color: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
 }
 
-.status-pendente, .status-aguardando {
-    background-color: #f39c12;
+.texto-ajuda {
+    font-size: 12px;
+    color: #777;
+    margin-top: 5px;
 }
 
-.status-rejeitado, .status-cancelado {
-    background-color: #dd4b39;
+.radio-options {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+.radio-options input[type="radio"] {
+    accent-color: var(--primary-color);
+    transform: scale(1.2);
+}
+
+.radio-options label {
+    font-weight: 400;
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+.btn-principal {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+    width: 100%;
+    max-width: 250px;
+    align-self: flex-start;
+}
+
+.btn-principal:hover {
+    background-color: #008d4c;
+}
+
+.btn-principal:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.mensagem-status {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.mensagem-status.sucesso {
+    background-color: #dff0d8;
+    color: #3c763d;
+    border: 1px solid #d6e9c6;
+}
+
+.mensagem-status.erro {
+    background-color: #f2dede;
+    color: #a94442;
+    border: 1px solid #ebccd1;
 }
 
 .logout a {
@@ -214,9 +299,9 @@ nav {
     nav {
         width: 25%;
     }
-    #header {
-        margin-left: 25%;
-        width: 75%;
+    .agendamento-container {
+        margin-left: 27%;
+        width: 71%;
     }
 }
 
@@ -227,11 +312,10 @@ nav {
         box-shadow: 2px 0 5px rgba(0,0,0,0.2);
     }
     
-    #header {
-        margin-left: 0;
-        width: 100%;
-        padding: 5%;
-        margin-top: 40px;
+    .agendamento-container {
+        margin-left: 5%;
+        width: 90%;
+        margin-top: 60px;
     }
 
     .fa-bars {
@@ -256,10 +340,198 @@ nav {
         left: 0;
     }
 
+    .grade-horarios {
+        justify-content: center;
+    }
+    
+    .btn-principal {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+:root {
+    --calendar-border: #eee;
+}
+
+/* --- ESTRUTURA PRINCIPAL (DASHBOARD) --- */
+.tudo {
+    width: 100%;
+    display: flex;
+}
+
+.conteudo {
+    margin-left: 18%;
+    width: 82%;
+    padding: 20px;
+    transition: margin-left 0.3s, width 0.3s;
+    margin-top: 20px;
+}
+
+/* --- GRADE E CARTÕES --- */
+.painel-grelha {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.cartao-painel {
+    background-color: var(--white);
+    border-radius: 3px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+    border-top: 3px solid var(--primary-color);
+    padding: 20px;
+    width: 100%;
+}
+
+.cartao-painel h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    color: var(--text-color);
+}
+
+/* --- CALENDÁRIO --- */
+.calendario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendario-header button {
+    background: none;
+    border: 1px solid var(--border-color);
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #555;
+    transition: 0.3s;
+}
+
+.calendario-header button:hover {
+    background-color: var(--light-bg);
+}
+
+.calendario-dias-semana {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #666;
+    font-size: 14px;
+}
+
+.calendario-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+.calendario-dia {
+    border: 1px solid var(--calendar-border);
+    min-height: 100px;
+    padding: 5px;
+    position: relative;
+    background: #fff;
+    font-size: 14px;
+}
+
+.calendario-dia:hover {
+    background-color: #fafafa;
+}
+
+.calendario-dia.hoje {
+    background-color: #e8f5e9;
+    border-color: #c8e6c9;
+}
+
+.calendario-evento {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 2px 4px;
+    border-radius: 2px;
+    font-size: 11px;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* --- TABELAS --- */
+.tabela-visualizacao-aulas {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.tabela-visualizacao-aulas th {
+    background-color: #f9fafc;
+    color: #444;
+    font-weight: 600;
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.tabela-visualizacao-aulas td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    color: #555;
+}
+
+.tabela-visualizacao-aulas tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* --- LISTAS --- */
+.lista-painel {
+    list-style: none;
+}
+
+.lista-painel li {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* --- RESPONSIVIDADE ADICIONAL --- */
+@media (max-width: 1024px) {
+    .conteudo {
+        margin-left: 25%;
+        width: 75%;
+    }
+}
+
+@media (max-width: 768px) {
+    .conteudo {
+        margin-left: 0;
+        width: 100%;
+        padding: 15px;
+        margin-top: 50px;
+    }
+
     .tabela-visualizacao-aulas {
         display: block;
-        width: 100%;
         overflow-x: auto;
         white-space: nowrap;
+    }
+
+    .calendario-dias-semana .dia-semana {
+        font-size: 11px;
+    }
+    
+    .calendario-grid {
+        gap: 2px;
+    }
+
+    .calendario-dia {
+        min-height: 70px;
+        font-size: 12px;
+        padding: 2px;
     }
 }

@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="images/icone3.png" type="image/png">
     <title>Inventário Produtos Químicos</title>
-    <link rel="stylesheet" href="css/style7.css">
+    <link rel="stylesheet" href="css/style5.css">
     <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
 </head>
 
@@ -52,7 +52,7 @@
 
                     const showMenuItem = (selector) => {
                         const el = document.querySelector(selector);
-                        if (el) el.style.display = 'list-item'; 
+                        if (el) el.style.display = 'list-item';
                     };
 
                     await loadMyRequests();
@@ -85,7 +85,7 @@
                 const tbody = document.getElementById("minhas-aulas-tbody");
                 if (!tbody) return;
 
-                tbody.innerHTML = ""; 
+                tbody.innerHTML = "";
                 if (requests.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação futura.</td></tr>`;
                     return;
@@ -112,7 +112,8 @@
             document.addEventListener('DOMContentLoaded', inicializarPagina);
 
         </script>
-        <script src="js/menu.js" defer></script>    <script src="js/menu.js" defer></script>
+        <script src="js/menu.js" defer></script>
+        <script src="js/menu.js" defer></script>
 
 
 </body>
