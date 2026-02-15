@@ -1,0 +1,265 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+:root {
+    --primary-color: #00a65a;
+    --secondary-color: #17a2b8;
+    --dark-bg: #222d32;
+    --dark-hover: #1e282c;
+    --light-bg: #ecf0f5;
+    --text-color: #333;
+    --text-light: #b8c7ce;
+    --white: #ffffff;
+    --border-color: #d2d6de;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    background-color: var(--light-bg);
+    color: var(--text-color);
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+nav {
+    width: 18%;
+    background-color: var(--dark-bg);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    transition: width 0.3s, left 0.3s;
+    overflow-y: auto;
+}
+
+#sidemenu {
+    list-style: none;
+    padding-bottom: 50px;
+    width: 100%;
+}
+
+#sidemenu .logo {
+    display: block;
+    width: 70%;
+    margin: 20px auto;
+    filter: brightness(0) invert(1);
+}
+
+#sidemenu li {
+    width: 100%;
+}
+
+#sidemenu li a {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 12px 10%;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 14px;
+    border-left: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+#sidemenu li a:hover {
+    background-color: var(--dark-hover);
+    color: var(--white);
+    border-left-color: var(--primary-color);
+}
+
+#sidemenu li a i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+#user-name {
+    color: var(--white);
+    padding: 15px 10%;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #4b646f;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.submenu-items {
+    list-style: none;
+    background-color: #2c3b41;
+    display: none; 
+    width: 100%;
+}
+
+.submenu:hover .submenu-items {
+    display: block;
+}
+
+.submenu-items li a {
+    padding-left: 20% !important;
+    font-size: 13px;
+}
+
+.fa-bars {
+    display: none;
+}
+
+.fa-circle-xmark {
+    display: none;
+    color: #fff;
+    font-size: 24px;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    cursor: pointer;
+}
+
+#header {
+    margin-left: 18%;
+    width: 82%;
+    padding: 2%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: margin-left 0.3s, width 0.3s;
+}
+
+.painel-minhas-aulas {
+    background-color: var(--white);
+    width: 100%;
+    border-radius: 3px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+    border-top: 3px solid var(--secondary-color);
+    padding: 2%;
+    margin-top: 1%;
+}
+
+.painel-minhas-aulas h1 {
+    font-size: 22px;
+    margin-bottom: 10px;
+    color: var(--text-color);
+    border-bottom: 1px solid #f4f4f4;
+    padding-bottom: 10px;
+    width: 100%;
+}
+
+.painel-minhas-aulas p {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.tabela-visualizacao-aulas {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.tabela-visualizacao-aulas th {
+    background-color: #f9fafc;
+    color: #444;
+    font-weight: 600;
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.tabela-visualizacao-aulas td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    color: #555;
+    vertical-align: middle;
+}
+
+.tabela-visualizacao-aulas tr:hover {
+    background-color: #f5f5f5;
+}
+
+.etiqueta-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #fff;
+    background-color: #999;
+}
+
+.status-aprovado, .status-confirmado {
+    background-color: var(--primary-color);
+}
+
+.status-pendente, .status-aguardando {
+    background-color: #f39c12;
+}
+
+.status-rejeitado, .status-cancelado {
+    background-color: #dd4b39;
+}
+
+.logout a {
+    color: #ff6b6b !important;
+}
+
+@media (max-width: 1024px) {
+    nav {
+        width: 25%;
+    }
+    #header {
+        margin-left: 25%;
+        width: 75%;
+    }
+}
+
+@media (max-width: 768px) {
+    nav {
+        width: 70%;
+        left: -100%; 
+        box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    }
+    
+    #header {
+        margin-left: 0;
+        width: 100%;
+        padding: 5%;
+        margin-top: 40px;
+    }
+
+    .fa-bars {
+        display: block;
+        position: fixed;
+        top: 15px;
+        left: 5%;
+        z-index: 1001;
+        font-size: 24px;
+        color: #333;
+        cursor: pointer;
+        background: rgba(255,255,255,0.8);
+        padding: 5px;
+        border-radius: 4px;
+    }
+
+    .fa-circle-xmark {
+        display: block;
+    }
+
+    nav.active {
+        left: 0;
+    }
+
+    .tabela-visualizacao-aulas {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
