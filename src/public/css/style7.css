@@ -607,6 +607,10 @@ table tbody tr:hover {
     
     #filter-form, #filter-form2 { flex-direction: column; align-items: stretch; }
     #filter-form input, #filter-form select, #filter-form2 input, #filter-form2 select, button[type="submit"] { width: 100%; }
+    nav .fa-solid {
+    display: block;
+}
+
 }
 
 .calendario-container {
@@ -757,4 +761,6 @@ table tbody tr:hover {
     grid-template-columns: repeat(7, 1fr);
     gap: 5px;
     margin-bottom: 5px;
+}nav .fa-solid {
+    display: none;
 }
