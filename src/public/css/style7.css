@@ -239,7 +239,6 @@ input[type="date"],
 input[type="number"],
 input[type="url"],
 input[type="text"] {
-    width: 100%;
     padding: 10px;
     border: 1px solid var(--input-border);
     border-radius: 4px;
@@ -775,7 +774,7 @@ tbody tr:hover {
 }
 
 .painel-gestao-solicitacoes {
-    max-width: 1200px;
+    width: 80%;
 }
 
 .painel-minhas-aulas h1,
