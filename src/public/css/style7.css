@@ -252,6 +252,8 @@ input[type="text"] {
     color: #555;
     font-size: 14px;
     transition: border-color 0.3s;
+        width: 100%;
+/* essa poha é aquela do select*/
 }
 
 select:focus,
@@ -335,7 +337,6 @@ button[type="submit"],
     background-color: var(--primary-color);
     padding: 12px 20px;
     font-size: 16px;
-    margin-top: 20px;
     width: 100%;
     max-width: 250px;
     align-self: flex-start;
@@ -373,8 +374,6 @@ button[type="submit"]:hover {
 }
 
 .mensagem-status {
-    margin-top: 10px;
-    padding: 10px;
     border-radius: 4px;
     font-size: 14px;
 }
@@ -752,7 +751,8 @@ tbody tr:hover {
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     width: 80%;
-
+height: 100vh;
+    overflow-y: auto;
 }
 
 #header {
@@ -820,6 +820,8 @@ tbody tr:hover {
 .container-tabela-responsiva {
     width: 100%;
     overflow-x: auto;
+    height: 100vh;
+    overflow-y: auto;
 }
 
 .etiqueta-status {
