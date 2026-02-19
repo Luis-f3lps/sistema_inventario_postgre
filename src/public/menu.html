@@ -1,20 +1,20 @@
 <nav>
     <ul id="sidemenu">
         <img src="images/logomenu.png" class="logo">
-        </br>
+        <br>
+        
         <li>
             <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
                 <i class="fas fa-user"></i>
                 <span id="user-name-text"></span>
             </span>
         </li>
-        </br>
+        <br>
 
         <li class="Home" style="display: none;"><a href="/Home"><i class="fas fa-home"></i> Home</a></li>
-        <li class="Horarios" style="display: none;"><a href="/Horario"><i class="fas fa-clock"></i> Horarios</a>
-        </li>
-        <li class="tecnico" style="display: none;"><a href="/Tela_Tecnico"><i class="fas fa-bell"></i>
-                Solicitações</a></li>
+        <li class="Horarios" style="display: none;"><a href="/Horario"><i class="fas fa-clock"></i> Horarios</a></li>
+        <li class="tecnico" style="display: none;"><a href="/Tela_Tecnico"><i class="fas fa-bell"></i> Solicitações</a></li>
+        <li class="professor" style="display: none;"><a href="/Tela_Professor"><i class="fas fa-bell"></i> Solicitações Aula</a></li>
 
         <li class="submenu produto" style="display: none;">
             <a href="#"><i class="fas fa-boxes"></i> Inventário <i class="fas fa-chevron-down"></i></a>
@@ -24,7 +24,7 @@
                 <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
             </ul>
         </li>
-        <!-- HTML para o menu de administração -->
+        
         <li class="submenu admin-menu" style="display: none;">
             <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
             <ul class="submenu-items">
@@ -32,16 +32,18 @@
                 <li><a href="/Produto"><i class="fas fa-tags"></i> Produtos</a></li>
                 <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Laboratórios</a></li>
                 <li><a href="/Disciplinas"><i class="fas fa-flask"></i> Disciplinas</a></li>
-
             </ul>
         </li>
-        </br>
+        <br>
+        
         <li class="logout">
             <a href="/logout" style="border-top: 1px solid;">
                 <i class="fas fa-sign-out-alt"></i> Sair
             </a>
         </li>
-        <i class="fa-solid fa-circle-xmark" onclick="clossmenu()"></i>
+        
+        <i class="fa-solid fa-circle-xmark" onclick="closemenu()"></i>
     </ul>
-    <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px; "></i>
+    
+    <i class="fa-solid fa-bars" onclick="openmenu()" aria-hidden="true" style="margin: 30px;"></i>
 </nav>

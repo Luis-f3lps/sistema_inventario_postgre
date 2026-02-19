@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     inicializarMenuEAutenticacao();
 });
@@ -71,29 +70,26 @@ function ativarFuncionalidadeMenu() {
 function preencherDadosDoMenu(userData) {
     const userNameElement = document.getElementById('user-name-text');
     if (userNameElement) {
-        userNameElement.textContent = userData.nome_usuario || userData.nome;
+        userNameElement.textContent = userData.nome_usuario || userData.nome || "Usuário";
     }
 
     const userType = userData.tipo_usuario ? userData.tipo_usuario.trim().toLowerCase() : '';
 
     const showMenuItem = (selector) => {
         const el = document.querySelector(selector);
-        if (el) el.style.display = 'list-item';
+        if (el) el.style.display = 'block'; 
     };
+    
     const showDashboardCard = (selector) => {
         const el = document.querySelector(selector);
         if (el) el.style.display = 'block';
     };
 
-
     document.querySelectorAll('.cartao-painel').forEach(card => card.style.display = 'none');
 
     switch (userType) {
         case 'admin':
-            if (window.location.pathname !== '/Inventario' && window.location.pathname !== '/Inventario.html') {
-                window.location.href = '/Inventario';
-                return;
-            }
+        case 'administrador': 
             showMenuItem('.admin-menu');
             showMenuItem('.produto');
             break;

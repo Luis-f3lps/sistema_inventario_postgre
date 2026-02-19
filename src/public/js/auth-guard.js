@@ -24,7 +24,6 @@ function mostrarAvisoDeAcessoNegado(motivo) {
     overlay.appendChild(caixaAviso);
     document.body.appendChild(overlay);
 
-    // O redirecionamento acontece após 3 segundos
     setTimeout(() => {
         window.location.href = '/Inventario'; 
     }, 3000); 
@@ -45,17 +44,14 @@ async function verificarAcessoAdmin() {
             const utilizador = await response.json();
             console.log("Auth Guard - Dados do Usuário:", utilizador);
 
-            // Pega o tipo_usuario, tira espaços extras e joga pra minúsculo
             const tipoUser = utilizador.tipo_usuario ? utilizador.tipo_usuario.trim().toLowerCase() : 'vazio_ou_nulo';
 
-            // Só bloqueia se não for admin e não for administrador
             if (tipoUser !== 'admin' && tipoUser !== 'administrador') {
                 mostrarAvisoDeAcessoNegado(tipoUser); 
             }
 
         } catch (error) {
             console.error("Erro no auth-guard:", error);
-            // Removi o redirecionamento aqui para não te chutar caso a rede apenas dê um engasgo
         }
     }
 }
