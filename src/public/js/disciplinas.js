@@ -14,40 +14,6 @@ function closemenu() {
 
 function opentab(event, tabname) {
   const tablinks = document.getElementsByClassName("tab-links");
-  const tabcontents = document.getElementsByClassName("tab-contents");
-
-  Array.from(tablinks).forEach((link) => link.classList.remove("active-link"));
-  Array.from(tabcontents).forEach((content) =>
-    content.classList.remove("active-tab")
-  );
-
-  const activeTab = document.getElementById(tabname);
-  if (activeTab) {
-    activeTab.classList.add("active-tab");
-  }
-
-  if (event && event.currentTarget) {
-    event.currentTarget.classList.add("active-link");
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  loadLoggedInUser();
-  loadDisciplinas();
-  loadProfessoresParaSelect();
-
-  setupEventListeners();
-
-  setupSubmenuListeners();
-});
-
-/**
- * 
- * @param {Event} event
- * @param {string} tabname 
- */
-function opentab(event, tabname) {
-  const tablinks = document.getElementsByClassName("tab-links");
   Array.from(tablinks).forEach((link) => {
     link.classList.remove("active-link");
   });
@@ -67,52 +33,59 @@ function opentab(event, tabname) {
   }
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  loadLoggedInUser();
+  loadDisciplinas();
+  loadProfessoresParaSelect();
+
+  setupEventListeners();
+  setupSubmenuListeners();
+});
+
+// A nova função loadLoggedInUser com tempo de espera para evitar o erro de 'null'
 async function loadLoggedInUser() {
-  const response = await fetch("/api/usuario-logado");
-  if (!response.ok) {
-    window.location.href = "/login.html";
-    return;
-  }
-  fetch("/api/usuario-logado")
-    .then((response) => {
+  try {
+      const response = await fetch("/api/usuario-logado");
       if (!response.ok) {
-        throw new Error("Falha ao buscar usuário. Status: " + response.status);
+          window.location.href = "/login.html";
+          return;
       }
-      return response.json();
-    })
-    .then((data) => {
-      const userNameElement = document.getElementById("user-name-text");
-      userNameElement.innerHTML = data.nome;
+      const data = await response.json();
 
-      const userType = data.tipo_usuario
-        ? data.tipo_usuario.trim().toLowerCase()
-        : "";
+      // Função que tenta preencher o nome esperando o menu carregar
+      const preencherNome = () => {
+          const userNameElement = document.getElementById("user-name-text");
+          if (userNameElement) {
+              userNameElement.innerHTML = data.nome_usuario || "Usuário"; 
+          } else {
+              setTimeout(preencherNome, 100); 
+          }
+      };
+      preencherNome();
 
-      switch (userType) {
-        case "admin":
-          document.querySelector(".admin-menu").style.display = "block";
-          document.querySelector(
-            "#sidemenu > li.submenu.produto"
-          ).style.display = "block";
+      // Função que libera os botões do menu baseado no cargo
+      const atualizarMenu = () => {
+          const adminMenu = document.querySelector(".admin-menu");
+          
+          if (adminMenu || document.querySelector(".tecnico")) {
+              const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : "";
+              
+              if (userType === "admin" || userType === "administrador") {
+                  document.querySelectorAll(".admin-menu, .produto").forEach(el => el.style.display = "block");
+              } else if (userType === "tecnico") {
+                  document.querySelectorAll(".tecnico, .Home, .produto").forEach(el => el.style.display = "block");
+              } else if (userType === "professor") {
+                  document.querySelectorAll(".professor, .Home, .Horarios").forEach(el => el.style.display = "block");
+              }
+          } else {
+              setTimeout(atualizarMenu, 100);
+          }
+      };
+      atualizarMenu();
 
-          break;
-        case "tecnico":
-          document.querySelector(".tecnico").style.display = "block";
-          document.querySelector(".Home").style.display = "block";
-          document.querySelector(
-            "#sidemenu > li.submenu.produto"
-          ).style.display = "block";
-
-          break;
-        case "professor":
-          document.querySelector(".Home").style.display = "block";
-          document.querySelector(".professor").style.display = "block";
-          document.querySelector(".Horarios").style.display = "block";
-
-          break;
-      }
-    })
-    .catch((error) => console.error("Erro ao carregar usuário logado:", error));
+  } catch (error) {
+      console.error("Erro ao carregar usuário logado:", error);
+  }
 }
 
 async function loadDisciplinas() {
@@ -124,30 +97,30 @@ async function loadDisciplinas() {
     const selectRemove = document.getElementById("disciplinas-select");
     const selectActivate = document.getElementById("disciplinas-select-ativar");
 
-    tbody.innerHTML = "";
-    selectRemove.innerHTML = "";
-    selectActivate.innerHTML = "";
+    // Limpa os dados antes de recarregar
+    if (tbody) tbody.innerHTML = "";
+    if (selectRemove) selectRemove.innerHTML = "";
+    if (selectActivate) selectActivate.innerHTML = "";
 
     data.forEach((disciplina) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-                <td>${disciplina.nome_disciplina}</td>
-                <td>${disciplina.professor_email_responsavel}</td>
-                                <td>${disciplina.status}</td>
-
-            `;
-      tbody.appendChild(tr);
+        <td>${disciplina.nome_disciplina}</td>
+        <td>${disciplina.professor_email_responsavel}</td>
+        <td>${disciplina.status}</td>
+      `;
+      if (tbody) tbody.appendChild(tr);
 
       if (disciplina.status === "ativado") {
         const optionRemove = document.createElement("option");
         optionRemove.value = disciplina.id_disciplina;
         optionRemove.textContent = `${disciplina.nome_disciplina} (Professor: ${disciplina.professor_email_responsavel})`;
-        selectRemove.appendChild(optionRemove);
+        if (selectRemove) selectRemove.appendChild(optionRemove);
       } else if (disciplina.status === "desativado") {
         const optionActivate = document.createElement("option");
         optionActivate.value = disciplina.id_disciplina;
         optionActivate.textContent = `${disciplina.nome_disciplina} (Status: ${disciplina.status})`;
-        selectActivate.appendChild(optionActivate);
+        if (selectActivate) selectActivate.appendChild(optionActivate);
       }
     });
   } catch (error) {
@@ -184,15 +157,15 @@ async function loadProfessoresParaSelect() {
 function setupEventListeners() {
   document
     .getElementById("add-user-form")
-    .addEventListener("submit", handleAddDisciplina);
+    ?.addEventListener("submit", handleAddDisciplina);
 
   document
     .getElementById("remove-user-form")
-    .addEventListener("submit", handleDeactivateDisciplina);
+    ?.addEventListener("submit", handleDeactivateDisciplina);
 
   document
     .getElementById("activate-user-form")
-    .addEventListener("submit", handleActivateDisciplina);
+    ?.addEventListener("submit", handleActivateDisciplina);
 }
 
 async function handleAddDisciplina(event) {
