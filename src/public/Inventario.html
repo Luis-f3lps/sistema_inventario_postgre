@@ -11,50 +11,48 @@
 
 <body>
 
-        <div class="menu">
-            <header id="menu-container"></header>
-        </div>
+    <div class="menu">
+        <header id="menu-container"></header>
+    </div>
 
-        <div class="container">
-            <div id="about">
-                <div class="container">
-                    <div class="row">
-                        <div class="about-col-2">
-                            <h1 class="sub-title">Inventário</h1>
-                            <div class="tab-titles">
-                                <p class="tab-links active-link" onclick="opentab('todos')">Todos os produtos</p>
-                            </div>
-                            <div class="tab-contents active-tab" id="todos">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Sigla</th>
-                                            <th>Produto Químico</th>
-                                            <th>Concentração</th>
-                                            <th>Densidade</th>
-                                            <th>Quantidade</th>
-                                            <th>Tipo unidade</th>
-                                            <th>NCM</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="produto-tbody">
-                                        <!-- Linhas serão preenchidas -->
-                                    </tbody>
-                                </table>
-                                <div id="pagination">
-                                    <!-- Botões de paginação -->
-                                </div>
-                                <button class="print-button" onclick="geradorPdfproduto()">
-                                    <i class="fa-solid fa-print"></i> Imprimir
-                                </button>
-                            </div>
-                        </div>
+    <div class="container">
+
+        <div class="row">
+            <div class="about-col-2">
+                <h1 class="sub-title">Inventário</h1>
+                <div class="tab-titles">
+                    <p class="tab-links active-link" onclick="opentab('todos')">Todos os produtos</p>
+                </div>
+                <div class="tab-contents active-tab" id="todos">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sigla</th>
+                                <th>Produto Químico</th>
+                                <th>Concentração</th>
+                                <th>Densidade</th>
+                                <th>Quantidade</th>
+                                <th>Tipo unidade</th>
+                                <th>NCM</th>
+                            </tr>
+                        </thead>
+                        <tbody id="produto-tbody">
+                            <!-- Linhas serão preenchidas -->
+                        </tbody>
+                    </table>
+                    <div id="pagination">
+                        <!-- Botões de paginação -->
                     </div>
+                    <button class="print-button" onclick="geradorPdfproduto()">
+                        <i class="fa-solid fa-print"></i> Imprimir
+                    </button>
                 </div>
             </div>
         </div>
-    <script src="js/inventario.js"></script>    <script src="js/menu.js" defer></script>
-<script src="/js/auth-guard.js" defer></script>
+    </div>
+    <script src="js/inventario.js"></script>
+    <script src="js/menu.js" defer></script>
+    <script src="/js/auth-guard.js" defer></script>
 </body>
 
 </html>
