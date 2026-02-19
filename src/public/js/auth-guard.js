@@ -1,10 +1,9 @@
 const paginasAdmin = [
     '/Usuarios', 
     '/Produto',
-        '/Disciplinas',
+    '/Disciplinas',
     '/Laboratorio'
 ];
-
 
 function mostrarAvisoDeAcessoNegado() {
     const overlay = document.createElement('div');
@@ -27,9 +26,9 @@ function mostrarAvisoDeAcessoNegado() {
     }, 2500); 
 }
 
-
 async function verificarAcessoAdmin() {
     const paginaAtual = window.location.pathname;
+    
     if (paginasAdmin.some(pagina => paginaAtual.includes(pagina))) {
         try {
             const response = await fetch('/api/usuario-logado');
@@ -39,8 +38,10 @@ async function verificarAcessoAdmin() {
             }
 
             const utilizador = await response.json();
+            const tipoUser = utilizador.tipo_usuario ? utilizador.tipo_usuario.trim().toLowerCase() : '';
 
-            if (utilizador.tipo_usuario.trim().toLowerCase() !== 'admin') {
+            // Aceita tanto 'admin' quanto 'administrador'
+            if (tipoUser !== 'admin' && tipoUser !== 'administrador') {
                 mostrarAvisoDeAcessoNegado(); 
             }
 
