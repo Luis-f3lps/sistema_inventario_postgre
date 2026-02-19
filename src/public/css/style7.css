@@ -154,7 +154,7 @@ menu {
 
 .conteudo,
 .container {
-    width: 100%;
+    width: 80%;
     margin-top: 20px;
 }
 
@@ -740,7 +740,24 @@ tbody tr:hover {
     width: 100%;
 }
 
-.painel-minhas-aulas,
+.painel-minhas-aulas{
+
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        width: 80%;
+
+}
+.header{
+
+        width: 20%;
+
+}.menu{
+
+        width: 20%;
+
+}
 .painel-gestao-solicitacoes {
 
     padding: 30px;
