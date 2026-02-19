@@ -1081,3 +1081,18 @@ tbody tr:hover {
         padding: 20px;
     }
 }
+
+.bloco-horario:hover:not(:disabled) {
+    background-color: #f4f4f4;
+    border-color: #aaa;
+}
+
+.bloco-horario.occupied,
+.bloco-horario:disabled {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+    cursor: not-allowed;
+    opacity: 0.8;
+    text-decoration: line-through;
+}

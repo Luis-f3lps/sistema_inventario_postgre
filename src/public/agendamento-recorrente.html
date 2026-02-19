@@ -1,86 +1,112 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
-<head>
+  <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="images/icone3.png" type="image/png">
+    <link rel="icon" href="images/icone3.png" type="image/png" />
     <title>Inventário Produtos Químicos</title>
-    <link rel="stylesheet" href="css/style7.css">
-    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
-</head>
+    <link rel="stylesheet" href="css/style7.css" />
+    <script
+      src="https://kit.fontawesome.com/915b45d802.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
 
-<body>
-
+  <body>
     <div class="menu">
-        <header id="menu-container"></header>
+      <header id="menu-container"></header>
     </div>
     <div class="agendamento-container">
-        <h1>Agendamento Recorrente de Aulas</h1>
+      <h1>Agendamento Recorrente de Aulas</h1>
 
-        <div class="seletor-fila">
-            <label>Laboratorio:</label>
-            <select id="laboratorios-select2" name="laboratorio">
-                <option value="">Selecione um Laboratório</option>
-                <!-- Opções serão preenchidas dinamicamente -->
-            </select> <label>Disciplina:</label>
+      <div class="seletor-fila">
+        <label>Laboratorio:</label>
+        <select id="laboratorios-select2" name="laboratorio">
+          <option value="">Selecione um Laboratório</option>
+          <!-- Opções serão preenchidas dinamicamente -->
+        </select>
+        <label>Disciplina:</label>
 
-            <select id="disciplina-select2" name="disciplinas">
-                <option value="">Selecione uma disciplina</option>
-                <!-- Opções serão preenchidas dinamicamente -->
-            </select>
+        <select id="disciplina-select2" name="disciplinas">
+          <option value="">Selecione uma disciplina</option>
+          <!-- Opções serão preenchidas dinamicamente -->
+        </select>
+        <label for="data-inicio">De:</label>
+        <input type="date" id="data-inicio" required />
+
+        <label for="data-fim">Até:</label>
+        <input type="date" id="data-fim" required />
+
+        <label for="dia-semana">No dia da semana:</label>
+        <select id="dia-semana">
+          <option value="1">Segunda-feira</option>
+          <option value="2">Terça-feira</option>
+          <option value="3">Quarta-feira</option>
+          <option value="4">Quinta-feira</option>
+          <option value="5">Sexta-feira</option>
+        </select>
+      </div>
+
+      <div>
+        <strong>Selecione um ou mais horários:</strong>
+        <div id="horarios-checkboxes" class="grade-horarios-recorrente"></div>
+      </div>
+
+      <hr class="form-divider" />
+      <div class="opcao-tecnico-fila">
+        <label for="numero_discentes">Número de Discentes</label>
+        <input
+          type="number"
+          id="numero_discentes"
+          name="numero_discentes"
+          min="1"
+          placeholder="Ex: 25"
+          required
+        />
+      </div>
+
+      <div class="opcao-tecnico-fila">
+        <span>Precisa de acompanhamento do técnico?</span>
+        <div class="radio-options">
+          <input
+            type="radio"
+            id="tecnicoSim"
+            name="precisaTecnico"
+            value="true"
+          />
+          <label for="tecnicoSim">Sim</label>
+
+          <input
+            type="radio"
+            id="tecnicoNao"
+            name="precisaTecnico"
+            value="false"
+            checked
+          />
+          <label for="tecnicoNao">Não</label>
         </div>
+      </div>
 
-        <div class="seletor-fila">
-            <label for="data-inicio">De:</label>
-            <input type="date" id="data-inicio" required>
+      <div
+        class="opcao-tecnico-fila"
+        id="roteiro-container"
+        style="display: none"
+      >
+        <label for="link_roteiro">Link do Roteiro da Aula</label>
+        <input
+          type="url"
+          id="link_roteiro"
+          name="link_roteiro"
+          placeholder="https://exemplo.com/roteiro.pdf"
+        />
+      </div>
 
-            <label for="data-fim">Até:</label>
-            <input type="date" id="data-fim" required>
-
-            <label for="dia-semana">No dia da semana:</label>
-            <select id="dia-semana">
-                <option value="1">Segunda-feira</option>
-                <option value="2">Terça-feira</option>
-                <option value="3">Quarta-feira</option>
-                <option value="4">Quinta-feira</option>
-                <option value="5">Sexta-feira</option>
-            </select>
-        </div>
-
-        <div>
-            <strong>Selecione um ou mais horários:</strong>
-            <div id="horarios-checkboxes" class="grade-horarios-recorrente">
-            </div>
-        </div>
-
-        <hr class="form-divider">
-        <div class="opcao-tecnico-fila">
-            <label for="numero_discentes">Número de Discentes</label>
-            <input type="number" id="numero_discentes" name="numero_discentes" min="1" placeholder="Ex: 25" required />
-        </div>
-
-        <div class="opcao-tecnico-fila">
-            <span>Precisa de acompanhamento do técnico?</span>
-            <div class="radio-options">
-                <input type="radio" id="tecnicoSim" name="precisaTecnico" value="true">
-                <label for="tecnicoSim">Sim</label>
-
-                <input type="radio" id="tecnicoNao" name="precisaTecnico" value="false" checked>
-                <label for="tecnicoNao">Não</label>
-            </div>
-        </div>
-
-        <div class="opcao-tecnico-fila" id="roteiro-container" style="display: none;">
-            <label for="link_roteiro">Link do Roteiro da Aula</label>
-            <input type="url" id="link_roteiro" name="link_roteiro" placeholder="https://exemplo.com/roteiro.pdf">
-        </div>
-
-        <div id="msg" class="mensagem-status"></div>
-        <button id="submitBtnRecorrente" class="btn-principal">Solicitar Aulas</button>
+      <div id="msg" class="mensagem-status"></div>
+      <button id="submitBtnRecorrente" class="btn-principal">
+        Solicitar Aulas
+      </button>
     </div>
     <script src="js/menu.js" defer></script>
     <script src="js/agendamento-recorrente.js" defer></script>
     <script src="/js/auth-guard.js" defer></script>
-</body>
-
+  </body>
 </html>
