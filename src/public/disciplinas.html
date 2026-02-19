@@ -12,88 +12,85 @@
 
 <body>
 
-        <div class="menu">
-            <header id="menu-container"></header>
-        </div>
+    <div class="menu">
+        <header id="menu-container"></header>
+    </div>
     <div class="container">
-        <div id="about">
-            <div class="container">
-                <div class="row">
-                    <div class="about-col-2">
-                        <h1 class="sub-title">Disciplinas</h1>
-                        </br>
-                        <div class="tab-titles">
-                            <p class="tab-links active-link" onclick="opentab(event, 'todos')">Todos os Disciplinas</p>
-                            <p class="tab-links" onclick="opentab(event, 'addUser')">Adicionar Disciplinas</p>
-                            <p class="tab-links" onclick="opentab(event, 'Status')">Status dos Disciplinas</p>
-                        </div>
-                    </div>
 
-                    <div class="tab-contents active-tab" id="todos">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Nome da Disciplina</th>
-                                    <th>Email do professor</th>
-                                    <th>Status</th>
-
-                                </tr>
-                            </thead>
-                            <tbody id="disciplinas-tbody">
-                                <!-- Linhas serão preenchidas -->
-                            </tbody>
-                        </table>
-
-                    <div class="tab-contents" id="addUser">
-                        <div class="form-container">
-                            <h2>Adicionar Disciplinas</h2>
-                            </br>
-                            <form id="add-user-form">
-                                <div class="form-group">
-                                    <label for="username">Nome de Disciplinas:</label>
-                                    <input type="text" id="username" name="username" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="usuarios">Selecione um usuário:</label>
-                                    <select id="usuarios-select" name="usuarios">
-                                        <!-- Opções serão preenchidas -->
-                                    </select>
-                                </div>
-                                <button type="submit">Adicionar Disciplinas</button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <div class="tab-contents" id="Status" style="text-align: center;margin-bottom: 20px;">
-                        <div class="form-container">
-                            <h1 style="margin-bottom: 20px;">Desativar Disciplinas</h1>
-                            <form id="remove-user-form">
-                                <select id="disciplinas-select" name="disciplinas" style="margin-bottom: 20px;">
-                                    <!-- Opções serão preenchidas -->
-                                </select>
-                                <button type="submit" class="btn-remover">Desativar Disciplinas</button>
-                            </form>
-                        </div>
-                        <div class="form-container">
-                            <h1 style="margin-bottom: 20px;">Ativar Disciplinas</h1>
-                            <form id="activate-user-form">
-                                <select id="disciplinas-select-ativar" name="disciplinas" style="margin-bottom: 20px;">
-                                    <!-- Opções serão preenchidas -->
-                                </select>
-                                <button type="submit" class="btn-ativar">Ativar Disciplinas</button>
-                            </form>
-                        </div>
-                    </div>
-                    </div>
-
+        <div class="row">
+            <div class="about-col-2">
+                <h1 class="sub-title">Disciplinas</h1>
+                </br>
+                <div class="tab-titles">
+                    <p class="tab-links active-link" onclick="opentab(event, 'todos')">Todos os Disciplinas</p>
+                    <p class="tab-links" onclick="opentab(event, 'addUser')">Adicionar Disciplinas</p>
+                    <p class="tab-links" onclick="opentab(event, 'Status')">Status dos Disciplinas</p>
                 </div>
             </div>
+
+            <div class="tab-contents active-tab" id="todos">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome da Disciplina</th>
+                            <th>Email do professor</th>
+                            <th>Status</th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="disciplinas-tbody">
+                        <!-- Linhas serão preenchidas -->
+                    </tbody>
+                </table>
+
+                <div class="tab-contents" id="addUser">
+                    <div class="form-container">
+                        <h2>Adicionar Disciplinas</h2>
+                        </br>
+                        <form id="add-user-form">
+                            <div class="form-group">
+                                <label for="username">Nome de Disciplinas:</label>
+                                <input type="text" id="username" name="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="usuarios">Selecione um usuário:</label>
+                                <select id="usuarios-select" name="usuarios">
+                                    <!-- Opções serão preenchidas -->
+                                </select>
+                            </div>
+                            <button type="submit">Adicionar Disciplinas</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="tab-contents" id="Status" style="text-align: center;margin-bottom: 20px;">
+                    <div class="form-container">
+                        <h1 style="margin-bottom: 20px;">Desativar Disciplinas</h1>
+                        <form id="remove-user-form">
+                            <select id="disciplinas-select" name="disciplinas" style="margin-bottom: 20px;">
+                                <!-- Opções serão preenchidas -->
+                            </select>
+                            <button type="submit" class="btn-remover">Desativar Disciplinas</button>
+                        </form>
+                    </div>
+                    <div class="form-container">
+                        <h1 style="margin-bottom: 20px;">Ativar Disciplinas</h1>
+                        <form id="activate-user-form">
+                            <select id="disciplinas-select-ativar" name="disciplinas" style="margin-bottom: 20px;">
+                                <!-- Opções serão preenchidas -->
+                            </select>
+                            <button type="submit" class="btn-ativar">Ativar Disciplinas</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     </div>
     <script src="js/disciplinas.js"></script>
-        <script src="js/menu.js" defer></script>
-<script src="/js/auth-guard.js" defer></script>
+    <script src="js/menu.js" defer></script>
+    <script src="/js/auth-guard.js" defer></script>
 </body>
 
 </html>
