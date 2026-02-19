@@ -15,7 +15,13 @@ document.getElementById('login-form').addEventListener('submit', function (event
         .then(data => {
             const errorMessage = document.getElementById('error-message');
             if (data.success) {
-                window.location.href = '/Home';
+                const tipoUser = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
+                
+                if (tipoUser === 'admin' || tipoUser === 'administrador') {
+                    window.location.href = '/Inventario';
+                } else {
+                    window.location.href = '/Home';
+                }
             } else {
                 errorMessage.innerText = data.error;
                 errorMessage.style.display = 'block';

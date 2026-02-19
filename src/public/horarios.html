@@ -11,9 +11,9 @@
 
 <body>
 
-        <div class="menu">
-            <header id="menu-container"></header>
-        </div>
+    <div class="menu">
+        <header id="menu-container"></header>
+    </div>
     <div class="agendamento-container">
         <h1>Agendar Aulas</h1>
         <div class="link-destacado" style="margin-bottom: 30px;">
@@ -22,15 +22,17 @@
             </a>
         </div>
         <div class="seletor-fila">
+            <label>Laboratorio:</label>
             <select id="laboratorios-select2" name="laboratorio">
                 <option value="">Selecione um Laboratório</option>
                 <!-- Opções serão preenchidas dinamicamente -->
-            </select>
+            </select> <label>Disciplina:</label>
+
             <select id="disciplina-select2" name="disciplinas">
                 <option value="">Selecione uma disciplina</option>
                 <!-- Opções serão preenchidas dinamicamente -->
             </select>
-            <label for="date">Data</label>
+            <label for="date">Data:</label>
             <input id="date" type="date" />
         </div>
 
@@ -51,7 +53,7 @@
             </div>
         </div>
         <div class="opcao-tecnico-fila">
-            <label for="numero_discentes">Número de Discentes</label>
+            <label for="numero_discentes">Número de Discentes:</label>
             <input type="number" id="numero_discentes" name="numero_discentes" min="1" placeholder="Ex: 25" required />
         </div>
 
@@ -66,7 +68,7 @@
     <script src="js/horarios.js" defer></script>
 
     <script src="js/menu.js" defer></script>
-<script src="/js/auth-guard.js" defer></script>
+    <script src="/js/auth-guard.js" defer></script>
 </body>
 
 </html>
