@@ -12,108 +12,108 @@
 <body>
     <div id="header">
         <header id="menu-container"></header>
+    </div>
 
+    <div class="painel-minhas-aulas">
+        <h1>Minhas Solicitações de Aula</h1>
+        <p style="text-align: center; color: #666;">Abaixo estão as suas solicitações para hoje e datas futuras.</p>
 
-        <div class="painel-minhas-aulas">
-            <h1>Minhas Solicitações de Aula</h1>
-            <p style="text-align: center; color: #666;">Abaixo estão as suas solicitações para hoje e datas futuras.</p>
-
-            <table class="tabela-visualizacao-aulas">
-                <thead>
-                    <tr>
-                        <th>Laboratório</th>
-                        <th>Data</th>
-                        <th>Horário</th>
-                        <th>Apoio Técnico</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="minhas-aulas-tbody">
-                </tbody>
-            </table>
-        </div>
-        <script>
-            let loggedInUser = null;
-            async function inicializarPagina() {
-                try {
-                    const response = await fetch('/api/usuario-logado');
-                    if (!response.ok) {
-                        window.location.href = '/login.html';
-                        return;
-                    }
-                    loggedInUser = await response.json();
-
-                    const userNameElement = document.getElementById('user-name-text');
-                    if (userNameElement) {
-                        userNameElement.innerHTML = loggedInUser.nome_usuario || loggedInUser.nome;
-                    }
-
-                    const userType = loggedInUser.tipo_usuario ? loggedInUser.tipo_usuario.trim().toLowerCase() : '';
-
-                    const showMenuItem = (selector) => {
-                        const el = document.querySelector(selector);
-                        if (el) el.style.display = 'list-item';
-                    };
-
-                    await loadMyRequests();
-
-                } catch (error) {
-                    console.error('Erro ao inicializar a página:', error);
+        <table class="tabela-visualizacao-aulas">
+            <thead>
+                <tr>
+                    <th>Laboratório</th>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Apoio Técnico</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="minhas-aulas-tbody">
+            </tbody>
+        </table>
+    </div>
+    <script>
+        let loggedInUser = null;
+        async function inicializarPagina() {
+            try {
+                const response = await fetch('/api/usuario-logado');
+                if (!response.ok) {
                     window.location.href = '/login.html';
-                }
-            }
-
-            async function loadMyRequests() {
-                if (!loggedInUser) return;
-
-                try {
-                    const res = await fetch(`/api/minhas-solicitacoes`);
-                    if (!res.ok) throw new Error('Erro na rede ao buscar solicitações');
-
-                    const data = await res.json();
-                    renderTable(data);
-                } catch (error) {
-                    console.error('Falha ao carregar solicitações:', error);
-                    const tbody = document.getElementById("minhas-aulas-tbody");
-                    if (tbody) {
-                        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Erro ao carregar dados. Tente novamente mais tarde.</td></tr>`;
-                    }
-                }
-            }
-
-            function renderTable(requests) {
-                const tbody = document.getElementById("minhas-aulas-tbody");
-                if (!tbody) return;
-
-                tbody.innerHTML = "";
-                if (requests.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação futura.</td></tr>`;
                     return;
                 }
+                loggedInUser = await response.json();
 
-                requests.forEach(r => {
-                    const tr = document.createElement("tr");
+                const userNameElement = document.getElementById('user-name-text');
+                if (userNameElement) {
+                    userNameElement.innerHTML = loggedInUser.nome_usuario || loggedInUser.nome;
+                }
 
-                    const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-                    const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : 'N/A';
-                    const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : 'N/A';
+                const userType = loggedInUser.tipo_usuario ? loggedInUser.tipo_usuario.trim().toLowerCase() : '';
 
-                    tr.innerHTML = `
+                const showMenuItem = (selector) => {
+                    const el = document.querySelector(selector);
+                    if (el) el.style.display = 'list-item';
+                };
+
+                await loadMyRequests();
+
+            } catch (error) {
+                console.error('Erro ao inicializar a página:', error);
+                window.location.href = '/login.html';
+            }
+        }
+
+        async function loadMyRequests() {
+            if (!loggedInUser) return;
+
+            try {
+                const res = await fetch(`/api/minhas-solicitacoes`);
+                if (!res.ok) throw new Error('Erro na rede ao buscar solicitações');
+
+                const data = await res.json();
+                renderTable(data);
+            } catch (error) {
+                console.error('Falha ao carregar solicitações:', error);
+                const tbody = document.getElementById("minhas-aulas-tbody");
+                if (tbody) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Erro ao carregar dados. Tente novamente mais tarde.</td></tr>`;
+                }
+            }
+        }
+
+        function renderTable(requests) {
+            const tbody = document.getElementById("minhas-aulas-tbody");
+            if (!tbody) return;
+
+            tbody.innerHTML = "";
+            if (requests.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação futura.</td></tr>`;
+                return;
+            }
+
+            requests.forEach(r => {
+                const tr = document.createElement("tr");
+
+                const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : 'N/A';
+                const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : 'N/A';
+
+                tr.innerHTML = `
                 <td>${r.nome_laboratorio}</td>
                 <td>${dataFormatada}</td>
                 <td>${horaInicio} - ${horaFim}</td>
                 <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
                 <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
             `;
-                    tbody.appendChild(tr);
-                });
-            }
+                tbody.appendChild(tr);
+            });
+        }
 
-            document.addEventListener('DOMContentLoaded', inicializarPagina);
+        document.addEventListener('DOMContentLoaded', inicializarPagina);
 
-        </script>
-        <script src="js/menu.js" defer></script>
-<script src="/js/auth-guard.js" defer></script>
+    </script>
+    <script src="js/menu.js" defer></script>
+    <script src="/js/auth-guard.js" defer></script>
 
 </body>
 
