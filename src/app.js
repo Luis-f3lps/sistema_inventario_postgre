@@ -104,7 +104,7 @@ app.post('/login', async (req, res) => {
       tipo_usuario: user.tipo_usuario,
     };
 
-    res.json({ success: true });
+    res.json({ success: true, tipo_usuario: user.tipo_usuario });
   } catch (error) {
     console.error('Erro ao fazer login:', error);
     res.status(500).json({ error: 'Erro no servidor' });
