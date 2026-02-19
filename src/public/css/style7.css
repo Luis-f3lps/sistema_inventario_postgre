@@ -131,7 +131,10 @@ menu {
     display: flex;
 }
 
-.agendamento-container,
+.agendamento-container.container {
+    padding: 5%;
+    transition: margin-left 0.3s, width 0.3s;
+}
 .conteudo,
 .container {
     padding: 20px;
@@ -139,10 +142,7 @@ menu {
 }
 
 .agendamento-container {
-    margin-left: 19%;
     width: 80%;
-    margin-top: 2%;
-    margin-bottom: 2%;
     background-color: var(--white);
     border-radius: 3px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
