@@ -742,8 +742,7 @@ tbody tr:hover {
 
 .painel-minhas-aulas,
 .painel-gestao-solicitacoes {
-    max-width: 1000px;
-    margin: 40px auto;
+
     padding: 30px;
     background-color: #ffffff;
     border-radius: 10px;
