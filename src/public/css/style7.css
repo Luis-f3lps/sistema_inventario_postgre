@@ -147,7 +147,7 @@ menu {
 }
 
 .agendamento-container {
-    width: 80%;
+    width: 100%;
     background-color: var(--white);
     border-radius: 3px;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
@@ -958,9 +958,7 @@ position: relative;
     .menu{
         width: 25%;
     }
-    .agendamento-container {
-        width: 75%;
-    }
+
 #header {
     width: 25%;
 }
