@@ -959,13 +959,15 @@ position: relative;
         width: 25%;
     }
     .agendamento-container {
-        width: 71%;
+        width: 75%;
     }
-
+#header {
+    width: 25%;
+}
     .conteudo,
     .container {
         width: 75%;
-    }
+    }.painel-minhas-aulas {width: 75%;}
 }
 
 @media (max-width: 768px) {

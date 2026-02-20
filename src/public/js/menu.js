@@ -111,20 +111,44 @@ function preencherDadosDoMenu(userData) {
             break;
     }
 }function openmenu() {
-  const nav = document.querySelector("nav");
-  if (nav) {
-    nav.style.left = "0px";
-  }
+    const nav = document.querySelector("nav");
+    const menu = document.querySelector(".menu");
+    const conteudo = document.querySelector(".conteudo");
+    const conteiner = document.querySelector(".container");
+
+    if (nav) {
+        nav.style.left = "0px";
+    }
+    if (menu) {
+        menu.style.width = "20%";
+    }
+    if (conteudo) {
+        conteudo.style.width = "80%";
+        conteudo.style.marginLeft = "20%";
+    }
+    if (conteiner) {
+        conteiner.style.width = "80%";
+        conteiner.style.marginLeft = "20%";
+    }
 }
 
 function closemenu() {
-  const nav = document.querySelector("nav");
-  if (nav) {
-    nav.style.left = "-100%";
-  }  if (menu) {
+    const nav = document.querySelector("nav");
+    const menu = document.querySelector(".menu");
+    const conteudo = document.querySelector(".conteudo");
+    const conteiner = document.querySelector(".container");
+
+    if (window.innerWidth <= 768 && nav) {
+        nav.style.left = "-100%";
+    }
+
+    if (menu) {
         menu.style.width = "5%";
-    }if (conteudo) {
-        conteudo.style.width = "95%";}    
-        if (conteiner) {
-        conteiner.style.width = "95%";}
+    }
+    if (conteudo) {
+        conteudo.style.width = "95%";
+    }
+    if (conteiner) {
+        conteiner.style.width = "95%";
+    }
 }
