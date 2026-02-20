@@ -1,20 +1,20 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="images/icone3.png" type="image/png" />
-    <title>Inventário Produtos Químicos</title>
-    <link rel="stylesheet" href="css/style7.css" />
-    <script
-      src="https://kit.fontawesome.com/915b45d802.js"
-      crossorigin="anonymous"
-    ></script>
-  </head>
 
-  <body>
-    <div class="menu">
-      <header id="menu-container"></header>
-    </div>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="images/icone3.png" type="image/png" />
+  <title>Inventário Produtos Químicos</title>
+  <link rel="stylesheet" href="css/style7.css" />
+  <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <div class="menu">
+    <header id="menu-container"></header>
+  </div>
+  <div class="container">
+
     <div class="agendamento-container">
       <h1>Agendamento Recorrente de Aulas</h1>
 
@@ -54,50 +54,23 @@
       <hr class="form-divider" />
       <div class="opcao-tecnico-fila">
         <label for="numero_discentes">Número de Discentes</label>
-        <input
-          type="number"
-          id="numero_discentes"
-          name="numero_discentes"
-          min="1"
-          placeholder="Ex: 25"
-          required
-        />
+        <input type="number" id="numero_discentes" name="numero_discentes" min="1" placeholder="Ex: 25" required />
       </div>
 
       <div class="opcao-tecnico-fila">
         <span>Precisa de acompanhamento do técnico?</span>
         <div class="radio-options">
-          <input
-            type="radio"
-            id="tecnicoSim"
-            name="precisaTecnico"
-            value="true"
-          />
+          <input type="radio" id="tecnicoSim" name="precisaTecnico" value="true" />
           <label for="tecnicoSim">Sim</label>
 
-          <input
-            type="radio"
-            id="tecnicoNao"
-            name="precisaTecnico"
-            value="false"
-            checked
-          />
+          <input type="radio" id="tecnicoNao" name="precisaTecnico" value="false" checked />
           <label for="tecnicoNao">Não</label>
         </div>
       </div>
 
-      <div
-        class="opcao-tecnico-fila"
-        id="roteiro-container"
-        style="display: none"
-      >
+      <div class="opcao-tecnico-fila" id="roteiro-container" style="display: none">
         <label for="link_roteiro">Link do Roteiro da Aula</label>
-        <input
-          type="url"
-          id="link_roteiro"
-          name="link_roteiro"
-          placeholder="https://exemplo.com/roteiro.pdf"
-        />
+        <input type="url" id="link_roteiro" name="link_roteiro" placeholder="https://exemplo.com/roteiro.pdf" />
       </div>
 
       <div id="msg" class="mensagem-status"></div>
@@ -105,8 +78,11 @@
         Solicitar Aulas
       </button>
     </div>
-    <script src="js/menu.js" defer></script>
-    <script src="js/agendamento-recorrente.js" defer></script>
-    <script src="/js/auth-guard.js" defer></script>
-  </body>
+  </div>
+
+  <script src="js/menu.js" defer></script>
+  <script src="js/agendamento-recorrente.js" defer></script>
+  <script src="/js/auth-guard.js" defer></script>
+</body>
+
 </html>

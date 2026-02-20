@@ -14,55 +14,59 @@
     <div class="menu">
         <header id="menu-container"></header>
     </div>
-    <div class="agendamento-container">
-        <h1>Agendar Aulas</h1>
-        <div class="link-destacado" style="margin-bottom: 30px;">
-            <a href="/agendamento-recorrente.html">
-                <i class="fas fa-calendar-alt"></i> Agendar Aulas Recorrentes
-            </a>
-        </div>
-        <div class="seletor-fila">
-            <label>Laboratorio:</label>
-            <select id="laboratorios-select2" name="laboratorio">
-                <option value="">Selecione um Laboratório</option>
-                <!-- Opções serão preenchidas dinamicamente -->
-            </select> <label>Disciplina:</label>
+    <div class="container">
 
-            <select id="disciplina-select2" name="disciplinas">
-                <option value="">Selecione uma disciplina</option>
-                <!-- Opções serão preenchidas dinamicamente -->
-            </select>
-            <label for="date">Data:</label>
-            <input id="date" type="date" />
-        </div>
-
-        <div>
-            <strong>Horários disponíveis:</strong>
-            <div id="slots" class="grade-horarios"></div>
-            <div class="texto-ajuda">Aulas de 1 hora. Manhã: 07h–11h. Tarde/Noite: 13h–22h.</div>
-        </div>
-
-        <div class="opcao-tecnico-fila">
-            <span>Precisa de acompanhamento do técnico?</span>
-            <div class="radio-options">
-                <input type="radio" id="tecnicoSim" name="precisaTecnico" value="true">
-                <label for="tecnicoSim">Sim</label>
-
-                <input type="radio" id="tecnicoNao" name="precisaTecnico" value="false" checked>
-                <label for="tecnicoNao">Não</label>
+        <div class="agendamento-container">
+            <h1>Agendar Aulas</h1>
+            <div class="link-destacado" style="margin-bottom: 30px;">
+                <a href="/agendamento-recorrente.html">
+                    <i class="fas fa-calendar-alt"></i> Agendar Aulas Recorrentes
+                </a>
             </div>
-        </div>
-        <div class="opcao-tecnico-fila">
-            <label for="numero_discentes">Número de Discentes:</label>
-            <input type="number" id="numero_discentes" name="numero_discentes" min="1" placeholder="Ex: 25" required />
-        </div>
+            <div class="seletor-fila">
+                <label>Laboratorio:</label>
+                <select id="laboratorios-select2" name="laboratorio">
+                    <option value="">Selecione um Laboratório</option>
+                    <!-- Opções serão preenchidas dinamicamente -->
+                </select> <label>Disciplina:</label>
 
-        <div class="opcao-tecnico-fila" id="roteiro-container" style="display: none;">
-            <label for="link_roteiro">Link do Roteiro da Aula</label>
-            <input type="url" id="link_roteiro" name="link_roteiro" placeholder="https://exemplo.com/roteiro.pdf">
+                <select id="disciplina-select2" name="disciplinas">
+                    <option value="">Selecione uma disciplina</option>
+                    <!-- Opções serão preenchidas dinamicamente -->
+                </select>
+                <label for="date">Data:</label>
+                <input id="date" type="date" />
+            </div>
+
+            <div>
+                <strong>Horários disponíveis:</strong>
+                <div id="slots" class="grade-horarios"></div>
+                <div class="texto-ajuda">Aulas de 1 hora. Manhã: 07h–11h. Tarde/Noite: 13h–22h.</div>
+            </div>
+
+            <div class="opcao-tecnico-fila">
+                <span>Precisa de acompanhamento do técnico?</span>
+                <div class="radio-options">
+                    <input type="radio" id="tecnicoSim" name="precisaTecnico" value="true">
+                    <label for="tecnicoSim">Sim</label>
+
+                    <input type="radio" id="tecnicoNao" name="precisaTecnico" value="false" checked>
+                    <label for="tecnicoNao">Não</label>
+                </div>
+            </div>
+            <div class="opcao-tecnico-fila">
+                <label for="numero_discentes">Número de Discentes:</label>
+                <input type="number" id="numero_discentes" name="numero_discentes" min="1" placeholder="Ex: 25"
+                    required />
+            </div>
+
+            <div class="opcao-tecnico-fila" id="roteiro-container" style="display: none;">
+                <label for="link_roteiro">Link do Roteiro da Aula</label>
+                <input type="url" id="link_roteiro" name="link_roteiro" placeholder="https://exemplo.com/roteiro.pdf">
+            </div>
+            <div id="msg" class="mensagem-status"></div>
+            <button id="submitBtn" class="btn-principal" disabled>Solicitar Aula</button>
         </div>
-        <div id="msg" class="mensagem-status"></div>
-        <button id="submitBtn" class="btn-principal" disabled>Solicitar Aula</button>
     </div>
 
     <script src="js/horarios.js" defer></script>

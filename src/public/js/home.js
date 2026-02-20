@@ -356,11 +356,9 @@ function openmenu() {
     }
     if (conteudo) {
         conteudo.style.width = "80%";
-        conteudo.style.marginLeft = "20%";
     }
     if (conteiner) {
         conteiner.style.width = "80%";
-        conteiner.style.marginLeft = "20%";
     }
 }
 
