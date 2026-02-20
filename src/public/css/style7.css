@@ -40,6 +40,7 @@ nav {
     z-index: 1000;
     transition: width 0.3s, left 0.3s;
     overflow-y: auto;
+    position:fixed;
 }
 
 #sidemenu {
