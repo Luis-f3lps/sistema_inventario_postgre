@@ -141,7 +141,7 @@ function closemenu() {
     }
 
     if (menu) {
-        menu.style.width = "5%";
+        menu.style.width = "3%";
     }
     if (conteudo) {
         conteudo.style.width = "95%";
