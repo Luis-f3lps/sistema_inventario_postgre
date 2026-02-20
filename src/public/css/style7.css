@@ -775,8 +775,8 @@ height: 55vh;
 }
 
 .menu {
-
-    width: 20%;
+position: relative;
+    width: 25%;
 
 }
 
@@ -954,7 +954,9 @@ height: 55vh;
     nav {
         width: 25%;
     }
-
+    .menu{
+        width: 25%;
+    }
     .agendamento-container {
         margin-left: 27%;
         width: 71%;
@@ -962,7 +964,6 @@ height: 55vh;
 
     .conteudo,
     .container {
-        margin-left: 25%;
         width: 75%;
     }
 }
