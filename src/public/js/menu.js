@@ -47,14 +47,14 @@ async function verificarLogin() {
 }
 
 function ativarFuncionalidadeMenu() {
-    const sideMenu = document.getElementById("sidemenu");
-    if (!sideMenu) return;
+    const navMenu = document.querySelector("nav"); 
+    if (!navMenu) return;
 
     const openMenuBtn = document.querySelector(".fa-bars");
-    const closeMenuBtn = sideMenu.querySelector(".fa-circle-xmark");
+    const closeMenuBtn = navMenu.querySelector(".fa-circle-xmark");
 
-    if (openMenuBtn) openMenuBtn.addEventListener('click', () => sideMenu.style.left = "0px");
-    if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => sideMenu.style.left = "-800px");
+    if (openMenuBtn) openMenuBtn.addEventListener('click', () => navMenu.style.left = "0px");
+    if (closeMenuBtn) closeMenuBtn.addEventListener('click', () => navMenu.style.left = "-100%");
 
     document.querySelectorAll('.submenu > a').forEach(menu => {
         menu.addEventListener('click', function (e) {

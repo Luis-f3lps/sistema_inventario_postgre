@@ -342,3 +342,16 @@ function formatarLinkRoteiro(url, textoLink = "Ver") {
     }
     return `<a href="${linkCorrigido}" target="_blank" class="link-roteiro">${textoLink}</a>`;
 }
+function openmenu() {
+  const nav = document.querySelector("nav");
+  if (nav) {
+    nav.style.left = "0px";
+  }
+}
+
+function closemenu() {
+  const nav = document.querySelector("nav");
+  if (nav) {
+    nav.style.left = "-100%";
+  }
+}
