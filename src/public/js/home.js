@@ -356,5 +356,7 @@ function closemenu() {
   }  if (menu) {
         menu.style.width = "5%";
     }if (conteudo) {
-        conteudo.style.width = "95%";}
+        conteudo.style.width = "95%";}    
+        if (conteiner) {
+        conteiner.style.width = "95%";}
 }

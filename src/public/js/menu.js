@@ -110,4 +110,21 @@ function preencherDadosDoMenu(userData) {
             showDashboardCard('.cartao-solicitacoes');
             break;
     }
+}function openmenu() {
+  const nav = document.querySelector("nav");
+  if (nav) {
+    nav.style.left = "0px";
+  }
+}
+
+function closemenu() {
+  const nav = document.querySelector("nav");
+  if (nav) {
+    nav.style.left = "-100%";
+  }  if (menu) {
+        menu.style.width = "5%";
+    }if (conteudo) {
+        conteudo.style.width = "95%";}    
+        if (conteiner) {
+        conteiner.style.width = "95%";}
 }

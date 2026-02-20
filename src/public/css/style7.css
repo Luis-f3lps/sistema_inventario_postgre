@@ -41,6 +41,7 @@ nav {
     transition: width 0.3s, left 0.3s;
     overflow-y: auto;
     position:fixed;
+    width: 20%;
 }
 
 #sidemenu {
@@ -958,7 +959,6 @@ position: relative;
         width: 25%;
     }
     .agendamento-container {
-        margin-left: 27%;
         width: 71%;
     }
 
