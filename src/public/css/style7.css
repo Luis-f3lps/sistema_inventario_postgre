@@ -958,7 +958,7 @@ position: relative;
 
     }
     .menu{
-        width: 25%;
+        width: 5%;
     }
 
 #header {
@@ -966,8 +966,8 @@ position: relative;
 }
     .conteudo,
     .container {
-        width: 75%;
-    }.painel-minhas-aulas {width: 75%;}
+        width: 95%;
+    }.painel-minhas-aulas {width: 95%;}
 }
 
 @media (max-width: 768px) {
