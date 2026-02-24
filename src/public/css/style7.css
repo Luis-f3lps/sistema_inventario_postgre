@@ -953,7 +953,7 @@ position: relative;
 
 @media (max-width: 1024px) {
     nav {
-        width: 25%;
+        width: auto;
     }
     .menu{
         width: 25%;
