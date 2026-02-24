@@ -1544,8 +1544,7 @@ app.post('/api/filter_records', Autenticado, async (req, res) => {
   }
 });
 
-// /////////////////////////////////////////////////////////////
-// Endpoint que verifica a disponibilidade de horários
+
 app.get("/api/availability", async (req, res) => {
   try {
     const { date, labId } = req.query;
@@ -1566,9 +1565,7 @@ app.get("/api/availability", async (req, res) => {
   }
 });
 
-// Professor solicita uma nova aula (VERSÃO FINAL E COMPLETA)
 app.post("/api/schedule", async (req, res) => {
-  // 1. Verifica a autenticação
   if (!req.session.user) {
     return res.status(401).json({ error: "Você precisa estar logado." });
   }
@@ -1576,22 +1573,18 @@ app.post("/api/schedule", async (req, res) => {
   try {
     const professor_email = req.session.user.email;
 
-    // --- MUDANÇA 1: Captura também o 'numero_discentes' ---
     const { labId, date, hour, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes } = req.body;
 
-    // Validação básica para garantir que os campos essenciais chegaram
     if (!labId || !date || !hour || !id_disciplina || !numero_discentes) {
       return res.status(400).json({ error: "Dados incompletos para o agendamento." });
     }
 
-    // Busca o id_horario (lógica existente e correta)
     const horario = await pool.query("SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1", [hour]);
     if (horario.rowCount === 0) {
       return res.status(400).json({ error: "Horário inválido" });
     }
     const id_horario = horario.rows[0].id_horario;
 
-    // --- MUDANÇA 2: Atualiza a consulta INSERT para incluir o novo campo ---
     const result = await pool.query(
       `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -1602,17 +1595,14 @@ app.post("/api/schedule", async (req, res) => {
     res.status(201).json({ message: "Aula solicitada com sucesso!", aula: result.rows[0] });
 
   } catch (err) {
-    // Tratamento de erro de chave duplicada (horário já ocupado)
     if (err.code === "23505") {
       return res.status(400).json({ error: "Esse horário já está ocupado ou em análise neste laboratório" });
     }
-    // Tratamento de outros erros
     console.error("Erro ao solicitar aula:", err);
     res.status(500).json({ error: "Erro ao solicitar aula" });
   }
 });
 
-// Adicione este endpoint ao seu arquivo de rotas do backend
 app.post("/api/schedule-recurring", async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: "Você precisa estar logado." });
