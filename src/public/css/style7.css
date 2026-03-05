@@ -227,9 +227,24 @@ menu {
 
 .seletor-fila {
     display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    align-items: flex-end;
+    flex-direction: row; 
+    gap: 15px;          
+    align-items: flex-end; 
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.campo-item {
+    display: flex;
+    flex-direction: column; 
+    flex: 1;               
+}
+
+.campo-item label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 8px;
 }
 
 .input-group {
@@ -746,13 +761,34 @@ tbody tr:hover {
 }
 
 .checkbox-item input[type="checkbox"]:checked+label {
-    background-color: var(--primary-green);
-    border-color: var(--primary-green);
+    background-color: #00a65a;
+    border-color: #ddd;
     color: white;
     font-weight: bold;
     box-shadow: 0 2px 4px rgba(0, 166, 80, 0.3);
 }
+input[type="url"] {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #333;
+    font-size: 14px;
+    width: 100%; 
+    box-sizing: border-box; 
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
 
+input[type="url"]:focus {
+    outline: none;
+    border-color: #00a650;
+    box-shadow: 0 0 5px rgba(0, 166, 80, 0.2);
+}
+
+input[type="url"]::placeholder {
+    color: #999;
+    opacity: 0.8;
+}
 .form-divider {
     border: 0;
     border-top: 1px solid var(--border-color);

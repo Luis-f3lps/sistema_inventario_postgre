@@ -24,20 +24,25 @@
                 </a>
             </div>
             <div class="seletor-fila">
-                <label>Laboratorio:</label>
-                <select id="laboratorios-select2" name="laboratorio">
-                    <option value="">Selecione um Laboratório</option>
-                    <!-- Opções serão preenchidas dinamicamente -->
-                </select> <label>Disciplina:</label>
+                <div class="campo-item">
+                    <label>Laboratório:</label>
+                    <select id="laboratorios-select2" name="laboratorio">
+                        <option value="">Selecione um Laboratório</option>
+                    </select>
+                </div>
 
-                <select id="disciplina-select2" name="disciplinas">
-                    <option value="">Selecione uma disciplina</option>
-                    <!-- Opções serão preenchidas dinamicamente -->
-                </select>
-                <label for="date">Data:</label>
-                <input id="date" type="date" />
+                <div class="campo-item">
+                    <label>Disciplina:</label>
+                    <select id="disciplina-select2" name="disciplinas">
+                        <option value="">Selecione uma disciplina</option>
+                    </select>
+                </div>
+
+                <div class="campo-item">
+                    <label for="date">Data:</label>
+                    <input id="date" type="date" />
+                </div>
             </div>
-
             <div>
                 <strong>Horários disponíveis:</strong>
                 <div id="slots" class="grade-horarios"></div>
