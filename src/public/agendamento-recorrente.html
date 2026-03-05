@@ -18,33 +18,39 @@
     <div class="agendamento-container">
       <h1>Agendamento Recorrente de Aulas</h1>
 
-      <div class="seletor-fila">
-        <label>Laboratorio:</label>
-        <select id="laboratorios-select2" name="laboratorio">
-          <option value="">Selecione um Laboratório</option>
-          <!-- Opções serão preenchidas dinamicamente -->
-        </select>
-        <label>Disciplina:</label>
+<div class="seletor-fila">
+  <div class="input-group">
+    <label for="laboratorios-select2">Laboratório:</label>
+    <select id="laboratorios-select2" name="laboratorio">
+      <option value="">Selecione um Laboratório</option>
+    </select>
+  </div>
 
-        <select id="disciplina-select2" name="disciplinas">
-          <option value="">Selecione uma disciplina</option>
-          <!-- Opções serão preenchidas dinamicamente -->
-        </select>
-        <label for="data-inicio">Inicio:</label>
-        <input type="date" id="data-inicio" required />
+  <div class="input-group">
+    <label for="disciplina-select2">Disciplina:</label>
+    <select id="disciplina-select2" name="disciplinas">
+      <option value="">Selecione uma disciplina</option>
+    </select>
+  </div>
 
-        <label for="data-fim">Fim:</label>
-        <input type="date" id="data-fim" required />
+  <div class="input-group">
+    <label for="data-inicio">De:</label>
+    <input type="date" id="data-inicio" required />
+  </div>
 
-        <label for="dia-semana">Dia da semana:</label>
-        <select id="dia-semana">
-          <option value="1">Segunda-feira</option>
-          <option value="2">Terça-feira</option>
-          <option value="3">Quarta-feira</option>
-          <option value="4">Quinta-feira</option>
-          <option value="5">Sexta-feira</option>
-        </select>
-      </div>
+  <div class="input-group">
+    <label for="data-fim">Até:</label>
+    <input type="date" id="data-fim" required />
+  </div>
+
+  <div class="input-group">
+    <label for="dia-semana">No dia da semana:</label>
+    <select id="dia-semana">
+      <option value="1">Segunda-feira</option>
+      <option value="2">Terça-feira</option>
+      </select>
+  </div>
+</div>
 
       <div>
         <strong>Selecione um ou mais horários:</strong>
