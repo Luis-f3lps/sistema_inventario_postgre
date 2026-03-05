@@ -40,7 +40,7 @@ nav {
     z-index: 1000;
     transition: width 0.3s, left 0.3s;
     overflow-y: auto;
-    position:fixed;
+    position: fixed;
     width: 20%;
 }
 
@@ -227,17 +227,16 @@ menu {
 
 .seletor-fila {
     display: flex;
-    flex-wrap: wrap; 
-    gap: 20px;       
-    align-items: flex-end; 
-    padding: 20px;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
 }
 
 .input-group {
     display: flex;
-    flex-direction: column; 
-    flex: 1;                
-    min-width: 200px;       
+    flex-direction: column;
+    flex: 1;
+    min-width: 200px;
 }
 
 .input-group label {
@@ -247,9 +246,9 @@ menu {
     color: var(--text-color);
 }
 
-select, 
-input[type="date"], 
-input[type="number"], 
+select,
+input[type="date"],
+input[type="number"],
 input[type="text"] {
     padding: 10px;
     border: 1px solid var(--input-border);
@@ -258,11 +257,11 @@ input[type="text"] {
     color: #555;
     font-size: 14px;
     transition: all 0.3s ease;
-    width: 100%; 
+    width: 100%;
     outline: none;
 }
 
-select:focus, 
+select:focus,
 input:focus {
     border-color: var(--primary-green);
     box-shadow: 0 0 5px rgba(0, 166, 80, 0.2);
@@ -715,35 +714,43 @@ tbody tr:hover {
 
 .grade-horarios-recorrente {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 10px;
-    margin-top: 10px;
-    width: 60%;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-top: 15px;
+    width: 100%;
 }
 
-.grade-horarios-recorrente label {
+.checkbox-item input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-item label {
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 10px;
-    background-color: #f4f4f4;
-    border: 1px solid #ddd;
-    padding: 10px 15px;
-    border-radius: 4px;
+    background-color: var(--light-gray);
+    border: 1px solid var(--border-color);
+    padding: 12px 10px;
+    border-radius: 6px;
     cursor: pointer;
-    font-weight: 400;
-    transition: all 0.2s;
-    margin-bottom: 0;
+    font-size: 14px;
+    color: #333;
+    transition: all 0.2s ease;
+    text-align: center;
+    user-select: none;
 }
 
-.grade-horarios-recorrente label:hover {
-    background-color: #e0e0e0;
+.checkbox-item label:hover {
+    background-color: #e8e8e8;
+    border-color: #ccc;
 }
 
-.grade-horarios-recorrente input[type="checkbox"] {
-    width: auto;
-    transform: scale(1.3);
-    accent-color: var(--primary-color);
-    cursor: pointer;
+.checkbox-item input[type="checkbox"]:checked+label {
+    background-color: var(--primary-green);
+    border-color: var(--primary-green);
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 166, 80, 0.3);
 }
 
 .form-divider {
@@ -760,7 +767,7 @@ tbody tr:hover {
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     width: 80%;
-height: 55vh;
+    height: 55vh;
     overflow-y: auto;
 }
 
@@ -783,7 +790,7 @@ height: 55vh;
 }
 
 .menu {
-position: relative;
+    position: relative;
     width: 20%;
 
 }
@@ -961,20 +968,26 @@ position: relative;
 @media (max-width: 1024px) {
     nav {
         width: auto;
-                left: -100%;
+        left: -100%;
 
     }
-    .menu{
+
+    .menu {
         width: 5%;
     }
 
-#header {
-    width: 25%;
-}
+    #header {
+        width: 25%;
+    }
+
     .conteudo,
     .container {
         width: 95%;
-    }.painel-minhas-aulas {width: 95%;}
+    }
+
+    .painel-minhas-aulas {
+        width: 95%;
+    }
 }
 
 @media (max-width: 768px) {
