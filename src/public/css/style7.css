@@ -689,7 +689,7 @@ tbody tr:hover {
     transform: translateX(-50%);
     width: 6px;
     height: 6px;
-    background-color: var(--success-color);
+    background-color: #ffffff;
     border-radius: 50%;
 }
 
@@ -743,7 +743,7 @@ tbody tr:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: var(--light-gray);
+    background-color: #f4f4f4;
     border: 1px solid var(--border-color);
     padding: 12px 10px;
     border-radius: 6px;
