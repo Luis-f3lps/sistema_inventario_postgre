@@ -715,6 +715,7 @@ tbody tr:hover {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 10px;
     margin-top: 10px;
+    width: 60%;
 }
 
 .grade-horarios-recorrente label {
