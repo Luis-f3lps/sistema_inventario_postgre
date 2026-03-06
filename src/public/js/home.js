@@ -381,17 +381,17 @@ function closemenu() {
     if (conteiner) {
         conteiner.style.width = "95%";
     }
-}function renderizarTabelaAgendamentos(requisicoes) {
+} function renderizarTabelaAgendamentos(requisicoes) {
     const tbody = document.getElementById("corpo-tabela-agendamentos");
     if (!tbody) return;
-    
+
     tbody.innerHTML = "";
-    
+
     if (requisicoes.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">Nenhum agendamento futuro encontrado.</td></tr>`;
         return;
     }
-    
+
     requisicoes.forEach((req) => {
         const tr = document.createElement("tr");
         const dataFormatada = new Date(req.data).toLocaleDateString("pt-BR", {
@@ -435,8 +435,8 @@ async function cancelarAgendamento(idAula) {
         if (!response.ok) throw new Error("Falha na atualização");
 
         alert("Agendamento cancelado!");
-        loadMyRequests(); 
-        
+        loadMyRequests();
+
     } catch (error) {
         console.error(error);
         alert("Erro ao processar a requisição.");
