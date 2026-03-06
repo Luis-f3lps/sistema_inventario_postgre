@@ -299,14 +299,13 @@ function renderizarMeusLaboratorios(laboratorios) {
             ? "<li>Você não é responsável por nenhum laboratório.</li>"
             : laboratorios.map((l) => `<li>${l.nome_laboratorio}</li>`).join("");
 }
-
 function renderizarAulasNosMeusLaboratorios(aulas) {
     const tbody = document.getElementById("corpo-tabela-aulas-tecnico");
     if (!tbody) return;
     tbody.innerHTML = "";
     if (!aulas || aulas.length === 0) {
         tbody.innerHTML =
-            '<tr><td colspan="8">Nenhuma aula futura autorizada nos seus laboratórios.</td></tr>';
+            '<tr><td colspan="9">Nenhuma aula futura autorizada nos seus laboratórios.</td></tr>';
         return;
     }
     aulas.forEach((aula) => {
@@ -329,6 +328,7 @@ function renderizarAulasNosMeusLaboratorios(aulas) {
             <td>${aula.numero_discentes}</td>
             <td>${aula.precisa_tecnico ? "Sim" : "Não"}</td>
             <td>${linkRoteiroHtml}</td>
+            <td>${aula.observacoes ? aula.observacoes : "-"}</td>
         `;
         tbody.appendChild(tr);
     });

@@ -1862,7 +1862,8 @@ app.get("/api/aulas-meus-laboratorios", async (req, res) => {
                 h.hora_inicio, 
                 h.hora_fim,
                 a.precisa_tecnico,
-                a.numero_discentes -- <<< CAMPO ADICIONADO AQUI
+                a.numero_discentes,
+                a.observacoes
             FROM aulas a
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
             JOIN horarios h ON a.id_horario = h.id_horario
@@ -1878,7 +1879,7 @@ app.get("/api/aulas-meus-laboratorios", async (req, res) => {
     const result = await pool.query(query, [tecnico_email]);
     res.json(result.rows);
   } catch (err) {
-    console.error("Erro ao buscar aulas nos laboratórios do técnico:", err);
+    console.error(err);
     res.status(500).json({ error: "Erro ao buscar as aulas." });
   }
 });
