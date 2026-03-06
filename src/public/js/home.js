@@ -24,11 +24,12 @@ async function inicializarDashboard(userData) {
         .forEach((el) => (el.style.display = "none"));
 
     switch (userType) {
+        // inverte depois, os nomes estão errados
         case "tecnico":
             showElement(".cartao-aulas-tecnico");
             showElement(".cartao-meus-laboratorios");
-            showElement(".painel-aulas-tecnico-lista");
-            document
+            showElement(".painel-minhas-aulas"); 
+                        document
                 .getElementById("btn-mes-anterior-tecnico")
                 ?.addEventListener("click", mostrarMesAnteriorTecnico);
             document
@@ -37,7 +38,8 @@ async function inicializarDashboard(userData) {
             break;
         case "professor":
             showElement(".cartao-aulas-autorizadas");
-            showElement(".painel-minhas-aulas");
+           showElement(".painel-aulas-tecnico-lista");
+
             document
                 .getElementById("btn-mes-anterior")
                 ?.addEventListener("click", mostrarMesAnteriorProfessor);
@@ -97,6 +99,7 @@ function renderTable(requests) {
         const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : "N/A";
         const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : "N/A";
         const linkRoteiroHtml = formatarLinkRoteiro(r.link_roteiro, "Ver");
+        const textoStatus = formatarTextoStatus(r.status);
 
         tr.innerHTML = `
             <td>${r.nome_laboratorio}</td>
@@ -104,7 +107,7 @@ function renderTable(requests) {
             <td>${dataFormatada}</td>
             <td>${horaInicio} - ${horaFim}</td>
             <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
-            <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
+            <td><span class="etiqueta-status status-${r.status}">${textoStatus}</span></td>
             <td>${linkRoteiroHtml}</td>
             <td>
                 <button class="btn-cancelar" onclick="cancelarAgendamento(${r.id_aula})" 
@@ -455,4 +458,12 @@ function renderizarTabelaAgendamentos(requisicoes) {
         `;
         tbody.appendChild(tr);
     });
+}
+function formatarTextoStatus(status) {
+    switch (status) {
+        case 'autorizado': return 'Autorizado';
+        case 'nao_autorizado': return 'Não Autorizado';
+        case 'analisando': return 'Em Análise';
+        default: return status;
+    }
 }
