@@ -42,25 +42,6 @@
                     <div class="calendario-grid" id="calendario-grid"></div>
                 </div>
 
-                <div class="cartao-painel painel-minhas-aulas" style="display: none; width: 100%">
-                    <h2>Minhas Solicitações de Aula</h2>
-                    <table class="tabela-visualizacao-aulas">
-                        <thead>
-                            <tr>
-                                <th>Laboratório</th>
-                                <th>Disciplina</th>
-                                <th>Data</th>
-                                <th>Horário</th>
-                                <th>Apoio Técnico</th>
-                                <th>Status</th>
-                                <th>Roteiro</th>
-                                <th>Observações</th>
-
-                            </tr>
-                        </thead>
-                        <tbody id="minhas-aulas-tbody"></tbody>
-                    </table>
-                </div>
 
                 <div class="cartao-painel cartao-meus-laboratorios" style="display: none">
                     <h2>Meus Laboratórios</h2>
@@ -93,24 +74,44 @@
                     <div class="calendario-grid" id="calendario-grid-tecnico"></div>
                 </div>
 
-                <div class="container-lista painel-pedidos" style="display: none; width: 100%">
-                    <h2>Lista de Agendamentos</h2>
-                    <table class="tabela-agendamentos">
-                        <thead>
-                            <tr>
-                                <th>Local</th>
-                                <th>Matéria</th>
-                                <th>Dia</th>
-                                <th>Período</th>
-                                <th>Requer Suporte</th>
-                                <th>Situação</th>
-                                <th>Material</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="corpo-tabela-agendamentos"></tbody>
-                    </table>
-                </div>
+<div class="cartao-painel painel-minhas-aulas" style="display: none; width: 100%">
+    <h2>Minhas Solicitações de Aula</h2>
+    <table class="tabela-visualizacao-aulas">
+        <thead>
+            <tr>
+                <th>Laboratório</th>
+                <th>Disciplina</th>
+                <th>Data</th>
+                <th>Horário</th>
+                <th>Apoio Técnico</th>
+                <th>Status</th>
+                <th>Roteiro</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="minhas-aulas-tbody"></tbody>
+    </table>
+</div>
+
+<div class="cartao-painel painel-aulas-tecnico-lista" style="display: none; width: 100%">
+    <h2>Aulas nos Meus Laboratórios</h2>
+    <table class="tabela-visualizacao-aulas">
+        <thead>
+            <tr>
+                <th>Laboratório</th>
+                <th>Disciplina</th>
+                <th>Professor</th>
+                <th>Data</th>
+                <th>Horário</th>
+                <th>Alunos</th>
+                <th>Apoio Técnico</th>
+                <th>Roteiro</th>
+                <th>Observações</th>
+            </tr>
+        </thead>
+        <tbody id="corpo-tabela-aulas-tecnico"></tbody>
+    </table>
+</div>
             </div>
         </div>
     </div>

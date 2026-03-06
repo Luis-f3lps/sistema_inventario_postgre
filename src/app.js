@@ -1763,16 +1763,15 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
     }
     const professor_email = req.session.user.email;
 
-    // Atualiza o status de aulas passadas que ainda estão em análise
     await pool.query(
       `UPDATE aulas SET status = 'nao_autorizado' 
              WHERE professor_email = $1 AND status = 'analisando' AND data < CURRENT_DATE`,
       [professor_email]
     );
 
-    // Busca a lista completa com todos os campos necessários
     const result = await pool.query(
       `SELECT 
+                a.id_aula,
                 l.nome_laboratorio, 
                 d.nome_disciplina,
                 a.link_roteiro,
@@ -1795,7 +1794,7 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
 
     res.json(result.rows);
   } catch (err) {
-    console.error("Erro ao buscar ou atualizar solicitações do professor:", err);
+    console.error(err);
     res.status(500).json({ error: "Erro ao processar as suas solicitações." });
   }
 });
