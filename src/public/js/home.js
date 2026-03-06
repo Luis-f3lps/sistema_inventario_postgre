@@ -82,45 +82,41 @@ async function carregarDadosDosPaineis(userType) {
 }
 
 function renderTable(requests) {
-            const tbody = document.getElementById("corpo-tabela-solicitacoes");
-            tbody.innerHTML = "";
+    const tbody = document.getElementById("minhas-aulas-tbody");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    if (requests.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">Você não tem nenhuma solicitação futura.</td></tr>`;
+        return;
+    }
+    requests.forEach((r) => {
+        const tr = document.createElement("tr");
+        const dataFormatada = new Date(r.data).toLocaleDateString("pt-BR", {
+            timeZone: "UTC",
+        });
+        const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : "N/A";
+        const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : "N/A";
+        const linkRoteiroHtml = formatarLinkRoteiro(r.link_roteiro, "Ver");
+        const textoStatus = formatarTextoStatus(r.status);
 
-            if (requests.length === 0) {
-                // Aumentei o colspan para 11 por causa da nova coluna
-                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
-                return;
-            }
-
-            requests.forEach(r => {
-                const tr = document.createElement("tr");
-                const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-
-                const linkRoteiroHtml = r.link_roteiro
-                    ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Link</a>`
-                    : 'N/A';
-                
-                // Trata o caso de observações vazias (NULL)
-                const observacoesTexto = r.observacoes ? r.observacoes : '-';
-
-                tr.innerHTML = `
-            <td>${r.professor}</td>
+        tr.innerHTML = `
             <td>${r.nome_laboratorio}</td>
             <td>${r.nome_disciplina}</td>
             <td>${dataFormatada}</td>
-            <td style="white-space: nowrap;">${r.hora_inicio.slice(0, 5)} - ${r.hora_fim.slice(0, 5)}</td>
-            <td>${r.numero_discentes}</td> 
+            <td>${horaInicio} - ${horaFim}</td>
             <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
-            <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
+            <td><span class="etiqueta-status status-${r.status}">${textoStatus}</span></td>
             <td>${linkRoteiroHtml}</td>
-            <td>${observacoesTexto}</td>
-            <td class="celula-de-acoes">
-                <button class="botao-de-acao botao-aceitar" data-id="${r.id_aula}">Autorizar</button>
-                <button class="botao-de-acao botao-recusar" data-id="${r.id_aula}">Não Autorizar</button>
+            <td>
+                <button class="btn-cancelar" onclick="cancelarAgendamento(${r.id_aula})" 
+                        ${r.status === 'nao_autorizado' ? 'disabled' : ''}>
+                    Cancelar
+                </button>
             </td>
         `;
-                tbody.appendChild(tr);
-            });
-        }
+        tbody.appendChild(tr);
+    });
+}
 
 function renderizarAulasNosMeusLaboratorios(aulas) {
     const tbody = document.getElementById("corpo-tabela-aulas-tecnico");
