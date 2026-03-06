@@ -1604,75 +1604,75 @@ app.post("/api/schedule", async (req, res) => {
 });
 
 app.post("/api/schedule-recurring", async (req, res) => {
-    if (!req.session.user) {
-        return res.status(401).json({ error: "Você precisa estar logado." });
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Você precisa estar logado." });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    const professor_email = req.session.user.email;
+    const {
+      labId, disciplinaId, diaDaSemana, dataInicio, dataFim,
+      horarios, precisa_tecnico, link_roteiro, numero_discentes
+    } = req.body;
+
+    if (!labId || !disciplinaId || !diaDaSemana || !dataInicio || !dataFim || !horarios || horarios.length === 0) {
+      return res.status(400).json({ error: "Dados incompletos." });
     }
 
-    const client = await pool.connect();
+    await client.query('BEGIN');
 
-    try {
-        const professor_email = req.session.user.email;
-        const { 
-            labId, disciplinaId, diaDaSemana, dataInicio, dataFim, 
-            horarios, precisa_tecnico, link_roteiro, numero_discentes 
-        } = req.body;
+    const datasParaAgendar = [];
+    let dataAtual = new Date(dataInicio);
+    const dataFinal = new Date(dataFim);
 
-        if (!labId || !disciplinaId || !diaDaSemana || !dataInicio || !dataFim || !horarios || horarios.length === 0) {
-            return res.status(400).json({ error: "Dados incompletos." });
+    while (dataAtual <= dataFinal) {
+      if (dataAtual.getUTCDay() == diaDaSemana) {
+        datasParaAgendar.push(new Date(dataAtual));
+      }
+      dataAtual.setUTCDate(dataAtual.getUTCDate() + 1);
+    }
+
+    if (datasParaAgendar.length === 0) {
+      return res.status(400).json({ error: "Nenhum dia correspondente no período." });
+    }
+
+    for (const data of datasParaAgendar) {
+      for (const hora of horarios) {
+        const horarioRes = await client.query("SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1", [hora]);
+        if (horarioRes.rowCount === 0) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({ error: `Horário inválido: ${hora}` });
         }
+        const id_horario = horarioRes.rows[0].id_horario;
 
-        await client.query('BEGIN');
-
-        const datasParaAgendar = [];
-        let dataAtual = new Date(dataInicio);
-        const dataFinal = new Date(dataFim);
-        
-        while (dataAtual <= dataFinal) {
-            if (dataAtual.getUTCDay() == diaDaSemana) {
-                datasParaAgendar.push(new Date(dataAtual));
-            }
-            dataAtual.setUTCDate(dataAtual.getUTCDate() + 1);
-        }
-
-        if (datasParaAgendar.length === 0) {
-            return res.status(400).json({ error: "Nenhum dia correspondente no período." });
-        }
-
-        for (const data of datasParaAgendar) {
-            for (const hora of horarios) {
-                const horarioRes = await client.query("SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1", [hora]);
-                if (horarioRes.rowCount === 0) {
-                    await client.query('ROLLBACK');
-                    return res.status(400).json({ error: `Horário inválido: ${hora}` });
-                }
-                const id_horario = horarioRes.rows[0].id_horario;
-
-                await client.query(
-                    `INSERT INTO aulas (
+        await client.query(
+          `INSERT INTO aulas (
                         professor_email, id_laboratorio, data, id_horario, precisa_tecnico, 
                         link_roteiro, id_disciplina, numero_discentes, status
                      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'analisando')`,
-                    [
-                        professor_email, labId, data, id_horario, precisa_tecnico, 
-                        link_roteiro, disciplinaId, numero_discentes
-                    ]
-                );
-            }
-        }
-
-        await client.query('COMMIT');
-        res.status(201).json({ message: `${datasParaAgendar.length * horarios.length} aula(s) solicitada(s) com sucesso!` });
-
-    } catch (err) {
-        await client.query('ROLLBACK');
-        if (err.code === "23505") {
-            return res.status(409).json({ error: "Conflito: Um ou mais horários já estão ocupados." });
-        }
-        console.error("Erro no agendamento recorrente:", err);
-        res.status(500).json({ error: "Erro interno no servidor." });
-    } finally {
-        client.release();
+          [
+            professor_email, labId, data, id_horario, precisa_tecnico,
+            link_roteiro, disciplinaId, numero_discentes
+          ]
+        );
+      }
     }
+
+    await client.query('COMMIT');
+    res.status(201).json({ message: `${datasParaAgendar.length * horarios.length} aula(s) solicitada(s) com sucesso!` });
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    if (err.code === "23505") {
+      return res.status(409).json({ error: "Conflito: Um ou mais horários já estão ocupados." });
+    }
+    console.error("Erro no agendamento recorrente:", err);
+    res.status(500).json({ error: "Erro interno no servidor." });
+  } finally {
+    client.release();
+  }
 });
 
 // Endpoint do Técnico para ver as solicitações
@@ -1686,12 +1686,13 @@ app.get("/api/requests", async (req, res) => {
                 l.nome_laboratorio, 
                 d.nome_disciplina,
                 a.link_roteiro,
-                a.numero_discentes, -- <<< ADICIONADO AQUI
+                a.numero_discentes,
                 a.data, 
                 h.hora_inicio, 
                 h.hora_fim,
                 a.precisa_tecnico, 
-                a.status
+                a.status,
+                a.observacoes
             FROM aulas a
             JOIN usuario u ON a.professor_email = u.email
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
@@ -1705,30 +1706,28 @@ app.get("/api/requests", async (req, res) => {
     const result = await pool.query(query, [tecnico_email]);
     res.json(result.rows);
   } catch (err) {
-    console.error("Erro ao buscar solicitações:", err);
+    console.error(err);
     res.status(500).json({ error: "Erro ao buscar solicitações" });
   }
 });
 
-// Endpoint do Técnico para autorizar/negar/reverter (CORRIGIDO)
 app.patch("/api/requests/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { novoStatus } = req.body;
+    const { novoStatus, observacoes } = req.body;
 
     if (!['autorizado', 'nao_autorizado', 'analisando'].includes(novoStatus)) {
       return res.status(400).json({ error: "Ação ou status inválido fornecido." });
     }
 
-    // Atualiza o status na tabela 'aulas'
     await pool.query(
-      "UPDATE aulas SET status = $1 WHERE id_aula = $2",
-      [novoStatus, id]
+      "UPDATE aulas SET status = $1, observacoes = $3 WHERE id_aula = $2",
+      [novoStatus, id, observacoes || null]
     );
 
     res.json({ message: "Status da aula atualizado com sucesso!" });
   } catch (err) {
-    console.error("Erro ao atualizar o status da aula:", err);
+    console.error(err);
     res.status(500).json({ error: "Erro interno ao atualizar o status da aula." });
   }
 });
@@ -1803,11 +1802,11 @@ app.get("/api/minhas-solicitacoes", async (req, res) => {
 
 
 app.get("/api/dashboard/aulas-autorizadas", async (req, res) => {
-    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
-    try {
-        const professor_email = req.session.user.email;
-        const result = await pool.query(
-            `SELECT 
+  if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+  try {
+    const professor_email = req.session.user.email;
+    const result = await pool.query(
+      `SELECT 
                 l.nome_laboratorio, 
                 d.nome_disciplina,
                 a.link_roteiro,
@@ -1824,12 +1823,12 @@ app.get("/api/dashboard/aulas-autorizadas", async (req, res) => {
               AND a.data >= CURRENT_DATE
             ORDER BY a.data ASC, h.hora_inicio ASC
             LIMIT 6`,
-            [professor_email]
-        );
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: "Erro ao buscar aulas autorizadas." });
-    }
+      [professor_email]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar aulas autorizadas." });
+  }
 });
 // Endpoint para o painel "Meus Laboratórios"
 app.get("/api/dashboard/meus-laboratorios", async (req, res) => {
@@ -1848,12 +1847,12 @@ app.get("/api/dashboard/meus-laboratorios", async (req, res) => {
 
 // Endpoint para o painel do Técnico "Aulas no meu laboratório" 
 app.get("/api/aulas-meus-laboratorios", async (req, res) => {
-    if (!req.session.user || !req.session.user.email) {
-        return res.status(401).json({ error: "Não autenticado." });
-    }
-    try {
-        const tecnico_email = req.session.user.email;
-        const query = `
+  if (!req.session.user || !req.session.user.email) {
+    return res.status(401).json({ error: "Não autenticado." });
+  }
+  try {
+    const tecnico_email = req.session.user.email;
+    const query = `
             SELECT 
                 l.nome_laboratorio, 
                 prof.nome_usuario AS nome_professor, 
@@ -1876,12 +1875,12 @@ app.get("/api/aulas-meus-laboratorios", async (req, res) => {
             ORDER BY 
                 a.data ASC, h.hora_inicio ASC
         `;
-        const result = await pool.query(query, [tecnico_email]);
-        res.json(result.rows);
-    } catch (err) {
-        console.error("Erro ao buscar aulas nos laboratórios do técnico:", err);
-        res.status(500).json({ error: "Erro ao buscar as aulas." });
-    }
+    const result = await pool.query(query, [tecnico_email]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Erro ao buscar aulas nos laboratórios do técnico:", err);
+    res.status(500).json({ error: "Erro ao buscar as aulas." });
+  }
 });
 // Endpoint para buscar todos os horários possíveis cadastrados no banco
 app.get("/api/horarios", async (req, res) => {
@@ -1905,17 +1904,17 @@ app.get("/api/horarios", async (req, res) => {
 });
 // Endpoint para buscar aulas autorizadas para o calendário por mês/ano
 app.get("/api/calendario/aulas-autorizadas", async (req, res) => {
-    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
-    try {
-        const professor_email = req.session.user.email;
-        const { ano, mes } = req.query;
+  if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+  try {
+    const professor_email = req.session.user.email;
+    const { ano, mes } = req.query;
 
-        if (!ano || !mes) {
-            return res.status(400).json({ error: "Ano e mês são obrigatórios." });
-        }
+    if (!ano || !mes) {
+      return res.status(400).json({ error: "Ano e mês são obrigatórios." });
+    }
 
-        const result = await pool.query(
-            `SELECT 
+    const result = await pool.query(
+      `SELECT 
                 l.nome_laboratorio, 
                 d.nome_disciplina,
                 a.data, 
@@ -1930,27 +1929,27 @@ app.get("/api/calendario/aulas-autorizadas", async (req, res) => {
               AND EXTRACT(YEAR FROM a.data) = $2
               AND EXTRACT(MONTH FROM a.data) = $3
             ORDER BY a.data ASC, h.hora_inicio ASC`,
-            [professor_email, ano, mes]
-        );
-        res.json(result.rows);
-    } catch (err) {
-        console.error("Erro ao buscar aulas para o calendário:", err);
-        res.status(500).json({ error: "Erro ao buscar aulas para o calendário." });
-    }
+      [professor_email, ano, mes]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Erro ao buscar aulas para o calendário:", err);
+    res.status(500).json({ error: "Erro ao buscar aulas para o calendário." });
+  }
 });
 // Endpoint para buscar aulas para o CALENDÁRIO DO TÉCNICO por mês/ano
 app.get("/api/calendario/aulas-tecnico", async (req, res) => {
-    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
-    try {
-        const tecnico_email = req.session.user.email;
-        const { ano, mes } = req.query;
+  if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+  try {
+    const tecnico_email = req.session.user.email;
+    const { ano, mes } = req.query;
 
-        if (!ano || !mes) {
-            return res.status(400).json({ error: "Ano e mês são obrigatórios." });
-        }
+    if (!ano || !mes) {
+      return res.status(400).json({ error: "Ano e mês são obrigatórios." });
+    }
 
-        const result = await pool.query(
-            `SELECT 
+    const result = await pool.query(
+      `SELECT 
                 l.nome_laboratorio, 
                 d.nome_disciplina,
                 u.nome_usuario AS nome_professor,
@@ -1967,111 +1966,155 @@ app.get("/api/calendario/aulas-tecnico", async (req, res) => {
               AND EXTRACT(YEAR FROM a.data) = $2
               AND EXTRACT(MONTH FROM a.data) = $3
             ORDER BY a.data ASC, h.hora_inicio ASC`,
-            [tecnico_email, ano, mes]
-        );
-        res.json(result.rows);
-    } catch (err) {
-        console.error("Erro ao buscar aulas para o calendário do técnico:", err);
-        res.status(500).json({ error: "Erro ao buscar aulas para o calendário." });
-    }
+      [tecnico_email, ano, mes]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Erro ao buscar aulas para o calendário do técnico:", err);
+    res.status(500).json({ error: "Erro ao buscar aulas para o calendário." });
+  }
 });
 app.get('/api/disciplinas', async (req, res) => {
-    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+  if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
 
-    try {
-        const query = 'SELECT * FROM "disciplina" ORDER BY nome_disciplina, status';
-        const result = await pool.query(query);
-        res.json(result.rows);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: 'Erro ao buscar disciplinas no servidor.' });
-    }
+  try {
+    const query = 'SELECT * FROM "disciplina" ORDER BY nome_disciplina, status';
+    const result = await pool.query(query);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Erro ao buscar disciplinas no servidor.' });
+  }
 });
 
 app.post('/api/disciplinas', async (req, res) => {
-    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+  if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
 
-    const { nome_disciplina, professor_email_responsavel } = req.body;
+  const { nome_disciplina, professor_email_responsavel } = req.body;
 
-    if (!nome_disciplina || !professor_email_responsavel) {
-        return res.status(400).json({ error: 'Nome da disciplina e e-mail do professor são obrigatórios.' });
-    }
+  if (!nome_disciplina || !professor_email_responsavel) {
+    return res.status(400).json({ error: 'Nome da disciplina e e-mail do professor são obrigatórios.' });
+  }
 
-    try {
-        const query = `
+  try {
+    const query = `
             INSERT INTO "disciplina" (nome_disciplina, professor_email_responsavel) 
             VALUES ($1, $2) 
             RETURNING *
         `;
-        const result = await pool.query(query, [nome_disciplina, professor_email_responsavel]);
-        
-        res.status(201).json({ 
-            message: 'Disciplina adicionada com sucesso!', 
-            disciplina: result.rows[0] 
-        });
+    const result = await pool.query(query, [nome_disciplina, professor_email_responsavel]);
 
-    } catch (err) {
-        console.error(err.message);
-        if (err.code === '23503') {
-            return res.status(400).json({ error: 'Erro: O professor com este e-mail não existe no cadastro de usuários.' });
-        }
-        res.status(500).json({ error: 'Erro ao adicionar disciplina.' });
+    res.status(201).json({
+      message: 'Disciplina adicionada com sucesso!',
+      disciplina: result.rows[0]
+    });
+
+  } catch (err) {
+    console.error(err.message);
+    if (err.code === '23503') {
+      return res.status(400).json({ error: 'Erro: O professor com este e-mail não existe no cadastro de usuários.' });
     }
+    res.status(500).json({ error: 'Erro ao adicionar disciplina.' });
+  }
 });
 
 app.patch('/api/disciplinas/desativar/:id', async (req, res) => {
-    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+  if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
 
-    const { id } = req.params;
-    try {
-        const query = `
+  const { id } = req.params;
+  try {
+    const query = `
             UPDATE "disciplina" 
             SET status = 'desativado' 
             WHERE id_disciplina = $1 
             RETURNING *
         `;
-        const result = await pool.query(query, [id]);
+    const result = await pool.query(query, [id]);
 
-        if (result.rowCount === 0) {
-            return res.status(404).json({ error: 'Disciplina não encontrada.' });
-        }
-
-        res.json({ 
-            message: 'Disciplina desativada com sucesso!', 
-            disciplina: result.rows[0] 
-        });
-
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: 'Erro ao desativar disciplina.' });
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Disciplina não encontrada.' });
     }
+
+    res.json({
+      message: 'Disciplina desativada com sucesso!',
+      disciplina: result.rows[0]
+    });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Erro ao desativar disciplina.' });
+  }
 });
 
 app.patch('/api/disciplinas/ativar/:id', async (req, res) => {
-    if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
+  if (!req.session.user) return res.status(401).json({ error: "Não autenticado." });
 
-    const { id } = req.params;
-    try {
-        const query = `
+  const { id } = req.params;
+  try {
+    const query = `
             UPDATE "disciplina" 
             SET status = 'ativado' 
             WHERE id_disciplina = $1 
             RETURNING *
         `;
-        const result = await pool.query(query, [id]);
+    const result = await pool.query(query, [id]);
 
-        if (result.rowCount === 0) {
-            return res.status(404).json({ error: 'Disciplina não encontrada.' });
-        }
-
-        res.json({ 
-            message: 'Disciplina ativada com sucesso!', 
-            disciplina: result.rows[0] 
-        });
-
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: 'Erro ao ativar disciplina.' });
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Disciplina não encontrada.' });
     }
+
+    res.json({
+      message: 'Disciplina ativada com sucesso!',
+      disciplina: result.rows[0]
+    });
+
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: 'Erro ao ativar disciplina.' });
+  }
 });
+app.put("/api/agendamentos/:id/status", async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Você precisa estar logado." });
+  }
+
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const professor_email = req.session.user.email;
+
+    if (status !== 'nao_autorizado') {
+      return res.status(400).json({ error: "Status inválido para esta operação." });
+    }
+
+    const verifyQuery = await pool.query(
+      `SELECT id_aula FROM aulas 
+             WHERE id_aula = $1 
+             AND professor_email = $2 
+             AND data >= CURRENT_DATE`,
+      [id, professor_email]
+    );
+
+    if (verifyQuery.rowCount === 0) {
+      return res.status(403).json({
+        error: "Você não tem permissão para cancelar esta aula, ou ela já ocorreu."
+      });
+    }
+
+    const updateQuery = await pool.query(
+      "UPDATE aulas SET status = $1 WHERE id_aula = $2 RETURNING *",
+      [status, id]
+    );
+
+    res.json({
+      message: "Agendamento cancelado com sucesso!",
+      aula: updateQuery.rows[0]
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro interno ao processar o cancelamento." });
+  }
+});
+
 export default app;

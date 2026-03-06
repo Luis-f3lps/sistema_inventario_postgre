@@ -381,4 +381,64 @@ function closemenu() {
     if (conteiner) {
         conteiner.style.width = "95%";
     }
+}function renderizarTabelaAgendamentos(requisicoes) {
+    const tbody = document.getElementById("corpo-tabela-agendamentos");
+    if (!tbody) return;
+    
+    tbody.innerHTML = "";
+    
+    if (requisicoes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">Nenhum agendamento futuro encontrado.</td></tr>`;
+        return;
+    }
+    
+    requisicoes.forEach((req) => {
+        const tr = document.createElement("tr");
+        const dataFormatada = new Date(req.data).toLocaleDateString("pt-BR", {
+            timeZone: "UTC",
+        });
+        const horaInicio = req.hora_inicio ? req.hora_inicio.slice(0, 5) : "N/A";
+        const horaFim = req.hora_fim ? req.hora_fim.slice(0, 5) : "N/A";
+        const linkMaterialHtml = formatarLinkRoteiro(req.link_roteiro, "Acessar");
+
+        tr.innerHTML = `
+            <td>${req.nome_laboratorio}</td>
+            <td>${req.nome_disciplina}</td>
+            <td>${dataFormatada}</td>
+            <td>${horaInicio} - ${horaFim}</td>
+            <td>${req.precisa_tecnico ? "Sim" : "Não"}</td>
+            <td><span class="badge-status status-${req.status}">${req.status}</span></td>
+            <td>${linkMaterialHtml}</td>
+            <td>
+                <button class="btn-cancelar" onclick="cancelarAgendamento(${req.id_aula})" 
+                        ${req.status === 'nao_autorizado' ? 'disabled' : ''}>
+                    Cancelar
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+async function cancelarAgendamento(idAula) {
+    if (!confirm("Confirmar o cancelamento deste agendamento?")) return;
+
+    try {
+        const response = await fetch(`/api/agendamentos/${idAula}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ status: 'nao_autorizado' })
+        });
+
+        if (!response.ok) throw new Error("Falha na atualização");
+
+        alert("Agendamento cancelado!");
+        loadMyRequests(); 
+        
+    } catch (error) {
+        console.error(error);
+        alert("Erro ao processar a requisição.");
+    }
 }

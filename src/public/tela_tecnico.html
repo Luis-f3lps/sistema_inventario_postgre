@@ -7,6 +7,74 @@
     <title>Inventário Produtos Químicos</title>
     <link rel="stylesheet" href="css/style7.css">
     <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+    <style>
+        .modal-overlay {
+            position: fixed;
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .modal-content textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            margin-top: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .modal-actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-cancelar {
+            background: #ccc;
+            color: #333;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-confirmar {
+            background: #d9534f;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-confirmar:hover { background: #c9302c; }
+        .btn-cancelar:hover { background: #bbb; }
+    </style>
 </head>
 
 <body>
@@ -17,27 +85,38 @@
         <h1>Solicitações Pendentes</h1>
         <p style="text-align: center; color: #666;">Abaixo estão as aulas que aguardam a sua aprovação.</p>
         <div class="container-tabela-responsiva">
-
-            <table class="tabela-de-aulas">
-                <thead>
-                    <tr>
-                        <th>Professor</th>
-                        <th>Laboratório</th>
-                        <th>Disciplina</th>
-                        <th>Data</th>
-                        <th>Horário</th>
-                        <th>Discentes</th>
-                        <th>Apoio Técnico</th>
-                        <th>Status</th>
-                        <th>Roteiro</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="corpo-tabela-solicitacoes">
-                </tbody>
-            </table>
+<table class="tabela-de-aulas">
+    <thead>
+        <tr>
+            <th>Professor</th>
+            <th>Laboratório</th>
+            <th>Disciplina</th>
+            <th>Data</th>
+            <th>Horário</th>
+            <th>Discentes</th>
+            <th>Apoio Técnico</th>
+            <th>Status</th>
+            <th>Roteiro</th>
+            <th>Observações</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody id="corpo-tabela-solicitacoes">
+    </tbody>
+</table>
         </div>
+    </div>
 
+    <div id="modal-justificativa" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2>Justificativa de Recusa</h2>
+            <p style="font-size: 0.9rem; color: #666;">Por favor, informe o motivo para não autorizar esta aula:</p>
+            <textarea id="texto-justificativa" rows="4" placeholder="Ex: Falta de reagentes, laboratório em manutenção, conflito de horários..."></textarea>
+            <div class="modal-actions">
+                <button id="btn-cancelar-recusa" class="btn-cancelar">Cancelar</button>
+                <button id="btn-confirmar-recusa" class="btn-confirmar">Confirmar Recusa</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -51,14 +130,13 @@
                 })
                 .then(data => {
                     const userNameElement = document.getElementById('user-name-text');
-                    userNameElement.innerHTML = data.nome;
-
-                    const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
+                    if (userNameElement) {
+                        userNameElement.innerHTML = data.nome;
+                    }
                 })
                 .catch(error => console.error('Erro ao carregar usuário logado:', error));
         }
         loadLoggedInUser();
-
     </script>
 
     <script>
@@ -81,7 +159,7 @@
         async function loadPendingRequests() {
             const tbody = document.getElementById("corpo-tabela-solicitacoes");
             if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
                 return;
             }
             try {
@@ -93,16 +171,16 @@
                 renderTable(data);
             } catch (error) {
                 console.error('Falha ao carregar solicitações:', error);
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
             }
         }
 
-        function renderTable(requests) {
+function renderTable(requests) {
             const tbody = document.getElementById("corpo-tabela-solicitacoes");
             tbody.innerHTML = "";
 
             if (requests.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
                 return;
             }
 
@@ -113,6 +191,8 @@
                 const linkRoteiroHtml = r.link_roteiro
                     ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Link</a>`
                     : 'N/A';
+                
+                const observacoesTexto = r.observacoes ? r.observacoes : '-';
 
                 tr.innerHTML = `
             <td>${r.professor}</td>
@@ -120,9 +200,11 @@
             <td>${r.nome_disciplina}</td>
             <td>${dataFormatada}</td>
             <td style="white-space: nowrap;">${r.hora_inicio.slice(0, 5)} - ${r.hora_fim.slice(0, 5)}</td>
-            <td>${r.numero_discentes}</td> <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
+            <td>${r.numero_discentes}</td> 
+            <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
             <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
             <td>${linkRoteiroHtml}</td>
+            <td>${observacoesTexto}</td>
             <td class="celula-de-acoes">
                 <button class="botao-de-acao botao-aceitar" data-id="${r.id_aula}">Autorizar</button>
                 <button class="botao-de-acao botao-recusar" data-id="${r.id_aula}">Não Autorizar</button>
@@ -132,12 +214,17 @@
             });
         }
 
-        async function updateRequestStatus(id, novoStatus) {
+        async function updateRequestStatus(id, novoStatus, observacoes = null) {
             try {
+                const payload = { novoStatus: novoStatus };
+                if (observacoes) {
+                    payload.observacoes = observacoes;
+                }
+
                 await fetch(`/api/requests/${id}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ novoStatus })
+                    body: JSON.stringify(payload)
                 });
                 const rowToRemove = document.querySelector(`button[data-id='${id}']`).closest('tr');
                 if (rowToRemove) {
@@ -153,7 +240,14 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadLoggedInUser();
 
+            let aulaIdParaRecusar = null;
+
             const tbody = document.getElementById("corpo-tabela-solicitacoes");
+            const modal = document.getElementById('modal-justificativa');
+            const btnCancelar = document.getElementById('btn-cancelar-recusa');
+            const btnConfirmar = document.getElementById('btn-confirmar-recusa');
+            const textoJustificativa = document.getElementById('texto-justificativa');
+
             tbody.addEventListener('click', (event) => {
                 const target = event.target;
                 const aulaId = target.dataset.id;
@@ -163,13 +257,34 @@
                 if (target.classList.contains('botao-aceitar')) {
                     updateRequestStatus(aulaId, 'autorizado');
                 } else if (target.classList.contains('botao-recusar')) {
-                    updateRequestStatus(aulaId, 'nao_autorizado');
+                    aulaIdParaRecusar = aulaId;
+                    textoJustificativa.value = '';
+                    modal.style.display = 'flex';
                 }
+            });
+
+            btnCancelar.addEventListener('click', () => {
+                modal.style.display = 'none';
+                aulaIdParaRecusar = null;
+            });
+
+            btnConfirmar.addEventListener('click', () => {
+                const justificativa = textoJustificativa.value.trim();
+                
+                if (!justificativa) {
+                    alert('Por favor, preencha a justificativa.');
+                    return;
+                }
+
+                updateRequestStatus(aulaIdParaRecusar, 'nao_autorizado', justificativa);
+                
+                modal.style.display = 'none';
+                aulaIdParaRecusar = null;
             });
         });
     </script>
     <script src="js/menu.js" defer></script>
-<script src="/js/auth-guard.js" defer></script>
+    <script src="/js/auth-guard.js" defer></script>
 </body>
 
 </html>
