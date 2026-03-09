@@ -159,7 +159,7 @@ async function cancelarAgendamento(idAula) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ status: 'nao_autorizado' })
+            body: JSON.stringify({ status: 'cancelado' })
         });
 
         if (!response.ok) throw new Error("Falha na atualização");
