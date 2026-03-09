@@ -2454,11 +2454,6 @@ app.put("/api/agendamentos/:id/status", async (req, res) => {
     const { status } = req.body;
     const professor_email = req.session.user.email;
 
-    if (status !== "nao_autorizado") {
-      return res
-        .status(400)
-        .json({ error: "Status inválido para esta operação." });
-    }
 
     const verifyQuery = await pool.query(
       `SELECT id_aula FROM aulas 

@@ -462,6 +462,7 @@ function formatarTextoStatus(status) {
         case 'autorizado': return 'Autorizado';
         case 'nao_autorizado': return 'Não Autorizado';
         case 'analisando': return 'Em Análise';
+        case 'cancelado': return 'Cancelado';
         default: return status;
     }
 }
