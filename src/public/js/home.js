@@ -13,7 +13,7 @@ async function inicializarDashboard(userData) {
     const userType = userData.tipo_usuario
         ? userData.tipo_usuario.trim().toLowerCase()
         : "";
-    
+
     const showElement = (selector) => {
         const el = document.querySelector(selector);
         if (el) el.style.display = "block";
@@ -165,8 +165,8 @@ async function cancelarAgendamento(idAula) {
         if (!response.ok) throw new Error("Falha na atualização");
 
         alert("Agendamento cancelado!");
-        loadMyRequests(); 
-        
+        loadMyRequests();
+
     } catch (error) {
         console.error(error);
         alert("Erro ao processar a requisição.");
@@ -418,7 +418,7 @@ function closemenu() {
     if (conteiner) {
         conteiner.style.width = "95%";
     }
-} 
+}
 function renderizarTabelaAgendamentos(requisicoes) {
     const tbody = document.getElementById("corpo-tabela-agendamentos");
     if (!tbody) return;
@@ -438,7 +438,8 @@ function renderizarTabelaAgendamentos(requisicoes) {
         const horaInicio = req.hora_inicio ? req.hora_inicio.slice(0, 5) : "N/A";
         const horaFim = req.hora_fim ? req.hora_fim.slice(0, 5) : "N/A";
         const linkMaterialHtml = formatarLinkRoteiro(req.link_roteiro, "Acessar");
-
+        const isDesativado = r.status === 'nao_autorizado' || r.status === 'cancelado';
+        const estiloBotao = isDesativado ? 'background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;' : '';
         tr.innerHTML = `
             <td>${req.nome_laboratorio}</td>
             <td>${req.nome_disciplina}</td>
