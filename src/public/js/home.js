@@ -440,22 +440,23 @@ function renderizarTabelaAgendamentos(requisicoes) {
         const linkMaterialHtml = formatarLinkRoteiro(req.link_roteiro, "Acessar");
         const isDesativado = r.status === 'nao_autorizado' || r.status === 'cancelado';
         const estiloBotao = isDesativado ? 'background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;' : '';
+
         tr.innerHTML = `
-            <td>${req.nome_laboratorio}</td>
-            <td>${req.nome_disciplina}</td>
+            <td>${r.nome_laboratorio}</td>
+            <td>${r.nome_disciplina}</td>
             <td>${dataFormatada}</td>
             <td>${horaInicio} - ${horaFim}</td>
-            <td>${req.precisa_tecnico ? "Sim" : "Não"}</td>
-            <td><span class="badge-status status-${req.status}">${req.status}</span></td>
-            <td>${linkMaterialHtml}</td>
+            <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
+            <td><span class="etiqueta-status status-${r.status}">${textoStatus}</span></td>
+            <td>${linkRoteiroHtml}</td>
             <td>
-                <button class="btn-cancelar" onclick="cancelarAgendamento(${req.id_aula})" 
-                        ${req.status === 'nao_autorizado' ? 'disabled' : ''}>
+                <button class="btn-cancelar" onclick="cancelarAgendamento(${r.id_aula})" 
+                        ${isDesativado ? 'disabled' : ''} 
+                        style="${estiloBotao}">
                     Cancelar
                 </button>
             </td>
         `;
-        tbody.appendChild(tr);
     });
 }
 function formatarTextoStatus(status) {
