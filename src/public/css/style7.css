@@ -1206,8 +1206,8 @@ input[type="url"]::placeholder {
 }
 
 .btn-cancelar {
-    background: #ccc;
-    color: #333;
+    background: #fc0303;
+    color: #ffffff;
     border: none;
     padding: 8px 16px;
     border-radius: 4px;
