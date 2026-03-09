@@ -1,120 +1,153 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
-<head>
+  <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="images/icone3.png" type="image/png">
+    <link rel="icon" href="images/icone3.png" type="image/png" />
     <title>Inventário Produtos Químicos</title>
-    <link rel="stylesheet" href="css/style7.css">
-    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
-</head>
+    <link rel="stylesheet" href="css/style7.css" />
+    <script
+      src="https://kit.fontawesome.com/915b45d802.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
 
-<body>
+  <body>
     <div id="header">
-        <header id="menu-container"></header>
+      <header id="menu-container"></header>
     </div>
 
-    <div class="painel-minhas-aulas" style="height: 100vh;">
-        <h1>Minhas Solicitações de Aula</h1>
-        <p style="text-align: center; color: #666;">Abaixo estão as suas solicitações para hoje e datas futuras.</p>
+    <div class="painel-minhas-aulas" style="height: 100vh">
+      <h1>Minhas Solicitações de Aula</h1>
+      <p style="text-align: center; color: #666">
+        Abaixo estão as suas solicitações para hoje e datas futuras.
+      </p>
 
-        <table class="tabela-visualizacao-aulas">
-            <thead>
-                <tr>
-                    <th>Laboratório</th>
-                    <th>Data</th>
-                    <th>Horário</th>
-                    <th>Apoio Técnico</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="minhas-aulas-tbody">
-            </tbody>
-        </table>
+      <table class="tabela-visualizacao-aulas">
+<thead>
+    <tr>
+        <th>Professor</th>
+        <th>Laboratório</th>
+        <th>Disciplina</th>
+        <th>Data</th>
+        <th>Horário</th>
+        <th>Discentes</th>
+        <th>Apoio Técnico</th>
+        <th>Status</th>
+        <th>Roteiro</th>
+        <th>Observações</th>
+    </tr>
+</thead>
+        <tbody id="minhas-aulas-tbody"></tbody>
+      </table>
     </div>
     <script>
-        let loggedInUser = null;
-        async function inicializarPagina() {
-            try {
-                const response = await fetch('/api/usuario-logado');
-                if (!response.ok) {
-                    window.location.href = '/login.html';
-                    return;
-                }
-                loggedInUser = await response.json();
-
-                const userNameElement = document.getElementById('user-name-text');
-                if (userNameElement) {
-                    userNameElement.innerHTML = loggedInUser.nome_usuario || loggedInUser.nome;
-                }
-
-                const userType = loggedInUser.tipo_usuario ? loggedInUser.tipo_usuario.trim().toLowerCase() : '';
-
-                const showMenuItem = (selector) => {
-                    const el = document.querySelector(selector);
-                    if (el) el.style.display = 'list-item';
-                };
-
-                await loadMyRequests();
-
-            } catch (error) {
-                console.error('Erro ao inicializar a página:', error);
-                window.location.href = '/login.html';
-            }
+      function formatarTextoStatus(status) {
+        switch (status) {
+          case "autorizado":
+            return "Autorizado";
+          case "nao_autorizado":
+            return "Não Autorizado";
+          case "analisando":
+            return "Em Análise";
+          default:
+            return status;
         }
+      }
+      let loggedInUser = null;
+      async function inicializarPagina() {
+        try {
+          const response = await fetch("/api/usuario-logado");
+          if (!response.ok) {
+            window.location.href = "/login.html";
+            return;
+          }
+          loggedInUser = await response.json();
 
-        async function loadMyRequests() {
-            if (!loggedInUser) return;
+          const userNameElement = document.getElementById("user-name-text");
+          if (userNameElement) {
+            userNameElement.innerHTML =
+              loggedInUser.nome_usuario || loggedInUser.nome;
+          }
 
-            try {
-                const res = await fetch(`/api/minhas-solicitacoes`);
-                if (!res.ok) throw new Error('Erro na rede ao buscar solicitações');
+          const userType = loggedInUser.tipo_usuario
+            ? loggedInUser.tipo_usuario.trim().toLowerCase()
+            : "";
 
-                const data = await res.json();
-                renderTable(data);
-            } catch (error) {
-                console.error('Falha ao carregar solicitações:', error);
-                const tbody = document.getElementById("minhas-aulas-tbody");
-                if (tbody) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Erro ao carregar dados. Tente novamente mais tarde.</td></tr>`;
-                }
-            }
+          const showMenuItem = (selector) => {
+            const el = document.querySelector(selector);
+            if (el) el.style.display = "list-item";
+          };
+
+          await loadMyRequests();
+        } catch (error) {
+          console.error("Erro ao inicializar a página:", error);
+          window.location.href = "/login.html";
         }
+      }
 
-        function renderTable(requests) {
-            const tbody = document.getElementById("minhas-aulas-tbody");
-            if (!tbody) return;
+      async function loadMyRequests() {
+        if (!loggedInUser) return;
 
-            tbody.innerHTML = "";
-            if (requests.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação futura.</td></tr>`;
-                return;
-            }
+        try {
+          const res = await fetch(`/api/minhas-solicitacoes`);
+          if (!res.ok) throw new Error("Erro na rede ao buscar solicitações");
 
-            requests.forEach(r => {
-                const tr = document.createElement("tr");
-
-                const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-                const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : 'N/A';
-                const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : 'N/A';
-
-                tr.innerHTML = `
-                <td>${r.nome_laboratorio}</td>
-                <td>${dataFormatada}</td>
-                <td>${horaInicio} - ${horaFim}</td>
-                <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
-                <td><span class="etiqueta-status status-${r.status}">${r.status}</span></td>
-            `;
-                tbody.appendChild(tr);
-            });
+          const data = await res.json();
+          renderTable(data);
+        } catch (error) {
+          console.error("Falha ao carregar solicitações:", error);
+          const tbody = document.getElementById("minhas-aulas-tbody");
+          if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Erro ao carregar dados. Tente novamente mais tarde.</td></tr>`;
+          }
         }
+      }
 
-        document.addEventListener('DOMContentLoaded', inicializarPagina);
+function renderTable(requests) {
+    const tbody = document.getElementById("minhas-aulas-tbody");
+    if (!tbody) return;
 
+    tbody.innerHTML = "";
+    if (requests.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação futura.</td></tr>`;
+        return;
+    }
+
+    requests.forEach(r => {
+        const tr = document.createElement("tr");
+
+        const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : 'N/A';
+        const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : 'N/A';
+        
+        // Pega o nome do professor logado
+        const nomeProfessor = loggedInUser.nome_usuario || loggedInUser.nome || 'Professor';
+        
+        // Trata os dados que podem vir vazios
+        const linkRoteiroHtml = r.link_roteiro ? `<a href="${r.link_roteiro}" target="_blank">Ver</a>` : 'N/A';
+        const observacoesTexto = r.observacoes ? r.observacoes : '-';
+        const discentes = r.numero_discentes || '-';
+        const disciplina = r.nome_disciplina || '-';
+
+        tr.innerHTML = `
+            <td>${nomeProfessor}</td>
+            <td>${r.nome_laboratorio}</td>
+            <td>${disciplina}</td>
+            <td>${dataFormatada}</td>
+            <td style="white-space: nowrap;">${horaInicio} - ${horaFim}</td>
+            <td>${discentes}</td>
+            <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
+            <td><span class="etiqueta-status status-${r.status}">${formatarTextoStatus(r.status)}</span></td>
+            <td>${linkRoteiroHtml}</td>
+            <td>${observacoesTexto}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+      document.addEventListener("DOMContentLoaded", inicializarPagina);
     </script>
     <script src="js/menu.js" defer></script>
     <script src="/js/auth-guard.js" defer></script>
-
-</body>
-
+  </body>
 </html>
