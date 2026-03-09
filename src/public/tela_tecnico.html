@@ -181,26 +181,30 @@
             }
         }
 
-        function renderTable(requests) {
-            const tbody = document.getElementById("corpo-tabela-solicitacoes");
-            tbody.innerHTML = "";
+function renderTable(requests) {
+    const tbody = document.getElementById("corpo-tabela-solicitacoes");
+    tbody.innerHTML = "";
 
-            if (requests.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
-                return;
-            }
+    if (requests.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
+        return;
+    }
 
-            requests.forEach(r => {
-                const tr = document.createElement("tr");
-                const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+    requests.forEach(r => {
+        const tr = document.createElement("tr");
+        const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
 
-                const linkRoteiroHtml = r.link_roteiro
-                    ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Link</a>`
-                    : 'N/A';
+        const linkRoteiroHtml = r.link_roteiro
+            ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Link</a>`
+            : 'N/A';
 
-                const observacoesTexto = r.observacoes ? r.observacoes : '-';
+        const observacoesTexto = r.observacoes ? r.observacoes : '-';
 
-                tr.innerHTML = `
+        const isCancelado = r.status === 'cancelado';
+        
+        const estiloBotaoDesativado = isCancelado ? 'background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;' : '';
+
+        tr.innerHTML = `
             <td>${r.professor}</td>
             <td>${r.nome_laboratorio}</td>
             <td>${r.nome_disciplina}</td>
@@ -208,16 +212,17 @@
             <td style="white-space: nowrap;">${r.hora_inicio.slice(0, 5)} - ${r.hora_fim.slice(0, 5)}</td>
             <td>${r.numero_discentes}</td> 
             <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
-<td><span class="etiqueta-status status-${r.status}">${formatarTextoStatus(r.status)}</span></td>            <td>${linkRoteiroHtml}</td>
+            <td><span class="etiqueta-status status-${r.status}">${formatarTextoStatus(r.status)}</span></td>
+            <td>${linkRoteiroHtml}</td>
             <td>${observacoesTexto}</td>
             <td class="celula-de-acoes">
-                <button class="botao-de-acao botao-aceitar" data-id="${r.id_aula}">Autorizar</button>
-                <button class="botao-de-acao botao-recusar" data-id="${r.id_aula}">Não Autorizar</button>
+                <button class="botao-de-acao ${isCancelado ? '' : 'botao-aceitar'}" data-id="${r.id_aula}" ${isCancelado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Autorizar</button>
+                <button class="botao-de-acao ${isCancelado ? '' : 'botao-recusar'}" data-id="${r.id_aula}" ${isCancelado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Não Autorizar</button>
             </td>
         `;
-                tbody.appendChild(tr);
-            });
-        }
+        tbody.appendChild(tr);
+    });
+}
 
         async function updateRequestStatus(id, novoStatus, observacoes = null) {
             try {
