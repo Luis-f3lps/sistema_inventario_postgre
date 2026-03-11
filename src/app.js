@@ -96,9 +96,10 @@ app.post("/login", async (req, res) => {
 
     const user = rows[0];
 
-    if (user.status === 'desativado') {
-      return res.status(403).json({ 
-        error: "Usuário desativado, entre em contato com o Administrador para ativação." 
+    if (user.status === "desativado") {
+      return res.status(403).json({
+        error:
+          "Usuário desativado, entre em contato com o Administrador para ativação.",
       });
     }
 
@@ -129,7 +130,8 @@ app.listen(PORT, () => {
 // Rota para a página Relatório
 app.get("/Relatorio", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "relatorio.html"));
-});app.get("/novo-usuario", (req, res) => {
+});
+app.get("/novo-usuario", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "novo-usuario.html"));
 });
 app.get("/Home", (req, res) => {
@@ -252,11 +254,9 @@ app.patch("/api/usuarios/:email", Autenticado, async (req, res) => {
 
       // Se houver apenas um admin ativo, impede a desativação
       if (resultActiveAdmins.rows[0].count <= 1) {
-        return res
-          .status(403)
-          .json({
-            error: "Não é possível desativar o único usuário admin ativo.",
-          });
+        return res.status(403).json({
+          error: "Não é possível desativar o único usuário admin ativo.",
+        });
       }
     }
 
@@ -343,7 +343,7 @@ app.post("/api/usuarios", Autenticado, async (req, res) => {
   }
 });
 
-app.post("/api/novo-usuario", async (req, res) => { 
+app.post("/api/novo-usuario", async (req, res) => {
   const { nome_usuario, email, senha, tipo_usuario } = req.body;
 
   if (!nome_usuario || !email || !senha || !tipo_usuario) {
@@ -352,7 +352,12 @@ app.post("/api/novo-usuario", async (req, res) => {
 
   const tiposPermitidos = ["professor", "tecnico"];
   if (!tiposPermitidos.includes(tipo_usuario)) {
-    return res.status(403).json({ error: "Apenas perfis de Professor ou Técnico são permitidos neste cadastro." });
+    return res
+      .status(403)
+      .json({
+        error:
+          "Apenas perfis de Professor ou Técnico são permitidos neste cadastro.",
+      });
   }
 
   if (senha.length > 12) {
@@ -365,18 +370,18 @@ app.post("/api/novo-usuario", async (req, res) => {
     // Verificar se o email já existe
     const { rows: existingUserByEmail } = await pool.query(
       "SELECT email FROM usuario WHERE email = $1",
-      [email]
+      [email],
     );
 
     if (existingUserByEmail.length > 0) {
       return res.status(400).json({ error: "Email já está em uso" });
     }
 
-    const hashedPassword = await bcrypt.hash(senha, 10); 
+    const hashedPassword = await bcrypt.hash(senha, 10);
 
     await pool.query(
       "INSERT INTO usuario (nome_usuario, email, senha, tipo_usuario, status) VALUES ($1, $2, $3, $4, 'desativado')",
-      [nome_usuario, email, hashedPassword, tipo_usuario]
+      [nome_usuario, email, hashedPassword, tipo_usuario],
     );
 
     res.status(201).json({ message: "Usuário adicionado com sucesso" });
@@ -483,11 +488,9 @@ app.post("/api/laboratorios", Autenticado, async (req, res) => {
     const { nome_laboratorio, usuario_email } = req.body;
 
     if (!nome_laboratorio || !usuario_email) {
-      return res
-        .status(400)
-        .json({
-          error: "Nome do laboratório e email do usuário são obrigatórios.",
-        });
+      return res.status(400).json({
+        error: "Nome do laboratório e email do usuário são obrigatórios.",
+      });
     }
 
     // Verificar se o laboratório já existe
@@ -509,12 +512,10 @@ app.post("/api/laboratorios", Autenticado, async (req, res) => {
     // A consulta de inserção no PostgreSQL usa "RETURNING" para retornar o id do novo registro
     const idLaboratorio = insertResult.rows[0].id_laboratorio;
 
-    res
-      .status(201)
-      .json({
-        message: "Laboratório adicionado com sucesso!",
-        id_laboratorio: idLaboratorio,
-      });
+    res.status(201).json({
+      message: "Laboratório adicionado com sucesso!",
+      id_laboratorio: idLaboratorio,
+    });
   } catch (error) {
     console.error("Erro ao adicionar laboratório:", error);
     res.status(500).json({ error: "Erro ao adicionar laboratório." });
@@ -545,12 +546,10 @@ app.delete(
         [id_laboratorio],
       );
       if (consumoCheck.rows.length > 0) {
-        return res
-          .status(400)
-          .json({
-            error:
-              "Não é possível remover o laboratório. Existem registros de consumo associados a ele.",
-          });
+        return res.status(400).json({
+          error:
+            "Não é possível remover o laboratório. Existem registros de consumo associados a ele.",
+        });
       }
 
       // Remove o laboratório
@@ -665,12 +664,10 @@ app.delete("/api/excluir-produto/:idproduto", Autenticado, async (req, res) => {
 
     // Se a quantidade for maior que zero, não permite a exclusão
     if (quantidade > 0) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Não é possível excluir o produto enquanto houver quantidade disponível.",
-        });
+      return res.status(400).json({
+        message:
+          "Não é possível excluir o produto enquanto houver quantidade disponível.",
+      });
     }
 
     // Se a quantidade for zero ou menor, apaga todos os registros de entrada e consumo
@@ -781,12 +778,10 @@ app.get("/api/produtoPag", Autenticado, async (req, res) => {
   const limitInt = parseInt(limit, 10);
 
   if (isNaN(pageInt) || isNaN(limitInt) || limitInt <= 0 || pageInt <= 0) {
-    return res
-      .status(400)
-      .json({
-        error:
-          "Os parâmetros de página e limite devem ser números inteiros positivos.",
-      });
+    return res.status(400).json({
+      error:
+        "Os parâmetros de página e limite devem ser números inteiros positivos.",
+    });
   }
 
   // Limite máximo para o número de itens por página
@@ -1434,11 +1429,9 @@ app.get("/api/consumos", Autenticado, async (req, res) => {
 
     // Validação do intervalo de datas
     if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-      return res
-        .status(400)
-        .json({
-          error: "A data de início não pode ser posterior à data de término.",
-        });
+      return res.status(400).json({
+        error: "A data de início não pode ser posterior à data de término.",
+      });
     }
 
     let query = `
@@ -1510,11 +1503,9 @@ app.post("/api/atualizar-responsavel", Autenticado, async (req, res) => {
   const { idLaboratorio, usuarioEmail } = req.body;
 
   if (!idLaboratorio || !usuarioEmail) {
-    return res
-      .status(400)
-      .json({
-        error: "ID do laboratório e email do responsável são obrigatórios.",
-      });
+    return res.status(400).json({
+      error: "ID do laboratório e email do responsável são obrigatórios.",
+    });
   }
 
   // Validação básica de formato de email
@@ -1563,12 +1554,10 @@ app.get("/api/produtoPag", Autenticado, async (req, res) => {
   const limitInt = parseInt(limit, 10);
 
   if (isNaN(pageInt) || isNaN(limitInt) || limitInt <= 0 || pageInt <= 0) {
-    return res
-      .status(400)
-      .json({
-        error:
-          "Os parâmetros de página e limite devem ser números inteiros positivos.",
-      });
+    return res.status(400).json({
+      error:
+        "Os parâmetros de página e limite devem ser números inteiros positivos.",
+    });
   }
 
   // Limite máximo para o número de itens por página
@@ -1661,12 +1650,10 @@ app.get("/api/tabelaregistraentrada", Autenticado, async (req, res) => {
     const limitInt = parseInt(limit, 10);
 
     if (isNaN(pageInt) || pageInt <= 0 || isNaN(limitInt) || limitInt <= 0) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Os parâmetros de página e limite devem ser números inteiros positivos.",
-        });
+      return res.status(400).json({
+        error:
+          "Os parâmetros de página e limite devem ser números inteiros positivos.",
+      });
     }
 
     // Limitar o limite de itens por página
@@ -1747,12 +1734,10 @@ app.get("/api/tabelaregistraConsumo", Autenticado, async (req, res) => {
     const limitInt = parseInt(limit, 10);
 
     if (isNaN(pageInt) || pageInt <= 0 || isNaN(limitInt) || limitInt <= 0) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Os parâmetros de página e limite devem ser números inteiros positivos.",
-        });
+      return res.status(400).json({
+        error:
+          "Os parâmetros de página e limite devem ser números inteiros positivos.",
+      });
     }
 
     // Limitar o limite de itens por página
@@ -1842,12 +1827,10 @@ app.post("/api/filter_records", Autenticado, async (req, res) => {
     // Validação de formato de data (YYYY-MM-DD)
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(startDate) || !dateRegex.test(endDate)) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Formato de data inválido. Utilize a data no formato YYYY-MM-DD.",
-        });
+      return res.status(400).json({
+        error:
+          "Formato de data inválido. Utilize a data no formato YYYY-MM-DD.",
+      });
     }
 
     // Converte as datas para objetos Date
@@ -1930,14 +1913,17 @@ app.post("/api/schedule", async (req, res) => {
         .json({ error: "Dados incompletos para o agendamento." });
     }
 
-
     const statusProfessor = await pool.query(
       "SELECT status FROM usuarios WHERE email = $1",
-      [professor_email]
+      [professor_email],
     );
-    if (statusProfessor.rowCount > 0 && statusProfessor.rows[0].status === 'desativado') {
-      return res.status(403).json({ 
-        error: "Sua conta está desativada. Você não tem permissão para solicitar agendamentos." 
+    if (
+      statusProfessor.rowCount > 0 &&
+      statusProfessor.rows[0].status === "desativado"
+    ) {
+      return res.status(403).json({
+        error:
+          "Sua conta está desativada. Você não tem permissão para solicitar agendamentos.",
       });
     }
 
@@ -1946,25 +1932,30 @@ app.post("/api/schedule", async (req, res) => {
        FROM laboratorio l
        JOIN usuarios u ON l.usuario_email = u.email
        WHERE l.id_laboratorio = $1`,
-      [labId]
+      [labId],
     );
-    if (statusLaboratorio.rowCount > 0 && statusLaboratorio.rows[0].status === 'desativado') {
-      return res.status(403).json({ 
-        error: "Não é possível agendar neste laboratório, pois o usuário responsável por ele está desativado." 
+    if (
+      statusLaboratorio.rowCount > 0 &&
+      statusLaboratorio.rows[0].status === "desativado"
+    ) {
+      return res.status(403).json({
+        error:
+          "Não é possível agendar neste laboratório, pois o usuário responsável por ele está desativado.",
       });
     }
 
-    const dataAgendamento = new Date(`${date}T00:00:00`); 
-    
+    const dataAgendamento = new Date(`${date}T00:00:00`);
+
     const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0); 
+    hoje.setHours(0, 0, 0, 0);
 
     const dataMinima = new Date(hoje);
-    dataMinima.setDate(hoje.getDate() + 4); 
+    dataMinima.setDate(hoje.getDate() + 4);
 
     if (dataAgendamento < dataMinima) {
-      return res.status(400).json({ 
-        error: "O agendamento deve ser feito com pelo menos 4 dias de antecedência." 
+      return res.status(400).json({
+        error:
+          "O agendamento deve ser feito com pelo menos 4 dias de antecedência.",
       });
     }
 
@@ -1988,12 +1979,13 @@ app.post("/api/schedule", async (req, res) => {
            AND a.precisa_tecnico = true
            AND a.status IN ('analisando', 'autorizado') -- Ignora aulas canceladas ou negadas
          LIMIT 1`,
-        [labId, date, id_horario]
+        [labId, date, id_horario],
       );
 
       if (tecnicoOcupado.rowCount > 0) {
         return res.status(400).json({
-          error: "O técnico responsável por este laboratório já está agendado para auxiliar em outra aula neste mesmo horário."
+          error:
+            "O técnico responsável por este laboratório já está agendado para auxiliar em outra aula neste mesmo horário.",
         });
       }
     }
@@ -2019,11 +2011,9 @@ app.post("/api/schedule", async (req, res) => {
       .json({ message: "Aula solicitada com sucesso!", aula: result.rows[0] });
   } catch (err) {
     if (err.code === "23505") {
-      return res
-        .status(400)
-        .json({
-          error: "Esse horário já está ocupado ou em análise neste laboratório",
-        });
+      return res.status(400).json({
+        error: "Esse horário já está ocupado ou em análise neste laboratório",
+      });
     }
     console.error("Erro ao solicitar aula:", err);
     res.status(500).json({ error: "Erro ao solicitar aula" });
@@ -2113,11 +2103,9 @@ app.post("/api/schedule-recurring", async (req, res) => {
     }
 
     await client.query("COMMIT");
-    res
-      .status(201)
-      .json({
-        message: `${datasParaAgendar.length * horarios.length} aula(s) solicitada(s) com sucesso!`,
-      });
+    res.status(201).json({
+      message: `${datasParaAgendar.length * horarios.length} aula(s) solicitada(s) com sucesso!`,
+    });
   } catch (err) {
     await client.query("ROLLBACK");
     if (err.code === "23505") {
@@ -2440,12 +2428,29 @@ app.get("/api/calendario/aulas-tecnico", async (req, res) => {
   }
 });
 app.get("/api/disciplinas", async (req, res) => {
-  if (!req.session.user)
+  if (!req.session.user) {
     return res.status(401).json({ error: "Não autenticado." });
+  }
 
   try {
-    const query = 'SELECT * FROM "disciplina" ORDER BY nome_disciplina, status';
-    const result = await pool.query(query);
+    const usuarioEmail = req.session.user.email;
+    const tipoUsuario = req.session.user.tipo_usuario;
+
+    let query = "";
+    let values = [];
+
+    if (tipoUsuario === "admin") {
+      query = 'SELECT * FROM "disciplina" ORDER BY nome_disciplina, status';
+    } else if (tipoUsuario === "professor") {
+      query =
+        'SELECT * FROM "disciplina" WHERE usuario_email = $1 ORDER BY nome_disciplina, status';
+      values = [usuarioEmail];
+    } else {
+      return res.json([]);
+    }
+
+    const result = await pool.query(query, values);
+
     res.json(result.rows);
   } catch (err) {
     console.error(err.message);
@@ -2460,11 +2465,9 @@ app.post("/api/disciplinas", async (req, res) => {
   const { nome_disciplina, professor_email_responsavel } = req.body;
 
   if (!nome_disciplina || !professor_email_responsavel) {
-    return res
-      .status(400)
-      .json({
-        error: "Nome da disciplina e e-mail do professor são obrigatórios.",
-      });
+    return res.status(400).json({
+      error: "Nome da disciplina e e-mail do professor são obrigatórios.",
+    });
   }
 
   try {
@@ -2485,12 +2488,10 @@ app.post("/api/disciplinas", async (req, res) => {
   } catch (err) {
     console.error(err.message);
     if (err.code === "23503") {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Erro: O professor com este e-mail não existe no cadastro de usuários.",
-        });
+      return res.status(400).json({
+        error:
+          "Erro: O professor com este e-mail não existe no cadastro de usuários.",
+      });
     }
     res.status(500).json({ error: "Erro ao adicionar disciplina." });
   }
@@ -2560,7 +2561,6 @@ app.put("/api/agendamentos/:id/status", async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     const professor_email = req.session.user.email;
-
 
     const verifyQuery = await pool.query(
       `SELECT id_aula FROM aulas 

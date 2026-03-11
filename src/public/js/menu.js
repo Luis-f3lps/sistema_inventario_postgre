@@ -92,6 +92,8 @@ function preencherDadosDoMenu(userData) {
         case 'administrador': 
             showMenuItem('.admin-menu');
             showMenuItem('.produto');
+                        showMenuItem('.Disciplinas');
+
             break;
 
         case 'tecnico':
@@ -104,7 +106,8 @@ function preencherDadosDoMenu(userData) {
 
         case 'professor':
             showMenuItem('.Home');
-            showMenuItem('.professor');
+            showMenuItem('.professor');            
+            showMenuItem('.Disciplinas');
             showMenuItem('.Horarios');
             showDashboardCard('.cartao-aulas-autorizadas');
             showDashboardCard('.cartao-solicitacoes');
