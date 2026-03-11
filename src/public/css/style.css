@@ -60,7 +60,7 @@ body {
 }
 
 button {
-    width: 96%;
+    width: 100%;
     padding: 10px;
     border: none;
     border-radius: 4px;
@@ -90,10 +90,22 @@ button:hover {
 
 .inputBox {
     position: relative;
-    width: 300px;
     margin-bottom: 10px;
 }
+.link-novo-usuario {
+    display: inline-block;
+    margin-top: 15px;
+    color: #666666; 
+    text-decoration: none; 
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
 
+.link-novo-usuario:hover {
+    color: #0b5e20; 
+    text-decoration: underline;
+}
 .inputBox input {
     padding: 15px 20px;
     border: none;

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const formCadastro = document.getElementById('form-cadastro');
 
     if (formCadastro) {
-        formCadastro.addEventListener('submit', async function(event) {
+        formCadastro.addEventListener('submit', async function (event) {
             event.preventDefault(); // Evita o recarregamento padrão da página
 
             const nome_usuario = document.getElementById('nome_usuario').value;
@@ -30,7 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (response.ok) {
                     exibirMensagem('Usuário cadastrado com sucesso!', 'green');
-                    formCadastro.reset(); // Limpa os campos do formulário
+                    formCadastro.reset();
+                    setTimeout(() => {
+                        window.location.href = "https://sistema-inventario-postgre.vercel.app/";
+                    }, 5000);
                 } else {
                     exibirMensagem(result.error || 'Erro ao cadastrar usuário.', 'red');
                 }
