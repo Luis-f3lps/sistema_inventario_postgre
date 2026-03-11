@@ -1,165 +1,182 @@
 <!doctype html>
 <html lang="pt-br">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cadastrar Novo Usuário</title>
-    <link rel="icon" href="images/icone3.png" type="image/png">
+    <link rel="icon" href="images/icone3.png" type="image/png" />
     <link rel="stylesheet" href="css/style.css" />
-    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+    <script
+      src="https://kit.fontawesome.com/915b45d802.js"
+      crossorigin="anonymous"
+    ></script>
     <style>
-        body {
-            background-color: #094412;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
+      body {
+        background-color: #094412;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
 
+      .cadastro-box {
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 450px;
+      }
+
+      .cadastro-box h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+      }
+
+      .inputBox {
+        position: relative;
+        margin-bottom: 25px;
+        width: 100%;
+      }
+
+      .inputBox input,
+      .inputBox select {
+        width: 100%;
+        padding: 10px 0;
+        font-size: 16px;
+        color: #333;
+        border: none;
+        border-bottom: 2px solid #ccc;
+        outline: none;
+        background: transparent;
+        transition: 0.3s;
+      }
+
+      .inputBox select {
+        color: #666;
+        cursor: pointer;
+      }
+
+      .inputBox input:focus,
+      .inputBox select:focus {
+        border-bottom: 2px solid #007bff;
+        /* Cor primária */
+      }
+
+      .inputBox label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 10px 0;
+        font-size: 16px;
+        color: #999;
+        pointer-events: none;
+        transition: 0.3s ease;
+      }
+
+      .inputBox input:focus ~ label,
+      .inputBox input:valid ~ label {
+        top: -20px;
+        font-size: 12px;
+        color: #007bff;
+        font-weight: bold;
+      }
+
+      button[type="submit"] {
+        width: 100%;
+        background: #007bff;
+        color: #fff;
+        border: none;
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.3s;
+        font-weight: bold;
+      }
+
+      button[type="submit"]:hover {
+        background: #0056b3;
+      }
+
+      #mensagem-retorno {
+        margin-top: 15px;
+        text-align: center;
+        font-size: 14px;
+        display: none;
+      }
+
+      .btn-voltar {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: #666;
+        text-decoration: none;
+        font-size: 14px;
+        transition: 0.3s;
+      }
+
+      .btn-voltar:hover {
+        color: #333;
+      }
+      @media (max-width: 1024px) {
         .cadastro-box {
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 450px;
+          margin: 30px;
         }
-
-        .cadastro-box h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
+        .link-novo-usuario {
+          font-size: 18px;
         }
-
-        .inputBox {
-            position: relative;
-            margin-bottom: 25px;
-            width: 100%
-        }
-
-        .inputBox input,
-        .inputBox select {
-            width: 100%;
-            padding: 10px 0;
-            font-size: 16px;
-            color: #333;
-            border: none;
-            border-bottom: 2px solid #ccc;
-            outline: none;
-            background: transparent;
-            transition: 0.3s;
-        }
-
-        .inputBox select {
-            color: #666;
-            cursor: pointer;
-        }
-
-        .inputBox input:focus,
-        .inputBox select:focus {
-            border-bottom: 2px solid #007bff;
-            /* Cor primária */
-        }
-
-        .inputBox label {
-            position: absolute;
-            top: 0;
-            left: 0;
-            padding: 10px 0;
-            font-size: 16px;
-            color: #999;
-            pointer-events: none;
-            transition: 0.3s ease;
-        }
-
-        .inputBox input:focus~label,
-        .inputBox input:valid~label {
-            top: -20px;
-            font-size: 12px;
-            color: #007bff;
-            font-weight: bold;
-        }
-
-        button[type="submit"] {
-            width: 100%;
-            background: #007bff;
-            color: #fff;
-            border: none;
-            padding: 12px;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s;
-            font-weight: bold;
-        }
-
-        button[type="submit"]:hover {
-            background: #0056b3;
-        }
-
-        #mensagem-retorno {
-            margin-top: 15px;
-            text-align: center;
-            font-size: 14px;
-            display: none;
-        }
-
-        .btn-voltar {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
-            text-decoration: none;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-
-        .btn-voltar:hover {
-            color: #333;
-        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
     <div class="cadastro-box">
-        <h2><i class="fa-solid fa-user-plus"></i> Novo Usuário</h2>
+      <h2><i class="fa-solid fa-user-plus"></i> Novo Usuário</h2>
 
-        <form id="form-cadastro">
-            <div class="inputBox">
-                <input type="text" name="nome_usuario" id="nome_usuario" required />
-                <label>Nome Completo</label>
-            </div>
+      <form id="form-cadastro">
+        <div class="inputBox">
+          <input type="text" name="nome_usuario" id="nome_usuario" required />
+          <label>Nome Completo</label>
+        </div>
 
-            <div class="inputBox">
-                <input type="email" name="email" id="email" required />
-                <label>Email</label>
-            </div>
+        <div class="inputBox">
+          <input type="email" name="email" id="email" required />
+          <label>Email</label>
+        </div>
 
-            <div class="inputBox">
-                <input type="password" name="senha" id="senha" maxlength="12" required />
-                <label>Senha (Máx. 12 caracteres)</label>
-            </div>
+        <div class="inputBox">
+          <input
+            type="password"
+            name="senha"
+            id="senha"
+            maxlength="12"
+            required
+          />
+          <label>Senha (Máx. 12 caracteres)</label>
+        </div>
 
-            <div class="inputBox">
-                <select name="tipo_usuario" id="tipo_usuario" required>
-                    <option value="" disabled selected>Selecione o Perfil</option>
-                    <option value="professor">Professor</option>
-                    <option value="tecnico">Técnico</option>
-                </select>
-            </div>
+        <div class="inputBox">
+          <select name="tipo_usuario" id="tipo_usuario" required>
+            <option value="" disabled selected>Selecione o Perfil</option>
+            <option value="professor">Professor</option>
+            <option value="tecnico">Técnico</option>
+          </select>
+        </div>
 
-            <button type="submit">Cadastrar Usuário</button>
-            <div id="mensagem-retorno"></div>
-        </form>
+        <button type="submit">Cadastrar Usuário</button>
+        <div id="mensagem-retorno"></div>
+      </form>
 
-        <a href="https://sistema-inventario-postgre.vercel.app" class="btn-voltar"><i class="fa-solid fa-arrow-left"></i> Voltar ao Login</a>
+      <a href="https://sistema-inventario-postgre.vercel.app" class="btn-voltar"
+        ><i class="fa-solid fa-arrow-left"></i> Voltar ao Login</a
+      >
     </div>
 
     <script src="js/cadastro.js"></script>
     <script src="/js/auth-guard.js" defer></script>
-</body>
-
+  </body>
 </html>

@@ -158,6 +158,55 @@ button:hover {
     background: url('/images/hide.png');
     background-size: cover;
 }
+@media (max-width: 1024px) {
+    .login-box {
+        width: 90%;
+        max-width: 400px; 
+        padding: 40px 25px; 
+    }
+
+    .login-box .logo {
+        width: 80%;
+        max-width: 250px;
+        margin-bottom: 20px;
+    }
+
+    .inputBox {
+        width: 100%;
+        margin-bottom: 25px;
+    }
+
+    .inputBox input {
+        width: 100%;
+        font-size: 16px; 
+        padding: 10px 40px 10px 10px; 
+        box-sizing: border-box; 
+    }
+
+    .inputBox span {
+        font-size: 14px;
+        left: 10px;
+    }
+
+    .inputBox input:focus ~ span,
+    .inputBox input:valid ~ span {
+        transform: translateY(-22px); 
+        font-size: 12px;
+        font-weight: bold;
+        color: #0b5e20; 
+    }
+
+    button[type="submit"] {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+    }
+
+    .link-novo-usuario {
+        font-size: 13px;
+        margin-top: 20px;
+    }
+}
 
 @media only screen and (max-width: 2532px) and (min-height: 1170px),
 only screen and (max-width: 2340px) and (min-height: 1080px) {
