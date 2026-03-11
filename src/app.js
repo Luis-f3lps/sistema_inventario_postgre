@@ -124,6 +124,8 @@ app.listen(PORT, () => {
 // Rota para a página Relatório
 app.get("/Relatorio", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "relatorio.html"));
+});app.get("/novo-usuario", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "novo-usuario.html"));
 });
 app.get("/Home", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "Home.html"));
