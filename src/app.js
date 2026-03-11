@@ -1906,7 +1906,6 @@ app.get("/api/availability", async (req, res) => {
     res.status(500).json({ error: "Erro ao buscar disponibilidade" });
   }
 });
-
 app.post("/api/schedule", async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: "Você precisa estar logado." });
@@ -1929,6 +1928,30 @@ app.post("/api/schedule", async (req, res) => {
       return res
         .status(400)
         .json({ error: "Dados incompletos para o agendamento." });
+    }
+
+
+    const statusProfessor = await pool.query(
+      "SELECT status FROM usuarios WHERE email = $1",
+      [professor_email]
+    );
+    if (statusProfessor.rowCount > 0 && statusProfessor.rows[0].status === 'desativado') {
+      return res.status(403).json({ 
+        error: "Sua conta está desativada. Você não tem permissão para solicitar agendamentos." 
+      });
+    }
+
+    const statusLaboratorio = await pool.query(
+      `SELECT u.status 
+       FROM laboratorio l
+       JOIN usuarios u ON l.usuario_email = u.email
+       WHERE l.id_laboratorio = $1`,
+      [labId]
+    );
+    if (statusLaboratorio.rowCount > 0 && statusLaboratorio.rows[0].status === 'desativado') {
+      return res.status(403).json({ 
+        error: "Não é possível agendar neste laboratório, pois o usuário responsável por ele está desativado." 
+      });
     }
 
     const dataAgendamento = new Date(`${date}T00:00:00`); 
@@ -2006,7 +2029,6 @@ app.post("/api/schedule", async (req, res) => {
     res.status(500).json({ error: "Erro ao solicitar aula" });
   }
 });
-
 app.post("/api/schedule-recurring", async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: "Você precisa estar logado." });
