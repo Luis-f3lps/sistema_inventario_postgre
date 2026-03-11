@@ -96,7 +96,12 @@ app.post("/login", async (req, res) => {
 
     const user = rows[0];
 
-    // Verificar se a senha fornecida corresponde ao hash armazenado
+    if (user.status === 'desativado') {
+      return res.status(403).json({ 
+        error: "Usuário desativado, entre em contato com o Administrador para ativação." 
+      });
+    }
+
     const match = await bcrypt.compare(senha, user.senha);
     if (!match) {
       return res.status(401).json({ error: "Credenciais inválidas" });
