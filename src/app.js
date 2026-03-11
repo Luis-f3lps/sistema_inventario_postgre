@@ -1907,7 +1907,7 @@ app.get("/api/availability", async (req, res) => {
   }
 });
 
-apapp.post("/api/schedule", async (req, res) => {
+app.post("/api/schedule", async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: "Você precisa estar logado." });
   }
@@ -1954,17 +1954,16 @@ apapp.post("/api/schedule", async (req, res) => {
     }
     const id_horario = horario.rows[0].id_horario;
 
-
     if (precisa_tecnico === true) {
-
       const tecnicoOcupado = await pool.query(
         `SELECT 1
          FROM aulas a
-         JOIN laboratorios l ON a.id_laboratorio = l.id_laboratorio
-         WHERE l.id_tecnico = (SELECT id_tecnico FROM laboratorios WHERE id_laboratorio = $1)
+         JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+         WHERE l.usuario_email = (SELECT usuario_email FROM laboratorio WHERE id_laboratorio = $1)
            AND a.data = $2
            AND a.id_horario = $3
            AND a.precisa_tecnico = true
+           AND a.status IN ('analisando', 'autorizado') -- Ignora aulas canceladas ou negadas
          LIMIT 1`,
         [labId, date, id_horario]
       );
@@ -1978,8 +1977,8 @@ apapp.post("/api/schedule", async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-             RETURNING *`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING *`,
       [
         professor_email,
         labId,
