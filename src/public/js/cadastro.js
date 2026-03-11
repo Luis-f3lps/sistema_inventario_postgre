@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const dados = { nome_usuario, email, senha, tipo_usuario };
 
             try {
-                const response = await fetch('/api/usuarios', {
+                const response = await fetch('/api/novo-usuario', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

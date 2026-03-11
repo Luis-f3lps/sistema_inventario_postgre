@@ -338,6 +338,49 @@ app.post("/api/usuarios", Autenticado, async (req, res) => {
   }
 });
 
+app.post("/api/novo-usuario", async (req, res) => { 
+  const { nome_usuario, email, senha, tipo_usuario } = req.body;
+
+  if (!nome_usuario || !email || !senha || !tipo_usuario) {
+    return res.status(400).json({ error: "Todos os campos são obrigatórios" });
+  }
+
+  const tiposPermitidos = ["professor", "tecnico"];
+  if (!tiposPermitidos.includes(tipo_usuario)) {
+    return res.status(403).json({ error: "Apenas perfis de Professor ou Técnico são permitidos neste cadastro." });
+  }
+
+  if (senha.length > 12) {
+    return res
+      .status(400)
+      .json({ error: "A senha deve ter no máximo 12 caracteres" });
+  }
+
+  try {
+    // Verificar se o email já existe
+    const { rows: existingUserByEmail } = await pool.query(
+      "SELECT email FROM usuario WHERE email = $1",
+      [email]
+    );
+
+    if (existingUserByEmail.length > 0) {
+      return res.status(400).json({ error: "Email já está em uso" });
+    }
+
+    const hashedPassword = await bcrypt.hash(senha, 10); 
+
+    await pool.query(
+      "INSERT INTO usuario (nome_usuario, email, senha, tipo_usuario, status) VALUES ($1, $2, $3, $4, 'desativado')",
+      [nome_usuario, email, hashedPassword, tipo_usuario]
+    );
+
+    res.status(201).json({ message: "Usuário adicionado com sucesso" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro no servidor" });
+  }
+});
+
 // Checar Autenticação
 app.get("/api/check-auth", (req, res) => {
   if (req.session.user) {
