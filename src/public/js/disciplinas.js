@@ -171,8 +171,8 @@ function setupEventListeners() {
 async function handleAddDisciplina(event) {
   event.preventDefault();
   const form = event.currentTarget;
-
-  const nomeDisciplina = document.getElementById("username").value;
+const nomeDisciplina = document.getElementById("disciplina-select2").value;
+  // const nomeDisciplina = document.getElementById("username").value;
   const emailProfessor = document.getElementById("usuarios-select").value;
 
   if (!nomeDisciplina || !emailProfessor) {
