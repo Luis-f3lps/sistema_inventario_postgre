@@ -1907,7 +1907,7 @@ app.get("/api/availability", async (req, res) => {
   }
 });
 
-app.post("/api/schedule", async (req, res) => {
+apapp.post("/api/schedule", async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: "Você precisa estar logado." });
   }
@@ -1931,6 +1931,20 @@ app.post("/api/schedule", async (req, res) => {
         .json({ error: "Dados incompletos para o agendamento." });
     }
 
+    const dataAgendamento = new Date(`${date}T00:00:00`); 
+    
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0); 
+
+    const dataMinima = new Date(hoje);
+    dataMinima.setDate(hoje.getDate() + 4); 
+
+    if (dataAgendamento < dataMinima) {
+      return res.status(400).json({ 
+        error: "O agendamento deve ser feito com pelo menos 4 dias de antecedência." 
+      });
+    }
+
     const horario = await pool.query(
       "SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1",
       [hour],
@@ -1939,6 +1953,28 @@ app.post("/api/schedule", async (req, res) => {
       return res.status(400).json({ error: "Horário inválido" });
     }
     const id_horario = horario.rows[0].id_horario;
+
+
+    if (precisa_tecnico === true) {
+
+      const tecnicoOcupado = await pool.query(
+        `SELECT 1
+         FROM aulas a
+         JOIN laboratorios l ON a.id_laboratorio = l.id_laboratorio
+         WHERE l.id_tecnico = (SELECT id_tecnico FROM laboratorios WHERE id_laboratorio = $1)
+           AND a.data = $2
+           AND a.id_horario = $3
+           AND a.precisa_tecnico = true
+         LIMIT 1`,
+        [labId, date, id_horario]
+      );
+
+      if (tecnicoOcupado.rowCount > 0) {
+        return res.status(400).json({
+          error: "O técnico responsável por este laboratório já está agendado para auxiliar em outra aula neste mesmo horário."
+        });
+      }
+    }
 
     const result = await pool.query(
       `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes)
