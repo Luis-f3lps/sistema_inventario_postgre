@@ -155,22 +155,32 @@ function closemenu() {
 }
 async function atualizarBadgeAulas() {
     try {
-        const emailProfessor = document.getElementById('user-name-text').innerText;
+        const spanNome = document.getElementById('user-name-text');
+        
+        if (!spanNome || !spanNome.innerText.trim()) {
+            setTimeout(atualizarBadgeAulas, 500);
+            return;
+        }
+
+        const emailProfessor = spanNome.innerText.trim();
         
         const response = await fetch(`/api/aulas-analise?email=${encodeURIComponent(emailProfessor)}`);
         const data = await response.json();
         
         const badge = document.getElementById('badge-solicitacoes');
         
-        if (data.total > 0) {
-            badge.innerText = data.total;
-            badge.style.display = 'flex';
-        } else {
-            badge.style.display = 'none';
+        if (badge) {
+            if (data.total > 0) {
+                badge.innerText = data.total;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
         }
     } catch (error) {
         console.error(error);
     }
 }
+
 
 document.addEventListener('DOMContentLoaded', atualizarBadgeAulas);

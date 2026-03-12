@@ -2593,5 +2593,23 @@ app.put("/api/agendamentos/:id/status", async (req, res) => {
       .json({ error: "Erro interno ao processar o cancelamento." });
   }
 });
+app.get("/api/aulas-analise", async (req, res) => {
+  try {
+    const email = req.query.email;
+    
+    if (!email) {
+      return res.json({ total: 0 });
+    }
 
+    const result = await pool.query(
+      "SELECT COUNT(*) AS total FROM aulas WHERE professor_email = $1 AND status = 'analisando'",
+      [email]
+    );
+
+    res.json({ total: parseInt(result.rows[0].total) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ total: 0 });
+  }
+});
 export default app;
