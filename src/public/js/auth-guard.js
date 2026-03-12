@@ -1,5 +1,4 @@
 const paginasAdmin = [
-    '/Usuarios', 
     '/Produto',
     '/Laboratorio'
 ];
