@@ -153,3 +153,24 @@ function closemenu() {
         conteiner.style.width = "95%";
     }
 }
+async function atualizarBadgeAulas() {
+    try {
+        const emailProfessor = document.getElementById('user-name-text').innerText;
+        
+        const response = await fetch(`/api/aulas-analise?email=${encodeURIComponent(emailProfessor)}`);
+        const data = await response.json();
+        
+        const badge = document.getElementById('badge-solicitacoes');
+        
+        if (data.total > 0) {
+            badge.innerText = data.total;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', atualizarBadgeAulas);

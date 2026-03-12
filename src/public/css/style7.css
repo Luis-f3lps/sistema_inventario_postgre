@@ -1013,7 +1013,7 @@ input[type="url"]::placeholder {
     }
 
     #header {
-        width: 25%;
+        width: 5%;
     }
 
     .conteudo,
@@ -1032,7 +1032,9 @@ input[type="url"]::placeholder {
         left: -100%;
         box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
     }
-
+.seletor-fila {
+    display: block;
+}
     nav.active {
         left: 0;
     }
@@ -1225,3 +1227,23 @@ input[type="url"]::placeholder {
 
 .btn-confirmar:hover { background: #c9302c; }
 .btn-cancelar:hover { background: #bbb; }
+.icon-wrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+.badge-notificacao {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background-color: #e74c3c;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+}
