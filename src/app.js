@@ -2615,5 +2615,4 @@ app.get("/api/solicitacoes-analise-tecnico", async (req, res) => {
     res.status(500).json({ total: 0 });
   }
 });
-document.addEventListener('DOMContentLoaded', atualizarBadgeTecnico);
 export default app;
