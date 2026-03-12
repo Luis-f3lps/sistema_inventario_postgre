@@ -1914,7 +1914,7 @@ app.post("/api/schedule", async (req, res) => {
     }
 
     const statusProfessor = await pool.query(
-      "SELECT status FROM usuarios WHERE email = $1",
+      "SELECT status FROM usuario WHERE email = $1",
       [professor_email],
     );
     if (
@@ -1930,7 +1930,7 @@ app.post("/api/schedule", async (req, res) => {
     const statusLaboratorio = await pool.query(
       `SELECT u.status 
        FROM laboratorio l
-       JOIN usuarios u ON l.usuario_email = u.email
+       JOIN usuario u ON l.usuario_email = u.email
        WHERE l.id_laboratorio = $1`,
       [labId],
     );
@@ -2019,6 +2019,7 @@ app.post("/api/schedule", async (req, res) => {
     res.status(500).json({ error: "Erro ao solicitar aula" });
   }
 });
+
 app.post("/api/schedule-recurring", async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: "Você precisa estar logado." });
