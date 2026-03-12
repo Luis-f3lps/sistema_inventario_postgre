@@ -153,21 +153,21 @@ function closemenu() {
         conteiner.style.width = "95%";
     }
 }
-async function atualizarBadgeAulas() {
+async function atualizarBadgeTecnico() {
     try {
         const spanNome = document.getElementById('user-name-text');
         
         if (!spanNome || !spanNome.innerText.trim()) {
-            setTimeout(atualizarBadgeAulas, 500);
+            setTimeout(atualizarBadgeTecnico, 500);
             return;
         }
 
-        const emailProfessor = spanNome.innerText.trim();
+        const emailTecnico = spanNome.innerText.trim();
         
-        const response = await fetch(`/api/aulas-analise?email=${encodeURIComponent(emailProfessor)}`);
+        const response = await fetch(`/api/solicitacoes-analise-tecnico?email=${encodeURIComponent(emailTecnico)}`);
         const data = await response.json();
         
-        const badge = document.getElementById('badge-solicitacoes');
+        const badge = document.getElementById('badge-solicitacoes-tecnico');
         
         if (badge) {
             if (data.total > 0) {
@@ -182,5 +182,4 @@ async function atualizarBadgeAulas() {
     }
 }
 
-
-document.addEventListener('DOMContentLoaded', atualizarBadgeAulas);
+document.addEventListener('DOMContentLoaded', atualizarBadgeTecnico);
