@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     inicializarMenuEAutenticacao();
+    atualizarBadgeTecnico();
 });
-
 async function inicializarMenuEAutenticacao() {
 
     const menuContainer = document.getElementById('menu-container');
@@ -155,16 +155,7 @@ function closemenu() {
 }
 async function atualizarBadgeTecnico() {
     try {
-        const spanNome = document.getElementById('user-name-text');
-        
-        if (!spanNome || !spanNome.innerText.trim()) {
-            setTimeout(atualizarBadgeTecnico, 500);
-            return;
-        }
-
-        const emailTecnico = spanNome.innerText.trim();
-        
-        const response = await fetch(`/api/solicitacoes-analise-tecnico?email=${encodeURIComponent(emailTecnico)}`);
+        const response = await fetch('/api/solicitacoes-analise-tecnico');
         const data = await response.json();
         
         const badge = document.getElementById('badge-solicitacoes-tecnico');
@@ -178,8 +169,7 @@ async function atualizarBadgeTecnico() {
             }
         }
     } catch (error) {
-        console.error(error);
+        console.error("Erro ao buscar badge:", error);
     }
 }
 
-document.addEventListener('DOMContentLoaded', atualizarBadgeTecnico);

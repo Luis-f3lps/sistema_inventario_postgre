@@ -2595,24 +2595,25 @@ app.put("/api/agendamentos/:id/status", async (req, res) => {
 });
 app.get("/api/solicitacoes-analise-tecnico", async (req, res) => {
   try {
-    const email = req.query.email;
-    
-    if (!email) {
+    if (!req.session.user || !req.session.user.email) {
       return res.json({ total: 0 });
     }
+
+    const email_tecnico = req.session.user.email;
 
     const result = await pool.query(
       `SELECT COUNT(*) AS total 
        FROM aulas a
        JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
        WHERE l.usuario_email = $1 AND a.status = 'analisando'`,
-      [email]
+      [email_tecnico]
     );
 
     res.json({ total: parseInt(result.rows[0].total) });
   } catch (err) {
-    console.error(err);
+    console.error("Erro na contagem de solicitacoes:", err);
     res.status(500).json({ total: 0 });
   }
 });
+document.addEventListener('DOMContentLoaded', atualizarBadgeTecnico);
 export default app;
