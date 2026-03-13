@@ -261,10 +261,14 @@ menu {
     color: var(--text-color);
 }
 
-select,
-input[type="date"],
-input[type="number"],
-input[type="text"] {
+select, 
+input[type="date"], 
+input[type="number"], 
+input[type="text"],
+input[type="email"],       
+input[type="password"],    
+input[type="tel"],         
+textarea {
     padding: 10px;
     border: 1px solid var(--input-border);
     border-radius: 6px;
