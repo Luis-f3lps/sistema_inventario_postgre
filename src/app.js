@@ -56,9 +56,16 @@ app.use(
 // Middleware de autenticação
 function Autenticado(req, res, next) {
   if (!req.session.user) {
-    console.log("Usuário não autenticado, redirecionando para login...");
-    return res.status(401).json({ error: "Não autorizado" });
+    console.log("Usuário não autenticado, bloqueando acesso...");
+
+    if (req.originalUrl.startsWith('/api') || req.xhr || req.headers.accept.indexOf('json') > -1) {
+      return res.status(401).json({ error: "Não autorizado" });
+    } else {
+      return res.redirect("https://sistema-inventario-postgre.vercel.app/");
+    }
   }
+  
+  // Se estiver logado, continua normalmente
   next();
 }
 

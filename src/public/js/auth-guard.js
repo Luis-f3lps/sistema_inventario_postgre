@@ -15,9 +15,11 @@ function mostrarAvisoDeAcessoNegado(motivo) {
     caixaAviso.innerHTML = `
         <i class="fas fa-lock" style="font-size: 40px; color: #dc3545; margin-bottom: 15px;"></i>
         <h2 style="color: #333;">Acesso Restrito</h2>
-        <p style="color: #666; margin-bottom: 10px;">Você não tem permissão para aceder a esta página.</p>
-        <p style="font-size: 11px; color: red;">(Debug - Cargo detectado: <b>${motivo}</b>)</p>
+        <p style="color: #666; margin-bottom: 10px;">Você não tem permissão para acessar esta página.</p>
+        <p style="font-size: 11px; color: red;">(Debug - Cargo detectado: <b></b>)</p>
     `;
+
+    caixaAviso.querySelector('b').textContent = motivo;
 
     overlay.appendChild(caixaAviso);
     document.body.appendChild(overlay);
