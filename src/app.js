@@ -2449,11 +2449,13 @@ app.get("/api/disciplinas", async (req, res) => {
 
     if (tipoUsuario === "admin") {
       query = 'SELECT * FROM "disciplina" ORDER BY nome_disciplina, status';
-    } else if (tipoUsuario === "professor") {
+    } 
+    else if (tipoUsuario === "professor") {
       query =
-        'SELECT * FROM "disciplina" WHERE usuario_email = $1 ORDER BY nome_disciplina, status';
+        'SELECT * FROM "disciplina" WHERE professor_email_responsavel = $1 ORDER BY nome_disciplina, status';
       values = [usuarioEmail];
-    } else {
+    } 
+    else {
       return res.json([]);
     }
 
