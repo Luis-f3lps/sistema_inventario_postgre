@@ -287,14 +287,13 @@ input:focus {
 }
 
 .grade-horarios {
-    display: flex;
+    display: grid;
     flex-wrap: wrap;
     gap: 10px;
     margin-top: 10px;
     margin-bottom: 10px;
-    width: 55%;
+    grid-template-columns: repeat(5, 1fr);
 }
-
 .grade-horarios button,
 .grade-horarios .slot {
     background-color: #f4f4f4;
@@ -1309,14 +1308,6 @@ input[type="url"]::placeholder {
     gap: 10px;
 }
 
-.btn-cancelar {
-    background: #ccc;
-    color: #333;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-}
 
 .btn-confirmar {
     background: #d9534f;
@@ -1333,11 +1324,6 @@ input[type="url"]::placeholder {
 
 .btn-cancelar:hover {
     background: #bbb;
-}
-
-.dia-calendario.tem-aula {
-    background-color: #27ae60; 
-    color: white;
 }
 
 .dia-calendario.tem-aula-recorrente {
@@ -1358,4 +1344,24 @@ input[type="url"]::placeholder {
     position: relative;
     z-index: 2;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+.dia-calendario.tem-aula {
+    background-color: #27ae60 !important;
+    color: white !important;
+}
+
+.dia-calendario.tem-aula-recorrente {
+    background-color: #9b59b6 !important;
+    color: white !important;
+}
+
+.dia-calendario.tem-aula-mista {
+    background: linear-gradient(135deg, #27ae60 50%, #9b59b6 50%) !important;
+    color: white !important;
+}
+
+.dia-calendario span {
+    position: relative;
+    z-index: 5;
+    font-weight: bold;
 }
