@@ -2062,6 +2062,8 @@ app.post("/api/schedule-recurring", async (req, res) => {
 
     await client.query("BEGIN");
 
+    const id_pedido = Date.now();
+
     const datasParaAgendar = [];
     let dataAtual = new Date(dataInicio);
     const dataFinal = new Date(dataFim);
@@ -2083,7 +2085,7 @@ app.post("/api/schedule-recurring", async (req, res) => {
       for (const hora of horarios) {
         const horarioRes = await client.query(
           "SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1",
-          [hora],
+          [hora]
         );
         if (horarioRes.rowCount === 0) {
           await client.query("ROLLBACK");
@@ -2092,10 +2094,10 @@ app.post("/api/schedule-recurring", async (req, res) => {
         const id_horario = horarioRes.rows[0].id_horario;
 
         await client.query(
-          `INSERT INTO aulas (
-                        professor_email, id_laboratorio, data, id_horario, precisa_tecnico, 
-                        link_roteiro, id_disciplina, numero_discentes, status
-                     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'analisando')`,
+          `INSERT INTO aulas_recorente (
+            professor_email, id_laboratorio, data, id_horario, precisa_tecnico, 
+            link_roteiro, id_disciplina, numero_discentes, status, id_pedido
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'analisando', $9)`,
           [
             professor_email,
             labId,
@@ -2105,7 +2107,8 @@ app.post("/api/schedule-recurring", async (req, res) => {
             link_roteiro,
             disciplinaId,
             numero_discentes,
-          ],
+            id_pedido
+          ]
         );
       }
     }
@@ -2626,69 +2629,4 @@ app.get("/api/solicitacoes-analise-tecnico", async (req, res) => {
   }
 });
 
-app.post('/api/schedule-recurring', async (req, res) => {
-    const { 
-        labId, 
-        disciplinaId, 
-        dataInicio, 
-        dataFim, 
-        diaDaSemana, 
-        horarios, 
-        precisa_tecnico, 
-        numero_discentes, 
-        link_roteiro 
-    } = req.body;
-
-    const professorEmail = "renato.trezes@sistema.com"; 
-
-    try {
-        const startDate = new Date(dataInicio);
-        const endDate = new Date(dataFim);
-        const datasParaAgendar = [];
-
-        let currentDate = startDate;
-        while (currentDate <= endDate) {
-            if (currentDate.getUTCDay() === diaDaSemana) {
-                datasParaAgendar.push(currentDate.toISOString().split('T')[0]);
-            }
-            currentDate.setUTCDate(currentDate.getUTCDate() + 1);
-        }
-
-        if (datasParaAgendar.length === 0) {
-            return res.status(400).json({ error: "Nenhuma data encontrada para este dia da semana no período." });
-        }
-
-        const registrosParaInserir = [];
-
-        datasParaAgendar.forEach(data => {
-            horarios.forEach(idHorario => {
-                registrosParaInserir.push({
-                    id_laboratorio: labId,
-                    id_disciplina: disciplinaId,
-                    id_horario: idHorario,
-                    data: data,
-                    professor_email: professorEmail,
-                    precisa_tecnico: precisa_tecnico,
-                    numero_discentes: numero_discentes,
-                    link_roteiro: link_roteiro
-                });
-            });
-        });
-
-        const { data: insertedData, error } = await supabase
-            .from('aulas_recorente')
-            .insert(registrosParaInserir);
-
-        if (error) {
-            console.error(error);
-            return res.status(500).json({ error: "Erro ao inserir no banco de dados." });
-        }
-
-        res.json({ message: "Aulas agendadas com sucesso na tabela de recorrência!" });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Erro interno do servidor." });
-    }
-});
 export default app;
