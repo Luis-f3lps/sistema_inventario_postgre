@@ -98,18 +98,17 @@ async function submeterAgendamentoRecorrente() {
     const numeroDiscentes = document.getElementById('numero_discentes').value;
     const linkRoteiro = document.getElementById('link_roteiro').value;
 
-    const payload = {
-        labId: labEl.value,
-        disciplinaId: disciplinaEl.value,
+const payload = {
+        labId: parseInt(labEl.value),
+        disciplinaId: parseInt(disciplinaEl.value),
         dataInicio: dataInicioEl.value,
         dataFim: dataFimEl.value,
         diaDaSemana: parseInt(diaDaSemanaEl.value),
-        horarios: horariosSelecionados, // Agora envia um array de IDs
+        horarios: horariosSelecionados.map(Number), 
         precisa_tecnico: precisaTecnico,
-        numero_discentes: numeroDiscentes,
+        numero_discentes: parseInt(numeroDiscentes),
         link_roteiro: linkRoteiro
     };
-
     try {
         const response = await fetch('/api/schedule-recurring', {
             method: 'POST',
