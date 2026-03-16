@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import pkg from "pg"; 
 import PDFDocument from "pdfkit";
 import fs from "fs";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import pool from "./database.js"; 
 
 // 1. NOVOS IMPORTS PARA O JWT E COOKIES
