@@ -2625,4 +2625,70 @@ app.get("/api/solicitacoes-analise-tecnico", async (req, res) => {
     res.status(500).json({ total: 0 });
   }
 });
+
+app.post('/api/schedule-recurring', async (req, res) => {
+    const { 
+        labId, 
+        disciplinaId, 
+        dataInicio, 
+        dataFim, 
+        diaDaSemana, 
+        horarios, 
+        precisa_tecnico, 
+        numero_discentes, 
+        link_roteiro 
+    } = req.body;
+
+    const professorEmail = "renato.trezes@sistema.com"; 
+
+    try {
+        const startDate = new Date(dataInicio);
+        const endDate = new Date(dataFim);
+        const datasParaAgendar = [];
+
+        let currentDate = startDate;
+        while (currentDate <= endDate) {
+            if (currentDate.getUTCDay() === diaDaSemana) {
+                datasParaAgendar.push(currentDate.toISOString().split('T')[0]);
+            }
+            currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+        }
+
+        if (datasParaAgendar.length === 0) {
+            return res.status(400).json({ error: "Nenhuma data encontrada para este dia da semana no período." });
+        }
+
+        const registrosParaInserir = [];
+
+        datasParaAgendar.forEach(data => {
+            horarios.forEach(idHorario => {
+                registrosParaInserir.push({
+                    id_laboratorio: labId,
+                    id_disciplina: disciplinaId,
+                    id_horario: idHorario,
+                    data: data,
+                    professor_email: professorEmail,
+                    precisa_tecnico: precisa_tecnico,
+                    numero_discentes: numero_discentes,
+                    link_roteiro: link_roteiro
+                });
+            });
+        });
+
+        const { data: insertedData, error } = await supabase
+            .from('aulas_recorente')
+            .insert(registrosParaInserir);
+
+        if (error) {
+            console.error(error);
+            return res.status(500).json({ error: "Erro ao inserir no banco de dados." });
+        }
+
+        res.json({ message: "Aulas agendadas com sucesso na tabela de recorrência!" });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Erro interno do servidor." });
+    }
+});
 export default app;

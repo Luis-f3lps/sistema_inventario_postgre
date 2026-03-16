@@ -3,7 +3,6 @@ document.addEventListener('menuReady', (event) => {
     inicializarPagina(userData);
 });
 
-
 const labEl = document.getElementById('laboratorios-select2');
 const disciplinaEl = document.getElementById('disciplina-select2');
 const dataInicioEl = document.getElementById('data-inicio');
@@ -12,31 +11,26 @@ const diaDaSemanaEl = document.getElementById('dia-semana');
 const submitBtn = document.getElementById('submitBtnRecorrente');
 const msgEl = document.getElementById('msg');
 
-
 async function inicializarPagina(userData) {
     await loadLaboratorios(); 
     await loadDisciplinas();
-
     await loadHorariosCheckboxes();
+
     const radioTecnico = document.querySelectorAll('input[name="precisaTecnico"]');
     radioTecnico.forEach(radio => {
         radio.addEventListener('change', toggleRoteiroVisibility);
     });
+    
     toggleRoteiroVisibility();
 
     if (submitBtn) {
         submitBtn.addEventListener('click', submeterAgendamentoRecorrente);
     }
-    if (submitBtn) {
-        submitBtn.addEventListener('click', submeterAgendamentoRecorrente);
-    }
 }
-
 
 async function loadLaboratorios() {
     try {
         const response = await fetch('/api/lab32');
-        if (!response.ok) throw new Error('Falha ao carregar laboratórios');
         const data = await response.json();
         
         labEl.innerHTML = '<option value="">Selecione um Laboratório</option>'; 
@@ -47,15 +41,13 @@ async function loadLaboratorios() {
             labEl.appendChild(option);
         });
     } catch (error) {
-        console.error('Erro ao carregar laboratórios:', error);
+        console.error('Erro:', error);
     }
 }
-
 
 async function loadDisciplinas() {
     try {
         const response = await fetch('/api/minhas-disciplinas');
-        if (!response.ok) throw new Error('Falha ao carregar disciplinas');
         const data = await response.json();
         
         if (!disciplinaEl) return;
@@ -67,30 +59,28 @@ async function loadDisciplinas() {
             disciplinaEl.appendChild(option);
         });
     } catch (error) {
-        console.error('Erro ao carregar disciplinas:', error);
+        console.error('Erro:', error);
     }
 }
-
 
 async function loadHorariosCheckboxes() {
     const container = document.getElementById('horarios-checkboxes');
     if (!container) return;
+    
     try {
         const response = await fetch('/api/horarios');
-        if (!response.ok) throw new Error('Falha ao buscar horários');
         const horarios = await response.json();
         
         container.innerHTML = horarios.map(h => `
             <div class="checkbox-item">
-                <input type="checkbox" id="horario-${h.inicio.replace(':','')}" name="horarios" value="${h.inicio}">
-                <label for="horario-${h.inicio.replace(':','')}">${h.inicio} — ${h.fim}</label>
+                <input type="checkbox" id="horario-${h.id_horario || h.id}" name="horarios" value="${h.id_horario || h.id}">
+                <label for="horario-${h.id_horario || h.id}">${h.inicio} — ${h.fim}</label>
             </div>
         `).join('');
     } catch (error) {
-        console.error("Erro ao carregar checkboxes de horários:", error);
+        console.error("Erro:", error);
     }
 }
-
 
 async function submeterAgendamentoRecorrente() {
     const horariosSelecionados = [];
@@ -98,11 +88,11 @@ async function submeterAgendamentoRecorrente() {
         horariosSelecionados.push(checkbox.value);
     });
 
-    if (!labEl.value) { return alert("Por favor, selecione um laboratório."); }
-    if (!disciplinaEl.value) { return alert("Por favor, selecione uma disciplina."); }
-    if (!dataInicioEl.value || !dataFimEl.value) { return alert("Por favor, selecione um período de datas."); }
-    if (dataFimEl.value < dataInicioEl.value) { return alert("A data final não pode ser anterior à data inicial."); }
-    if (horariosSelecionados.length === 0) { return alert("Selecione pelo menos um horário."); }
+    if (!labEl.value) return alert("Selecione um laboratório.");
+    if (!disciplinaEl.value) return alert("Selecione uma disciplina.");
+    if (!dataInicioEl.value || !dataFimEl.value) return alert("Selecione um período.");
+    if (dataFimEl.value < dataInicioEl.value) return alert("Data final inválida.");
+    if (horariosSelecionados.length === 0) return alert("Selecione um horário.");
 
     const precisaTecnico = document.querySelector('input[name="precisaTecnico"]:checked').value === 'true';
     const numeroDiscentes = document.getElementById('numero_discentes').value;
@@ -113,8 +103,8 @@ async function submeterAgendamentoRecorrente() {
         disciplinaId: disciplinaEl.value,
         dataInicio: dataInicioEl.value,
         dataFim: dataFimEl.value,
-        diaDaSemana: diaDaSemanaEl.value,
-        horarios: horariosSelecionados,
+        diaDaSemana: parseInt(diaDaSemanaEl.value),
+        horarios: horariosSelecionados, // Agora envia um array de IDs
         precisa_tecnico: precisaTecnico,
         numero_discentes: numeroDiscentes,
         link_roteiro: linkRoteiro
@@ -129,10 +119,10 @@ async function submeterAgendamentoRecorrente() {
 
         const result = await response.json();
         
-        if (!response.ok) throw new Error(result.error || 'Ocorreu um erro no servidor.');
+        if (!response.ok) throw new Error(result.error);
 
         msgEl.className = 'mensagem-status sucesso';
-        msgEl.textContent = result.message;
+        msgEl.textContent = "Aulas recorrentes cadastradas com sucesso!";
         msgEl.style.display = 'block';
 
     } catch (err) {
@@ -141,15 +131,12 @@ async function submeterAgendamentoRecorrente() {
         msgEl.style.display = 'block';
     }
 }
+
 function toggleRoteiroVisibility() {
     const roteiroContainer = document.getElementById('roteiro-container');
     const precisaTecnicoSim = document.getElementById('tecnicoSim');
 
     if (roteiroContainer && precisaTecnicoSim) {
-        if (precisaTecnicoSim.checked) {
-            roteiroContainer.style.display = 'flex'; 
-        } else {
-            roteiroContainer.style.display = 'none';
-        }
+        roteiroContainer.style.display = precisaTecnicoSim.checked ? 'flex' : 'none';
     }
 }
