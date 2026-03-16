@@ -16,6 +16,7 @@
             border-radius: 8px;
             border: 1px solid #e0e0e0;
         }
+
         .container-filtros label {
             margin: 0 15px;
             font-size: 1.05rem;
@@ -23,6 +24,7 @@
             color: #333;
             cursor: pointer;
         }
+
         .container-filtros input[type="radio"] {
             transform: scale(1.2);
             margin-right: 5px;
@@ -35,13 +37,15 @@
             border-radius: 8px;
             background-color: #fcfcfc;
             margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             transition: transform 0.2s ease;
         }
+
         .cartao-recorrente:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
         .header-recorrente {
             display: flex;
             justify-content: space-between;
@@ -50,10 +54,12 @@
             padding-bottom: 10px;
             margin-bottom: 15px;
         }
+
         .header-recorrente h3 {
             margin: 0;
             color: #2c3e50;
         }
+
         .grid-info-recorrente {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -61,12 +67,14 @@
             font-size: 0.95rem;
             color: #444;
         }
+
         .tags-datas {
             display: flex;
             flex-wrap: wrap;
             gap: 5px;
             margin-top: 5px;
         }
+
         .tag-data {
             background-color: #e3f2fd;
             color: #1976d2;
@@ -75,6 +83,7 @@
             font-size: 0.85rem;
             font-weight: 500;
         }
+
         .acoes-recorrente {
             margin-top: 20px;
             display: flex;
@@ -102,7 +111,7 @@
                 <input type="radio" name="filtroStatus" value="todas"> Histórico Completo (Todas)
             </label>
         </div>
-        
+
         <h2 style="margin-top: 30px; border-bottom: 2px solid #569af9; padding-bottom: 5px;">Aulas Recorrentes</h2>
         <div id="container-recorrentes" style="margin-top: 20px;">
         </div>
@@ -134,7 +143,8 @@
     <div id="modal-justificativa" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <h2>Justificativa de Recusa</h2>
-            <p style="font-size: 0.9rem; color: #666;">Por favor, informe o motivo para não autorizar esta(s) aula(s):</p>
+            <p style="font-size: 0.9rem; color: #666;">Por favor, informe o motivo para não autorizar esta(s) aula(s):
+            </p>
             <textarea id="texto-justificativa" rows="4"
                 placeholder="Ex: Falta de reagentes, conflito de horários..."></textarea>
             <div class="modal-actions">
@@ -146,8 +156,8 @@
 
     <script>
         let loggedInUser = null;
-        let allRequests = []; 
-        let filtroAtual = 'analisando'; 
+        let allRequests = [];
+        let filtroAtual = 'analisando';
 
         async function loadLoggedInUser() {
             try {
@@ -157,7 +167,7 @@
                     return;
                 }
                 loggedInUser = await response.json();
-                
+
                 const userNameElement = document.getElementById('user-name-text');
                 if (userNameElement) userNameElement.innerHTML = loggedInUser.nome;
 
@@ -182,9 +192,9 @@
                 const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
                 if (!res.ok) throw new Error('Erro na rede');
 
-                allRequests = await res.json(); 
-                
-                aplicarFiltroEDesenhar(); 
+                allRequests = await res.json();
+
+                aplicarFiltroEDesenhar();
             } catch (error) {
                 console.error('Falha ao carregar solicitações:', error);
                 tbodyInd.innerHTML = `<tr><td colspan="11" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
@@ -194,18 +204,18 @@
 
         function aplicarFiltroEDesenhar() {
             let dadosParaTela = allRequests;
-            
+
             if (filtroAtual === 'analisando') {
                 dadosParaTela = allRequests.filter(req => req.status === 'analisando');
             }
-            
+
             renderUI(dadosParaTela);
         }
 
         function renderUI(requests) {
             const tbodyInd = document.getElementById("corpo-tabela-individuais");
             const containerRec = document.getElementById("container-recorrentes");
-            
+
             tbodyInd.innerHTML = "";
             containerRec.innerHTML = "";
 
@@ -226,8 +236,8 @@
                     const tr = document.createElement("tr");
                     const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
                     const linkRoteiroHtml = r.link_roteiro ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Link</a>` : 'N/A';
-                    
-                    const isDesativado = r.status !== 'analisando';
+
+                    const isDesativado = r.status === 'cancelado';
                     const estiloBotaoDesativado = isDesativado ? 'background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;' : '';
 
                     tr.innerHTML = `
@@ -261,12 +271,13 @@
 
                 for (const [id_pedido, aulas] of Object.entries(agrupados)) {
                     const info = aulas[0];
-                    const isDesativado = info.status !== 'analisando';
+
+                    const isDesativado = info.status === 'cancelado';
                     const estiloBotaoDesativado = isDesativado ? 'background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;' : '';
-                    
-                    const datasFormatadas = aulas.map(a => `<span class="tag-data">${new Date(a.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</span>`).join('');
+
+                    const datasFormatadas = aulas.map(a => `<span class="tag-data">${new Date(a.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>`).join('');
                     const idsArrayJSON = JSON.stringify(aulas.map(a => a.id_aula));
-                    
+
                     const div = document.createElement('div');
                     div.className = 'cartao-recorrente';
                     div.innerHTML = `
@@ -304,7 +315,7 @@
                 const payload = { novoStatus: novoStatus };
                 if (observacoes) payload.observacoes = observacoes;
 
-                const promises = arrayIds.map(id => 
+                const promises = arrayIds.map(id =>
                     fetch(`/api/requests/${id}`, {
                         method: "PATCH",
                         headers: { "Content-Type": "application/json" },
@@ -313,7 +324,7 @@
                 );
 
                 await Promise.all(promises);
-                
+
                 await loadPendingRequests();
 
             } catch (error) {
@@ -330,8 +341,8 @@
             const radiosFiltro = document.querySelectorAll('input[name="filtroStatus"]');
             radiosFiltro.forEach(radio => {
                 radio.addEventListener('change', (event) => {
-                    filtroAtual = event.target.value; 
-                    aplicarFiltroEDesenhar(); 
+                    filtroAtual = event.target.value;
+                    aplicarFiltroEDesenhar();
                 });
             });
 
@@ -343,7 +354,7 @@
 
             painel.addEventListener('click', (event) => {
                 const target = event.target;
-                
+
                 if (target.classList.contains('botao-aceitar')) {
                     const ids = JSON.parse(target.dataset.ids);
                     updateRequestStatus(ids, 'autorizado');
