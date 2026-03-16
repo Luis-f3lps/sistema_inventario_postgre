@@ -1,5 +1,6 @@
 let mesExibido;
 let anoExibido;
+let dataReferenciaSemanaTecnico = new Date();
 document.addEventListener("menuReady", (event) => {
     const { userData } = event.detail;
     inicializarDashboard(userData);
@@ -28,12 +29,11 @@ async function inicializarDashboard(userData) {
             showElement(".cartao-aulas-tecnico");
             showElement(".cartao-meus-laboratorios");
             showElement(".painel-aulas-tecnico-lista");
-            document
-                .getElementById("btn-mes-anterior-tecnico")
-                ?.addEventListener("click", mostrarMesAnteriorTecnico);
-            document
-                .getElementById("btn-proximo-mes-tecnico")
-                ?.addEventListener("click", mostrarProximoMesTecnico);
+
+            document.getElementById("btn-mes-anterior-tecnico")
+                ?.addEventListener("click", mostrarSemanaAnteriorTecnico);
+            document.getElementById("btn-proximo-mes-tecnico")
+                ?.addEventListener("click", mostrarProximaSemanaTecnico);
             break;
         case "professor":
             showElement(".cartao-aulas-autorizadas");
@@ -202,29 +202,22 @@ async function mostrarProximoMesProfessor() {
     renderizarCalendarioProfessor(novasAulas, anoExibido, mesExibido);
 }
 
-async function mostrarMesAnteriorTecnico() {
-    mesExibido--;
-    if (mesExibido < 0) {
-        mesExibido = 11;
-        anoExibido--;
-    }
-    const novasAulas = await fetchAulasDoCalendarioTecnico(
-        anoExibido,
-        mesExibido + 1
-    );
-    renderizarCalendarioTecnico(novasAulas, anoExibido, mesExibido);
+async function mostrarSemanaAnteriorTecnico() {
+    dataReferenciaSemanaTecnico.setDate(dataReferenciaSemanaTecnico.getDate() - 7);
+    const mes = dataReferenciaSemanaTecnico.getMonth() + 1;
+    const ano = dataReferenciaSemanaTecnico.getFullYear();
+
+    const novasAulas = await fetchAulasDoCalendarioTecnico(ano, mes);
+    renderizarCalendarioTecnico(novasAulas, ano, mes - 1);
 }
-async function mostrarProximoMesTecnico() {
-    mesExibido++;
-    if (mesExibido > 11) {
-        mesExibido = 0;
-        anoExibido++;
-    }
-    const novasAulas = await fetchAulasDoCalendarioTecnico(
-        anoExibido,
-        mesExibido + 1
-    );
-    renderizarCalendarioTecnico(novasAulas, anoExibido, mesExibido);
+
+async function mostrarProximaSemanaTecnico() {
+    dataReferenciaSemanaTecnico.setDate(dataReferenciaSemanaTecnico.getDate() + 7);
+    const mes = dataReferenciaSemanaTecnico.getMonth() + 1;
+    const ano = dataReferenciaSemanaTecnico.getFullYear();
+
+    const novasAulas = await fetchAulasDoCalendarioTecnico(ano, mes);
+    renderizarCalendarioTecnico(novasAulas, ano, mes - 1);
 }
 
 async function fetchAulasDoCalendarioProfessor(ano, mes) {
@@ -317,24 +310,24 @@ function renderizarBaseCalendario(
         ) {
             classesCss += " hoje";
         }
-if (aulasPorDia[dia]) {
-    const temRecorrente = aulasPorDia[dia].some(aula => aula.tipo_aula === 'recorrente');
-    const temRegular = aulasPorDia[dia].some(aula => aula.tipo_aula !== 'recorrente');
+        if (aulasPorDia[dia]) {
+            const temRecorrente = aulasPorDia[dia].some(aula => aula.tipo_aula === 'recorrente');
+            const temRegular = aulasPorDia[dia].some(aula => aula.tipo_aula !== 'recorrente');
 
-    if (temRecorrente && temRegular) {
-        classesCss += " tem-aula-mista";
-    } 
-    else if (temRecorrente) {
-        classesCss += " tem-aula-recorrente";
-    } 
-    else if (temRegular) {
-        classesCss += " tem-aula";
-    }
-    
-    eventosDoDia = `<div class="tooltip">${aulasPorDia[dia]
-        .map(formatarTooltip)
-        .join("")}</div>`;
-}
+            if (temRecorrente && temRegular) {
+                classesCss += " tem-aula-mista";
+            }
+            else if (temRecorrente) {
+                classesCss += " tem-aula-recorrente";
+            }
+            else if (temRegular) {
+                classesCss += " tem-aula";
+            }
+
+            eventosDoDia = `<div class="tooltip">${aulasPorDia[dia]
+                .map(formatarTooltip)
+                .join("")}</div>`;
+        }
         grid.innerHTML += `<div class="${classesCss}"><span>${dia}</span>${eventosDoDia}</div>`;
     }
 }
@@ -475,7 +468,7 @@ function renderizarTabelaAgendamentos(requisicoes) {
                 </button>
             </td>
         `;
-        tbody.appendChild(tr); 
+        tbody.appendChild(tr);
     });
 }
 function formatarTextoStatus(status) {
@@ -485,5 +478,58 @@ function formatarTextoStatus(status) {
         case 'analisando': return 'Em Análise';
         case 'cancelado': return 'Cancelado';
         default: return status;
+    }
+}
+function renderizarCalendarioTecnico(aulas, ano, mes) {
+    const grid = document.getElementById("calendario-grid-tecnico");
+    const titulo = document.getElementById("calendario-titulo-tecnico");
+    if (!grid || !titulo) return;
+
+    const inicioSemana = new Date(dataReferenciaSemanaTecnico);
+    inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
+
+    const fimSemana = new Date(inicioSemana);
+    fimSemana.setDate(fimSemana.getDate() + 6);
+
+    const formatador = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' });
+    titulo.textContent = `${formatador.format(inicioSemana)} - ${formatador.format(fimSemana)} • ${inicioSemana.getFullYear()}`;
+
+    grid.innerHTML = "";
+
+    for (let i = 0; i < 7; i++) {
+        const diaAtual = new Date(inicioSemana);
+        diaAtual.setDate(inicioSemana.getDate() + i);
+
+        const diaNumero = diaAtual.getDate();
+        const mesAtual = diaAtual.getMonth();
+        const anoAtual = diaAtual.getFullYear();
+
+        let classesCss = "dia-calendario";
+        const hoje = new Date();
+
+        if (diaNumero === hoje.getDate() && mesAtual === hoje.getMonth() && anoAtual === hoje.getFullYear()) {
+            classesCss += " hoje";
+        }
+
+        const aulasDoDia = aulas.filter(aula => {
+            const d = new Date(aula.data);
+            return d.getUTCDate() === diaNumero && d.getUTCMonth() === mesAtual && d.getUTCFullYear() === anoAtual;
+        });
+
+        let eventosDoDia = "";
+        if (aulasDoDia.length > 0) {
+            const temRecorrente = aulasDoDia.some(a => a.tipo_aula === 'recorrente');
+            const temRegular = aulasDoDia.some(a => a.tipo_aula !== 'recorrente');
+
+            if (temRecorrente && temRegular) classesCss += " tem-aula-mista";
+            else if (temRecorrente) classesCss += " tem-aula-recorrente";
+            else classesCss += " tem-aula";
+
+            eventosDoDia = `<div class="tooltip">${aulasDoDia.map(aula =>
+                `<p><strong>${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(0, 5)}:</strong> ${aula.nome_disciplina}<br><em>(Prof: ${aula.nome_professor})</em></p>`
+            ).join("")}</div>`;
+        }
+
+        grid.innerHTML += `<div class="${classesCss}"><span>${diaNumero}</span>${eventosDoDia}</div>`;
     }
 }
