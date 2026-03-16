@@ -2094,10 +2094,10 @@ const id_pedido = Math.floor(10000000 + Math.random() * 90000000);
         const id_horario = horarioRes.rows[0].id_horario;
 
         await client.query(
-          `INSERT INTO aulas_recorente (
+          `INSERT INTO aulas (
             professor_email, id_laboratorio, data, id_horario, precisa_tecnico, 
-            link_roteiro, id_disciplina, numero_discentes, status, id_pedido
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'analisando', $9)`,
+            link_roteiro, id_disciplina, numero_discentes, status, id_pedido, tipo_aula
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'analisando', $9, 'recorrente')`,
           [
             professor_email,
             labId,
