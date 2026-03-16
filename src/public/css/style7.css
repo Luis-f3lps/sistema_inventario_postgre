@@ -1335,9 +1335,27 @@ input[type="url"]::placeholder {
     background: #bbb;
 }
 
+.dia-calendario.tem-aula {
+    background-color: #27ae60; 
+    color: white;
+}
+
 .dia-calendario.tem-aula-recorrente {
     background-color: #9b59b6;
+    color: white;
+    font-weight: bold;
+}
+
+.dia-calendario.tem-aula-mista {
+    background: linear-gradient(135deg, #27ae60 50%, #9b59b6 50%);
+    color: white;
     font-weight: bold;
     cursor: pointer;
-    color: aliceblue;
+}
+
+.dia-calendario.tem-aula-mista span,
+.dia-calendario.tem-aula-recorrente span {
+    position: relative;
+    z-index: 2;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }

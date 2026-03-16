@@ -318,17 +318,23 @@ function renderizarBaseCalendario(
             classesCss += " hoje";
         }
 if (aulasPorDia[dia]) {
-            const temRecorrente = aulasPorDia[dia].some(aula => aula.tipo_aula === 'recorrente');
+    const temRecorrente = aulasPorDia[dia].some(aula => aula.tipo_aula === 'recorrente');
+    const temRegular = aulasPorDia[dia].some(aula => aula.tipo_aula !== 'recorrente');
 
-            if (temRecorrente) {
-                classesCss += " tem-aula-recorrente"; 
-            } else {
-                classesCss += " tem-aula";}
-            
-            eventosDoDia = `<div class="tooltip">${aulasPorDia[dia]
-                .map(formatarTooltip)
-                .join("")}</div>`;
-        }
+    if (temRecorrente && temRegular) {
+        classesCss += " tem-aula-mista";
+    } 
+    else if (temRecorrente) {
+        classesCss += " tem-aula-recorrente";
+    } 
+    else if (temRegular) {
+        classesCss += " tem-aula";
+    }
+    
+    eventosDoDia = `<div class="tooltip">${aulasPorDia[dia]
+        .map(formatarTooltip)
+        .join("")}</div>`;
+}
         grid.innerHTML += `<div class="${classesCss}"><span>${dia}</span>${eventosDoDia}</div>`;
     }
 }
