@@ -1326,18 +1326,7 @@ input[type="url"]::placeholder {
     background: #bbb;
 }
 
-.dia-calendario.tem-aula-recorrente {
-    background-color: #9b59b6;
-    color: white;
-    font-weight: bold;
-}
 
-.dia-calendario.tem-aula-mista {
-    background: linear-gradient(135deg, #27ae60 50%, #9b59b6 50%);
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-}
 
 .dia-calendario.tem-aula-mista span,
 .dia-calendario.tem-aula-recorrente span {
@@ -1348,12 +1337,33 @@ input[type="url"]::placeholder {
 
 
 .dia-calendario.tem-aula-recorrente {
-    background-color: #9b59b6 !important;
+    background-color: #27ae60  !important;
     color: white !important;
 }
-
+.dia-calendario.tem-aula-recorrente::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background-color: #ffffff;
+    border-radius: 50%;
+}
+.dia-calendario.tem-aula-mista::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background-color: #ffffff;
+    border-radius: 50%;
+}
 .dia-calendario.tem-aula-mista {
-    background: linear-gradient(135deg, #27ae60 50%, #9b59b6 50%) !important;
+    background: linear-gradient(135deg, #569af9 50%, #27ae60 50%) !important;
     color: white !important;
 }
 
