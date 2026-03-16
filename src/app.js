@@ -2294,7 +2294,7 @@ app.get("/api/horarios", Autenticado, async (req, res) => {
   }
 });
 // Endpoint para buscar aulas autorizadas para o calendário por mês/ano
-// 1. Adicione o "Autenticado" aqui 👇
+
 app.get("/api/calendario/aulas-autorizadas", Autenticado, async (req, res) => {
   if (!req.session?.user)
     return res.status(401).json({ error: "Não autenticado." });
@@ -2312,7 +2312,8 @@ app.get("/api/calendario/aulas-autorizadas", Autenticado, async (req, res) => {
                 d.nome_disciplina,
                 a.data, 
                 h.hora_inicio, 
-                h.hora_fim -- <<< ADICIONADO AQUI
+                h.hora_fim, 
+                a.tipo_aula
             FROM aulas a
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
             JOIN horarios h ON a.id_horario = h.id_horario
@@ -2349,6 +2350,7 @@ app.get("/api/calendario/aulas-tecnico", Autenticado, async (req, res) => {
                 u.nome_usuario AS nome_professor,
                 h.hora_inicio,
                 h.hora_fim,
+                a.tipo_aula,
                 a.data
             FROM aulas a
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
