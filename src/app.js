@@ -2,19 +2,20 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
-import pkg from "pg"; // Importa o pacote pg
+import pkg from "pg"; 
 import PDFDocument from "pdfkit";
 import fs from "fs";
-import session from "express-session";
 import bcrypt from "bcrypt";
-import connectPgSimple from "connect-pg-simple"; // Importa a integração do express-session com o PostgreSQL
-import pool from "./database.js"; // Importa a pool de conexões do arquivo database.js
+import pool from "./database.js"; 
 
-// Definindo __filename e __dirname
+// 1. NOVOS IMPORTS PARA O JWT E COOKIES
+import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// Carregando variáveis de ambiente do arquivo .env
-dotenv.config({ path: path.resolve(__dirname, "variaveis.env") }); // Ajuste o caminho conforme necessário
+
+dotenv.config({ path: path.resolve(__dirname, "variaveis.env") }); 
 console.log({
   DB_HOST: process.env.DB_HOST,
   DB_USER: process.env.DB_USER,
@@ -24,77 +25,70 @@ console.log({
 
 const app = express();
 
-// Testando a conexão ao banco de dados
+// 2. CHAVE SECRETA DO JWT (Recomendo depois colocar no seu variaveis.env como JWT_SECRET)
+const JWT_SECRET = process.env.JWT_SECRET || "chaveSuperSecretaDoInventario2026";
+
 (async () => {
   try {
-    await pool.query("SELECT NOW()"); // Consulta simples para testar a conexão
+    await pool.query("SELECT NOW()"); 
     console.log("Conexão bem-sucedida ao banco de dados!");
   } catch (err) {
     console.error("Erro ao conectar ao banco de dados:", err);
   }
 })();
 
-// Usando connect-pg-simple para armazenar sessões no PostgreSQL
-const PGSession = connectPgSimple(session);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use(
-  session({
-    store: new PGSession({
-      pool: pool, // Conexão com o banco PostgreSQL
-      tableName: "session", // Nome da tabela de sessões
-    }),
-    secret: "seuSegredo",
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-      secure: false, // Altere para true em produção com HTTPS
-      maxAge: 8 * 60 * 60 * 1000, // 8 horas
-    },
-  }),
-);
+// 3. ATIVANDO O LEITOR DE COOKIES
+app.use(cookieParser());
 
-// Middleware de autenticação
+// 4. NOVO MIDDLEWARE DE AUTENTICAÇÃO (Sem ir no banco de dados!)
 function Autenticado(req, res, next) {
-  if (!req.session.user) {
-    console.log("Usuário não autenticado, bloqueando acesso...");
+  const token = req.cookies.token; // Pega o crachá digital do cookie
 
+  if (!token) {
+    console.log("Usuário não autenticado, bloqueando acesso...");
     if (req.originalUrl.startsWith('/api') || req.xhr || req.headers.accept.indexOf('json') > -1) {
       return res.status(401).json({ error: "Não autorizado" });
     } else {
       return res.redirect("https://sistema-inventario-postgre.vercel.app/");
     }
   }
-  
-  // Se estiver logado, continua normalmente
-  next();
+
+  try {
+    // Confere a assinatura matemática do token
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    // TRUQUE: Recria o req.session.user na memória rápida para não quebrar o resto do seu sistema!
+    req.session = { user: decoded }; 
+    
+    next();
+  } catch (err) {
+    console.error("Token inválido ou expirado.");
+    res.clearCookie("token");
+    return res.status(401).json({ error: "Sessão expirada. Faça login novamente." });
+  }
 }
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Configurar middleware para servir arquivos estáticos
 app.use(express.static(path.join(__dirname, "public")));
 
-// Rotas do servidor
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "login.html"));
 });
 
-// Rota de login
+// 5. NOVA ROTA DE LOGIN (Gera o Token JWT)
 app.post("/login", async (req, res) => {
   try {
     const { email, senha } = req.body;
 
     if (!email || !senha) {
-      return res
-        .status(400)
-        .json({ error: "Usuário e senha são obrigatórios" });
+      return res.status(400).json({ error: "Usuário e senha são obrigatórios" });
     }
 
-    // Usando o pool para fazer a consulta em PostgreSQL
     const { rows } = await pool.query(
       "SELECT * FROM usuario WHERE email = $1",
-      [email],
+      [email]
     );
 
     if (rows.length === 0) {
@@ -105,8 +99,7 @@ app.post("/login", async (req, res) => {
 
     if (user.status === "desativado") {
       return res.status(403).json({
-        error:
-          "Usuário desativado, entre em contato com o Administrador para ativação.",
+        error: "Usuário desativado, entre em contato com o Administrador para ativação.",
       });
     }
 
@@ -115,11 +108,22 @@ app.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Credenciais inválidas" });
     }
 
-    req.session.user = {
+    // Criando os dados que vão dentro do crachá (Token)
+    const userData = {
       nome: user.nome_usuario,
       email: user.email,
       tipo_usuario: user.tipo_usuario,
     };
+
+    // Assinando o Token válido por 8 horas
+    const token = jwt.sign(userData, JWT_SECRET, { expiresIn: '8h' });
+
+    // Enviando o Token como um Cookie seguro para o navegador
+    res.cookie('token', token, {
+      httpOnly: true, // Impede roubo por hackers via Javascript
+      secure: process.env.NODE_ENV === 'production', // true na Vercel
+      maxAge: 8 * 60 * 60 * 1000 // 8 horas
+    });
 
     res.json({ success: true, tipo_usuario: user.tipo_usuario });
   } catch (error) {
@@ -128,98 +132,75 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Iniciar o servidor
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Servidor rodando no endereço http://localhost:${PORT}`);
 });
 
-// Rota para a página Relatório
-app.get("/Relatorio", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "relatorio.html"));
-});
-app.get("/novo-usuario", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "novo-usuario.html"));
-});
-app.get("/Home", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "Home.html"));
-});
-app.get("/Disciplinas", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "disciplinas.html"));
-});
-app.get("/Horario", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "horarios.html"));
-});
-app.get("/agendamento-recorrente", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "agendamento-recorrente.html"));
-});
-app.get("/Tela_Tecnico", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "tela_tecnico.html"));
-});
-app.get("/Tela_Professor", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "tela_professor.html"));
-});
+/* --- ROTAS DE TELAS --- */
+app.get("/Relatorio", (req, res) => res.sendFile(path.join(__dirname, "public", "relatorio.html")));
+app.get("/novo-usuario", (req, res) => res.sendFile(path.join(__dirname, "public", "novo-usuario.html")));
+app.get("/Home", (req, res) => res.sendFile(path.join(__dirname, "public", "Home.html")));
+app.get("/Disciplinas", (req, res) => res.sendFile(path.join(__dirname, "public", "disciplinas.html")));
+app.get("/Horario", (req, res) => res.sendFile(path.join(__dirname, "public", "horarios.html")));
+app.get("/agendamento-recorrente", (req, res) => res.sendFile(path.join(__dirname, "public", "agendamento-recorrente.html")));
+app.get("/Tela_Tecnico", (req, res) => res.sendFile(path.join(__dirname, "public", "tela_tecnico.html")));
+app.get("/Tela_Professor", (req, res) => res.sendFile(path.join(__dirname, "public", "tela_professor.html")));
 
-app.get("/Usuarios", Autenticado, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "usuarios.html"));
-});
+app.get("/Usuarios", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "usuarios.html")));
+app.get("/Produto", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "Produto.html")));
+app.get("/MovimentacaoProduto", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "MovimentacaoProduto.html")));
+app.get("/EditarMovimentacoes", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "EditarMovimentacoes.html")));
+app.get("/Inventario", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "Inventario.html")));
+app.get("/Laboratorio", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "laboratorio.html")));
 
-app.get("/Produto", Autenticado, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "Produto.html"));
-});
+// 6. ATUALIZADA: Rota para obter o usuário logado lendo o Token
+app.get("/api/usuario-logado", (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ error: "Usuário não logado" });
+  }
 
-app.get("/MovimentacaoProduto", Autenticado, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "MovimentacaoProduto.html"));
-});
-
-app.get("/EditarMovimentacoes", Autenticado, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "EditarMovimentacoes.html"));
-});
-
-app.get("/Inventario", Autenticado, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "Inventario.html"));
-});
-
-app.get("/Laboratorio", Autenticado, (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "laboratorio.html"));
-});
-// Rota para obter o usuário logado
-app.get("/api/usuario-logado", async (req, res) => {
-  if (req.session.user) {
-    const { email, nome, tipo_usuario } = req.session.user;
-
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
     res.json({
-      email,
-      nome,
-      tipo_usuario, // Retornando o tipo do usuário
+      email: decoded.email,
+      nome: decoded.nome,
+      tipo_usuario: decoded.tipo_usuario,
     });
-  } else {
-    res.status(401).json({ error: "Usuário não logado" });
+  } catch (err) {
+    res.status(401).json({ error: "Sessão inválida ou expirada" });
   }
 });
-// Rota de logout
+
+// 7. NOVA ROTA DE LOGOUT (Apaga o cookie)
 app.get("/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error("Erro ao destruir a sessão:", err);
-      return res.status(500).json({ error: "Erro ao fazer logout" });
-    }
-    // Limpa o cookie do navegador e redireciona
-    res.clearCookie("connect.sid");
-    res.redirect("/login.html"); // Redireciona para a página de login
-  });
+  res.clearCookie("token");
+  res.redirect("/login.html");
 });
 
-// Rota para usuários
+// 8. ATUALIZADA: Checar Autenticação
+app.get("/api/check-auth", (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.json({ Autenticado: false });
+  }
+  
+  try {
+    jwt.verify(token, JWT_SECRET);
+    res.json({ Autenticado: true });
+  } catch (err) {
+    res.json({ Autenticado: false });
+  }
+});
+
+// Rotas para usuários
 app.get("/api/usuarios", Autenticado, async (req, res) => {
   try {
-    // Consultando o banco de dados PostgreSQL
     const result = await pool.query(
       "SELECT nome_usuario, email, tipo_usuario, status FROM usuario ORDER BY nome_usuario ASC",
     );
-
-    // Retornando os resultados em formato JSON
-    res.json(result.rows); // 'result.rows' contém os dados retornados pela consulta
+    res.json(result.rows); 
   } catch (error) {
     console.error("Erro ao buscar usuários:", error);
     res.status(500).json({ error: "Erro no servidor" });
@@ -229,17 +210,13 @@ app.get("/api/usuarios", Autenticado, async (req, res) => {
 // Desativar Usuários
 app.patch("/api/usuarios/:email", Autenticado, async (req, res) => {
   const { email } = req.params;
-  const loggedUserEmail = req.session.user.email; // Acessa o email do usuário autenticado da sessão
+  const loggedUserEmail = req.session.user.email; 
 
   try {
-    // Verifica se o usuário está tentando desativar a si mesmo
     if (email === loggedUserEmail) {
-      return res
-        .status(403)
-        .json({ error: "Você não pode desativar sua própria conta." });
+      return res.status(403).json({ error: "Você não pode desativar sua própria conta." });
     }
 
-    // Verifica se o usuário que está sendo desativado é um admin
     const resultUserToDeactivate = await pool.query(
       "SELECT tipo_usuario FROM usuario WHERE email = $1",
       [email],
@@ -251,28 +228,18 @@ app.patch("/api/usuarios/:email", Autenticado, async (req, res) => {
 
     const userType = resultUserToDeactivate.rows[0].tipo_usuario;
 
-    // Se o usuário a ser desativado for um admin
     if (userType === "admin") {
-      // Verifica se há pelo menos um outro admin ativo
       const resultActiveAdmins = await pool.query(
         "SELECT COUNT(*) AS count FROM usuario WHERE tipo_usuario = $1 AND status = $2",
         ["admin", "ativado"],
       );
 
-      // Se houver apenas um admin ativo, impede a desativação
       if (resultActiveAdmins.rows[0].count <= 1) {
-        return res.status(403).json({
-          error: "Não é possível desativar o único usuário admin ativo.",
-        });
+        return res.status(403).json({ error: "Não é possível desativar o único usuário admin ativo." });
       }
     }
 
-    // Realiza a desativação do usuário
-    await pool.query("UPDATE usuario SET status = $1 WHERE email = $2", [
-      "desativado",
-      email,
-    ]);
-
+    await pool.query("UPDATE usuario SET status = $1 WHERE email = $2", ["desativado", email]);
     res.status(200).json({ message: "Usuário desativado com sucesso" });
   } catch (error) {
     console.error(error);
@@ -283,14 +250,8 @@ app.patch("/api/usuarios/:email", Autenticado, async (req, res) => {
 // Ativar Usuários
 app.patch("/api/usuarios/ativar/:email", Autenticado, async (req, res) => {
   const { email } = req.params;
-
   try {
-    // Atualiza o status do usuário para 'ativado'
-    await pool.query(
-      "UPDATE usuario SET status = $1 WHERE email = $2",
-      ["ativado", email], // Mudar o status para 'ativado'
-    );
-
+    await pool.query("UPDATE usuario SET status = $1 WHERE email = $2", ["ativado", email]);
     res.status(200).json({ message: "Usuário ativado com sucesso" });
   } catch (error) {
     console.error(error);
@@ -306,38 +267,29 @@ app.post("/api/usuarios", Autenticado, async (req, res) => {
     return res.status(400).json({ error: "Todos os campos são obrigatórios" });
   }
 
-  // Verificar se a senha tem no máximo 12 caracteres
   if (senha.length > 12) {
-    return res
-      .status(400)
-      .json({ error: "A senha deve ter no máximo 12 caracteres" });
+    return res.status(400).json({ error: "A senha deve ter no máximo 12 caracteres" });
   }
 
   try {
-    // Verificar se o nome de usuário já existe
     const { rows: existingUserByName } = await pool.query(
-      "SELECT email FROM usuario WHERE nome_usuario = $1",
-      [nome_usuario],
+      "SELECT email FROM usuario WHERE nome_usuario = $1", [nome_usuario]
     );
 
     if (existingUserByName.length > 0) {
       return res.status(400).json({ error: "Nome de usuário já está em uso" });
     }
 
-    // Verificar se o email já existe
     const { rows: existingUserByEmail } = await pool.query(
-      "SELECT email FROM usuario WHERE email = $1",
-      [email],
+      "SELECT email FROM usuario WHERE email = $1", [email]
     );
 
     if (existingUserByEmail.length > 0) {
       return res.status(400).json({ error: "Email já está em uso" });
     }
 
-    // Criptografar a senha
-    const hashedPassword = await bcrypt.hash(senha, 10); // 10 é o número de rounds
+    const hashedPassword = await bcrypt.hash(senha, 10); 
 
-    // Inserir o novo usuário
     await pool.query(
       "INSERT INTO usuario (nome_usuario, email, senha, tipo_usuario) VALUES ($1, $2, $3, $4)",
       [nome_usuario, email, hashedPassword, tipo_usuario],
@@ -359,25 +311,16 @@ app.post("/api/novo-usuario", async (req, res) => {
 
   const tiposPermitidos = ["professor", "tecnico"];
   if (!tiposPermitidos.includes(tipo_usuario)) {
-    return res
-      .status(403)
-      .json({
-        error:
-          "Apenas perfis de Professor ou Técnico são permitidos neste cadastro.",
-      });
+    return res.status(403).json({ error: "Apenas perfis de Professor ou Técnico são permitidos neste cadastro." });
   }
 
   if (senha.length > 12) {
-    return res
-      .status(400)
-      .json({ error: "A senha deve ter no máximo 12 caracteres" });
+    return res.status(400).json({ error: "A senha deve ter no máximo 12 caracteres" });
   }
 
   try {
-    // Verificar se o email já existe
     const { rows: existingUserByEmail } = await pool.query(
-      "SELECT email FROM usuario WHERE email = $1",
-      [email],
+      "SELECT email FROM usuario WHERE email = $1", [email]
     );
 
     if (existingUserByEmail.length > 0) {
@@ -398,22 +341,13 @@ app.post("/api/novo-usuario", async (req, res) => {
   }
 });
 
-// Checar Autenticação
-app.get("/api/check-auth", (req, res) => {
-  if (req.session.user) {
-    res.json({ Autenticado: true });
-  } else {
-    res.json({ Autenticado: false });
-  }
-});
-
 // Rotas para produtos
 app.get("/api/produto", Autenticado, async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT sigla, nome_produto, concentracao, densidade, quantidade, tipo_unidade_produto, ncm FROM produto ORDER BY nome_produto ASC",
     );
-    res.json(result.rows); // PostgreSQL retorna os resultados em 'rows'
+    res.json(result.rows); 
   } catch (error) {
     console.error("Erro ao obter produtos:", error);
     res.status(500).json({ error: "Erro no servidor ao obter produtos" });
@@ -425,7 +359,6 @@ app.get("/api/produto", Autenticado, async (req, res) => {
 // Obter todos os laboratórios
 app.get("/api/laboratorios", Autenticado, async (req, res) => {
   try {
-    // Consulta para obter todos os laboratórios e seus responsáveis
     const result = await pool.query(`
       SELECT 
         laboratorio.id_laboratorio, 
@@ -435,8 +368,6 @@ app.get("/api/laboratorios", Autenticado, async (req, res) => {
       FROM laboratorio
       LEFT JOIN usuario ON laboratorio.usuario_email = usuario.email
     `);
-
-    // Acessa os resultados através de 'rows' no PostgreSQL
     res.json(result.rows);
   } catch (error) {
     console.error("Erro ao obter laboratórios:", error);
@@ -446,20 +377,17 @@ app.get("/api/laboratorios", Autenticado, async (req, res) => {
 
 // Paginação para laboratórios
 app.get("/api/laboratoriosPag", Autenticado, async (req, res) => {
-  const { page = 1, limit = 20 } = req.query; // Parâmetros de página e limite
+  const { page = 1, limit = 20 } = req.query;
   const pageInt = parseInt(page, 10);
-  const limitInt = parseInt(limit, 10); // Convertendo limit para número
+  const limitInt = parseInt(limit, 10);
 
   if (isNaN(pageInt) || isNaN(limitInt)) {
-    return res
-      .status(400)
-      .json({ error: "Os parâmetros de página e limite devem ser inteiros." });
+    return res.status(400).json({ error: "Os parâmetros de página e limite devem ser inteiros." });
   }
 
   const offset = (pageInt - 1) * limitInt;
 
   try {
-    // Usando pool.query para executar a consulta paginada no PostgreSQL
     const result = await pool.query(
       `
             SELECT l.id_laboratorio, l.nome_laboratorio, u.email AS usuario_email, u.nome_usuario
@@ -468,9 +396,8 @@ app.get("/api/laboratoriosPag", Autenticado, async (req, res) => {
             LIMIT $1 OFFSET $2
         `,
       [limitInt, offset],
-    ); // Usando parâmetros com $1, $2 para evitar SQL injection
+    );
 
-    // Contar o total de laboratórios
     const countResult = await pool.query(
       "SELECT COUNT(*) as total FROM laboratorio",
     );
@@ -478,7 +405,7 @@ app.get("/api/laboratoriosPag", Autenticado, async (req, res) => {
     const totalPages = Math.ceil(totalItems / limitInt);
 
     res.json({
-      data: result.rows, // Resultados paginados
+      data: result.rows,
       totalItems,
       totalPages,
       currentPage: pageInt,
