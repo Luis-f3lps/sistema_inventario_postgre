@@ -317,8 +317,14 @@ function renderizarBaseCalendario(
         ) {
             classesCss += " hoje";
         }
-        if (aulasPorDia[dia]) {
-            classesCss += " tem-aula";
+if (aulasPorDia[dia]) {
+            const temRecorrente = aulasPorDia[dia].some(aula => aula.tipo_aula === 'recorrente');
+
+            if (temRecorrente) {
+                classesCss += " tem-aula-recorrente"; 
+            } else {
+                classesCss += " tem-aula";}
+            
             eventosDoDia = `<div class="tooltip">${aulasPorDia[dia]
                 .map(formatarTooltip)
                 .join("")}</div>`;

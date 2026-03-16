@@ -2131,7 +2131,6 @@ const id_pedido = Math.floor(10000000 + Math.random() * 90000000);
   }
 });
 
-// Endpoint do Técnico para ver as solicitações
 app.get("/api/requests", async (req, res) => {
   try {
     const { tecnico_email } = req.query;
@@ -2148,7 +2147,9 @@ app.get("/api/requests", async (req, res) => {
                 h.hora_fim,
                 a.precisa_tecnico, 
                 a.status,
-                a.observacoes
+                a.observacoes,
+                a.tipo_aula, -- ADICIONADO PARA O FRONTEND SEPARAR
+                a.id_pedido  -- ADICIONADO PARA O FRONTEND AGRUPAR
             FROM aulas a
             JOIN usuario u ON a.professor_email = u.email
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
@@ -2157,7 +2158,7 @@ app.get("/api/requests", async (req, res) => {
             WHERE 
                 l.usuario_email = $1 
             ORDER BY 
-                a.data, h.hora_inicio
+                a.id_pedido DESC, a.data ASC, h.hora_inicio ASC
         `;
     const result = await pool.query(query, [tecnico_email]);
     res.json(result.rows);

@@ -7,6 +7,62 @@
     <title>Inventário Produtos Químicos</title>
     <link rel="stylesheet" href="css/style7.css">
     <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+    <style>
+        .cartao-recorrente {
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #fcfcfc;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease;
+        }
+        .cartao-recorrente:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .header-recorrente {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .header-recorrente h3 {
+            margin: 0;
+            color: #2c3e50;
+        }
+        .grid-info-recorrente {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.95rem;
+            color: #444;
+        }
+        .tags-datas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .tag-data {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .acoes-recorrente {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px dashed #ccc;
+            padding-top: 15px;
+        }
+    </style>
 </head>
 
 <body>
@@ -16,7 +72,13 @@
     <div class="painel-gestao-solicitacoes">
         <h1>Solicitações</h1>
         <p style="text-align: center; color: #666;">Abaixo estão as aulas que aguardam a sua aprovação.</p>
-        <div class="container-tabela-responsiva">
+        
+        <h2 style="margin-top: 30px; border-bottom: 2px solid #569af9; padding-bottom: 5px;">Aulas Recorrentes (Em Lote)</h2>
+        <div id="container-recorrentes" style="margin-top: 20px;">
+            </div>
+
+        <h2 style="margin-top: 40px; border-bottom: 2px solid #569af9; padding-bottom: 5px;">Aulas Individuais</h2>
+        <div class="container-tabela-responsiva" style="margin-top: 20px;">
             <table class="tabela-de-aulas">
                 <thead>
                     <tr>
@@ -33,7 +95,7 @@
                         <th>Ações</th>
                     </tr>
                 </thead>
-                <tbody id="corpo-tabela-solicitacoes">
+                <tbody id="corpo-tabela-individuais">
                 </tbody>
             </table>
         </div>
@@ -42,35 +104,15 @@
     <div id="modal-justificativa" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <h2>Justificativa de Recusa</h2>
-            <p style="font-size: 0.9rem; color: #666;">Por favor, informe o motivo para não autorizar esta aula:</p>
+            <p style="font-size: 0.9rem; color: #666;">Por favor, informe o motivo para não autorizar esta(s) aula(s):</p>
             <textarea id="texto-justificativa" rows="4"
-                placeholder="Ex: Falta de reagentes, laboratório em manutenção, conflito de horários..."></textarea>
+                placeholder="Ex: Falta de reagentes, conflito de horários..."></textarea>
             <div class="modal-actions">
                 <button id="btn-cancelar-recusa" class="btn-cancelar">Cancelar</button>
                 <button id="btn-confirmar-recusa" class="btn-confirmar">Confirmar Recusa</button>
             </div>
         </div>
     </div>
-
-    <script>
-        function loadLoggedInUser() {
-            fetch('/api/usuario-logado')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Falha ao buscar usuário. Status: ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    const userNameElement = document.getElementById('user-name-text');
-                    if (userNameElement) {
-                        userNameElement.innerHTML = data.nome;
-                    }
-                })
-                .catch(error => console.error('Erro ao carregar usuário logado:', error));
-        }
-        loadLoggedInUser();
-    </script>
 
     <script>
         let loggedInUser = null;
@@ -83,6 +125,10 @@
                     return;
                 }
                 loggedInUser = await response.json();
+                
+                const userNameElement = document.getElementById('user-name-text');
+                if (userNameElement) userNameElement.innerHTML = loggedInUser.nome;
+
                 await loadPendingRequests();
             } catch (error) {
                 console.error('Erro ao carregar utilizador:', error);
@@ -90,84 +136,142 @@
         }
 
         async function loadPendingRequests() {
-            const tbody = document.getElementById("corpo-tabela-solicitacoes");
+            const tbodyInd = document.getElementById("corpo-tabela-individuais");
+            const containerRec = document.getElementById("container-recorrentes");
+
             if (!loggedInUser || loggedInUser.tipo_usuario.trim().toLowerCase() !== 'tecnico') {
-                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
+                tbodyInd.innerHTML = `<tr><td colspan="11" style="text-align:center;">Acesso restrito a técnicos.</td></tr>`;
+                containerRec.innerHTML = `<p style="text-align:center;">Acesso restrito a técnicos.</p>`;
                 return;
             }
+
             try {
                 const tecnicoEmail = loggedInUser.email;
                 const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
                 if (!res.ok) throw new Error('Erro na rede');
 
                 const data = await res.json();
-                renderTable(data);
+                renderUI(data);
             } catch (error) {
                 console.error('Falha ao carregar solicitações:', error);
-                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
+                tbodyInd.innerHTML = `<tr><td colspan="11" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
+                containerRec.innerHTML = `<p style="text-align:center; color:red;">Erro ao carregar dados.</p>`;
             }
         }
 
-function renderTable(requests) {
-    const tbody = document.getElementById("corpo-tabela-solicitacoes");
-    tbody.innerHTML = "";
+        function renderUI(requests) {
+            const tbodyInd = document.getElementById("corpo-tabela-individuais");
+            const containerRec = document.getElementById("container-recorrentes");
+            
+            tbodyInd.innerHTML = "";
+            containerRec.innerHTML = "";
 
-    if (requests.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 20px;">Nenhuma solicitação pendente no momento.</td></tr>`;
-        return;
-    }
+            if (requests.length === 0) {
+                tbodyInd.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 20px;">Nenhuma solicitação individual.</td></tr>`;
+                containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">Nenhuma solicitação recorrente no momento.</p>`;
+                return;
+            }
 
-    requests.forEach(r => {
-        const tr = document.createElement("tr");
-        const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const individuais = requests.filter(r => r.tipo_aula !== 'recorrente');
+            const recorrentes = requests.filter(r => r.tipo_aula === 'recorrente' && r.id_pedido);
 
-        const linkRoteiroHtml = r.link_roteiro
-            ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Link</a>`
-            : 'N/A';
+            if (individuais.length === 0) {
+                tbodyInd.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 20px;">Nenhuma solicitação individual.</td></tr>`;
+            } else {
+                individuais.forEach(r => {
+                    const tr = document.createElement("tr");
+                    const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                    const linkRoteiroHtml = r.link_roteiro ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Link</a>` : 'N/A';
+                    const isCancelado = r.status === 'cancelado';
+                    const estiloBotaoDesativado = isCancelado ? 'background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;' : '';
 
-        const observacoesTexto = r.observacoes ? r.observacoes : '-';
+                    tr.innerHTML = `
+                        <td>${r.professor}</td>
+                        <td>${r.nome_laboratorio}</td>
+                        <td>${r.nome_disciplina}</td>
+                        <td>${dataFormatada}</td>
+                        <td style="white-space: nowrap;">${r.hora_inicio.slice(0, 5)} - ${r.hora_fim.slice(0, 5)}</td>
+                        <td>${r.numero_discentes}</td> 
+                        <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
+                        <td><span class="etiqueta-status status-${r.status}">${formatarTextoStatus(r.status)}</span></td>
+                        <td>${linkRoteiroHtml}</td>
+                        <td>${r.observacoes || '-'}</td>
+                        <td class="celula-de-acoes">
+                            <button class="botao-de-acao botao-aceitar" data-ids='["${r.id_aula}"]' ${isCancelado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Autorizar</button>
+                            <button class="botao-de-acao botao-recusar" data-ids='["${r.id_aula}"]' ${isCancelado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Recusar</button>
+                        </td>
+                    `;
+                    tbodyInd.appendChild(tr);
+                });
+            }
 
-        const isCancelado = r.status === 'cancelado';
-        
-        const estiloBotaoDesativado = isCancelado ? 'background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;' : '';
+            if (recorrentes.length === 0) {
+                containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">Nenhuma solicitação recorrente pendente.</p>`;
+            } else {
+                const agrupados = {};
+                recorrentes.forEach(r => {
+                    if (!agrupados[r.id_pedido]) agrupados[r.id_pedido] = [];
+                    agrupados[r.id_pedido].push(r);
+                });
 
-        tr.innerHTML = `
-            <td>${r.professor}</td>
-            <td>${r.nome_laboratorio}</td>
-            <td>${r.nome_disciplina}</td>
-            <td>${dataFormatada}</td>
-            <td style="white-space: nowrap;">${r.hora_inicio.slice(0, 5)} - ${r.hora_fim.slice(0, 5)}</td>
-            <td>${r.numero_discentes}</td> 
-            <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
-            <td><span class="etiqueta-status status-${r.status}">${formatarTextoStatus(r.status)}</span></td>
-            <td>${linkRoteiroHtml}</td>
-            <td>${observacoesTexto}</td>
-            <td class="celula-de-acoes">
-                <button class="botao-de-acao ${isCancelado ? '' : 'botao-aceitar'}" data-id="${r.id_aula}" ${isCancelado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Autorizar</button>
-                <button class="botao-de-acao ${isCancelado ? '' : 'botao-recusar'}" data-id="${r.id_aula}" ${isCancelado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Não Autorizar</button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
+                for (const [id_pedido, aulas] of Object.entries(agrupados)) {
+                    const info = aulas[0];
+                    const isCancelado = info.status === 'cancelado';
+                    const estiloBotaoDesativado = isCancelado ? 'background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;' : '';
+                    
+                    const datasFormatadas = aulas.map(a => `<span class="tag-data">${new Date(a.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</span>`).join('');
+                    
+                    const idsArrayJSON = JSON.stringify(aulas.map(a => a.id_aula));
+                    
+                    const div = document.createElement('div');
+                    div.className = 'cartao-recorrente';
+                    div.innerHTML = `
+                        <div class="header-recorrente">
+                            <h3>Lote #${id_pedido} - ${info.nome_disciplina}</h3>
+                            <span class="etiqueta-status status-${info.status}">${formatarTextoStatus(info.status)}</span>
+                        </div>
+                        <div class="grid-info-recorrente">
+                            <p><strong>Professor:</strong> ${info.professor}</p>
+                            <p><strong>Laboratório:</strong> ${info.nome_laboratorio}</p>
+                            <p><strong>Horário Padrão:</strong> ${info.hora_inicio.slice(0, 5)} - ${info.hora_fim.slice(0, 5)}</p>
+                            <p><strong>Discentes:</strong> ${info.numero_discentes}</p>
+                            <p><strong>Apoio Técnico:</strong> ${info.precisa_tecnico ? 'Sim' : 'Não'}</p>
+                            <p><strong>Quantidade de Aulas:</strong> ${aulas.length} aula(s)</p>
+                            ${info.link_roteiro ? `<p><strong>Roteiro:</strong> <a href="${info.link_roteiro}" target="_blank">Acessar Link</a></p>` : ''}
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <strong>Datas Agendadas:</strong>
+                            <div class="tags-datas">
+                                ${datasFormatadas}
+                            </div>
+                        </div>
+                        <div class="acoes-recorrente">
+                            <button class="botao-de-acao botao-aceitar" data-ids='${idsArrayJSON}' ${isCancelado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Autorizar Todas</button>
+                            <button class="botao-de-acao botao-recusar" data-ids='${idsArrayJSON}' ${isCancelado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Recusar Todas</button>
+                        </div>
+                    `;
+                    containerRec.appendChild(div);
+                }
+            }
+        }
 
-        async function updateRequestStatus(id, novoStatus, observacoes = null) {
+        async function updateRequestStatus(arrayIds, novoStatus, observacoes = null) {
             try {
                 const payload = { novoStatus: novoStatus };
-                if (observacoes) {
-                    payload.observacoes = observacoes;
-                }
+                if (observacoes) payload.observacoes = observacoes;
 
-                await fetch(`/api/requests/${id}`, {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-                const rowToRemove = document.querySelector(`button[data-id='${id}']`).closest('tr');
-                if (rowToRemove) {
-                    rowToRemove.style.opacity = '0';
-                    setTimeout(() => rowToRemove.remove(), 300);
-                }
+                const promises = arrayIds.map(id => 
+                    fetch(`/api/requests/${id}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    })
+                );
+
+                await Promise.all(promises);
+                
+                await loadPendingRequests();
+
             } catch (error) {
                 console.error('Falha ao atualizar status:', error);
                 alert('Não foi possível processar a sua decisão. Tente novamente.');
@@ -177,24 +281,23 @@ function renderTable(requests) {
         document.addEventListener('DOMContentLoaded', () => {
             loadLoggedInUser();
 
-            let aulaIdParaRecusar = null;
+            let idsParaRecusar = null;
 
-            const tbody = document.getElementById("corpo-tabela-solicitacoes");
+            const painel = document.querySelector(".painel-gestao-solicitacoes");
             const modal = document.getElementById('modal-justificativa');
             const btnCancelar = document.getElementById('btn-cancelar-recusa');
             const btnConfirmar = document.getElementById('btn-confirmar-recusa');
             const textoJustificativa = document.getElementById('texto-justificativa');
 
-            tbody.addEventListener('click', (event) => {
+            painel.addEventListener('click', (event) => {
                 const target = event.target;
-                const aulaId = target.dataset.id;
-
-                if (!aulaId) return;
-
+                
+                // Verifica se clicou em Autorizar ou Recusar
                 if (target.classList.contains('botao-aceitar')) {
-                    updateRequestStatus(aulaId, 'autorizado');
+                    const ids = JSON.parse(target.dataset.ids);
+                    updateRequestStatus(ids, 'autorizado');
                 } else if (target.classList.contains('botao-recusar')) {
-                    aulaIdParaRecusar = aulaId;
+                    idsParaRecusar = JSON.parse(target.dataset.ids);
                     textoJustificativa.value = '';
                     modal.style.display = 'flex';
                 }
@@ -202,7 +305,7 @@ function renderTable(requests) {
 
             btnCancelar.addEventListener('click', () => {
                 modal.style.display = 'none';
-                aulaIdParaRecusar = null;
+                idsParaRecusar = null;
             });
 
             btnConfirmar.addEventListener('click', () => {
@@ -213,16 +316,19 @@ function renderTable(requests) {
                     return;
                 }
 
-                updateRequestStatus(aulaIdParaRecusar, 'nao_autorizado', justificativa);
+                updateRequestStatus(idsParaRecusar, 'nao_autorizado', justificativa);
 
                 modal.style.display = 'none';
-                aulaIdParaRecusar = null;
+                idsParaRecusar = null;
             });
-        }); function formatarTextoStatus(status) {
+        });
+
+        function formatarTextoStatus(status) {
             switch (status) {
                 case 'autorizado': return 'Autorizado';
                 case 'nao_autorizado': return 'Não Autorizado';
                 case 'analisando': return 'Em Análise';
+                case 'cancelado': return 'Cancelado';
                 default: return status;
             }
         }
