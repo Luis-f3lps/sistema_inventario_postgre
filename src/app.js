@@ -2062,7 +2062,7 @@ app.post("/api/schedule-recurring", async (req, res) => {
 
     await client.query("BEGIN");
 
-    const id_pedido = Date.now();
+const id_pedido = Math.floor(10000000 + Math.random() * 90000000);
 
     const datasParaAgendar = [];
     let dataAtual = new Date(dataInicio);

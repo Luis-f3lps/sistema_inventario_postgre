@@ -108,8 +108,8 @@ const payload = {
         dataInicio: dataInicioEl.value,
         dataFim: dataFimEl.value,
         diaDaSemana: parseInt(diaDaSemanaEl.value),
-        horarios: horariosSelecionados.map(Number), 
-        precisa_tecnico: precisaTecnico,
+horarios: horariosSelecionados,        
+precisa_tecnico: precisaTecnico,
         numero_discentes: parseInt(numeroDiscentes),
         link_roteiro: linkRoteiro
     };
