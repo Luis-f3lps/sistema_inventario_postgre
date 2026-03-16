@@ -552,12 +552,12 @@ app.get("/api/lab32", Autenticado, async (req, res) => {
 });
 
 // Endpoint para buscar as disciplinas de um professor logado
-app.get("/api/minhas-disciplinas", async (req, res) => {
-  // 1. Verifica se o usuário está logado
-  if (!req.session.user || !req.session.user.email) {
+// 1. Coloque o "Autenticado" aqui 👇
+app.get("/api/minhas-disciplinas", Autenticado, async (req, res) => {
+  if (!req.session?.user?.email) {
     return res.status(401).json({ error: "Não autenticado." });
   }
-
+  
   try {
     // 2. Pega o email do professor a partir da sessão
     const professor_email = req.session.user.email;
@@ -2144,9 +2144,9 @@ app.get("/api/my-classes", async (req, res) => {
 });
 
 // Endpoint para o professor ver as suas próprias solicitações futuras
-app.get("/api/minhas-solicitacoes", async (req, res) => {
+app.get("/api/minhas-solicitacoes", Autenticado, async (req, res) => {
   try {
-    if (!req.session.user) {
+    if (!req.session?.user) {
       return res.status(401).json({ error: "Utilizador não autenticado." });
     }
     const professor_email = req.session.user.email;
@@ -2220,8 +2220,8 @@ app.get("/api/dashboard/aulas-autorizadas", async (req, res) => {
   }
 });
 // Endpoint para o painel "Meus Laboratórios"
-app.get("/api/dashboard/meus-laboratorios", async (req, res) => {
-  if (!req.session.user)
+app.get("/api/dashboard/meus-laboratorios", Autenticado, async (req, res) => {
+  if (!req.session?.user)
     return res.status(401).json({ error: "Não autenticado." });
   try {
     const user_email = req.session.user.email;
@@ -2236,8 +2236,8 @@ app.get("/api/dashboard/meus-laboratorios", async (req, res) => {
 });
 
 // Endpoint para o painel do Técnico "Aulas no meu laboratório"
-app.get("/api/aulas-meus-laboratorios", async (req, res) => {
-  if (!req.session.user || !req.session.user.email) {
+app.get("/api/aulas-meus-laboratorios", Autenticado, async (req, res) => {
+  if (!req.session?.user?.email) {
     return res.status(401).json({ error: "Não autenticado." });
   }
   try {
@@ -2293,8 +2293,9 @@ app.get("/api/horarios", async (req, res) => {
   }
 });
 // Endpoint para buscar aulas autorizadas para o calendário por mês/ano
-app.get("/api/calendario/aulas-autorizadas", async (req, res) => {
-  if (!req.session.user)
+// 1. Adicione o "Autenticado" aqui 👇
+app.get("/api/calendario/aulas-autorizadas", Autenticado, async (req, res) => {
+  if (!req.session?.user)
     return res.status(401).json({ error: "Não autenticado." });
   try {
     const professor_email = req.session.user.email;
@@ -2328,10 +2329,10 @@ app.get("/api/calendario/aulas-autorizadas", async (req, res) => {
     res.status(500).json({ error: "Erro ao buscar aulas para o calendário." });
   }
 });
-// Endpoint para buscar aulas para o CALENDÁRIO DO TÉCNICO por mês/ano
-app.get("/api/calendario/aulas-tecnico", async (req, res) => {
-  if (!req.session.user)
+app.get("/api/calendario/aulas-tecnico", Autenticado, async (req, res) => {
+  if (!req.session?.user)
     return res.status(401).json({ error: "Não autenticado." });
+    
   try {
     const tecnico_email = req.session.user.email;
     const { ano, mes } = req.query;
@@ -2353,7 +2354,7 @@ app.get("/api/calendario/aulas-tecnico", async (req, res) => {
             JOIN horarios h ON a.id_horario = h.id_horario
             JOIN disciplina d ON a.id_disciplina = d.id_disciplina
             JOIN usuario u ON a.professor_email = u.email
-            WHERE l.usuario_email = $1 -- Filtra pelos laboratórios do técnico
+            WHERE l.usuario_email = $1 
               AND a.status = 'autorizado' 
               AND EXTRACT(YEAR FROM a.data) = $2
               AND EXTRACT(MONTH FROM a.data) = $3
@@ -2366,11 +2367,11 @@ app.get("/api/calendario/aulas-tecnico", async (req, res) => {
     res.status(500).json({ error: "Erro ao buscar aulas para o calendário." });
   }
 });
-app.get("/api/disciplinas", async (req, res) => {
-  if (!req.session.user) {
+
+app.get("/api/disciplinas", Autenticado, async (req, res) => {
+  if (!req.session?.user) {
     return res.status(401).json({ error: "Não autenticado." });
   }
-
   try {
     const usuarioEmail = req.session.user.email;
     const tipoUsuario = req.session.user.tipo_usuario;
@@ -2534,9 +2535,10 @@ app.put("/api/agendamentos/:id/status", async (req, res) => {
       .json({ error: "Erro interno ao processar o cancelamento." });
   }
 });
-app.get("/api/solicitacoes-analise-tecnico", async (req, res) => {
+
+app.get("/api/solicitacoes-analise-tecnico", Autenticado, async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user.email) {
+    if (!req.session?.user?.email) {
       return res.json({ total: 0 });
     }
 
