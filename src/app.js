@@ -78,7 +78,7 @@ app.get("/", (req, res) => {
 });
 
 // 5. NOVA ROTA DE LOGIN (Gera o Token JWT)
-app.post("/login", async (req, res) => {
+app.post("/login", Autenticado, async (req, res) => {
   try {
     const { email, senha } = req.body;
 
@@ -302,7 +302,7 @@ app.post("/api/usuarios", Autenticado, async (req, res) => {
   }
 });
 
-app.post("/api/novo-usuario", async (req, res) => {
+app.post("/api/novo-usuario", Autenticado, async (req, res) => {
   const { nome_usuario, email, senha, tipo_usuario } = req.body;
 
   if (!nome_usuario || !email || !senha || !tipo_usuario) {
@@ -632,7 +632,7 @@ app.delete("/api/excluir-produto/:idproduto", Autenticado, async (req, res) => {
 });
 
 // Adicionar um produto// Rota para adicionar um produto
-app.post("/api/addproduto", async (req, res) => {
+app.post("/api/addproduto", Autenticado, async (req, res) => {
   try {
     const {
       sigla,
@@ -776,7 +776,7 @@ app.get("/api/produto/:sigla", Autenticado, async (req, res) => {
   }
 });
 
-app.get("/generate-pdf-produto", async (req, res) => {
+app.get("/generate-pdf-produto", Autenticado, async (req, res) => {
   try {
     // Consulta para obter produtos usando pool de PostgreSQL
     const { rows: produtos } = await pool.query(
@@ -916,7 +916,7 @@ app.get("/generate-pdf-produto", async (req, res) => {
   }
 });
 
-app.get("/generate-pdf-entradatipo2", async (req, res) => {
+app.get("/generate-pdf-entradatipo2", Autenticado, async (req, res) => {
   const { start_date, end_date } = req.query;
 
   let sqlQuery = `
@@ -1035,7 +1035,7 @@ app.get("/generate-pdf-entradatipo2", async (req, res) => {
   }
 });
 
-app.get("/generate-pdf-consumo", async (req, res) => {
+app.get("/generate-pdf-consumo", Autenticado, async (req, res) => {
   try {
     const { start_date, end_date, laboratorio } = req.query;
 
@@ -1243,7 +1243,7 @@ app.get("/generate-pdf-consumo", async (req, res) => {
 });
 
 // Endpoint para registrar entrada (versão PostgreSQL com atualização de quantidade)
-app.post("/api/registrar_entrada", async (req, res) => {
+app.post("/api/registrar_entrada", Autenticado, async (req, res) => {
   const { id_produto, quantidade, data_entrada, descricao } = req.body;
 
   // Validação simples
@@ -1289,7 +1289,7 @@ app.post("/api/registrar_entrada", async (req, res) => {
 });
 
 // Endpoint para registrar consumo com atualização da quantidade (PostgreSQL)
-app.post("/api/registrar_consumo", async (req, res) => {
+app.post("/api/registrar_consumo", Autenticado, async (req, res) => {
   console.log(req.body); // Log para depuração
 
   const { data_consumo, id_produto, id_laboratorio, quantidade, descricao } =
@@ -1804,7 +1804,7 @@ app.post("/api/filter_records", Autenticado, async (req, res) => {
   }
 });
 
-app.get("/api/availability", async (req, res) => {
+app.get("/api/availability", Autenticado, async (req, res) => {
   try {
     const { date, labId } = req.query;
     const result = await pool.query(
@@ -1823,7 +1823,7 @@ app.get("/api/availability", async (req, res) => {
     res.status(500).json({ error: "Erro ao buscar disponibilidade" });
   }
 });
-app.post("/api/schedule", async (req, res) => {
+app.post("/api/schedule", Autenticado, async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: "Você precisa estar logado." });
   }
@@ -1954,7 +1954,7 @@ app.post("/api/schedule", async (req, res) => {
   }
 });
 
-app.post("/api/schedule-recurring", async (req, res) => {
+app.post("/api/schedule-recurring", Autenticado, async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: "Você precisa estar logado." });
   }
@@ -2058,7 +2058,7 @@ const id_pedido = Math.floor(10000000 + Math.random() * 90000000);
   }
 });
 
-app.get("/api/requests", async (req, res) => {
+app.get("/api/requests", Autenticado, async (req, res) => {
   try {
     const { tecnico_email } = req.query;
     const query = `
@@ -2095,7 +2095,7 @@ app.get("/api/requests", async (req, res) => {
   }
 });
 
-app.patch("/api/requests/:id", async (req, res) => {
+app.patch("/api/requests/:id", Autenticado, async (req, res) => {
   try {
     const { id } = req.params;
     const { novoStatus, observacoes } = req.body;
@@ -2121,7 +2121,7 @@ app.patch("/api/requests/:id", async (req, res) => {
 });
 
 // Endpoint para listar todas as aulas de um professor ou técnico
-app.get("/api/my-classes", async (req, res) => {
+app.get("/api/my-classes", Autenticado, async (req, res) => {
   try {
     const { email } = req.query;
     const result = await pool.query(
@@ -2189,7 +2189,7 @@ app.get("/api/minhas-solicitacoes", Autenticado, async (req, res) => {
   }
 });
 
-app.get("/api/dashboard/aulas-autorizadas", async (req, res) => {
+app.get("/api/dashboard/aulas-autorizadas", Autenticado, async (req, res) => {
   if (!req.session.user)
     return res.status(401).json({ error: "Não autenticado." });
   try {
@@ -2274,7 +2274,7 @@ app.get("/api/aulas-meus-laboratorios", Autenticado, async (req, res) => {
   }
 });
 // Endpoint para buscar todos os horários possíveis cadastrados no banco
-app.get("/api/horarios", async (req, res) => {
+app.get("/api/horarios", Autenticado, async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT hora_inicio, hora_fim FROM horarios ORDER BY hora_inicio ASC",
@@ -2400,7 +2400,7 @@ app.get("/api/disciplinas", Autenticado, async (req, res) => {
   }
 });
 
-app.post("/api/disciplinas", async (req, res) => {
+app.post("/api/disciplinas", Autenticado, async (req, res) => {
   if (!req.session.user)
     return res.status(401).json({ error: "Não autenticado." });
 
@@ -2439,7 +2439,7 @@ app.post("/api/disciplinas", async (req, res) => {
   }
 });
 
-app.patch("/api/disciplinas/desativar/:id", async (req, res) => {
+app.patch("/api/disciplinas/desativar/:id", Autenticado, async (req, res) => {
   if (!req.session.user)
     return res.status(401).json({ error: "Não autenticado." });
 
@@ -2467,7 +2467,7 @@ app.patch("/api/disciplinas/desativar/:id", async (req, res) => {
   }
 });
 
-app.patch("/api/disciplinas/ativar/:id", async (req, res) => {
+app.patch("/api/disciplinas/ativar/:id", Autenticado, async (req, res) => {
   if (!req.session.user)
     return res.status(401).json({ error: "Não autenticado." });
 
@@ -2494,7 +2494,7 @@ app.patch("/api/disciplinas/ativar/:id", async (req, res) => {
     res.status(500).json({ error: "Erro ao ativar disciplina." });
   }
 });
-app.put("/api/agendamentos/:id/status", async (req, res) => {
+app.put("/api/agendamentos/:id/status", Autenticado, async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: "Você precisa estar logado." });
   }
