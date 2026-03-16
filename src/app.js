@@ -78,7 +78,7 @@ app.get("/", (req, res) => {
 });
 
 // 5. NOVA ROTA DE LOGIN (Gera o Token JWT)
-app.post("/login", Autenticado, async (req, res) => {
+app.post("/login", async (req, res) => {
   try {
     const { email, senha } = req.body;
 
@@ -137,15 +137,17 @@ app.listen(PORT, () => {
   console.log(`Servidor rodando no endereço http://localhost:${PORT}`);
 });
 
-/* --- ROTAS DE TELAS --- */
-app.get("/Relatorio", (req, res) => res.sendFile(path.join(__dirname, "public", "relatorio.html")));
-app.get("/novo-usuario", (req, res) => res.sendFile(path.join(__dirname, "public", "novo-usuario.html")));
-app.get("/Home", (req, res) => res.sendFile(path.join(__dirname, "public", "Home.html")));
-app.get("/Disciplinas", (req, res) => res.sendFile(path.join(__dirname, "public", "disciplinas.html")));
-app.get("/Horario", (req, res) => res.sendFile(path.join(__dirname, "public", "horarios.html")));
-app.get("/agendamento-recorrente", (req, res) => res.sendFile(path.join(__dirname, "public", "agendamento-recorrente.html")));
-app.get("/Tela_Tecnico", (req, res) => res.sendFile(path.join(__dirname, "public", "tela_tecnico.html")));
-app.get("/Tela_Professor", (req, res) => res.sendFile(path.join(__dirname, "public", "tela_professor.html")));
+
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "login.html")));
+app.get("/novo-usuario", (req, res) => res.sendFile(path.join(__dirname, "public", "novo-usuario.html"))); 
+
+app.get("/Home", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "Home.html")));
+app.get("/Relatorio", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "relatorio.html")));
+app.get("/Disciplinas", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "disciplinas.html")));
+app.get("/Horario", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "horarios.html")));
+app.get("/agendamento-recorrente", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "agendamento-recorrente.html")));
+app.get("/Tela_Tecnico", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "tela_tecnico.html")));
+app.get("/Tela_Professor", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "tela_professor.html")));
 
 app.get("/Usuarios", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "usuarios.html")));
 app.get("/Produto", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "Produto.html")));
@@ -154,7 +156,6 @@ app.get("/EditarMovimentacoes", Autenticado, (req, res) => res.sendFile(path.joi
 app.get("/Inventario", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "Inventario.html")));
 app.get("/Laboratorio", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "laboratorio.html")));
 
-// 6. ATUALIZADA: Rota para obter o usuário logado lendo o Token
 app.get("/api/usuario-logado", (req, res) => {
   const token = req.cookies.token;
   if (!token) {
