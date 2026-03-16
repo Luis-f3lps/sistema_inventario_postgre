@@ -8,6 +8,27 @@
     <link rel="stylesheet" href="css/style7.css">
     <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
     <style>
+        .container-filtros {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .container-filtros label {
+            margin: 0 15px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+        }
+        .container-filtros input[type="radio"] {
+            transform: scale(1.2);
+            margin-right: 5px;
+            cursor: pointer;
+        }
+
         .cartao-recorrente {
             border: 1px solid #e0e0e0;
             padding: 20px;
@@ -72,10 +93,19 @@
     <div class="painel-gestao-solicitacoes">
         <h1>Solicitações</h1>
         <p style="text-align: center; color: #666;">Abaixo estão as aulas que aguardam a sua aprovação.</p>
+
+        <div class="container-filtros">
+            <label>
+                <input type="radio" name="filtroStatus" value="analisando" checked> Apenas Pendentes (Em Análise)
+            </label>
+            <label>
+                <input type="radio" name="filtroStatus" value="todas"> Histórico Completo (Todas)
+            </label>
+        </div>
         
-        <h2 style="margin-top: 30px; border-bottom: 2px solid #569af9; padding-bottom: 5px;">Aulas Recorrentes (Em Lote)</h2>
+        <h2 style="margin-top: 30px; border-bottom: 2px solid #569af9; padding-bottom: 5px;">Aulas Recorrentes</h2>
         <div id="container-recorrentes" style="margin-top: 20px;">
-            </div>
+        </div>
 
         <h2 style="margin-top: 40px; border-bottom: 2px solid #569af9; padding-bottom: 5px;">Aulas Individuais</h2>
         <div class="container-tabela-responsiva" style="margin-top: 20px;">
@@ -116,6 +146,8 @@
 
     <script>
         let loggedInUser = null;
+        let allRequests = []; 
+        let filtroAtual = 'analisando'; 
 
         async function loadLoggedInUser() {
             try {
@@ -150,13 +182,24 @@
                 const res = await fetch(`/api/requests?tecnico_email=${encodeURIComponent(tecnicoEmail)}`);
                 if (!res.ok) throw new Error('Erro na rede');
 
-                const data = await res.json();
-                renderUI(data);
+                allRequests = await res.json(); 
+                
+                aplicarFiltroEDesenhar(); 
             } catch (error) {
                 console.error('Falha ao carregar solicitações:', error);
                 tbodyInd.innerHTML = `<tr><td colspan="11" style="text-align:center; color:red;">Erro ao carregar dados.</td></tr>`;
                 containerRec.innerHTML = `<p style="text-align:center; color:red;">Erro ao carregar dados.</p>`;
             }
+        }
+
+        function aplicarFiltroEDesenhar() {
+            let dadosParaTela = allRequests;
+            
+            if (filtroAtual === 'analisando') {
+                dadosParaTela = allRequests.filter(req => req.status === 'analisando');
+            }
+            
+            renderUI(dadosParaTela);
         }
 
         function renderUI(requests) {
@@ -167,8 +210,9 @@
             containerRec.innerHTML = "";
 
             if (requests.length === 0) {
-                tbodyInd.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 20px;">Nenhuma solicitação individual.</td></tr>`;
-                containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">Nenhuma solicitação recorrente no momento.</p>`;
+                const msgFiltro = filtroAtual === 'analisando' ? "Nenhuma solicitação pendente no momento." : "Nenhuma solicitação encontrada no histórico.";
+                tbodyInd.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 20px;">${msgFiltro}</td></tr>`;
+                containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">${msgFiltro}</p>`;
                 return;
             }
 
@@ -182,8 +226,9 @@
                     const tr = document.createElement("tr");
                     const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
                     const linkRoteiroHtml = r.link_roteiro ? `<a href="${r.link_roteiro}" target="_blank" class="link-roteiro">Ver Link</a>` : 'N/A';
-                    const isCancelado = r.status === 'cancelado';
-                    const estiloBotaoDesativado = isCancelado ? 'background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;' : '';
+                    
+                    const isDesativado = r.status !== 'analisando';
+                    const estiloBotaoDesativado = isDesativado ? 'background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;' : '';
 
                     tr.innerHTML = `
                         <td>${r.professor}</td>
@@ -197,8 +242,8 @@
                         <td>${linkRoteiroHtml}</td>
                         <td>${r.observacoes || '-'}</td>
                         <td class="celula-de-acoes">
-                            <button class="botao-de-acao botao-aceitar" data-ids='["${r.id_aula}"]' ${isCancelado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Autorizar</button>
-                            <button class="botao-de-acao botao-recusar" data-ids='["${r.id_aula}"]' ${isCancelado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Recusar</button>
+                            <button class="botao-de-acao botao-aceitar" data-ids='["${r.id_aula}"]' ${isDesativado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Autorizar</button>
+                            <button class="botao-de-acao botao-recusar" data-ids='["${r.id_aula}"]' ${isDesativado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Recusar</button>
                         </td>
                     `;
                     tbodyInd.appendChild(tr);
@@ -206,7 +251,7 @@
             }
 
             if (recorrentes.length === 0) {
-                containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">Nenhuma solicitação recorrente pendente.</p>`;
+                containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">Nenhuma solicitação recorrente.</p>`;
             } else {
                 const agrupados = {};
                 recorrentes.forEach(r => {
@@ -216,11 +261,10 @@
 
                 for (const [id_pedido, aulas] of Object.entries(agrupados)) {
                     const info = aulas[0];
-                    const isCancelado = info.status === 'cancelado';
-                    const estiloBotaoDesativado = isCancelado ? 'background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;' : '';
+                    const isDesativado = info.status !== 'analisando';
+                    const estiloBotaoDesativado = isDesativado ? 'background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;' : '';
                     
                     const datasFormatadas = aulas.map(a => `<span class="tag-data">${new Date(a.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</span>`).join('');
-                    
                     const idsArrayJSON = JSON.stringify(aulas.map(a => a.id_aula));
                     
                     const div = document.createElement('div');
@@ -246,8 +290,8 @@
                             </div>
                         </div>
                         <div class="acoes-recorrente">
-                            <button class="botao-de-acao botao-aceitar" data-ids='${idsArrayJSON}' ${isCancelado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Autorizar Todas</button>
-                            <button class="botao-de-acao botao-recusar" data-ids='${idsArrayJSON}' ${isCancelado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Recusar Todas</button>
+                            <button class="botao-de-acao botao-aceitar" data-ids='${idsArrayJSON}' ${isDesativado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Autorizar Todas</button>
+                            <button class="botao-de-acao botao-recusar" data-ids='${idsArrayJSON}' ${isDesativado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Recusar Todas</button>
                         </div>
                     `;
                     containerRec.appendChild(div);
@@ -283,6 +327,14 @@
 
             let idsParaRecusar = null;
 
+            const radiosFiltro = document.querySelectorAll('input[name="filtroStatus"]');
+            radiosFiltro.forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    filtroAtual = event.target.value; 
+                    aplicarFiltroEDesenhar(); 
+                });
+            });
+
             const painel = document.querySelector(".painel-gestao-solicitacoes");
             const modal = document.getElementById('modal-justificativa');
             const btnCancelar = document.getElementById('btn-cancelar-recusa');
@@ -292,7 +344,6 @@
             painel.addEventListener('click', (event) => {
                 const target = event.target;
                 
-                // Verifica se clicou em Autorizar ou Recusar
                 if (target.classList.contains('botao-aceitar')) {
                     const ids = JSON.parse(target.dataset.ids);
                     updateRequestStatus(ids, 'autorizado');
