@@ -71,14 +71,18 @@ async function loadHorariosCheckboxes() {
         const response = await fetch('/api/horarios');
         const horarios = await response.json();
         
-        container.innerHTML = horarios.map(h => `
+        container.innerHTML = horarios.map(h => {
+            const idHTML = h.inicio.replace(':', '');
+            
+            return `
             <div class="checkbox-item">
-                <input type="checkbox" id="horario-${h.id_horario || h.id}" name="horarios" value="${h.id_horario || h.id}">
-                <label for="horario-${h.id_horario || h.id}">${h.inicio} — ${h.fim}</label>
+                <input type="checkbox" id="horario-${idHTML}" name="horarios" value="${h.inicio}">
+                <label for="horario-${idHTML}">${h.inicio} — ${h.fim}</label>
             </div>
-        `).join('');
+            `;
+        }).join('');
     } catch (error) {
-        console.error("Erro:", error);
+        console.error("Erro ao carregar os horários:", error);
     }
 }
 
