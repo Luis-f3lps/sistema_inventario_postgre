@@ -229,6 +229,7 @@
             const individuais = requests.filter(r => r.tipo_aula !== 'recorrente');
             const recorrentes = requests.filter(r => r.tipo_aula === 'recorrente' && r.id_pedido);
 
+            // --- RENDERIZAR AULAS INDIVIDUAIS ---
             if (individuais.length === 0) {
                 tbodyInd.innerHTML = `<tr><td colspan="11" style="text-align:center; padding: 20px;">Nenhuma solicitação individual.</td></tr>`;
             } else {
@@ -241,25 +242,26 @@
                     const estiloBotaoDesativado = isDesativado ? 'background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;' : '';
 
                     tr.innerHTML = `
-                        <td>${r.professor}</td>
-                        <td>${r.nome_laboratorio}</td>
-                        <td>${r.nome_disciplina}</td>
-                        <td>${dataFormatada}</td>
-                        <td style="white-space: nowrap;">${r.hora_inicio.slice(0, 5)} - ${r.hora_fim.slice(0, 5)}</td>
-                        <td>${r.numero_discentes}</td> 
-                        <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
-                        <td><span class="etiqueta-status status-${r.status}">${formatarTextoStatus(r.status)}</span></td>
-                        <td>${linkRoteiroHtml}</td>
-                        <td>${r.observacoes || '-'}</td>
-                        <td class="celula-de-acoes">
-                            <button class="botao-de-acao botao-aceitar" data-ids='["${r.id_aula}"]' ${isDesativado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Autorizar</button>
-                            <button class="botao-de-acao botao-recusar" data-ids='["${r.id_aula}"]' ${isDesativado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Recusar</button>
-                        </td>
-                    `;
+                <td>${r.professor}</td>
+                <td>${r.nome_laboratorio}</td>
+                <td>${r.nome_disciplina}</td>
+                <td>${dataFormatada}</td>
+                <td style="white-space: nowrap;">${r.hora_inicio.slice(0, 5)} - ${r.hora_fim.slice(0, 5)}</td>
+                <td>${r.numero_discentes}</td> 
+                <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
+                <td><span class="etiqueta-status status-${r.status}">${formatarTextoStatus(r.status)}</span></td>
+                <td>${linkRoteiroHtml}</td>
+                <td>${r.observacoes || '-'}</td>
+                <td class="celula-de-acoes">
+                    <button class="botao-de-acao botao-aceitar" data-ids='["${r.id_aula}"]' ${isDesativado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Autorizar</button>
+                    <button class="botao-de-acao botao-recusar" data-ids='["${r.id_aula}"]' ${isDesativado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Recusar</button>
+                </td>
+            `;
                     tbodyInd.appendChild(tr);
                 });
             }
 
+            // --- RENDERIZAR AULAS RECORRENTES ---
             if (recorrentes.length === 0) {
                 containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">Nenhuma solicitação recorrente.</p>`;
             } else {
@@ -275,36 +277,46 @@
                     const isDesativado = info.status === 'cancelado';
                     const estiloBotaoDesativado = isDesativado ? 'background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;' : '';
 
-                    const datasFormatadas = aulas.map(a => `<span class="tag-data">${new Date(a.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>`).join('');
+                    const horariosUnicos = [...new Set(aulas.map(a =>
+                        `${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}`
+                    ))].join(' | ');
+
+                    const datasFormatadas = aulas.map(a =>
+                        `<span class="tag-data">
+                    ${new Date(a.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} 
+                    (${a.hora_inicio.slice(0, 5)})
+                </span>`
+                    ).join('');
+
                     const idsArrayJSON = JSON.stringify(aulas.map(a => a.id_aula));
 
                     const div = document.createElement('div');
                     div.className = 'cartao-recorrente';
                     div.innerHTML = `
-                        <div class="header-recorrente">
-                            <h3>Lote #${id_pedido} - ${info.nome_disciplina}</h3>
-                            <span class="etiqueta-status status-${info.status}">${formatarTextoStatus(info.status)}</span>
-                        </div>
-                        <div class="grid-info-recorrente">
-                            <p><strong>Professor:</strong> ${info.professor}</p>
-                            <p><strong>Laboratório:</strong> ${info.nome_laboratorio}</p>
-                            <p><strong>Horário Padrão:</strong> ${info.hora_inicio.slice(0, 5)} - ${info.hora_fim.slice(0, 5)}</p>
-                            <p><strong>Discentes:</strong> ${info.numero_discentes}</p>
-                            <p><strong>Apoio Técnico:</strong> ${info.precisa_tecnico ? 'Sim' : 'Não'}</p>
-                            <p><strong>Quantidade de Aulas:</strong> ${aulas.length} aula(s)</p>
-                            ${info.link_roteiro ? `<p><strong>Roteiro:</strong> <a href="${info.link_roteiro}" target="_blank">Acessar Link</a></p>` : ''}
-                        </div>
-                        <div style="margin-top: 15px;">
-                            <strong>Datas Agendadas:</strong>
-                            <div class="tags-datas">
-                                ${datasFormatadas}
-                            </div>
-                        </div>
-                        <div class="acoes-recorrente">
-                            <button class="botao-de-acao botao-aceitar" data-ids='${idsArrayJSON}' ${isDesativado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Autorizar Todas</button>
-                            <button class="botao-de-acao botao-recusar" data-ids='${idsArrayJSON}' ${isDesativado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Recusar Todas</button>
-                        </div>
-                    `;
+                <div class="header-recorrente">
+                    <h3>Lote #${id_pedido} - ${info.nome_disciplina}</h3>
+                    <span class="etiqueta-status status-${info.status}">${formatarTextoStatus(info.status)}</span>
+                </div>
+                <div class="grid-info-recorrente">
+                    <p><strong>Professor:</strong> ${info.professor}</p>
+                    <p><strong>Laboratório:</strong> ${info.nome_laboratorio}</p>
+                    <p><strong>Horários:</strong> ${horariosUnicos}</p>
+                    <p><strong>Discentes:</strong> ${info.numero_discentes}</p>
+                    <p><strong>Apoio Técnico:</strong> ${info.precisa_tecnico ? 'Sim' : 'Não'}</p>
+                    <p><strong>Quantidade de Aulas:</strong> ${aulas.length} aula(s)</p>
+                    ${info.link_roteiro ? `<p><strong>Roteiro:</strong> <a href="${info.link_roteiro}" target="_blank">Acessar Link</a></p>` : ''}
+                </div>
+                <div style="margin-top: 15px;">
+                    <strong>Datas e Horários Agendados:</strong>
+                    <div class="tags-datas">
+                        ${datasFormatadas}
+                    </div>
+                </div>
+                <div class="acoes-recorrente">
+                    <button class="botao-de-acao botao-aceitar" data-ids='${idsArrayJSON}' ${isDesativado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Autorizar Todas</button>
+                    <button class="botao-de-acao botao-recusar" data-ids='${idsArrayJSON}' ${isDesativado ? 'disabled' : ''} style="${estiloBotaoDesativado}">Recusar Todas</button>
+                </div>
+            `;
                     containerRec.appendChild(div);
                 }
             }
