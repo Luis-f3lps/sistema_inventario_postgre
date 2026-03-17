@@ -133,16 +133,25 @@ async function loadProfessoresParaSelect() {
     const selectProfessores = document.getElementById("usuarios-select");
     if (!selectProfessores) return;
 
+    const userResponse = await fetch("/api/usuario-logado");
+    if (!userResponse.ok) return; 
+    const loggedUser = await userResponse.json();
+    
+    const userType = loggedUser.tipo_usuario ? loggedUser.tipo_usuario.trim().toLowerCase() : "";
+    const userEmail = loggedUser.email; 
+
     const response = await fetch("/api/usuarios");
     const data = await response.json();
 
     selectProfessores.innerHTML = "";
 
     data.forEach((usuario) => {
-      if (
-        usuario.tipo_usuario === "professor" &&
-        usuario.status === "ativado"
-      ) {
+      if (usuario.tipo_usuario === "professor" && usuario.status === "ativado") {
+        
+        if (userType === "professor" && usuario.email !== userEmail) {
+            return;
+        }
+
         const option = document.createElement("option");
         option.value = usuario.email;
         option.textContent = `${usuario.nome_usuario} (${usuario.email})`;
