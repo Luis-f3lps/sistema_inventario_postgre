@@ -52,7 +52,7 @@ function Autenticado(req, res, next) {
     if (req.originalUrl.startsWith('/api') || req.xhr || req.headers.accept.indexOf('json') > -1) {
       return res.status(401).json({ error: "Não autorizado" });
     } else {
-      return res.redirect("https://sistema-inventario-postgre.vercel.app/");
+      return res.redirect("https://sistema-merlin.vercel.app/");
     }
   }
 
