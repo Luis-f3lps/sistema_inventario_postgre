@@ -303,7 +303,7 @@ app.post("/api/usuarios", Autenticado, async (req, res) => {
   }
 });
 
-app.post("/api/novo-usuario", Autenticado, async (req, res) => {
+app.post("/api/novo-usuario", async (req, res) => {
   const { nome_usuario, email, senha, tipo_usuario } = req.body;
 
   if (!nome_usuario || !email || !senha || !tipo_usuario) {
