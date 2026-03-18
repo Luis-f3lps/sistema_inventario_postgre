@@ -5,10 +5,55 @@
     <link rel="icon" href="images/icone.png" type="image/png" />
     <title>Sistema Merlin</title>
     <link rel="stylesheet" href="css/style7.css" />
-    <script
-      src="https://kit.fontawesome.com/915b45d802.js"
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+    <style>
+        .cartao-recorrente {
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #fcfcfc;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+        .cartao-recorrente:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .header-recorrente {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .header-recorrente h3 {
+            margin: 0;
+            color: #2c3e50;
+        }
+        .grid-info-recorrente {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.95rem;
+            color: #444;
+        }
+        .tags-datas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .tag-data {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+    </style>
   </head>
 
   <body>
@@ -16,44 +61,52 @@
       <header id="menu-container"></header>
     </div>
 
-    <div class="painel-minhas-aulas" style="height: 100vh">
+    <div class="painel-minhas-aulas" style="min-height: 100vh">
       <h1>Minhas Solicitações de Aula</h1>
       <p style="text-align: center; color: #666">
         Abaixo estão as suas solicitações para hoje e datas futuras.
       </p>
 
-      <table class="tabela-visualizacao-aulas">
-<thead>
-    <tr>
-        <th>Professor</th>
-        <th>Laboratório</th>
-        <th>Disciplina</th>
-        <th>Data</th>
-        <th>Horário</th>
-        <th>Discentes</th>
-        <th>Apoio Técnico</th>
-        <th>Status</th>
-        <th>Roteiro</th>
-        <th>Observações</th>
-    </tr>
-</thead>
-        <tbody id="minhas-aulas-tbody"></tbody>
-      </table>
+      <h2 style="margin-top: 30px; border-bottom: 2px solid #569af9; padding-bottom: 5px;">Aulas Recorrentes</h2>
+      <div id="container-recorrentes" style="margin-top: 20px;">
+          </div>
+
+      <h2 style="margin-top: 40px; border-bottom: 2px solid #569af9; padding-bottom: 5px;">Aulas Individuais</h2>
+      <div class="container-tabela-responsiva" style="margin-top: 20px;">
+          <table class="tabela-visualizacao-aulas">
+            <thead>
+                <tr>
+                    <th>Professor</th>
+                    <th>Laboratório</th>
+                    <th>Disciplina</th>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Discentes</th>
+                    <th>Apoio Técnico</th>
+                    <th>Status</th>
+                    <th>Roteiro</th>
+                    <th>Observações</th>
+                </tr>
+            </thead>
+            <tbody id="minhas-aulas-individuais-tbody">
+                </tbody>
+          </table>
+      </div>
     </div>
+
     <script>
       function formatarTextoStatus(status) {
         switch (status) {
-          case "autorizado":
-            return "Autorizado";
-          case "nao_autorizado":
-            return "Não Autorizado";
-          case "analisando":
-            return "Em Análise";
-          default:
-            return status;
+          case "autorizado": return "Autorizado";
+          case "nao_autorizado": return "Não Autorizado";
+          case "analisando": return "Em Análise";
+          case "cancelado": return "Cancelado";
+          default: return status;
         }
       }
+      
       let loggedInUser = null;
+      
       async function inicializarPagina() {
         try {
           const response = await fetch("/api/usuario-logado");
@@ -65,18 +118,8 @@
 
           const userNameElement = document.getElementById("user-name-text");
           if (userNameElement) {
-            userNameElement.innerHTML =
-              loggedInUser.nome_usuario || loggedInUser.nome;
+            userNameElement.innerHTML = loggedInUser.nome_usuario || loggedInUser.nome;
           }
-
-          const userType = loggedInUser.tipo_usuario
-            ? loggedInUser.tipo_usuario.trim().toLowerCase()
-            : "";
-
-          const showMenuItem = (selector) => {
-            const el = document.querySelector(selector);
-            if (el) el.style.display = "list-item";
-          };
 
           await loadMyRequests();
         } catch (error) {
@@ -96,74 +139,130 @@
           renderTable(data);
         } catch (error) {
           console.error("Falha ao carregar solicitações:", error);
-          const tbody = document.getElementById("minhas-aulas-tbody");
-          if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Erro ao carregar dados. Tente novamente mais tarde.</td></tr>`;
-          }
+          const tbody = document.getElementById("minhas-aulas-individuais-tbody");
+          const recContainer = document.getElementById("container-recorrentes");
+          if (tbody) tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:red;">Erro ao carregar dados. Tente novamente mais tarde.</td></tr>`;
+          if (recContainer) recContainer.innerHTML = `<p style="text-align:center; color:red;">Erro ao carregar dados.</p>`;
         }
       }
 
-function renderTable(requests) {
-    const tbody = document.getElementById("minhas-aulas-tbody");
-    if (!tbody) return;
+      function renderTable(requests) {
+          const tbodyInd = document.getElementById("minhas-aulas-individuais-tbody");
+          const containerRec = document.getElementById("container-recorrentes");
 
-    tbody.innerHTML = "";
-    if (requests.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação futura.</td></tr>`;
-        return;
-    }
+          if (!tbodyInd || !containerRec) return;
 
-    requests.forEach(r => {
-        const tr = document.createElement("tr");
+          tbodyInd.innerHTML = "";
+          containerRec.innerHTML = "";
 
-        const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-        const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : 'N/A';
-        const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : 'N/A';
-        
-        // Pega o nome do professor logado
-        const nomeProfessor = loggedInUser.nome_usuario || loggedInUser.nome || 'Professor';
-        
-        // Trata os dados que podem vir vazios
-        const linkRoteiroHtml = r.link_roteiro ? `<a href="${r.link_roteiro}" target="_blank">Ver</a>` : 'N/A';
-        const observacoesTexto = r.observacoes ? r.observacoes : '-';
-        const discentes = r.numero_discentes || '-';
-        const disciplina = r.nome_disciplina || '-';
+          if (requests.length === 0) {
+              tbodyInd.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação individual futura.</td></tr>`;
+              containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">Você não tem nenhuma solicitação recorrente futura.</p>`;
+              return;
+          }
 
-        tr.innerHTML = `
-            <td>${nomeProfessor}</td>
-            <td>${r.nome_laboratorio}</td>
-            <td>${disciplina}</td>
-            <td>${dataFormatada}</td>
-            <td style="white-space: nowrap;">${horaInicio} - ${horaFim}</td>
-            <td>${discentes}</td>
-            <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
-            <td><span class="etiqueta-status status-${r.status}">${formatarTextoStatus(r.status)}</span></td>
-            <td>${linkRoteiroHtml}</td>
-            <td>${observacoesTexto}</td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-function closemenu() {
-    const nav = document.querySelector("nav");
-    const menu = document.querySelector(".menu");
-    const conteudo = document.querySelector(".conteudo");
-    const painel = document.querySelector(".painel-minhas-aulas");
+          const individuais = requests.filter(r => r.tipo_aula !== 'recorrente');
+          const recorrentes = requests.filter(r => r.tipo_aula === 'recorrente' && r.id_pedido);
 
-    if (window.innerWidth <= 768 && nav) {
-        nav.style.left = "-100%";
-    }
+          const nomeProfessor = loggedInUser.nome_usuario || loggedInUser.nome || 'Professor';
 
-    if (menu) {
-        menu.style.width = "5%";
-    }
-    if (conteudo) {
-        conteudo.style.width = "95%";
-    }
-    if (painel) {
-        conteiner.style.width = "95%";
-    }
-}
+          if (individuais.length === 0) {
+              tbodyInd.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">Nenhuma solicitação individual.</td></tr>`;
+          } else {
+              individuais.forEach(r => {
+                  const tr = document.createElement("tr");
+
+                  const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                  const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : 'N/A';
+                  const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : 'N/A';
+                  
+                  const linkRoteiroHtml = r.link_roteiro ? `<a href="${r.link_roteiro}" target="_blank">Ver</a>` : 'N/A';
+                  const observacoesTexto = r.observacoes ? r.observacoes : '-';
+                  const discentes = r.numero_discentes || '-';
+                  const disciplina = r.nome_disciplina || '-';
+
+                  tr.innerHTML = `
+                      <td>${nomeProfessor}</td>
+                      <td>${r.nome_laboratorio}</td>
+                      <td>${disciplina}</td>
+                      <td>${dataFormatada}</td>
+                      <td style="white-space: nowrap;">${horaInicio} - ${horaFim}</td>
+                      <td>${discentes}</td>
+                      <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
+                      <td><span class="etiqueta-status status-${r.status}">${formatarTextoStatus(r.status)}</span></td>
+                      <td>${linkRoteiroHtml}</td>
+                      <td>${observacoesTexto}</td>
+                  `;
+                  tbodyInd.appendChild(tr);
+              });
+          }
+
+          if (recorrentes.length === 0) {
+              containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">Nenhuma solicitação recorrente.</p>`;
+          } else {
+              const agrupados = {};
+              recorrentes.forEach(r => {
+                  if (!agrupados[r.id_pedido]) agrupados[r.id_pedido] = [];
+                  agrupados[r.id_pedido].push(r);
+              });
+
+              for (const [id_pedido, aulas] of Object.entries(agrupados)) {
+                  const info = aulas[0];
+
+                  const horariosUnicos = [...new Set(aulas.map(a => 
+                      `${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}`
+                  ))].join(' | ');
+
+                  const datasFormatadas = aulas.map(a => 
+                      `<span class="tag-data">
+                          ${new Date(a.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })} 
+                          (${a.hora_inicio.slice(0, 5)})
+                      </span>`
+                  ).join('');
+
+                  const div = document.createElement('div');
+                  div.className = 'cartao-recorrente';
+                  div.innerHTML = `
+                      <div class="header-recorrente">
+                          <h3>Lote #${id_pedido} - ${info.nome_disciplina || '-'}</h3>
+                          <span class="etiqueta-status status-${info.status}">${formatarTextoStatus(info.status)}</span>
+                      </div>
+                      <div class="grid-info-recorrente">
+                          <p><strong>Professor:</strong> ${nomeProfessor}</p>
+                          <p><strong>Laboratório:</strong> ${info.nome_laboratorio}</p>
+                          <p><strong>Horários:</strong> ${horariosUnicos}</p>
+                          <p><strong>Discentes:</strong> ${info.numero_discentes || '-'}</p>
+                          <p><strong>Apoio Técnico:</strong> ${info.precisa_tecnico ? 'Sim' : 'Não'}</p>
+                          <p><strong>Quantidade de Aulas:</strong> ${aulas.length} aula(s)</p>
+                          ${info.link_roteiro ? `<p><strong>Roteiro:</strong> <a href="${info.link_roteiro}" target="_blank">Acessar Link</a></p>` : ''}
+                      </div>
+                      <div style="margin-top: 15px;">
+                          <strong>Datas e Horários Agendados:</strong>
+                          <div class="tags-datas">
+                              ${datasFormatadas}
+                          </div>
+                      </div>
+                  `;
+                  containerRec.appendChild(div);
+              }
+          }
+      }
+
+      function closemenu() {
+        const nav = document.querySelector("nav");
+        const menu = document.querySelector(".menu");
+        const conteudo = document.querySelector(".conteudo");
+        const painel = document.querySelector(".painel-minhas-aulas");
+
+        if (window.innerWidth <= 768 && nav) {
+            nav.style.left = "-100%";
+        }
+
+        if (menu) menu.style.width = "5%";
+        if (conteudo) conteudo.style.width = "95%";
+        if (painel) painel.style.width = "95%";
+      }
+
       document.addEventListener("DOMContentLoaded", inicializarPagina);
     </script>
     <script src="js/menu.js" defer></script>
