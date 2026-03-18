@@ -2161,11 +2161,13 @@ app.get("/api/minhas-solicitacoes", Autenticado, async (req, res) => {
     const result = await pool.query(
       `SELECT 
                 a.id_aula,
+                a.id_pedido,
+                a.tipo_aula,
                 l.nome_laboratorio, 
                 d.nome_disciplina,
                 a.link_roteiro,
                 a.numero_discentes, 
-        a.observacoes,
+                a.observacoes,
                 a.data, 
                 h.hora_inicio, 
                 h.hora_fim,
