@@ -7,6 +7,26 @@
     <link rel="stylesheet" href="css/style7.css" />
     <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
     <style>
+        .container-filtros {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .container-filtros label {
+            margin: 0 15px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+        }
+        .container-filtros input[type="radio"] {
+            transform: scale(1.2);
+            margin-right: 5px;
+            cursor: pointer;
+        }
         .cartao-recorrente {
             border: 1px solid #e0e0e0;
             padding: 20px;
@@ -67,6 +87,15 @@
         Abaixo estão as suas solicitações para hoje e datas futuras.
       </p>
 
+      <div class="container-filtros">
+          <label>
+              <input type="radio" name="filtroStatus" value="analisando" checked> Apenas Pendentes (Em Análise)
+          </label>
+          <label>
+              <input type="radio" name="filtroStatus" value="todas"> Histórico Completo (Todas)
+          </label>
+      </div>
+
       <h2 style="margin-top: 30px; border-bottom: 2px solid #569af9; padding-bottom: 5px;">Aulas Recorrentes</h2>
       <div id="container-recorrentes" style="margin-top: 20px;">
           </div>
@@ -95,6 +124,10 @@
     </div>
 
     <script>
+      let loggedInUser = null;
+      let allRequests = [];
+      let filtroAtual = 'analisando'; // Valor padrão inicial
+
       function formatarTextoStatus(status) {
         switch (status) {
           case "autorizado": return "Autorizado";
@@ -104,8 +137,6 @@
           default: return status;
         }
       }
-      
-      let loggedInUser = null;
       
       async function inicializarPagina() {
         try {
@@ -121,6 +152,15 @@
             userNameElement.innerHTML = loggedInUser.nome_usuario || loggedInUser.nome;
           }
 
+          // Listener para os botões de filtro
+          const radiosFiltro = document.querySelectorAll('input[name="filtroStatus"]');
+          radiosFiltro.forEach(radio => {
+              radio.addEventListener('change', (event) => {
+                  filtroAtual = event.target.value;
+                  aplicarFiltroEDesenhar();
+              });
+          });
+
           await loadMyRequests();
         } catch (error) {
           console.error("Erro ao inicializar a página:", error);
@@ -135,8 +175,12 @@
           const res = await fetch(`/api/minhas-solicitacoes`);
           if (!res.ok) throw new Error("Erro na rede ao buscar solicitações");
 
-          const data = await res.json();
-          renderTable(data);
+          // Guarda todos os dados vindos do banco na variável global
+          allRequests = await res.json();
+          
+          // Aplica o filtro padrão e renderiza
+          aplicarFiltroEDesenhar();
+
         } catch (error) {
           console.error("Falha ao carregar solicitações:", error);
           const tbody = document.getElementById("minhas-aulas-individuais-tbody");
@@ -144,6 +188,17 @@
           if (tbody) tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; color:red;">Erro ao carregar dados. Tente novamente mais tarde.</td></tr>`;
           if (recContainer) recContainer.innerHTML = `<p style="text-align:center; color:red;">Erro ao carregar dados.</p>`;
         }
+      }
+
+      function aplicarFiltroEDesenhar() {
+          let dadosParaTela = allRequests;
+
+          // Se o filtro estiver em "analisando", mostra apenas os pendentes
+          if (filtroAtual === 'analisando') {
+              dadosParaTela = allRequests.filter(req => req.status === 'analisando');
+          }
+
+          renderTable(dadosParaTela);
       }
 
       function renderTable(requests) {
@@ -156,8 +211,9 @@
           containerRec.innerHTML = "";
 
           if (requests.length === 0) {
-              tbodyInd.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">Você não tem nenhuma solicitação individual futura.</td></tr>`;
-              containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">Você não tem nenhuma solicitação recorrente futura.</p>`;
+              const msgFiltro = filtroAtual === 'analisando' ? "Você não tem nenhuma solicitação pendente no momento." : "Nenhuma solicitação encontrada no seu histórico.";
+              tbodyInd.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">${msgFiltro}</td></tr>`;
+              containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">${msgFiltro}</p>`;
               return;
           }
 
@@ -166,6 +222,7 @@
 
           const nomeProfessor = loggedInUser.nome_usuario || loggedInUser.nome || 'Professor';
 
+          // --- TABELA INDIVIDUAIS ---
           if (individuais.length === 0) {
               tbodyInd.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">Nenhuma solicitação individual.</td></tr>`;
           } else {
@@ -197,6 +254,7 @@
               });
           }
 
+          // --- CARTÕES RECORRENTES ---
           if (recorrentes.length === 0) {
               containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">Nenhuma solicitação recorrente.</p>`;
           } else {
