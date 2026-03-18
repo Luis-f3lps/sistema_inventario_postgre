@@ -224,7 +224,7 @@
                   div.className = 'cartao-recorrente';
                   div.innerHTML = `
                       <div class="header-recorrente">
-                          <h3>Lote #${id_pedido} - ${info.nome_disciplina || '-'}</h3>
+                          <h3>${info.nome_disciplina || '-'}</h3>
                           <span class="etiqueta-status status-${info.status}">${formatarTextoStatus(info.status)}</span>
                       </div>
                       <div class="grid-info-recorrente">
