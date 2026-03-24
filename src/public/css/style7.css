@@ -1372,3 +1372,147 @@ input[type="url"]::placeholder {
     z-index: 5;
     font-weight: bold;
 }
+
+/* =========================================
+   RESPONSIVIDADE PARA SMARTPHONES (Até 768px)
+   ========================================= */
+@media (max-width: 768px) {
+    /* Ajusta o container principal para não colar nas bordas */
+    .agendamento-container {
+        padding: 15px;
+        margin: 10px;
+        width: auto;
+    }
+
+    /* Empilha os seletores de Laboratório, Disciplina e Data */
+    .seletor-fila {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .campo-item {
+        width: 100%;
+    }
+
+    /* Aumenta a área de toque e evita zoom automático no iPhone */
+    .campo-item select,
+    .campo-item input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px;
+        font-size: 16px; 
+    }
+
+    /* Ajusta a grade de horários para 2 colunas no celular */
+    .grade-horarios {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .bloco-horario {
+        padding: 12px 5px;
+        font-size: 0.9rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Empilha as perguntas de técnico, número de alunos e link */
+    .opcao-tecnico-fila {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .radio-options {
+        width: 100%;
+        gap: 15px;
+    }
+
+    #numero_discentes, 
+    #link_roteiro {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px;
+        font-size: 16px;
+    }
+
+    /* Ajusta o botão de envio para ocupar a largura toda */
+    .btn-principal {
+        width: 100%;
+        padding: 15px;
+        font-size: 1.1rem;
+    }
+    /* 1. Ajuste do Layout Principal */
+    .conteudo {
+        width: 100% !important;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    /* 2. Empilhando os cartões do painel */
+    .painel-grelha {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .cartao-painel {
+        width: 100% !important;
+        padding: 10px;
+        box-sizing: border-box;
+        margin: 0;
+    }
+
+    /* 3. Tabelas Responsivas (Rolagem Horizontal) */
+    /* Cria uma barra de rolagem apenas dentro do cartão da tabela */
+    .painel-minhas-aulas,
+    .painel-aulas-tecnico-lista {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch; /* Deixa a rolagem suave no iOS */
+    }
+
+    /* Trava a largura mínima da tabela para ela não "esmagar" o texto */
+    .tabela-visualizacao-aulas {
+        min-width: 700px; 
+    }
+
+    /* 4. Ajustes Finos no Calendário */
+    .calendario-header {
+        flex-direction: row; /* Mantém as setas lado a lado */
+        justify-content: space-between;
+    }
+
+    .calendario-header h2 {
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .calendario-dias-semana {
+        font-size: 0.7rem; /* Reduz a fonte de SEG, TER, QUA... */
+    }
+
+    .dia-calendario {
+        padding: 5px;
+        min-height: 50px; /* Diminui a altura dos quadrados no celular */
+        font-size: 0.85rem;
+    }
+
+    /* Ajuste do "balão" flutuante (tooltip) do calendário para não sair da tela */
+    .tooltip {
+        width: 180px;
+        font-size: 0.75rem;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: normal; /* Permite que o texto quebre linhas */
+    }
+}
+
+/* Telas muito pequenas (ex: iPhone SE antigo) */
+@media (max-width: 400px) {
+    .grade-horarios {
+        grid-template-columns: 1fr; /* Muda para 1 horário por linha */
+    }
+}
