@@ -90,14 +90,16 @@ function preencherDadosDoMenu(userData) {
     switch (userType) {
         case 'admin':
         case 'administrador': 
-            showMenuItem('.admin-menu');
+            showMenuItem('.admin-menu');                        showMenuItem('.Calendario');
+
             showMenuItem('.produto');
                         showMenuItem('.Disciplinas');
 
             break;
 
         case 'tecnico':
-            showMenuItem('.tecnico');
+            showMenuItem('.tecnico');                        showMenuItem('.Calendario');
+
             showMenuItem('.Home');
             showMenuItem('.produto');
             showDashboardCard('.cartao-aulas-tecnico');
@@ -106,6 +108,8 @@ function preencherDadosDoMenu(userData) {
 
         case 'professor':
             showMenuItem('.Home');
+                        showMenuItem('.Calendario');
+
             showMenuItem('.professor');            
             showMenuItem('.Disciplinas');
             showMenuItem('.Horarios');

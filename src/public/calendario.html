@@ -1,0 +1,353 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="images/icone.png" type="image/png" />
+    <title>Sistema Merlin - Grade de Aulas</title>
+    <link rel="stylesheet" href="css/style7.css" />
+    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+    <style>
+        .painel-split {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            align-items: flex-start;
+        }
+        .coluna-calendario {
+            width: 60%;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e0e0e0;
+        }
+        .coluna-horarios {
+            width: 40%;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e0e0e0;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .controle-filtro {
+            margin-bottom: 20px;
+        }
+        .controle-filtro label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .controle-filtro select, 
+        .controle-filtro input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+        .lista-horarios {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .slot-horario {
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 5px solid #ccc;
+            background-color: #f9f9f9;
+        }
+        .slot-livre {
+            border-left-color: #2ecc71;
+            background-color: #f4fdf7;
+        }
+        .slot-ocupado {
+            border-left-color: #e74c3c;
+            background-color: #fdf5f5;
+        }
+        .slot-horario h4 {
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+        }
+        .slot-horario p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .dia-calendario {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .dia-calendario:hover {
+            background-color: #e3f2fd;
+        }
+        .dia-selecionado {
+            background-color: #3498db !important;
+            color: white !important;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .painel-split {
+                flex-direction: column;
+                padding: 10px;
+            }
+            .coluna-calendario, .coluna-horarios {
+                width: 100%;
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="tudo">
+        <div class="menu">
+            <header id="menu-container"></header>
+        </div>
+
+        <div class="conteudo">
+            <div class="painel-split">
+                
+                <div class="coluna-calendario">
+                    <div class="controle-filtro">
+                        <label for="select-laboratorio">Laboratório:</label>
+                        <select id="select-laboratorio">
+                            <option value="">Selecione um laboratório...</option>
+                        </select>
+                    </div>
+
+                    <div class="calendario-header">
+                        <button type="button" id="btn-mes-anterior">&lt;</button>
+                        <h2 id="calendario-titulo" style="border-bottom: none; margin: 0">Mês / Ano</h2>
+                        <button type="button" id="btn-proximo-mes">&gt;</button>
+                    </div>
+
+                    <div class="calendario-dias-semana">
+                        <div class="dia-semana">DOM</div>
+                        <div class="dia-semana">SEG</div>
+                        <div class="dia-semana">TER</div>
+                        <div class="dia-semana">QUA</div>
+                        <div class="dia-semana">QUI</div>
+                        <div class="dia-semana">SEX</div>
+                        <div class="dia-semana">SÁB</div>
+                    </div>
+
+                    <div class="calendario-grid" id="calendario-grid"></div>
+                </div>
+
+                <div class="coluna-horarios">
+                    <div class="controle-filtro">
+                        <label for="input-data">Data Selecionada:</label>
+                        <input type="date" id="input-data">
+                    </div>
+
+                    <h3 style="border-bottom: 2px solid #eee; padding-bottom: 10px;">Grade do Dia</h3>
+                    
+                    <div class="lista-horarios" id="lista-horarios">
+                        <p style="text-align: center; color: #888; padding: 20px;">
+                            Selecione um laboratório e uma data para ver a grade.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userInfo = null;
+        let horariosBd = [];
+        let aulasDoMes = [];
+        let dataAtual = new Date();
+        let mesExibido = dataAtual.getMonth();
+        let anoExibido = dataAtual.getFullYear();
+
+        const selectLab = document.getElementById('select-laboratorio');
+        const inputData = document.getElementById('input-data');
+        const grid = document.getElementById('calendario-grid');
+        const tituloCalendario = document.getElementById('calendario-titulo');
+        const listaHorarios = document.getElementById('lista-horarios');
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const dateStr = dataAtual.getFullYear() + '-' + 
+                            String(dataAtual.getMonth() + 1).padStart(2, '0') + '-' + 
+                            String(dataAtual.getDate()).padStart(2, '0');
+            inputData.value = dateStr;
+
+            await carregarUsuarioLogado();
+            await carregarHorariosBase();
+            await carregarLaboratorios();
+
+            selectLab.addEventListener('change', () => atualizarPainelCompleto());
+            inputData.addEventListener('change', () => {
+                sincronizarCalendarioComInputData();
+                renderizarHorariosDoDia(inputData.value);
+            });
+
+            document.getElementById('btn-mes-anterior').addEventListener('click', () => mudarMes(-1));
+            document.getElementById('btn-proximo-mes').addEventListener('click', () => mudarMes(1));
+
+            renderizarCalendario();
+        });
+
+        async function carregarUsuarioLogado() {
+            try {
+                const res = await fetch('/api/usuario-logado');
+                if(res.ok) userInfo = await res.json();
+            } catch(e) {}
+        }
+
+        async function carregarHorariosBase() {
+            try {
+                const res = await fetch('/api/horarios');
+                if(res.ok) horariosBd = await res.json();
+            } catch(e) {}
+        }
+
+        async function carregarLaboratorios() {
+            try {
+                const response = await fetch('/api/lab32'); 
+                const data = await response.json();
+                data.forEach(lab => {
+                    const option = document.createElement('option');
+                    option.value = lab.id_laboratorio;
+                    option.textContent = lab.nome_laboratorio;
+                    selectLab.appendChild(option);
+                });
+            } catch (error) {}
+        }
+
+        async function buscarAulasDoMesAPI() {
+            if (!userInfo) return [];
+            try {
+                const isTecnico = userInfo.tipo_usuario.toLowerCase() === 'tecnico';
+                const endpoint = isTecnico 
+                    ? `/api/calendario/aulas-tecnico?ano=${anoExibido}&mes=${mesExibido + 1}`
+                    : `/api/calendario/aulas-autorizadas?ano=${anoExibido}&mes=${mesExibido + 1}`;
+                
+                const response = await fetch(endpoint);
+                if (response.ok) return await response.json();
+                return [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        async function atualizarPainelCompleto() {
+            if (!selectLab.value) {
+                aulasDoMes = [];
+                renderizarCalendario();
+                listaHorarios.innerHTML = '<p style="text-align: center; color: #888;">Selecione um laboratório.</p>';
+                return;
+            }
+
+            const todasAulas = await buscarAulasDoMesAPI();
+            const nomeLabSelecionado = selectLab.options[selectLab.selectedIndex].text;
+            
+            aulasDoMes = todasAulas.filter(a => a.nome_laboratorio === nomeLabSelecionado);
+
+            renderizarCalendario();
+            renderizarHorariosDoDia(inputData.value);
+        }
+
+        function mudarMes(direcao) {
+            mesExibido += direcao;
+            if (mesExibido > 11) { mesExibido = 0; anoExibido++; }
+            if (mesExibido < 0) { mesExibido = 11; anoExibido--; }
+            atualizarPainelCompleto();
+        }
+
+        function sincronizarCalendarioComInputData() {
+            const partes = inputData.value.split('-');
+            anoExibido = parseInt(partes[0]);
+            mesExibido = parseInt(partes[1]) - 1; 
+            atualizarPainelCompleto();
+        }
+
+        function renderizarCalendario() {
+            const dataBase = new Date(anoExibido, mesExibido, 1);
+            tituloCalendario.textContent = `${dataBase.toLocaleString('pt-BR', { month: 'long' }).toUpperCase()} • ${anoExibido}`;
+            
+            const diasNoMes = new Date(anoExibido, mesExibido + 1, 0).getDate();
+            const primeiroDia = dataBase.getDay();
+            
+            const diasComAula = {};
+            aulasDoMes.forEach(aula => {
+                const d = new Date(aula.data);
+                const diaUTC = d.getUTCDate();
+                diasComAula[diaUTC] = true;
+            });
+
+            grid.innerHTML = "";
+            
+            for (let i = 0; i < primeiroDia; i++) {
+                grid.innerHTML += `<div class="dia-calendario dia-vazio"></div>`;
+            }
+
+            const dataInputSelecionada = inputData.value; 
+
+            for (let dia = 1; dia <= diasNoMes; dia++) {
+                const diaStr = String(dia).padStart(2, '0');
+                const mesStr = String(mesExibido + 1).padStart(2, '0');
+                const diaFormatado = `${anoExibido}-${mesStr}-${diaStr}`;
+                
+                let classes = "dia-calendario";
+                if (diasComAula[dia]) classes += " tem-aula";
+                if (diaFormatado === dataInputSelecionada) classes += " dia-selecionado";
+
+                const div = document.createElement('div');
+                div.className = classes;
+                div.innerHTML = `<span>${dia}</span>`;
+                
+                div.addEventListener('click', () => {
+                    inputData.value = diaFormatado;
+                    renderizarCalendario(); 
+                    renderizarHorariosDoDia(diaFormatado); 
+                });
+
+                grid.appendChild(div);
+            }
+        }
+
+        function renderizarHorariosDoDia(dataEscolhida) {
+            listaHorarios.innerHTML = "";
+            if (!selectLab.value) {
+                listaHorarios.innerHTML = '<p style="text-align: center; color: #888;">Selecione um laboratório para ver os horários.</p>';
+                return;
+            }
+
+            const aulasDoDia = aulasDoMes.filter(aula => {
+                const d = new Date(aula.data);
+                const diaDaAula = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+                return diaDaAula === dataEscolhida;
+            });
+
+            horariosBd.forEach(slot => {
+                const aulaEncontrada = aulasDoDia.find(a => a.hora_inicio.startsWith(slot.inicio));
+                const div = document.createElement('div');
+                
+                if (aulaEncontrada) {
+                    div.className = "slot-horario slot-ocupado";
+                    div.innerHTML = `
+                        <h4><i class="fas fa-clock"></i> ${slot.inicio} - ${slot.fim}</h4>
+                        <p><strong>Disciplina:</strong> ${aulaEncontrada.nome_disciplina}</p>
+                        ${aulaEncontrada.nome_professor ? `<p><strong>Professor:</strong> ${aulaEncontrada.nome_professor}</p>` : ''}
+                        <p style="color: #e74c3c; margin-top: 5px;"><strong><i class="fas fa-ban"></i> Reservado</strong></p>
+                    `;
+                } else {
+                    div.className = "slot-horario slot-livre";
+                    div.innerHTML = `
+                        <h4><i class="fas fa-clock"></i> ${slot.inicio} - ${slot.fim}</h4>
+                        <p style="color: #2ecc71;"><strong><i class="fas fa-check-circle"></i> Livre</strong></p>
+                    `;
+                }
+                listaHorarios.appendChild(div);
+            });
+        }
+    </script>
+    <script src="js/menu.js" defer></script>
+    <script src="/js/auth-guard.js" defer></script>
+</body>
+</html>

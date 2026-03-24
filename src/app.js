@@ -142,6 +142,8 @@ app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "login.ht
 app.get("/novo-usuario", (req, res) => res.sendFile(path.join(__dirname, "public", "novo-usuario.html"))); 
 
 app.get("/Home", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "Home.html")));
+app.get("/Calendario", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "calendario.html")));
+
 app.get("/Relatorio", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "relatorio.html")));
 app.get("/Disciplinas", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "disciplinas.html")));
 app.get("/Horario", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "horarios.html")));

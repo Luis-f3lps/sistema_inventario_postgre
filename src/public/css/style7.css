@@ -1376,7 +1376,7 @@ input[type="url"]::placeholder {
 /* =========================================
    RESPONSIVIDADE PARA SMARTPHONES (Até 768px)
    ========================================= */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     /* Ajusta o container principal para não colar nas bordas */
     .agendamento-container {
         padding: 15px;
