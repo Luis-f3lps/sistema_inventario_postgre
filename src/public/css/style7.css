@@ -805,7 +805,7 @@ input[type="url"]::placeholder {
 .painel-minhas-aulas {
     padding-left: 60px;
     padding-right: 60px;
-    padding-top: 30px;
+    padding-top: 60px;
     background-color: #ffffff;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -1651,6 +1651,10 @@ input[type="url"]::placeholder {
     .grade-horarios-recorrente {
         font-size: 28px;
     }
+    .checkbox-item label {        font-size: 28px;
+}
+.fa-solid, .fas {
+    position: fixed;}
 }
 
 @media (max-width: 400px) {
