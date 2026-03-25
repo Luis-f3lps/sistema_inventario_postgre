@@ -1015,7 +1015,7 @@ input[type="url"]::placeholder {
     }
 
     .menu {
-        width: 5%;
+        width: 1%;
     }
 
     #header {
@@ -1377,32 +1377,30 @@ input[type="url"]::placeholder {
    RESPONSIVIDADE PARA SMARTPHONES (Até 1024px)
    ========================================= */
 @media (max-width: 1024px) {
-/* 1. Layout Principal e Cartões */
     .conteudo {
         width: 100% !important;
-        padding: 20px; /* Dobrado */
+        padding: 20px;
         box-sizing: border-box;
     }
 
     .painel-grelha {
         display: flex;
         flex-direction: column;
-        gap: 30px; /* Dobrado */
+        gap: 30px;
     }
 
     .cartao-painel {
         width: 100% !important;
-        padding: 30px; /* Dobrado */
+        padding: 30px;
         box-sizing: border-box;
         margin: 0;
     }
 
     .cartao-painel h2 {
-        font-size: 36px; /* Dobrado */
+        font-size: 36px;
         margin-bottom: 20px;
     }
 
-    /* 2. Calendário Gigante */
     .calendario-header {
         flex-direction: row;
         justify-content: space-between;
@@ -1411,75 +1409,70 @@ input[type="url"]::placeholder {
     }
 
     .calendario-header h2 {
-        font-size: 32px !important; /* Dobrado */
+        font-size: 32px !important;
         text-align: center;
     }
 
     .calendario-header button {
-        font-size: 48px; /* Dobrado */
-        padding: 20px 30px; /* Dobrado: Área de toque gigante */
+        font-size: 48px;
+        padding: 20px 30px;
     }
 
     .calendario-dias-semana {
-        font-size: 24px; /* Dobrado */
+        font-size: 24px;
         font-weight: bold;
         padding: 10px 0;
     }
 
     .dia-calendario {
-        padding: 10px; /* Dobrado */
-        min-height: 100px; /* Dobrado (quadrados bem altos) */
-        font-size: 28px; /* Dobrado */
+        padding: 10px;
+        min-height: 100px;
+        font-size: 28px;
     }
 
     .dia-calendario span {
         font-size: 28px; 
     }
 
-    /* Balão flutuante (tooltip) gigante */
     .tooltip {
-        width: 360px; /* Dobrado de 180px */
-        font-size: 24px; /* Dobrado de 12px */
+        width: 360px;
+        font-size: 24px;
         padding: 16px;
         left: 50%;
         transform: translateX(-50%);
         white-space: normal;
     }
 
-    /* 3. Tabela de Solicitações Gigante */
     .painel-minhas-aulas,
     .painel-aulas-tecnico-lista {
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch;
     }
 
-    /* A tabela precisa ser mais larga para caber a nova fonte de 32px sem esmagar */
     .tabela-visualizacao-aulas {
-        min-width: 1400px; /* Dobrado para acompanhar o texto */
+        min-width: 1400px;
     }
 
     .tabela-visualizacao-aulas th,
     .tabela-visualizacao-aulas td {
-        font-size: 28px; /* Dobrado */
-        padding: 24px; /* Dobrado */
+        font-size: 28px;
+        padding: 24px;
     }
 
-    /* Botões e Status dentro da tabela */
     .etiqueta-status, 
     .badge-status {
-        font-size: 24px; /* Dobrado */
-        padding: 12px 20px; /* Dobrado */
+        font-size: 24px;
+        padding: 12px 20px;
     }
 
     .btn-cancelar {
-        font-size: 24px; /* Dobrado */
-        padding: 16px 24px; /* Dobrado */
+        font-size: 24px;
+        padding: 16px 24px;
     }
 }
 
-/* Telas muito pequenas (ex: iPhone SE antigo) */
 @media (max-width: 400px) {
     .grade-horarios {
-        grid-template-columns: 1fr; /* 1 horário por linha se a tela for minúscula */
+        grid-template-columns: 1fr;
     }
 }
