@@ -1,6 +1,7 @@
 let mesExibido;
 let anoExibido;
 let dataReferenciaSemanaTecnico = new Date();
+
 document.addEventListener("menuReady", (event) => {
   const { userData } = event.detail;
   inicializarDashboard(userData);
@@ -26,6 +27,13 @@ async function inicializarDashboard(userData) {
 
   switch (userType) {
     case "tecnico":
+      const grelha = document.querySelector(".painel-grelha");
+      if (grelha) {
+        grelha.style.display = "block";
+        grelha.style.gap = "20px";
+        grelha.style.marginBottom = "20px";
+      }
+
       showElement(".cartao-aulas-tecnico");
       showElement(".cartao-meus-laboratorios");
       showElement(".painel-aulas-tecnico-lista");
@@ -37,17 +45,20 @@ async function inicializarDashboard(userData) {
         .getElementById("btn-proximo-mes-tecnico")
         ?.addEventListener("click", mostrarProximaSemanaTecnico);
       break;
+
     case "professor":
       showElement(".cartao-aulas-autorizadas");
-      showElement(".painel-minhas-aulas"); showElement(".cartao-horarios-hoje");
+      showElement(".painel-minhas-aulas"); 
+      showElement(".cartao-horarios-hoje");
+      
       carregarAulasDeHoje();
+      
       document
         .getElementById("btn-mes-anterior")
         ?.addEventListener("click", mostrarMesAnteriorProfessor);
       document
         .getElementById("btn-proximo-mes")
         ?.addEventListener("click", mostrarProximoMesProfessor);
-
       break;
   }
 
