@@ -1091,6 +1091,12 @@ input[type="url"]::placeholder {
         top: -750px;
     }
 
+    .form-container h2,
+    .form-container h1,
+    .delete-produto-container h3 {
+        font-size: 24px;
+    }
+
     .grade-horarios {
         justify-content: center;
     }
@@ -1396,6 +1402,11 @@ input[type="url"]::placeholder {
         width: 100% !important;
         padding: 20px;
         box-sizing: border-box;
+        margin-top: 60px;
+    }
+
+    body {
+        background-color: #ffffff;
     }
 
     .painel-grelha {
