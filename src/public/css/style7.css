@@ -1024,16 +1024,16 @@ input[type="url"]::placeholder {
     }
 
     #header {
-        width: 5%;
+        width: 1%;
     }
 
     .conteudo,
     .container {
-        width: 95%;
+        width: 100%;
     }
 
     .painel-minhas-aulas {
-        width: 95%;
+        width: 100%;
     }
 }
 
@@ -1486,7 +1486,7 @@ input[type="url"]::placeholder {
     }
 
     .agendamento-container h1 {
-        font-size: 64px;
+        font-size: 44px;
         margin-bottom: 40px;
     }
 
@@ -1498,6 +1498,22 @@ input[type="url"]::placeholder {
         font-size: 36px;
         padding: 20px;
         display: block;
+    }
+
+    select,
+    input[type="date"],
+    input[type="number"],
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    textarea {
+        font-size: 28px;
+    }
+
+    .input-group label {
+
+        font-size: 28px;
     }
 
     .link-destacado i {
@@ -1570,7 +1586,7 @@ input[type="url"]::placeholder {
 
     .opcao-tecnico-fila span,
     .opcao-tecnico-fila label {
-        font-size: 32px;
+        font-size: 28px;
     }
 
     .radio-options {
@@ -1623,6 +1639,11 @@ input[type="url"]::placeholder {
 
     #sidemenu li a i {
         width: auto;
+    }
+
+    .grade-horarios button,
+    .grade-horarios .slot {
+        font-size: 28px;
     }
 }
 
