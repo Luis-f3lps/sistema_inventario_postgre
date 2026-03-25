@@ -1377,143 +1377,103 @@ input[type="url"]::placeholder {
    RESPONSIVIDADE PARA SMARTPHONES (Até 1024px)
    ========================================= */
 @media (max-width: 1024px) {
-    /* 1. Ajustes Gerais e Container */
-    .agendamento-container, .conteudo {
+/* 1. Layout Principal e Cartões */
+    .conteudo {
         width: 100% !important;
-        padding: 15px;
-        margin: 0;
+        padding: 20px; /* Dobrado */
         box-sizing: border-box;
     }
 
-    .agendamento-container h1 {
-        font-size: 1.8rem; /* Título maior */
-    }
-
-    /* 2. Link e Ícone de Aulas Recorrentes */
-    .link-destacado a {
-        font-size: 1.2rem; /* Texto maior */
-        display: block;
-        padding: 10px;
-    }
-    .link-destacado i {
-        font-size: 1.4rem; /* Ícone do calendário maior */
-        margin-right: 8px;
-    }
-
-    /* 3. Seletores, Inputs e Labels */
-    .seletor-fila, .opcao-tecnico-fila, .painel-grelha {
+    .painel-grelha {
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        gap: 30px; /* Dobrado */
     }
 
-    .campo-item {
-        width: 100%;
-    }
-
-    .campo-item label,
-    .opcao-tecnico-fila span,
-    .opcao-tecnico-fila label {
-        font-size: 1.1rem; /* Rótulos mais legíveis */
-        font-weight: bold;
-    }
-
-    .radio-options {
-        width: 100%;
-        gap: 15px;
-    }
-
-    /* Aumenta a área de toque e a fonte dos campos de digitação */
-    .campo-item select,
-    .campo-item input,
-    #numero_discentes, 
-    #link_roteiro {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 14px; /* Área de toque maior */
-        font-size: 1.1rem; /* Texto digitado maior */
-    }
-
-    /* 4. Grade de Horários (Botões) */
-    .grade-horarios {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
-
-    .bloco-horario {
-        padding: 15px 5px; /* Botão mais alto para caber o dedo */
-        font-size: 1.1rem; /* Horários maiores */
-        font-weight: bold;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .btn-principal {
-        width: 100%;
-        padding: 18px;
-        font-size: 1.3rem; /* Botão finalizador gigante */
-    }
-
-    /* 5. Tabelas Responsivas */
-    .painel-minhas-aulas,
-    .painel-aulas-tecnico-lista {
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
-        width: 100%;
-    }
-
-    .tabela-visualizacao-aulas {
-        min-width: 750px; 
-    }
-
-    .tabela-visualizacao-aulas th,
-    .tabela-visualizacao-aulas td {
-        font-size: 1rem; /* Textos da tabela maiores */
-        padding: 12px;
-    }
-
-    /* 6. Calendário e Cartões */
     .cartao-painel {
         width: 100% !important;
-        padding: 15px;
+        padding: 30px; /* Dobrado */
         box-sizing: border-box;
         margin: 0;
     }
 
+    .cartao-painel h2 {
+        font-size: 36px; /* Dobrado */
+        margin-bottom: 20px;
+    }
+
+    /* 2. Calendário Gigante */
     .calendario-header {
         flex-direction: row;
         justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
     }
 
     .calendario-header h2 {
-        font-size: 1.3rem; /* Mês/Ano maior */
+        font-size: 32px !important; /* Dobrado */
         text-align: center;
     }
 
     .calendario-header button {
-        font-size: 1.5rem; /* Setas maiores */
-        padding: 10px 15px; /* Área de clique nas setas */
+        font-size: 48px; /* Dobrado */
+        padding: 20px 30px; /* Dobrado: Área de toque gigante */
     }
 
     .calendario-dias-semana {
-        font-size: 0.9rem; /* Dias da semana maiores (DOM, SEG...) */
+        font-size: 24px; /* Dobrado */
         font-weight: bold;
+        padding: 10px 0;
     }
 
     .dia-calendario {
-        padding: 5px;
-        min-height: 60px; /* Quadrados mais altos */
-        font-size: 1.1rem; /* Números dos dias bem visíveis */
+        padding: 10px; /* Dobrado */
+        min-height: 100px; /* Dobrado (quadrados bem altos) */
+        font-size: 28px; /* Dobrado */
     }
 
-    /* Balãozinho de informação quando clica no dia */
+    .dia-calendario span {
+        font-size: 28px; 
+    }
+
+    /* Balão flutuante (tooltip) gigante */
     .tooltip {
-        width: 220px; /* Mais largo para caber a fonte maior */
-        font-size: 0.9rem; /* Antes era 0.75rem, agora está fácil de ler */
+        width: 360px; /* Dobrado de 180px */
+        font-size: 24px; /* Dobrado de 12px */
+        padding: 16px;
         left: 50%;
         transform: translateX(-50%);
         white-space: normal;
+    }
+
+    /* 3. Tabela de Solicitações Gigante */
+    .painel-minhas-aulas,
+    .painel-aulas-tecnico-lista {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* A tabela precisa ser mais larga para caber a nova fonte de 32px sem esmagar */
+    .tabela-visualizacao-aulas {
+        min-width: 1400px; /* Dobrado para acompanhar o texto */
+    }
+
+    .tabela-visualizacao-aulas th,
+    .tabela-visualizacao-aulas td {
+        font-size: 28px; /* Dobrado */
+        padding: 24px; /* Dobrado */
+    }
+
+    /* Botões e Status dentro da tabela */
+    .etiqueta-status, 
+    .badge-status {
+        font-size: 24px; /* Dobrado */
+        padding: 12px 20px; /* Dobrado */
+    }
+
+    .btn-cancelar {
+        font-size: 24px; /* Dobrado */
+        padding: 16px 24px; /* Dobrado */
     }
 }
 
