@@ -1084,6 +1084,12 @@ input[type="url"]::placeholder {
         display: block;
     }
 
+    .fa-circle-xmark {
+        left: 550px;
+        position: relative;
+        top: -750px;
+    }
+
     .grade-horarios {
         justify-content: center;
     }
@@ -1740,7 +1746,7 @@ Pagina calendario
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     border: 1px solid #e0e0e0;
-    max-height: 54vh;
+    height: 54vh;
 
 }
 
@@ -1751,7 +1757,7 @@ Pagina calendario
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     border: 1px solid #e0e0e0;
-    max-height: 54vh;
+    height: 54vh;
     overflow-y: auto;
 }
 
@@ -1889,7 +1895,7 @@ Pagina calendario
     .sub-title {
         font-size: 32px;
     }
-    
+
     table td,
     td {
         font-size: 24px;
@@ -1898,6 +1904,19 @@ Pagina calendario
     table th,
     th {
         font-size: 26px;
+    }
+
+    .dia-semana {
+        font-size: 26px;
+
+    }
+
+    p {
+        font-size: 24px;
+    }
+
+    .h3 {
+        font-size: 24px;
     }
 }
 
