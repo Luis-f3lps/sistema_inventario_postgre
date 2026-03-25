@@ -39,13 +39,15 @@ async function inicializarDashboard(userData) {
       break;
     case "professor":
       showElement(".cartao-aulas-autorizadas");
-      showElement(".painel-minhas-aulas");
+      showElement(".painel-minhas-aulas"); showElement(".cartao-horarios-hoje");
+      carregarAulasDeHoje();
       document
         .getElementById("btn-mes-anterior")
         ?.addEventListener("click", mostrarMesAnteriorProfessor);
       document
         .getElementById("btn-proximo-mes")
         ?.addEventListener("click", mostrarProximoMesProfessor);
+
       break;
   }
 
@@ -148,8 +150,8 @@ function renderizarAulasNosMeusLaboratorios(aulas) {
             <td>${aula.nome_disciplina}</td>
             <td>${aula.nome_professor}</td>
             <td>${new Date(aula.data).toLocaleDateString("pt-BR", {
-              timeZone: "UTC",
-            })}</td>
+      timeZone: "UTC",
+    })}</td>
             <td>${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(0, 5)}</td>
             <td>${aula.numero_discentes}</td>
             <td>${aula.precisa_tecnico ? "Sim" : "Não"}</td>
@@ -358,8 +360,7 @@ function renderizarCalendarioProfessor(aulas, ano, mes) {
       `<p><strong>${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(
         0,
         5,
-      )}:</strong> ${aula.nome_disciplina}<br><em>(${
-        aula.nome_laboratorio
+      )}:</strong> ${aula.nome_disciplina}<br><em>(${aula.nome_laboratorio
       })</em></p>`,
   );
 }
@@ -378,8 +379,7 @@ function renderizarCalendarioTecnico(aulas, ano, mes) {
       `<p><strong>${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(
         0,
         5,
-      )}:</strong> ${aula.nome_disciplina}<br><em>(Prof: ${
-        aula.nome_professor
+      )}:</strong> ${aula.nome_disciplina}<br><em>(Prof: ${aula.nome_professor
       })</em></p>`,
   );
 }
@@ -569,5 +569,39 @@ function renderizarCalendarioTecnico(aulas, ano, mes) {
     }
 
     grid.innerHTML += `<div class="${classesCss}"><span>${diaNumero}</span>${eventosDoDia}</div>`;
+  }
+}
+async function carregarAulasDeHoje() {
+  const container = document.getElementById("lista-horarios-hoje");
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/aulas-hoje');
+    if (!res.ok) throw new Error();
+    const aulas = await res.json();
+
+    container.innerHTML = "";
+
+    if (aulas.length === 0) {
+      container.innerHTML = "<p style='text-align:center; color:#666; padding: 20px;'>Nenhuma aula agendada para hoje.</p>";
+      return;
+    }
+
+    aulas.forEach(aula => {
+      const div = document.createElement("div");
+      div.className = "item-horario-hoje";
+      div.innerHTML = `
+        <div class="item-horario-hora">
+            <i class="fas fa-clock"></i> ${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(0, 5)}
+        </div>
+        <div class="item-horario-info">
+            <h4>${aula.nome_disciplina}</h4>
+            <p><i class="fas fa-flask"></i> ${aula.nome_laboratorio}</p>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  } catch (error) {
+    container.innerHTML = "<p style='color:red; text-align:center;'>Erro ao carregar horários.</p>";
   }
 }

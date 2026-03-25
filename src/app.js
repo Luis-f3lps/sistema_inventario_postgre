@@ -2565,5 +2565,28 @@ app.get("/api/solicitacoes-analise-tecnico", Autenticado, async (req, res) => {
     res.status(500).json({ total: 0 });
   }
 });
-
+app.get("/api/aulas-hoje", Autenticado, async (req, res) => {
+  try {
+    const email = req.session.user.email;
+    const query = `
+      SELECT 
+        h.hora_inicio, 
+        h.hora_fim, 
+        d.nome_disciplina, 
+        l.nome_laboratorio
+      FROM aulas a
+      JOIN horarios h ON a.id_horario = h.id_horario
+      JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+      JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+      WHERE a.professor_email = $1 
+        AND a.data = CURRENT_DATE
+        AND a.status = 'autorizado'
+      ORDER BY h.hora_inicio ASC
+    `;
+    const result = await pool.query(query, [email]);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar aulas de hoje." });
+  }
+});
 export default app;

@@ -1481,8 +1481,12 @@ input[type="url"]::placeholder {
 
     .agendamento-container {
         padding: 30px;
-        margin: 20px;
         width: auto;
+    }
+
+    .fa-solid,
+    .fas {
+        font-size: 35px;
     }
 
     .agendamento-container h1 {
@@ -1522,7 +1526,7 @@ input[type="url"]::placeholder {
     }
 
     .seletor-fila {
-        display: flex;
+        display: grid;
         flex-direction: column;
         gap: 30px;
         margin-bottom: 40px;
@@ -1620,8 +1624,6 @@ input[type="url"]::placeholder {
 
     .mensagem-status {
         font-size: 32px;
-        padding: 20px;
-        margin-bottom: 30px;
         border-radius: 10px;
     }
 
@@ -1645,10 +1647,66 @@ input[type="url"]::placeholder {
     .grade-horarios .slot {
         font-size: 28px;
     }
+
+    .grade-horarios-recorrente {
+        font-size: 28px;
+    }
 }
 
 @media (max-width: 400px) {
     .grade-horarios {
         grid-template-columns: 1fr;
+    }
+}
+.lista-horarios-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.item-horario-hoje {
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border-left: 5px solid #569af9;
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.item-horario-hora {
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    min-width: 140px;
+}
+
+.item-horario-info h4 {
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.item-horario-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .item-horario-hoje {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 25px;
+    }
+    .item-horario-hora {
+        margin-bottom: 15px;
+        font-size: 28px;
+    }
+    .item-horario-info h4 {
+        font-size: 28px;
+    }
+    .item-horario-info p {
+        font-size: 24px;
     }
 }
