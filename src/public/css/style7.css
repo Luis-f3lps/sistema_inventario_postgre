@@ -802,8 +802,9 @@ input[type="url"]::placeholder {
 }
 
 .painel-minhas-aulas {
-
-    padding: 30px;
+    padding-left: 60px;
+    padding-right: 60px;
+    padding-top: 30px;
     background-color: #ffffff;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -1372,20 +1373,35 @@ input[type="url"]::placeholder {
     z-index: 5;
     font-weight: bold;
 }
-
 /* =========================================
-   RESPONSIVIDADE PARA SMARTPHONES (Até 768px)
+   RESPONSIVIDADE PARA SMARTPHONES (Até 1024px)
    ========================================= */
 @media (max-width: 1024px) {
-    /* Ajusta o container principal para não colar nas bordas */
-    .agendamento-container {
+    /* 1. Ajustes Gerais e Container */
+    .agendamento-container, .conteudo {
+        width: 100% !important;
         padding: 15px;
-        margin: 10px;
-        width: auto;
+        margin: 0;
+        box-sizing: border-box;
     }
 
-    /* Empilha os seletores de Laboratório, Disciplina e Data */
-    .seletor-fila {
+    .agendamento-container h1 {
+        font-size: 1.8rem; /* Título maior */
+    }
+
+    /* 2. Link e Ícone de Aulas Recorrentes */
+    .link-destacado a {
+        font-size: 1.2rem; /* Texto maior */
+        display: block;
+        padding: 10px;
+    }
+    .link-destacado i {
+        font-size: 1.4rem; /* Ícone do calendário maior */
+        margin-right: 8px;
+    }
+
+    /* 3. Seletores, Inputs e Labels */
+    .seletor-fila, .opcao-tecnico-fila, .painel-grelha {
         display: flex;
         flex-direction: column;
         gap: 15px;
@@ -1395,35 +1411,11 @@ input[type="url"]::placeholder {
         width: 100%;
     }
 
-    /* Aumenta a área de toque e evita zoom automático no iPhone */
-    .campo-item select,
-    .campo-item input {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 12px;
-        font-size: 16px; 
-    }
-
-    /* Ajusta a grade de horários para 2 colunas no celular */
-    .grade-horarios {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-    }
-
-    .bloco-horario {
-        padding: 12px 5px;
-        font-size: 0.9rem;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    /* Empilha as perguntas de técnico, número de alunos e link */
-    .opcao-tecnico-fila {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+    .campo-item label,
+    .opcao-tecnico-fila span,
+    .opcao-tecnico-fila label {
+        font-size: 1.1rem; /* Rótulos mais legíveis */
+        font-weight: bold;
     }
 
     .radio-options {
@@ -1431,88 +1423,103 @@ input[type="url"]::placeholder {
         gap: 15px;
     }
 
+    /* Aumenta a área de toque e a fonte dos campos de digitação */
+    .campo-item select,
+    .campo-item input,
     #numero_discentes, 
     #link_roteiro {
         width: 100%;
         box-sizing: border-box;
-        padding: 12px;
-        font-size: 16px;
+        padding: 14px; /* Área de toque maior */
+        font-size: 1.1rem; /* Texto digitado maior */
     }
 
-    /* Ajusta o botão de envio para ocupar a largura toda */
-    .btn-principal {
-        width: 100%;
-        padding: 15px;
-        font-size: 1.1rem;
+    /* 4. Grade de Horários (Botões) */
+    .grade-horarios {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
     }
-    /* 1. Ajuste do Layout Principal */
-    .conteudo {
-        width: 100% !important;
-        padding: 10px;
+
+    .bloco-horario {
+        padding: 15px 5px; /* Botão mais alto para caber o dedo */
+        font-size: 1.1rem; /* Horários maiores */
+        font-weight: bold;
+        width: 100%;
         box-sizing: border-box;
     }
 
-    /* 2. Empilhando os cartões do painel */
-    .painel-grelha {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
+    .btn-principal {
+        width: 100%;
+        padding: 18px;
+        font-size: 1.3rem; /* Botão finalizador gigante */
     }
 
+    /* 5. Tabelas Responsivas */
+    .painel-minhas-aulas,
+    .painel-aulas-tecnico-lista {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+    }
+
+    .tabela-visualizacao-aulas {
+        min-width: 750px; 
+    }
+
+    .tabela-visualizacao-aulas th,
+    .tabela-visualizacao-aulas td {
+        font-size: 1rem; /* Textos da tabela maiores */
+        padding: 12px;
+    }
+
+    /* 6. Calendário e Cartões */
     .cartao-painel {
         width: 100% !important;
-        padding: 10px;
+        padding: 15px;
         box-sizing: border-box;
         margin: 0;
     }
 
-    /* 3. Tabelas Responsivas (Rolagem Horizontal) */
-    /* Cria uma barra de rolagem apenas dentro do cartão da tabela */
-    .painel-minhas-aulas,
-    .painel-aulas-tecnico-lista {
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch; /* Deixa a rolagem suave no iOS */
-    }
-
-    /* Trava a largura mínima da tabela para ela não "esmagar" o texto */
-    .tabela-visualizacao-aulas {
-        min-width: 700px; 
-    }
-
-    /* 4. Ajustes Finos no Calendário */
     .calendario-header {
-        flex-direction: row; /* Mantém as setas lado a lado */
+        flex-direction: row;
         justify-content: space-between;
     }
 
     .calendario-header h2 {
-        font-size: 1rem;
+        font-size: 1.3rem; /* Mês/Ano maior */
         text-align: center;
     }
 
+    .calendario-header button {
+        font-size: 1.5rem; /* Setas maiores */
+        padding: 10px 15px; /* Área de clique nas setas */
+    }
+
     .calendario-dias-semana {
-        font-size: 0.7rem; /* Reduz a fonte de SEG, TER, QUA... */
+        font-size: 0.9rem; /* Dias da semana maiores (DOM, SEG...) */
+        font-weight: bold;
     }
 
     .dia-calendario {
         padding: 5px;
-        min-height: 50px; /* Diminui a altura dos quadrados no celular */
-        font-size: 0.85rem;
+        min-height: 60px; /* Quadrados mais altos */
+        font-size: 1.1rem; /* Números dos dias bem visíveis */
     }
 
-    /* Ajuste do "balão" flutuante (tooltip) do calendário para não sair da tela */
+    /* Balãozinho de informação quando clica no dia */
     .tooltip {
-        width: 180px;
-        font-size: 0.75rem;
+        width: 220px; /* Mais largo para caber a fonte maior */
+        font-size: 0.9rem; /* Antes era 0.75rem, agora está fácil de ler */
         left: 50%;
         transform: translateX(-50%);
-        white-space: normal; /* Permite que o texto quebre linhas */
+        white-space: normal;
     }
 }
 
 /* Telas muito pequenas (ex: iPhone SE antigo) */
 @media (max-width: 400px) {
     .grade-horarios {
-        grid-template-columns: 1fr; /* Muda para 1 horário por linha */
+        grid-template-columns: 1fr; /* 1 horário por linha se a tela for minúscula */
     }
 }
