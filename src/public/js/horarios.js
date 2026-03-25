@@ -14,12 +14,16 @@ const msgEl = document.getElementById('msg');
 let occupiedSlots = [];
 let selectedSlot = null;
 let availableSlotsFromDB = [];
+
 async function inicializarPaginaDeAgendamento(userData) {
     loggedInUser = userData;
 
-    const todayString = new Date().toISOString().slice(0, 10);
-    dateEl.value = todayString;
-    dateEl.min = todayString;
+    const dataFutura = new Date();
+    dataFutura.setDate(dataFutura.getDate() + 4);
+    const dataFuturaString = dataFutura.toISOString().slice(0, 10);
+
+    dateEl.value = dataFuturaString;
+    dateEl.min = dataFuturaString;
 
     dateEl.addEventListener('change', loadAvailability);
     labEl.addEventListener('change', loadAvailability);

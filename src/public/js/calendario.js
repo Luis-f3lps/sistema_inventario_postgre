@@ -64,6 +64,10 @@ async function carregarLaboratorios() {
             option.textContent = lab.nome_laboratorio;
             selectLab.appendChild(option);
         });
+        if (data.length > 0) {
+            selectLab.value = data[0].id_laboratorio; 
+            atualizarPainelCompleto(); 
+        }
     } catch (error) { }
 }
 
