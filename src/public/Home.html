@@ -16,7 +16,7 @@
         </div>
         <div class="conteudo">
             <div class="painel-grelha" id="painel-grelha">
-                <div class="cartao-painel cartao-aulas-autorizadas" style="display: none">
+                <div class="cartao-painel cartao-aulas-autorizadas" style="display: none; width: 60%;">
                     <div class="calendario-header">
                         <button type="button" id="btn-mes-anterior" title="Mês Anterior">
                             &lt;
@@ -73,29 +73,11 @@
 
                     <div class="calendario-grid" id="calendario-grid-tecnico"></div>
                 </div>
-                <div class="cartao-painel cartao-horarios-hoje" style="display: none;">
+                <div class="cartao-painel cartao-horarios-hoje" style="display: none; width: 40%;">
                     <h2>Meus Horários de Hoje</h2>
                     <div id="lista-horarios-hoje" class="lista-horarios-timeline"></div>
                 </div>
-                <div class="cartao-painel painel-minhas-aulas"
-                    style="display: none; width: 100% ; overflow-y: auto; height: 50vh;">
-                    <h2>Minhas Solicitações de Aula</h2>
-                    <table class="tabela-visualizacao-aulas">
-                        <thead>
-                            <tr>
-                                <th>Laboratório</th>
-                                <th>Disciplina</th>
-                                <th>Data</th>
-                                <th>Horário</th>
-                                <th>Apoio Técnico</th>
-                                <th>Status</th>
-                                <th>Roteiro</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="minhas-aulas-tbody"></tbody>
-                    </table>
-                </div>
+
 
                 <div class="cartao-painel painel-aulas-tecnico-lista"
                     style="display: none; width: 100%; overflow-y: auto; height: 50vh;">
@@ -118,6 +100,25 @@
                     </table>
                 </div>
 
+            </div>
+            <div class="cartao-painel painel-minhas-aulas"
+                style="display: none; width: 100% ; overflow-y: auto; height: 50vh;">
+                <h2>Minhas Solicitações de Aula</h2>
+                <table class="tabela-visualizacao-aulas">
+                    <thead>
+                        <tr>
+                            <th>Laboratório</th>
+                            <th>Disciplina</th>
+                            <th>Data</th>
+                            <th>Horário</th>
+                            <th>Apoio Técnico</th>
+                            <th>Status</th>
+                            <th>Roteiro</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="minhas-aulas-tbody"></tbody>
+                </table>
             </div>
         </div>
     </div>
