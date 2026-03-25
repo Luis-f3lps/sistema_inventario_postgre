@@ -10,85 +10,86 @@
 </head>
 
 <body>
-        <div class="menu">
-            <header id="menu-container"></header>
-        </div>
+    <div class="menu">
+        <header id="menu-container"></header>
+    </div>
 
-        <div class="container">
+    <div class="container">
 
-                    <div class="row">
-                        <div class="about-col-2">
-                            <h1 class="sub-title">Movimentação</h1>
-                            </br>
-                            <div class="tab-titles">
-                                <p class="tab-links active-link" onclick="opentab('Aba01')">Registrar Consumo</p>
-                                <p class="tab-links" onclick="opentab('Aba02')" style="display: none;">Registrar Entrada
-                                </p>
+        <div class="row">
+            <div class="about-col-2">
+                <h1 class="sub-title">Movimentação</h1>
+                </br>
+                <div class="tab-titles">
+                    <p class="tab-links active-link" onclick="opentab('Aba01')">Registrar Consumo</p>
+                    <p class="tab-links" onclick="opentab('Aba02')" style="display: none;">Registrar Entrada
+                    </p>
+                </div>
+                <div class="tab-contents active-tab" id="Aba01">
+                    <div class="form-container">
+                        <form id="consumo-form">
+                            <div class="form-group">
+                                <label for="sigla-select">Produto*:</label>
+                                <select id="sigla-select" name="sigla" required>
+                                    <!-- siglas serão carregados  -->
+                                </select>
                             </div>
-                            <div class="tab-contents active-tab" id="Aba01">
-                                <div class="form-container">
-                                    <form id="consumo-form">
-                                        <div class="form-group">
-                                            <label for="sigla-select">Produto*:</label>
-                                            <select id="sigla-select" name="sigla" required>
-                                                <!-- siglas serão carregados  -->
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="quantidade">Quantidade*:</label>
-                                            <input type="number" id="quantidade" name="quantidade" required> g/ml
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="laboratorio-select">Laboratório*:</label>
-                                            <select id="laboratorio-select" name="laboratorio">
-                                                <!-- Laboratórios serão carregados  -->
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="data_consumo">Data de Consumo*:</label>
-                                            <input type="date" id="data_consumo" name="data_consumo" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="descricao_comsumo">Descrição*:</label>
-                                            <input type="text" id="descricao_comsumo" name="descricao_comsumo"
-                                                maxlength="120" placeholder="Ex: Novo Frasco" required>
-                                        </div>
-                                        <button type="submit">Registrar</button>
-                                    </form>
-                                </div>
+                            <div class="form-group">
+                                <label for="quantidade">Quantidade*:</label>
+                                <input type="number" id="quantidade" name="quantidade" required> g/ml
                             </div>
-                            <div class="tab-contents" id="Aba02">
-                                <div class="form-container">
-                                    <form id="entrada-form">
-                                        <div class="form-group">
-                                            <label for="produto-entrada-select">Produto*:</label>
-                                            <select id="produto-entrada-select" name="produto" required>
-                                                <!-- Produtos serão carregados -->
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="quantidade-entrada">Quantidade*:</label>
-                                            <input type="number" id="quantidade-entrada" name="quantidade" required>
-                                            g/ml
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="data-entrada">Data de Entrada*:</label>
-                                            <input type="date" id="data-entrada" name="data_entrada" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="descricao-entrada">Descrição*:</label>
-                                            <input type="text" id="descricao-entrada" name="descricao" maxlength="120"
-                                                placeholder="Ex: Novo Frasco" required>
-                                        </div>
-                                        <button type="submit">Registrar</button>
-                                    </form>
-                                </div>
+                            <div class="form-group">
+                                <label for="laboratorio-select">Laboratório*:</label>
+                                <select id="laboratorio-select" name="laboratorio">
+                                    <!-- Laboratórios serão carregados  -->
+                                </select>
                             </div>
+                            <div class="form-group">
+                                <label for="data_consumo">Data de Consumo*:</label>
+                                <input type="date" id="data_consumo" name="data_consumo" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="descricao_comsumo">Descrição*:</label>
+                                <input type="text" id="descricao_comsumo" name="descricao_comsumo" maxlength="120"
+                                    placeholder="Ex: Novo Frasco" required>
+                            </div>
+                            <button type="submit">Registrar</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="tab-contents" id="Aba02">
+                    <div class="form-container">
+                        <form id="entrada-form">
+                            <div class="form-group">
+                                <label for="produto-entrada-select">Produto*:</label>
+                                <select id="produto-entrada-select" name="produto" required>
+                                    <!-- Produtos serão carregados -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="quantidade-entrada">Quantidade*:</label>
+                                <input type="number" id="quantidade-entrada" name="quantidade" required>
+                                g/ml
+                            </div>
+                            <div class="form-group">
+                                <label for="data-entrada">Data de Entrada*:</label>
+                                <input type="date" id="data-entrada" name="data_entrada" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="descricao-entrada">Descrição*:</label>
+                                <input type="text" id="descricao-entrada" name="descricao" maxlength="120"
+                                    placeholder="Ex: Novo Frasco" required>
+                            </div>
+                            <button type="submit">Registrar</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    <script src="js/MovimentacaoProduto.js"></script>    <script src="js/menu.js" defer></script>
-<script src="/js/auth-guard.js" defer></script>
+    </div>
+    <script src="js/MovimentacaoProduto.js"></script>
+    <script src="js/menu.js" defer></script>
+    <script src="/js/auth-guard.js" defer></script>
 </body>
 
 </html>

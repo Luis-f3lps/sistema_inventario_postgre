@@ -188,7 +188,7 @@ menu {
 .painel-grelha {
     display: flex;
     gap: 20px;
-        margin-bottom: 20px;
+    margin-bottom: 20px;
 
 }
 
@@ -1650,10 +1650,15 @@ input[type="url"]::placeholder {
     .grade-horarios-recorrente {
         font-size: 28px;
     }
-    .checkbox-item label {        font-size: 28px;
-}
-.fa-solid, .fas {
-    position: fixed;}
+
+    .checkbox-item label {
+        font-size: 28px;
+    }
+
+    .fa-solid,
+    .fas {
+        position: fixed;
+    }
 }
 
 @media (max-width: 400px) {
@@ -1661,6 +1666,7 @@ input[type="url"]::placeholder {
         grid-template-columns: 1fr;
     }
 }
+
 .lista-horarios-timeline {
     display: flex;
     flex-direction: column;
@@ -1675,7 +1681,7 @@ input[type="url"]::placeholder {
     border-left: 5px solid #569af9;
     padding: 15px;
     border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .item-horario-hora {
@@ -1702,14 +1708,447 @@ input[type="url"]::placeholder {
         align-items: flex-start;
         padding: 25px;
     }
+
     .item-horario-hora {
         margin-bottom: 15px;
         font-size: 28px;
     }
+
     .item-horario-info h4 {
         font-size: 28px;
     }
+
     .item-horario-info p {
         font-size: 24px;
     }
+}
+
+/* =========================================
+Pagina calendario
+   ========================================= */
+
+.painel-split {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 20px;
+    align-items: flex-start;
+}
+
+.coluna-calendario {
+    width: 60%;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e0e0;
+    max-height: 54vh;
+
+}
+
+.coluna-horarios {
+    width: 40%;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e0e0e0;
+    max-height: 54vh;
+    overflow-y: auto;
+}
+
+.controle-filtro {
+    margin-bottom: 20px;
+}
+
+.controle-filtro label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.controle-filtro select,
+.controle-filtro input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+.lista-horarios {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.slot-horario {
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 5px solid #ccc;
+    background-color: #f9f9f9;
+}
+
+.slot-livre {
+    border-left-color: #2ecc71;
+    background-color: #f4fdf7;
+}
+
+.slot-ocupado {
+    border-left-color: #e74c3c;
+    background-color: #fdf5f5;
+}
+
+.slot-horario h4 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.slot-horario p {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.dia-calendario {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.dia-calendario:hover {
+    background-color: #e3f2fd;
+}
+
+.dia-selecionado {
+    background-color: #3498db !important;
+    color: white !important;
+    font-weight: bold;
+}
+
+.calendario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.calendario-header h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.calendario-header button {
+    font-size: 16px;
+    padding: 5px 10px;
+}
+
+.calendario-dias-semana {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.calendario-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+
+@media (max-width: 1024px) {
+    .painel-split {
+        display: grid;
+    }
+
+    .coluna-calendario {
+        width: 100%;
+    }
+
+    .coluna-horarios {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .painel-split {
+        display: flex;
+        flex-direction: column;
+        padding: 40px;
+        gap: 40px;
+    }
+
+    .coluna-calendario,
+    .coluna-horarios {
+        width: 100%;
+        max-height: none;
+        padding: 40px;
+        border-radius: 16px;
+    }
+
+    .controle-filtro {
+        margin-bottom: 40px;
+    }
+
+    .controle-filtro label {
+        margin-bottom: 16px;
+        font-size: 32px;
+    }
+
+    .controle-filtro select,
+    .controle-filtro input[type="date"] {
+        padding: 20px;
+        border-radius: 10px;
+        font-size: 32px;
+        border-width: 2px;
+    }
+
+    .calendario-header {
+        margin-bottom: 20px;
+    }
+
+    .calendario-header h2 {
+        font-size: 48px;
+    }
+
+    .calendario-header button {
+        font-size: 32px;
+        padding: 10px 20px;
+    }
+
+    .calendario-dias-semana {
+        font-size: 28px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .calendario-grid {
+        gap: 10px;
+    }
+
+    .dia-calendario {
+        font-size: 32px;
+        padding: 20px;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
+
+    .coluna-horarios h3 {
+        font-size: 48px;
+        border-bottom-width: 4px;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+
+    .lista-horarios {
+        gap: 20px;
+    }
+
+    .slot-horario {
+        padding: 30px;
+        border-radius: 12px;
+        border-left-width: 10px;
+    }
+
+    .slot-horario h4 {
+        font-size: 36px;
+        margin-bottom: 10px;
+    }
+
+    .slot-horario p {
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
+
+    .slot-horario i {
+        font-size: 36px;
+    }
+
+    .lista-horarios>p {
+        font-size: 32px;
+        padding: 40px;
+    }
+
+    .controle-filtro select,
+    .controle-filtro input[type="date"] {
+        font-size: 26px;
+    }
+
+    .controle-filtro label {
+        font-size: 30px;
+    }
+
+    .h3 {
+        font-size: 28px;
+    }
+}
+
+/* =========================================
+Tela professor
+   ========================================= */
+.container-filtros {
+    text-align: center;
+    margin: 20px 0;
+    padding: 15px;
+    /* background-color: #f8f9fa; */
+    border-radius: 8px;
+    /* border: 1px solid #e0e0e0; */
+}
+
+.container-filtros label {
+    margin: 0 15px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+}
+
+.container-filtros input[type="radio"] {
+    transform: scale(1.2);
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.cartao-recorrente {
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fcfcfc;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.cartao-recorrente:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-recorrente {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.header-recorrente h3 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.grid-info-recorrente {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.tags-datas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.tag-data {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* =========================================
+Tela tecnico
+   ========================================= */
+.container-filtros {
+    text-align: center;
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.container-filtros label {
+    margin: 0 15px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+}
+
+.container-filtros input[type="radio"] {
+    transform: scale(1.2);
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.cartao-recorrente {
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fcfcfc;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.cartao-recorrente:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-recorrente {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.header-recorrente h3 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.grid-info-recorrente {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+.tags-datas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.tag-data {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.acoes-recorrente {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px dashed #ccc;
+    padding-top: 15px;
 }

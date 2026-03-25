@@ -7,264 +7,6 @@
     <title>Sistema Merlin - Grade de Aulas</title>
     <link rel="stylesheet" href="css/style7.css" />
     <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
-    <style>
-        .painel-split {
-            display: flex;
-            gap: 20px;
-    padding-bottom: 20px;
-            align-items: flex-start;
-        }
-
-        .coluna-calendario {
-            width: 60%;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e0e0e0;
-        }
-
-        .coluna-horarios {
-            width: 40%;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            border: 1px solid #e0e0e0;
-            max-height: 52vh;
-            overflow-y: auto;
-        }
-
-        .controle-filtro {
-            margin-bottom: 20px;
-        }
-
-        .controle-filtro label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #333;
-        }
-
-        .controle-filtro select,
-        .controle-filtro input[type="date"] {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-        }
-
-        .lista-horarios {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .slot-horario {
-            padding: 15px;
-            border-radius: 6px;
-            border-left: 5px solid #ccc;
-            background-color: #f9f9f9;
-        }
-
-        .slot-livre {
-            border-left-color: #2ecc71;
-            background-color: #f4fdf7;
-        }
-
-        .slot-ocupado {
-            border-left-color: #e74c3c;
-            background-color: #fdf5f5;
-        }
-
-        .slot-horario h4 {
-            margin: 0 0 5px 0;
-            color: #2c3e50;
-            font-size: 18px;
-        }
-
-        .slot-horario p {
-            margin: 0;
-            font-size: 14px;
-            color: #555;
-        }
-
-        .dia-calendario {
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .dia-calendario:hover {
-            background-color: #e3f2fd;
-        }
-
-        .dia-selecionado {
-            background-color: #3498db !important;
-            color: white !important;
-            font-weight: bold;
-        }
-
-        .calendario-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .calendario-header h2 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        .calendario-header button {
-            font-size: 16px;
-            padding: 5px 10px;
-        }
-
-        .calendario-dias-semana {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-
-        .calendario-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-        }
-
-        @media (max-width: 1024px) {
-            .painel-split {
-                display: grid;
-            }
-
-            .coluna-calendario {
-                width: 100%;
-            }
-
-            .coluna-horarios {
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .painel-split {
-                display: flex;
-                flex-direction: column;
-                padding: 40px;
-                gap: 40px;
-            }
-
-            .coluna-calendario,
-            .coluna-horarios {
-                width: 100%;
-                max-height: none;
-                padding: 40px;
-                border-radius: 16px;
-            }
-
-            .controle-filtro {
-                margin-bottom: 40px;
-            }
-
-            .controle-filtro label {
-                margin-bottom: 16px;
-                font-size: 32px;
-            }
-
-            .controle-filtro select,
-            .controle-filtro input[type="date"] {
-                padding: 20px;
-                border-radius: 10px;
-                font-size: 32px;
-                border-width: 2px;
-            }
-
-            .calendario-header {
-                margin-bottom: 20px;
-            }
-
-            .calendario-header h2 {
-                font-size: 48px;
-            }
-
-            .calendario-header button {
-                font-size: 32px;
-                padding: 10px 20px;
-            }
-
-            .calendario-dias-semana {
-                font-size: 28px;
-                margin-top: 20px;
-                margin-bottom: 20px;
-            }
-
-            .calendario-grid {
-                gap: 10px;
-            }
-
-            .dia-calendario {
-                font-size: 32px;
-                padding: 20px;
-                min-height: 80px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 8px;
-            }
-
-            .coluna-horarios h3 {
-                font-size: 48px;
-                border-bottom-width: 4px;
-                padding-bottom: 20px;
-                margin-bottom: 20px;
-            }
-
-            .lista-horarios {
-                gap: 20px;
-            }
-
-            .slot-horario {
-                padding: 30px;
-                border-radius: 12px;
-                border-left-width: 10px;
-            }
-
-            .slot-horario h4 {
-                font-size: 36px;
-                margin-bottom: 10px;
-            }
-
-            .slot-horario p {
-                font-size: 28px;
-                margin-bottom: 10px;
-            }
-
-            .slot-horario i {
-                font-size: 36px;
-            }
-
-            .lista-horarios>p {
-                font-size: 32px;
-                padding: 40px;
-            }
-
-            .controle-filtro select,
-            .controle-filtro input[type="date"] {
-                font-size: 26px;
-            }
-
-            .controle-filtro label {
-                font-size: 30px;
-            }
-
-            .h3 {
-                font-size: 28px;
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -319,62 +61,64 @@
                 </div>
 
             </div>
-        <div class="agendamento-container" style="margin-bottom: 0px; padding-bottom: 0px; padding-top: 10px; gap:10px">
-            <h1>Agendar Aulas</h1>
-            <div class="link-destacado" style="margin-bottom: 0px;">
-                <a href="/agendamento-recorrente.html">
-                    <i class="fas fa-calendar-alt"></i> Agendar Aulas Recorrentes
-                </a>
-            </div>
-            <div class="seletor-fila" style="margin-bottom: 0px;">
-                <div class="campo-item">
-                    <label>Laboratório:</label>
-                    <select id="laboratorios-select2" name="laboratorio">
-                        <option value="">Selecione um Laboratório</option>
-                    </select>
+            <div class="agendamento-container"
+                style="margin-bottom: 0px; padding-bottom: 0px; padding-top: 10px; gap:10px">
+                <h1>Agendar Aulas</h1>
+                <div class="link-destacado" style="margin-bottom: 0px;">
+                    <a href="/agendamento-recorrente.html">
+                        <i class="fas fa-calendar-alt"></i> Agendar Aulas Recorrentes
+                    </a>
+                </div>
+                <div class="seletor-fila" style="margin-bottom: 0px;">
+                    <div class="campo-item">
+                        <label>Laboratório:</label>
+                        <select id="laboratorios-select2" name="laboratorio">
+                            <option value="">Selecione um Laboratório</option>
+                        </select>
+                    </div>
+
+                    <div class="campo-item">
+                        <label>Disciplina:</label>
+                        <select id="disciplina-select2" name="disciplinas">
+                            <option value="">Selecione uma disciplina</option>
+                        </select>
+                    </div>
+
+                    <div class="campo-item">
+                        <label for="date">Data:</label>
+                        <input id="date" type="date" />
+                    </div>
+                </div>
+                <div>
+                    <strong>Horários disponíveis:</strong>
+                    <div id="slots" class="grade-horarios"></div>
+                    <div class="texto-ajuda">Aulas de 1 hora. Manhã: 07h–11h. Tarde/Noite: 13h–22h.</div>
                 </div>
 
-                <div class="campo-item">
-                    <label>Disciplina:</label>
-                    <select id="disciplina-select2" name="disciplinas">
-                        <option value="">Selecione uma disciplina</option>
-                    </select>
+                <div class="opcao-tecnico-fila">
+                    <span>Precisa de acompanhamento do técnico?</span>
+                    <div class="radio-options">
+                        <input type="radio" id="tecnicoSim" name="precisaTecnico" value="true">
+                        <label for="tecnicoSim">Sim</label>
+
+                        <input type="radio" id="tecnicoNao" name="precisaTecnico" value="false" checked>
+                        <label for="tecnicoNao">Não</label>
+                    </div>
+                </div>
+                <div class="opcao-tecnico-fila">
+                    <label for="numero_discentes">Número de Discentes:</label>
+                    <input type="number" id="numero_discentes" name="numero_discentes" min="1" placeholder="Ex: 25"
+                        required />
                 </div>
 
-                <div class="campo-item">
-                    <label for="date">Data:</label>
-                    <input id="date" type="date" />
+                <div class="opcao-tecnico-fila" id="roteiro-container" style="display: none;">
+                    <label for="link_roteiro">Link do Roteiro da Aula</label>
+                    <input type="url" id="link_roteiro" name="link_roteiro"
+                        placeholder="https://exemplo.com/roteiro.pdf">
                 </div>
+                <div id="msg" class="mensagem-status"></div>
+                <button id="submitBtn" class="btn-principal" disabled>Solicitar Aula</button>
             </div>
-            <div>
-                <strong>Horários disponíveis:</strong>
-                <div id="slots" class="grade-horarios"></div>
-                <div class="texto-ajuda">Aulas de 1 hora. Manhã: 07h–11h. Tarde/Noite: 13h–22h.</div>
-            </div>
-
-            <div class="opcao-tecnico-fila">
-                <span>Precisa de acompanhamento do técnico?</span>
-                <div class="radio-options">
-                    <input type="radio" id="tecnicoSim" name="precisaTecnico" value="true">
-                    <label for="tecnicoSim">Sim</label>
-
-                    <input type="radio" id="tecnicoNao" name="precisaTecnico" value="false" checked>
-                    <label for="tecnicoNao">Não</label>
-                </div>
-            </div>
-            <div class="opcao-tecnico-fila">
-                <label for="numero_discentes">Número de Discentes:</label>
-                <input type="number" id="numero_discentes" name="numero_discentes" min="1" placeholder="Ex: 25"
-                    required />
-            </div>
-
-            <div class="opcao-tecnico-fila" id="roteiro-container" style="display: none;">
-                <label for="link_roteiro">Link do Roteiro da Aula</label>
-                <input type="url" id="link_roteiro" name="link_roteiro" placeholder="https://exemplo.com/roteiro.pdf">
-            </div>
-            <div id="msg" class="mensagem-status"></div>
-            <button id="submitBtn" class="btn-principal" disabled>Solicitar Aula</button>
-        </div>
         </div>
     </div>
 
@@ -402,13 +146,13 @@
             await carregarHorariosBase();
             await carregarLaboratorios();
 
-if (userInfo && userInfo.tipo_usuario && userInfo.tipo_usuario.toLowerCase() === 'tecnico') {
+            if (userInfo && userInfo.tipo_usuario && userInfo.tipo_usuario.toLowerCase() === 'tecnico') {
                 const painelAgendamento = document.querySelector('.agendamento-container');
                 if (painelAgendamento) {
                     painelAgendamento.style.display = 'none';
                 }
             }
-            
+
             selectLab.addEventListener('change', () => atualizarPainelCompleto());
             inputData.addEventListener('change', () => {
                 sincronizarCalendarioComInputData();
