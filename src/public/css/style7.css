@@ -1085,6 +1085,7 @@ input[type="url"]::placeholder {
     }
 
     .fa-circle-xmark {
+        position: absolute;
         left: 550px;
         position: relative;
         top: -750px;
