@@ -1655,8 +1655,7 @@ input[type="url"]::placeholder {
         font-size: 28px;
     }
 
-    .fa-solid,
-    .fas {
+    .fa-solid {
         position: fixed;
     }
 }
@@ -1867,6 +1866,38 @@ Pagina calendario
 
     .coluna-horarios {
         width: 100%;
+    }
+
+    label {
+        font-size: 28px;
+    }
+
+    .controle-filtro select,
+    .controle-filtro input[type="date"] {
+        font-size: 28px;
+    }
+
+    .h3 {
+        font-size: 28px;
+    }
+
+    .tab-links {
+        font-size: 28px;
+    }
+
+    .agendamento-container h1,
+    .sub-title {
+        font-size: 32px;
+    }
+    
+    table td,
+    td {
+        font-size: 24px;
+    }
+
+    table th,
+    th {
+        font-size: 26px;
     }
 }
 
