@@ -1013,7 +1013,9 @@ input[type="url"]::placeholder {
         left: -100%;
 
     }
-
+.painel-gestao-solicitacoes {
+    width: 100%;
+}
     #user-name {
         font-size: 34px;
     }
@@ -1407,6 +1409,25 @@ input[type="url"]::placeholder {
 
     body {
         background-color: #ffffff;
+    }
+
+    .painel-minhas-aulas p,
+    .painel-gestao-solicitacoes p {
+        font-size: 24px;
+    }
+
+    .strong {
+        font-size: 24px;
+    }
+
+    .tag-data {
+        font-size: 28px;
+    }
+.lista-painel li {
+    font-size: 22px;
+}
+    .container-filtros label {
+        font-size: 28px;
     }
 
     .painel-grelha {
