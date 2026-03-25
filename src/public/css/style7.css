@@ -294,6 +294,7 @@ input:focus {
     margin-bottom: 10px;
     grid-template-columns: repeat(5, 1fr);
 }
+
 .grade-horarios button,
 .grade-horarios .slot {
     background-color: #f4f4f4;
@@ -1009,9 +1010,13 @@ input[type="url"]::placeholder {
 
 @media (max-width: 1024px) {
     nav {
-        width: auto;
+        width: 60%;
         left: -100%;
 
+    }
+
+    #user-name {
+        font-size: 34px;
     }
 
     .menu {
@@ -1333,14 +1338,15 @@ input[type="url"]::placeholder {
 .dia-calendario.tem-aula-recorrente span {
     position: relative;
     z-index: 2;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 
 .dia-calendario.tem-aula-recorrente {
-    background-color: #27ae60  !important;
+    background-color: #27ae60 !important;
     color: white !important;
 }
+
 .dia-calendario.tem-aula-recorrente::after {
     content: '';
     position: absolute;
@@ -1352,6 +1358,7 @@ input[type="url"]::placeholder {
     background-color: #ffffff;
     border-radius: 50%;
 }
+
 .dia-calendario.tem-aula-mista::after {
     content: '';
     position: absolute;
@@ -1363,6 +1370,7 @@ input[type="url"]::placeholder {
     background-color: #ffffff;
     border-radius: 50%;
 }
+
 .dia-calendario.tem-aula-mista {
     background: linear-gradient(135deg, #569af9 50%, #27ae60 50%) !important;
     color: white !important;
@@ -1373,6 +1381,7 @@ input[type="url"]::placeholder {
     z-index: 5;
     font-weight: bold;
 }
+
 /* =========================================
    RESPONSIVIDADE PARA SMARTPHONES (Até 1024px)
    ========================================= */
@@ -1431,7 +1440,7 @@ input[type="url"]::placeholder {
     }
 
     .dia-calendario span {
-        font-size: 28px; 
+        font-size: 28px;
     }
 
     .tooltip {
@@ -1459,7 +1468,7 @@ input[type="url"]::placeholder {
         padding: 24px;
     }
 
-    .etiqueta-status, 
+    .etiqueta-status,
     .badge-status {
         font-size: 24px;
         padding: 12px 20px;
@@ -1468,6 +1477,152 @@ input[type="url"]::placeholder {
     .btn-cancelar {
         font-size: 24px;
         padding: 16px 24px;
+    }
+
+    .agendamento-container {
+        padding: 30px;
+        margin: 20px;
+        width: auto;
+    }
+
+    .agendamento-container h1 {
+        font-size: 64px;
+        margin-bottom: 40px;
+    }
+
+    .link-destacado {
+        margin-bottom: 60px !important;
+    }
+
+    .link-destacado a {
+        font-size: 36px;
+        padding: 20px;
+        display: block;
+    }
+
+    .link-destacado i {
+        font-size: 40px;
+        margin-right: 16px;
+    }
+
+    .seletor-fila {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+
+    .campo-item {
+        width: 100%;
+    }
+
+    .campo-item label {
+        font-size: 32px;
+        margin-bottom: 16px;
+        display: block;
+    }
+
+    .campo-item select,
+    .campo-item input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 24px;
+        font-size: 32px;
+        border-radius: 10px;
+        border-width: 2px;
+        height: auto;
+    }
+
+    .agendamento-container>div>strong {
+        font-size: 32px;
+        display: block;
+        margin-bottom: 20px;
+    }
+
+    .grade-horarios {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .bloco-horario {
+        padding: 24px 10px;
+        font-size: 28px;
+        width: 100%;
+        box-sizing: border-box;
+        border-radius: 10px;
+    }
+
+    .texto-ajuda {
+        font-size: 24px;
+        margin-top: 20px;
+        margin-bottom: 40px;
+        line-height: 1.5;
+    }
+
+    .opcao-tecnico-fila {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    .opcao-tecnico-fila span,
+    .opcao-tecnico-fila label {
+        font-size: 32px;
+    }
+
+    .radio-options {
+        width: 100%;
+        display: flex;
+        gap: 40px;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .radio-options input[type="radio"] {
+        transform: scale(2.5);
+        margin-right: 16px;
+        margin-left: 10px;
+    }
+
+    .radio-options label {
+        font-size: 32px;
+    }
+
+    #numero_discentes,
+    #link_roteiro {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 24px;
+        font-size: 32px;
+        border-radius: 10px;
+        border-width: 2px;
+        height: auto;
+    }
+
+    .mensagem-status {
+        font-size: 32px;
+        padding: 20px;
+        margin-bottom: 30px;
+        border-radius: 10px;
+    }
+
+    .btn-principal {
+        width: 100%;
+        padding: 30px;
+        font-size: 40px;
+        border-radius: 16px;
+        margin-top: 20px;
+    }
+
+    #sidemenu li a {
+        font-size: 34px;
+    }
+
+    #sidemenu li a i {
+        width: auto;
     }
 }
 
