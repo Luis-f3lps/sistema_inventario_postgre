@@ -199,6 +199,8 @@ menu {
     border-top: 3px solid var(--primary-color);
     padding: 20px;
     width: 100%;
+    margin-bottom: 15px;
+
 }
 
 .cartao-painel h2 {
