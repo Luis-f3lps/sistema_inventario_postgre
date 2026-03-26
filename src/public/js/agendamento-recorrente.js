@@ -12,6 +12,29 @@ const submitBtn = document.getElementById('submitBtnRecorrente');
 const msgEl = document.getElementById('msg');
 
 async function inicializarPagina(userData) {
+
+    const dataFutura = new Date();
+    dataFutura.setDate(dataFutura.getDate() + 4);
+    const dataFuturaString = dataFutura.toISOString().slice(0, 10);
+
+    if (dataInicioEl) {
+        dataInicioEl.min = dataFuturaString;
+        dataInicioEl.value = dataFuturaString; 
+    }
+    
+    if (dataFimEl) {
+        dataFimEl.min = dataFuturaString;
+    }
+
+    if (dataInicioEl && dataFimEl) {
+        dataInicioEl.addEventListener('change', () => {
+            dataFimEl.min = dataInicioEl.value;
+            if (dataFimEl.value < dataInicioEl.value) {
+                dataFimEl.value = dataInicioEl.value;
+            }
+        });
+    }
+
     await loadLaboratorios(); 
     await loadDisciplinas();
     await loadHorariosCheckboxes();

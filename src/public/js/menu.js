@@ -47,7 +47,7 @@ async function verificarLogin() {
 }
 
 function ativarFuncionalidadeMenu() {
-    const navMenu = document.querySelector("nav"); 
+    const navMenu = document.querySelector("nav");
     if (!navMenu) return;
 
     const openMenuBtn = document.querySelector(".fa-bars");
@@ -77,9 +77,9 @@ function preencherDadosDoMenu(userData) {
 
     const showMenuItem = (selector) => {
         const el = document.querySelector(selector);
-        if (el) el.style.display = 'block'; 
+        if (el) el.style.display = 'block';
     };
-    
+
     const showDashboardCard = (selector) => {
         const el = document.querySelector(selector);
         if (el) el.style.display = 'block';
@@ -89,17 +89,16 @@ function preencherDadosDoMenu(userData) {
 
     switch (userType) {
         case 'admin':
-        case 'administrador': 
-            showMenuItem('.admin-menu');                        showMenuItem('.Calendario');
-
+        case 'administrador':
+            showMenuItem('.admin-menu');
             showMenuItem('.produto');
-                        showMenuItem('.Disciplinas');
+            showMenuItem('.Disciplinas');
 
             break;
 
         case 'tecnico':
-            showMenuItem('.tecnico');                        showMenuItem('.Calendario');
-
+            showMenuItem('.tecnico'); 
+            showMenuItem('.Calendario');
             showMenuItem('.Home');
             showMenuItem('.produto');
             showDashboardCard('.cartao-aulas-tecnico');
@@ -108,16 +107,15 @@ function preencherDadosDoMenu(userData) {
 
         case 'professor':
             showMenuItem('.Home');
-                        showMenuItem('.Calendario');
-
-            showMenuItem('.professor');            
+            showMenuItem('.Calendario');
+            showMenuItem('.professor');
             showMenuItem('.Disciplinas');
             showMenuItem('.Horarios');
             showDashboardCard('.cartao-aulas-autorizadas');
             showDashboardCard('.cartao-solicitacoes');
             break;
     }
-}function openmenu() {
+} function openmenu() {
     const nav = document.querySelector("nav");
     const menu = document.querySelector(".menu");
     const conteudo = document.querySelector(".conteudo");
@@ -161,9 +159,9 @@ async function atualizarBadgeTecnico() {
     try {
         const response = await fetch('/api/solicitacoes-analise-tecnico');
         const data = await response.json();
-        
+
         const badge = document.getElementById('badge-solicitacoes-tecnico');
-        
+
         if (badge) {
             if (data.total > 0) {
                 badge.innerText = data.total;
