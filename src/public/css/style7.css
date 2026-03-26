@@ -571,7 +571,7 @@ table {
 
 table th,
 th {
-background-color: #0022ff;
+    background-color: #0022ff;
     color: #ffffff;
     font-weight: 600;
     text-align: left;
@@ -1013,9 +1013,11 @@ input[type="url"]::placeholder {
         left: -100%;
 
     }
-.painel-gestao-solicitacoes {
-    width: 100%;
-}
+
+    .painel-gestao-solicitacoes {
+        width: 100%;
+    }
+
     #user-name {
         font-size: 34px;
     }
@@ -1423,9 +1425,11 @@ input[type="url"]::placeholder {
     .tag-data {
         font-size: 28px;
     }
-.lista-painel li {
-    font-size: 22px;
-}
+
+    .lista-painel li {
+        font-size: 22px;
+    }
+
     .container-filtros label {
         font-size: 28px;
     }
@@ -1503,7 +1507,14 @@ input[type="url"]::placeholder {
     .tabela-visualizacao-aulas th,
     .tabela-visualizacao-aulas td {
         font-size: 28px;
-        padding: 24px;
+    }
+
+    .tag-data {
+        font-size: 22px;
+    }
+
+    .container-filtros label {
+        font-size: 22px;
     }
 
     .etiqueta-status,
@@ -1901,6 +1912,23 @@ Pagina calendario
 
     .coluna-calendario {
         width: 100%;
+        margin-top: 70px;
+        height: 40vh;
+
+    }
+
+    button[type="submit"] {
+        font-size: 26px;
+    }
+
+    .form-container h2,
+    .form-container h1,
+    .delete-produto-container h3 {
+        font-size: 28px;
+    }
+
+    .calendario-header button {
+        font-size: 28px;
     }
 
     .coluna-horarios {
