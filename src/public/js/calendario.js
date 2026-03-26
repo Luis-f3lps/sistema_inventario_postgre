@@ -56,19 +56,29 @@ async function carregarHorariosBase() {
 
 async function carregarLaboratorios() {
     try {
-        const response = await fetch('/api/lab32');
+        const isTecnico = userInfo && userInfo.tipo_usuario && userInfo.tipo_usuario.toLowerCase() === 'tecnico';
+        
+        const endpoint = isTecnico ? '/api/dashboard/meus-laboratorios' : '/api/lab32';
+
+        const response = await fetch(endpoint);
         const data = await response.json();
+        
+        selectLab.innerHTML = '<option value="">Selecione um laboratório...</option>';
+
         data.forEach(lab => {
             const option = document.createElement('option');
             option.value = lab.id_laboratorio;
             option.textContent = lab.nome_laboratorio;
             selectLab.appendChild(option);
         });
+
         if (data.length > 0) {
             selectLab.value = data[0].id_laboratorio; 
             atualizarPainelCompleto(); 
         }
-    } catch (error) { }
+    } catch (error) { 
+        console.error("Erro ao carregar os laboratórios:", error);
+    }
 }
 
 async function buscarAulasDoMesAPI() {

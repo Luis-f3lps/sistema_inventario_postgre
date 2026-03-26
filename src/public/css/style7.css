@@ -1872,7 +1872,7 @@ Pagina calendario
 }
 
 .dia-selecionado {
-    background-color: #3498db !important;
+    background-color:#db3483 !important;
     color: white !important;
     font-weight: bold;
 }
