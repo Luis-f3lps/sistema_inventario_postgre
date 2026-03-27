@@ -229,16 +229,3 @@ function formatEnd(start) {
     const endH = parseInt(start.split(':')[0]) + 1;
     return formatHour(endH);
 }
-
-function toggleRoteiroVisibility() {
-    const roteiroContainer = document.getElementById('roteiro-container');
-    const precisaTecnicoSim = document.getElementById('tecnicoSim');
-
-    if (roteiroContainer && precisaTecnicoSim) {
-        if (precisaTecnicoSim.checked) {
-            roteiroContainer.style.display = 'flex';
-        } else {
-            roteiroContainer.style.display = 'none';
-        }
-    }
-}

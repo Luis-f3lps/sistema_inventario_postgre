@@ -163,12 +163,3 @@ async function submeterAgendamentoRecorrente() {
         msgEl.style.display = 'block';
     }
 }
-
-function toggleRoteiroVisibility() {
-    const roteiroContainer = document.getElementById('roteiro-container');
-    const precisaTecnicoSim = document.getElementById('tecnicoSim');
-
-    if (roteiroContainer && precisaTecnicoSim) {
-        roteiroContainer.style.display = precisaTecnicoSim.checked ? 'flex' : 'none';
-    }
-}
