@@ -179,12 +179,22 @@ async function submeterAgendamento() {
         return;
     }
 
+    const precisaTecnico = document.querySelector('input[name="precisaTecnico"]:checked').value === 'true';
+    const linkRoteiro = document.getElementById('link_roteiro').value.trim();
+
+    if (precisaTecnico && linkRoteiro === '') {
+        msgEl.textContent = 'Por favor, insira o link do roteiro. Ele é obrigatório quando o acompanhamento do técnico é solicitado.';
+        msgEl.className = 'mensagem-status erro';
+        msgEl.style.display = 'block';
+        return;
+    }
+
     const payload = {
         labId: labEl.value,
         date: dateEl.value,
         hour: selectedSlot,
-        precisa_tecnico: document.querySelector('input[name="precisaTecnico"]:checked').value === 'true',
-        link_roteiro: document.getElementById('link_roteiro').value,
+        precisa_tecnico: precisaTecnico,
+        link_roteiro: linkRoteiro,
         id_disciplina: disciplinaEl.value,
         numero_discentes: numeroDiscentes
     };

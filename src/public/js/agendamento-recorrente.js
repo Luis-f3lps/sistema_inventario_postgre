@@ -123,19 +123,25 @@ async function submeterAgendamentoRecorrente() {
 
     const precisaTecnico = document.querySelector('input[name="precisaTecnico"]:checked').value === 'true';
     const numeroDiscentes = document.getElementById('numero_discentes').value;
-    const linkRoteiro = document.getElementById('link_roteiro').value;
+    
+    const linkRoteiro = document.getElementById('link_roteiro').value.trim();
 
-const payload = {
+    if (precisaTecnico && linkRoteiro === '') {
+        return alert("Por favor, insira o link do roteiro. Ele é obrigatório quando o acompanhamento do técnico é solicitado.");
+    }
+
+    const payload = {
         labId: parseInt(labEl.value),
         disciplinaId: parseInt(disciplinaEl.value),
         dataInicio: dataInicioEl.value,
         dataFim: dataFimEl.value,
         diaDaSemana: parseInt(diaDaSemanaEl.value),
-horarios: horariosSelecionados,        
-precisa_tecnico: precisaTecnico,
+        horarios: horariosSelecionados,        
+        precisa_tecnico: precisaTecnico,
         numero_discentes: parseInt(numeroDiscentes),
         link_roteiro: linkRoteiro
     };
+    
     try {
         const response = await fetch('/api/schedule-recurring', {
             method: 'POST',
