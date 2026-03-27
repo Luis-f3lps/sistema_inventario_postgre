@@ -149,10 +149,10 @@ function closemenu() {
         menu.style.width = "1%";
     }
     if (conteudo) {
-        conteudo.style.width = "95%";
+        conteudo.style.width = "99%";
     }
     if (conteiner) {
-        conteiner.style.width = "95%";
+        conteiner.style.width = "99%";
     }
 }
 async function atualizarBadgeTecnico() {
