@@ -29,13 +29,6 @@ async function inicializarPaginaDeAgendamento(userData) {
     labEl.addEventListener('change', loadAvailability);
     submitBtn.addEventListener('click', submeterAgendamento);
 
-    const radioTecnico = document.querySelectorAll('input[name="precisaTecnico"]');
-    radioTecnico.forEach(radio => {
-        radio.addEventListener('change', toggleRoteiroVisibility);
-    });
-
-    toggleRoteiroVisibility();
-
     await loadLaboratorios();
     await loadDisciplinas();
     await fetchHorariosFromAPI();

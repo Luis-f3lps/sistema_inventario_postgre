@@ -39,13 +39,6 @@ async function inicializarPagina(userData) {
     await loadDisciplinas();
     await loadHorariosCheckboxes();
 
-    const radioTecnico = document.querySelectorAll('input[name="precisaTecnico"]');
-    radioTecnico.forEach(radio => {
-        radio.addEventListener('change', toggleRoteiroVisibility);
-    });
-    
-    toggleRoteiroVisibility();
-
     if (submitBtn) {
         submitBtn.addEventListener('click', submeterAgendamentoRecorrente);
     }
