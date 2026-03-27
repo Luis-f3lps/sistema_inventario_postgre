@@ -571,10 +571,10 @@ function renderizarCalendarioTecnico(aulas, ano, mes) {
       else if (temRecorrente) classesCss += " tem-aula-recorrente";
       else classesCss += " tem-aula";
 
-      eventosDoDia = `<div class="tooltip">${aulasDoDia
+eventosDoDia = `<div class="tooltip">${aulasDoDia
         .map(
           (aula) =>
-            `<p><strong>${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(0, 5)}:</strong> ${aula.nome_disciplina}<br><em>(Prof: ${aula.nome_professor})</em></p>`,
+            `<p><strong>${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(0, 5)}:</strong> ${aula.nome_disciplina}<br><em>Lab: ${aula.nome_laboratorio}<br>(Prof: ${aula.nome_professor})</em></p>`
         )
         .join("")}</div>`;
     }
