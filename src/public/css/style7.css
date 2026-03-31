@@ -2097,6 +2097,15 @@ Pagina calendario
     .h3 {
         font-size: 28px;
     }
+
+    .aula-card-header h3 {
+        font-size: 28px;
+
+    }
+
+    .aula-card-info-linha {
+        font-size: 28px;
+    }
 }
 
 /* =========================================
@@ -2265,6 +2274,7 @@ Tela tecnico
     border-top: 1px dashed #ccc;
     padding-top: 15px;
 }
+
 .lista-cards-aulas {
     display: flex;
     flex-direction: column;
@@ -2276,13 +2286,14 @@ Tela tecnico
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 15px 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     transition: box-shadow 0.2s;
-    border-left: 5px solid #0056b3; /* Cor de destaque lateral (azul) */
+    border-left: 5px solid #0056b3;
+    /* Cor de destaque lateral (azul) */
 }
 
 .aula-card:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
 }
 
 .aula-card-header {
@@ -2321,7 +2332,6 @@ Tela tecnico
     justify-content: space-between;
     align-items: center;
     margin-top: 15px;
-    padding-top: 10px;
 }
 
 .btn-cancelar-card {

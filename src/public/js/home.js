@@ -131,11 +131,11 @@ function renderTable(requests) {
                 <span class="etiqueta-status status-${r.status}">${textoStatus}</span>
             </div>
             <div class="aula-card-body">
-                <p><strong><i class="fas fa-flask"></i> Laboratório:</strong> ${r.nome_laboratorio}</p>
                 <div class="aula-card-info-linha">
                     <p><strong><i class="far fa-calendar-alt"></i> Data:</strong> ${dataFormatada}</p>
                     <p><strong><i class="far fa-clock"></i> Horário:</strong> ${horaInicio} - ${horaFim}</p>
                     <p><strong><i class="fas fa-user-cog"></i> Técnico:</strong> ${r.precisa_tecnico ? "Sim" : "Não"}</p>
+                    <p><strong><i class="fas fa-flask"></i> Laboratório:</strong> ${r.nome_laboratorio}</p>
                 </div>
             </div>
             <div class="aula-card-footer">
