@@ -48,11 +48,11 @@ async function inicializarDashboard(userData) {
 
     case "professor":
       showElement(".cartao-aulas-autorizadas");
-      showElement(".painel-minhas-aulas"); 
+      showElement(".painel-minhas-aulas");
       showElement(".cartao-horarios-hoje");
-      
+
       carregarAulasDeHoje();
-      
+
       document
         .getElementById("btn-mes-anterior")
         ?.addEventListener("click", mostrarMesAnteriorProfessor);
@@ -98,46 +98,56 @@ async function carregarDadosDosPaineis(userType) {
 }
 
 function renderTable(requests) {
-  const tbody = document.getElementById("minhas-aulas-tbody");
-  if (!tbody) return;
-  tbody.innerHTML = "";
+  // Agora apontamos para a nova div, não mais para o tbody
+  const container = document.getElementById("minhas-aulas-container");
+  if (!container) return;
+
+  container.innerHTML = "";
+
   if (requests.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">Você não tem nenhuma solicitação futura.</td></tr>`;
+    container.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">Você não tem nenhuma solicitação futura.</p>`;
     return;
   }
+
   requests.forEach((r) => {
-    const tr = document.createElement("tr");
-    const dataFormatada = new Date(r.data).toLocaleDateString("pt-BR", {
-      timeZone: "UTC",
-    });
+    const dataFormatada = new Date(r.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
     const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : "N/A";
     const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : "N/A";
-    const linkRoteiroHtml = formatarLinkRoteiro(r.link_roteiro, "Ver");
+    const linkRoteiroHtml = formatarLinkRoteiro(r.link_roteiro, "Ver Roteiro");
     const textoStatus = formatarTextoStatus(r.status);
 
-    const isDesativado =
-      r.status === "nao_autorizado" || r.status === "cancelado";
+    const isDesativado = r.status === "nao_autorizado" || r.status === "cancelado";
     const estiloBotao = isDesativado
-      ? "background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;"
-      : "";
+      ? "background-color: #f1f1f1; color: #a1a1a1; cursor: not-allowed; border: 1px solid #ddd;"
+      : "background-color: #ff4d4d; color: white; cursor: pointer; border: none;";
 
-    tr.innerHTML = `
-            <td>${r.nome_laboratorio}</td>
-            <td>${r.nome_disciplina}</td>
-            <td>${dataFormatada}</td>
-            <td>${horaInicio} - ${horaFim}</td>
-            <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
-            <td><span class="etiqueta-status status-${r.status}">${textoStatus}</span></td>
-            <td>${linkRoteiroHtml}</td>
-            <td>
-                <button class="btn-cancelar" onclick="cancelarAgendamento(${r.id_aula})" 
-                        ${isDesativado ? "disabled" : ""} 
-                        style="${estiloBotao}">
-                    Cancelar
+    // Criando o card
+    const card = document.createElement("div");
+    card.className = "aula-card";
+
+    card.innerHTML = `
+            <div class="aula-card-header">
+                <h3>${r.nome_disciplina}</h3>
+                <span class="etiqueta-status status-${r.status}">${textoStatus}</span>
+            </div>
+            <div class="aula-card-body">
+                <p><strong><i class="fas fa-flask"></i> Laboratório:</strong> ${r.nome_laboratorio}</p>
+                <div class="aula-card-info-linha">
+                    <p><strong><i class="far fa-calendar-alt"></i> Data:</strong> ${dataFormatada}</p>
+                    <p><strong><i class="far fa-clock"></i> Horário:</strong> ${horaInicio} - ${horaFim}</p>
+                    <p><strong><i class="fas fa-user-cog"></i> Técnico:</strong> ${r.precisa_tecnico ? "Sim" : "Não"}</p>
+                </div>
+            </div>
+            <div class="aula-card-footer">
+                <div class="aula-card-roteiro">
+                    ${linkRoteiroHtml}
+                </div>
+                <button class="btn-cancelar-card" onclick="cancelarAgendamento(${r.id_aula})" ${isDesativado ? "disabled" : ""} style="${estiloBotao}">
+                    <i class="fas fa-times"></i> Cancelar Aula
                 </button>
-            </td>
+            </div>
         `;
-    tbody.appendChild(tr);
+    container.appendChild(card);
   });
 }
 
@@ -571,7 +581,7 @@ function renderizarCalendarioTecnico(aulas, ano, mes) {
       else if (temRecorrente) classesCss += " tem-aula-recorrente";
       else classesCss += " tem-aula";
 
-eventosDoDia = `<div class="tooltip">${aulasDoDia
+      eventosDoDia = `<div class="tooltip">${aulasDoDia
         .map(
           (aula) =>
             `<p><strong>${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(0, 5)}:</strong> ${aula.nome_disciplina}<br><em>Lab: ${aula.nome_laboratorio}<br>(Prof: ${aula.nome_professor})</em></p>`
