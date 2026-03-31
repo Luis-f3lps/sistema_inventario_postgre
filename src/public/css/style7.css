@@ -2106,6 +2106,10 @@ Pagina calendario
     .aula-card-info-linha {
         font-size: 28px;
     }
+    .aula-card-body p {
+                font-size: 28px;
+
+    }
 }
 
 /* =========================================

@@ -5,7 +5,10 @@
     <link rel="icon" href="images/icone.png" type="image/png" />
     <title>Sistema Merlin</title>
     <link rel="stylesheet" href="css/style7.css" />
-    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+    <script
+      src="https://kit.fontawesome.com/915b45d802.js"
+      crossorigin="anonymous"
+    ></script>
   </head>
 
   <body>
@@ -17,38 +20,41 @@
       <h1>Minhas Solicitações de Aula</h1>
 
       <div class="container-filtros">
-          <label>
-              <input type="radio" name="filtroStatus" value="analisando" checked> Apenas Pendentes (Em Análise)
-          </label>
-          <label>
-              <input type="radio" name="filtroStatus" value="todas"> Histórico Completo (Todas)
-          </label>
+        <label>
+          <input type="radio" name="filtroStatus" value="analisando" checked />
+          Apenas Pendentes (Em Análise)
+        </label>
+        <label>
+          <input type="radio" name="filtroStatus" value="todas" /> Histórico
+          Completo (Todas)
+        </label>
       </div>
 
-      <h2 style="margin-top: 30px; border-bottom: 2px solid #569af9; padding-bottom: 5px;">Aulas Recorrentes</h2>
-      <div id="container-recorrentes" style="margin-top: 20px;">
-          </div>
+      <h2
+        style="
+          margin-top: 30px;
+          border-bottom: 2px solid #569af9;
+          padding-bottom: 5px;
+        "
+      >
+        Aulas Recorrentes
+      </h2>
+      <div id="container-recorrentes" style="margin-top: 20px"></div>
 
-      <h2 style="margin-top: 40px; border-bottom: 2px solid #569af9; padding-bottom: 5px;">Aulas Individuais</h2>
-      <div class="container-tabela-responsiva" style="margin-top: 20px;">
-          <table class="tabela-visualizacao-aulas">
-            <thead>
-                <tr>
-                    <th>Professor</th>
-                    <th>Laboratório</th>
-                    <th>Disciplina</th>
-                    <th>Data</th>
-                    <th>Horário</th>
-                    <th>Discentes</th>
-                    <th>Apoio Técnico</th>
-                    <th>Status</th>
-                    <th>Roteiro</th>
-                    <th>Observações</th>
-                </tr>
-            </thead>
-            <tbody id="minhas-aulas-individuais-tbody">
-                </tbody>
-          </table>
+      <h2
+        style="
+          margin-top: 40px;
+          border-bottom: 2px solid #569af9;
+          padding-bottom: 5px;
+        "
+      >
+        Aulas Individuais
+      </h2>
+      <div class="container-tabela-responsiva" style="margin-top: 20px">
+        <div
+          id="minhas-aulas-individuais-container"
+          class="lista-cards-aulas"
+        ></div>
       </div>
     </div>
     <script src="js/tela_professor.js" defer></script>

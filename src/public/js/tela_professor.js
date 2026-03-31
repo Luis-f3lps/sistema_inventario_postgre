@@ -76,17 +76,18 @@ function aplicarFiltroEDesenhar() {
 }
 
 function renderTable(requests) {
-    const tbodyInd = document.getElementById("minhas-aulas-individuais-tbody");
+    // Apontamos para o novo container das individuais
+    const containerInd = document.getElementById("minhas-aulas-individuais-container");
     const containerRec = document.getElementById("container-recorrentes");
 
-    if (!tbodyInd || !containerRec) return;
+    if (!containerInd || !containerRec) return;
 
-    tbodyInd.innerHTML = "";
+    containerInd.innerHTML = "";
     containerRec.innerHTML = "";
 
     if (requests.length === 0) {
         const msgFiltro = filtroAtual === 'analisando' ? "Você não tem nenhuma solicitação pendente no momento." : "Nenhuma solicitação encontrada no seu histórico.";
-        tbodyInd.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">${msgFiltro}</td></tr>`;
+        containerInd.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">${msgFiltro}</p>`;
         containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">${msgFiltro}</p>`;
         return;
     }
@@ -96,39 +97,48 @@ function renderTable(requests) {
 
     const nomeProfessor = loggedInUser.nome_usuario || loggedInUser.nome || 'Professor';
 
-    // --- TABELA INDIVIDUAIS ---
     if (individuais.length === 0) {
-        tbodyInd.innerHTML = `<tr><td colspan="10" style="text-align:center; padding: 20px;">Nenhuma solicitação individual.</td></tr>`;
+        containerInd.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">Nenhuma solicitação individual.</p>`;
     } else {
         individuais.forEach(r => {
-            const tr = document.createElement("tr");
+            const card = document.createElement("div");
+            card.className = "aula-card"; 
 
             const dataFormatada = new Date(r.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : 'N/A';
             const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : 'N/A';
 
-            const linkRoteiroHtml = r.link_roteiro ? `<a href="${r.link_roteiro}" target="_blank">Ver</a>` : 'N/A';
-            const observacoesTexto = r.observacoes ? r.observacoes : '-';
+            const linkRoteiroHtml = r.link_roteiro ? `<a href="${r.link_roteiro}" target="_blank">Acessar Link</a>` : 'Não exigido';
+            const observacoesTexto = r.observacoes ? r.observacoes : 'Nenhuma observação.';
             const discentes = r.numero_discentes || '-';
-            const disciplina = r.nome_disciplina || '-';
+            const disciplina = r.nome_disciplina || 'Disciplina não informada';
 
-            tr.innerHTML = `
-                      <td>${nomeProfessor}</td>
-                      <td>${r.nome_laboratorio}</td>
-                      <td>${disciplina}</td>
-                      <td>${dataFormatada}</td>
-                      <td style="white-space: nowrap;">${horaInicio} - ${horaFim}</td>
-                      <td>${discentes}</td>
-                      <td>${r.precisa_tecnico ? "Sim" : "Não"}</td>
-                      <td><span class="etiqueta-status status-${r.status}">${formatarTextoStatus(r.status)}</span></td>
-                      <td>${linkRoteiroHtml}</td>
-                      <td>${observacoesTexto}</td>
-                  `;
-            tbodyInd.appendChild(tr);
+            card.innerHTML = `
+                <div class="aula-card-header">
+                    <h3>${disciplina}</h3>
+                    <span class="etiqueta-status status-${r.status}">${formatarTextoStatus(r.status)}</span>
+                </div>
+                <div class="aula-card-body">
+                    <p><strong><i class="fas fa-flask"></i> Laboratório:</strong> ${r.nome_laboratorio}</p>
+                    <div class="aula-card-info-linha">
+                        <p><strong><i class="far fa-calendar-alt"></i> Data:</strong> ${dataFormatada}</p>
+                        <p><strong><i class="far fa-clock"></i> Horário:</strong> ${horaInicio} - ${horaFim}</p>
+                        <p><strong><i class="fas fa-users"></i> Discentes:</strong> ${discentes}</p>
+                        <p><strong><i class="fas fa-user-cog"></i> Técnico:</strong> ${r.precisa_tecnico ? "Sim" : "Não"}</p>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 0.9em; color: #666;"><strong>Observações:</strong> ${observacoesTexto}</p>
+                </div>
+                <div class="aula-card-footer">
+                    <div class="aula-card-roteiro">
+                        <strong>Roteiro:</strong> ${linkRoteiroHtml}
+                    </div>
+                </div>
+            `;
+            containerInd.appendChild(card);
         });
     }
 
-    // --- CARTÕES RECORRENTES ---
+    // --- CARTÕES RECORRENTES (MANTIDO) ---
     if (recorrentes.length === 0) {
         containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">Nenhuma solicitação recorrente.</p>`;
     } else {
