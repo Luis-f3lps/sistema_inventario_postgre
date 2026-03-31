@@ -1249,7 +1249,7 @@ input[type="url"]::placeholder {
 }
 
 .btn-confirmar {
-    background: #d9534f;
+    background: #025a20;
     color: white;
     border: none;
     padding: 8px 16px;
@@ -1333,17 +1333,8 @@ input[type="url"]::placeholder {
 }
 
 
-.btn-confirmar {
-    background: #d9534f;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
 .btn-confirmar:hover {
-    background: #c9302c;
+    background: #025a20;
 }
 
 .btn-cancelar:hover {

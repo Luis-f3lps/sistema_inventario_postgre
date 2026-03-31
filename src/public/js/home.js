@@ -152,35 +152,47 @@ function renderTable(requests) {
 }
 
 function renderizarAulasNosMeusLaboratorios(aulas) {
-  const tbody = document.getElementById("corpo-tabela-aulas-tecnico");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-  if (!aulas || aulas.length === 0) {
-    tbody.innerHTML =
-      '<tr><td colspan="9">Nenhuma aula futura autorizada nos seus laboratórios.</td></tr>';
-    return;
-  }
-  aulas.forEach((aula) => {
-    const tr = document.createElement("tr");
-    const linkRoteiroHtml = formatarLinkRoteiro(
-      aula.link_roteiro,
-      "Ver Roteiro",
-    );
-    tr.innerHTML = `
-            <td>${aula.nome_laboratorio}</td>
-            <td>${aula.nome_disciplina}</td>
-            <td>${aula.nome_professor}</td>
-            <td>${new Date(aula.data).toLocaleDateString("pt-BR", {
-      timeZone: "UTC",
-    })}</td>
-            <td>${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(0, 5)}</td>
-            <td>${aula.numero_discentes}</td>
-            <td>${aula.precisa_tecnico ? "Sim" : "Não"}</td>
-            <td>${linkRoteiroHtml}</td>
-            <td>${aula.observacoes ? aula.observacoes : "-"}</td>
+    const container = document.getElementById("corpo-tabela-aulas-tecnico");
+    if (!container) return;
+    
+    container.innerHTML = "";
+    
+    if (!aulas || aulas.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Nenhuma aula futura autorizada nos seus laboratórios.</p>';
+        return;
+    }
+    
+    aulas.forEach((aula) => {
+        const card = document.createElement("div");
+        card.className = "aula-card"; 
+
+        const dataFormatada = new Date(aula.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+        const linkRoteiroHtml = aula.link_roteiro ? `<a href="${aula.link_roteiro}" target="_blank" class="link-roteiro">Acessar Link</a>` : 'Não exigido';
+
+        card.innerHTML = `
+            <div class="aula-card-header">
+                <h3>${aula.nome_disciplina || 'Disciplina não informada'}</h3>
+                <span class="etiqueta-status status-autorizado">Autorizado</span>
+            </div>
+            <div class="aula-card-body">
+                <div class="aula-card-info-linha">
+                    <p><strong><i class="fas fa-user-graduate"></i> Professor:</strong> ${aula.nome_professor}</p>
+                    <p><strong><i class="fas fa-flask"></i> Laboratório:</strong> ${aula.nome_laboratorio}</p>
+                    <p><strong><i class="far fa-calendar-alt"></i> Data:</strong> ${dataFormatada}</p>
+                    <p><strong><i class="far fa-clock"></i> Horário:</strong> ${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(0, 5)}</p>
+                    <p><strong><i class="fas fa-users"></i> Alunos:</strong> ${aula.numero_discentes || '-'}</p>
+                    <p><strong><i class="fas fa-user-cog"></i> Técnico:</strong> ${aula.precisa_tecnico ? "Sim" : "Não"}</p>
+                </div>
+                <p style="margin-top: 10px; font-size: 0.9em; color: #666;"><strong>Observações:</strong> ${aula.observacoes ? aula.observacoes : "Nenhuma observação."}</p>
+            </div>
+            <div class="aula-card-footer" style="display: flex; justify-content: flex-start; margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
+                <div class="aula-card-roteiro">
+                    <strong>Roteiro:</strong> ${linkRoteiroHtml}
+                </div>
+            </div>
         `;
-    tbody.appendChild(tr);
-  });
+        container.appendChild(card);
+    });
 }
 
 async function cancelarAgendamento(idAula) {
@@ -269,14 +281,33 @@ async function fetchAulasDoCalendarioProfessor(ano, mes) {
   }
 }
 
-async function fetchAulasDoCalendarioTecnico(ano, mes) {
+async function fetchAulasDoCalendarioTecnico() {
   try {
-    const response = await fetch(
-      `/api/calendario/aulas-tecnico?ano=${ano}&mes=${mes}`,
-    );
-    if (!response.ok)
-      throw new Error("Falha ao buscar dados do calendário do técnico");
-    return await response.json();
+    const inicioSemana = new Date(dataReferenciaSemanaTecnico);
+    inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
+
+    const fimSemana = new Date(inicioSemana);
+    fimSemana.setDate(fimSemana.getDate() + 6);
+
+    const mesInicio = inicioSemana.getMonth() + 1;
+    const anoInicio = inicioSemana.getFullYear();
+    
+    const mesFim = fimSemana.getMonth() + 1;
+    const anoFim = fimSemana.getFullYear();
+
+    const response1 = await fetch(`/api/calendario/aulas-tecnico?ano=${anoInicio}&mes=${mesInicio}`);
+    if (!response1.ok) throw new Error("Falha ao buscar dados do calendário do técnico");
+    let aulas = await response1.json();
+
+    if (mesInicio !== mesFim) {
+        const response2 = await fetch(`/api/calendario/aulas-tecnico?ano=${anoFim}&mes=${mesFim}`);
+        if (response2.ok) {
+            const aulasMes2 = await response2.json();
+            aulas = [...aulas, ...aulasMes2]; 
+        }
+    }
+
+    return aulas;
   } catch (error) {
     console.error("Erro ao buscar aulas para o calendário do técnico:", error);
     return [];
