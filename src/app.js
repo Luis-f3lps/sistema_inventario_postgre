@@ -70,7 +70,26 @@ function Autenticado(req, res, next) {
     return res.status(401).json({ error: "Sessão expirada. Faça login novamente." });
   }
 }
+//  MIDDLEWARE Bloqueio por Cargo
+function AutorizadoPara(cargosPermitidos) {
+  return (req, res, next) => {
+    let tipoUser = req.session.user.tipo_usuario.trim().toLowerCase();
 
+    if (tipoUser === 'administrador') tipoUser = 'admin';
+
+    if (cargosPermitidos.includes(tipoUser)) {
+      next(); 
+    } else {
+      console.warn(`Tentativa de acesso negado. Cargo: ${tipoUser}. Rota: ${req.originalUrl}`);
+      
+      if (req.originalUrl.startsWith('/api')) {
+        return res.status(403).json({ error: "Acesso Negado: Seu cargo não tem permissão para realizar esta ação." });
+      } else {
+        return res.redirect("/Inventario"); 
+      }
+    }
+  };
+}
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", (req, res) => {
@@ -137,26 +156,47 @@ app.listen(PORT, () => {
   console.log(`Servidor rodando no endereço http://localhost:${PORT}`);
 });
 
-
+// ==========================================
+// PÁGINAS LIVRES
+// ==========================================
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "login.html")));
 app.get("/novo-usuario", (req, res) => res.sendFile(path.join(__dirname, "public", "novo-usuario.html"))); 
+// ==========================================
+// PÁGINAS GERAIS & PROFESSOR/TÉCNICO
+// ==========================================
+app.get("/Home", Autenticado, AutorizadoPara(['tecnico', 'professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "Home.html")));
+app.get("/Calendario", Autenticado, AutorizadoPara(['tecnico', 'professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "calendario.html")));
 
-app.get("/Home", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "Home.html")));
-app.get("/Calendario", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "calendario.html")));
+// ==========================================
+// PÁGINAS DO PROFESSOR (.professor, .Disciplinas, .Horarios)
+// ==========================================
+app.get("/Horario", Autenticado, AutorizadoPara(['professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "horarios.html")));
+app.get("/agendamento-recorrente", Autenticado, AutorizadoPara(['professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "agendamento-recorrente.html")));
+app.get("/Tela_Professor", Autenticado, AutorizadoPara(['professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "tela_professor.html")));
 
-app.get("/Relatorio", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "relatorio.html")));
-app.get("/Disciplinas", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "disciplinas.html")));
-app.get("/Horario", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "horarios.html")));
-app.get("/agendamento-recorrente", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "agendamento-recorrente.html")));
-app.get("/Tela_Tecnico", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "tela_tecnico.html")));
-app.get("/Tela_Professor", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "tela_professor.html")));
+// ==========================================
+// PÁGINAS DO TÉCNICO (.tecnico)
+// ==========================================
+app.get("/Tela_Tecnico", Autenticado, AutorizadoPara(['tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "tela_tecnico.html")));
 
-app.get("/Usuarios", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "usuarios.html")));
-app.get("/Produto", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "Produto.html")));
-app.get("/MovimentacaoProduto", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "MovimentacaoProduto.html")));
-app.get("/EditarMovimentacoes", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "EditarMovimentacoes.html")));
-app.get("/Inventario", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "Inventario.html")));
-app.get("/Laboratorio", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "laboratorio.html")));
+// ==========================================
+// PÁGINAS COMPARTILHADAS 
+// ==========================================
+// .Disciplinas aparece para Admin e Professor
+app.get("/Disciplinas", Autenticado, AutorizadoPara(['admin', 'professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "disciplinas.html")));
+
+// .produto aparece para Admin e Técnico
+app.get("/Produto", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "Produto.html")));
+app.get("/MovimentacaoProduto", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "MovimentacaoProduto.html")));
+app.get("/EditarMovimentacoes", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "EditarMovimentacoes.html")));
+app.get("/Inventario", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "Inventario.html")));
+
+// ==========================================
+// PÁGINAS RESTRITAS DO ADMIN (.admin-menu)
+// ==========================================
+app.get("/Relatorio", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "relatorio.html")));
+app.get("/Usuarios", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "usuarios.html")));
+app.get("/Laboratorio", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "laboratorio.html")));
 
 app.get("/api/usuario-logado", (req, res) => {
   const token = req.cookies.token;
