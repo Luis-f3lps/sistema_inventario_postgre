@@ -1,37 +1,24 @@
 // ==========================================
-// 1. CARREGAMENTO INICIAL
+// 1. CARREGAMENTO INICIAL (VIA MENU READY)
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    // Carrega o Menu
-    const menuContainer = document.getElementById('menu-container');
-    if (menuContainer) {
-        fetch('menu.html')
-            .then(response => response.text())
-            .then(data => {
-                menuContainer.innerHTML = data;
-            })
-            .catch(error => console.error('Erro ao carregar o menu:', error));
-    }
+document.addEventListener('menuReady', (event) => {
+    const { userData } = event.detail;
+    inicializarPaginaProduto(userData);
+});
 
-    // Inicializa a tabela e os selects
-    loadproduto();
+let loggedInUser = null;
+
+function inicializarPaginaProduto(userData) {
+    loggedInUser = userData;
+
+    loadproduto(1);
     loadProdutosSelect();
     carregarsiglas();
-    loadLoggedInUser();
-});
+}
 
-// Efeito sanfona nos menus laterais
-document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function (e) {
-        e.preventDefault();
-        const submenuItems = this.nextElementSibling;
-        if (submenuItems) submenuItems.classList.toggle('open');
-        this.querySelector('.fas.fa-chevron-down')?.classList.toggle('rotate');
-    });
-});
 
 // ==========================================
-// 2. NAVEGAÇÃO E AUTENTICAÇÃO
+// 2. NAVEGAÇÃO DE ABAS
 // ==========================================
 function opentab(tabname) {
     const tablinks = document.getElementsByClassName("tab-links");
@@ -43,52 +30,9 @@ function opentab(tabname) {
     const targetTab = document.getElementById(tabname);
     if (targetTab) targetTab.classList.add("active-tab");
 
-    const clickedLink = document.querySelector(`.tab-links[onclick*="${tabname}"]`);
-    if (clickedLink) clickedLink.classList.add("active-link");
-}
-
-async function loadLoggedInUser() {
-    try {
-        const response = await fetch('/api/usuario-logado');
-        if (!response.ok) {
-            window.location.href = '/login.html';
-            return;
-        }
-        const data = await response.json();
-
-        // Função recursiva para esperar o menu.html carregar antes de escrever o nome
-        const preencherNome = () => {
-            const userNameElement = document.getElementById("user-name-text");
-            if (userNameElement) {
-                userNameElement.innerHTML = data.nome || "Usuário";
-            } else {
-                setTimeout(preencherNome, 100); // Tenta de novo em 100ms se o menu não estiver pronto
-            }
-        };
-        preencherNome();
-
-        // Libera os botões do menu baseado no cargo
-        const atualizarMenu = () => {
-            const adminMenu = document.querySelector(".admin-menu");
-
-            if (adminMenu || document.querySelector(".tecnico")) {
-                const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : "";
-
-                if (userType === "admin" || userType === "administrador") {
-                    document.querySelectorAll(".admin-menu, .produto").forEach(el => el.style.display = "block");
-                } else if (userType === "tecnico") {
-                    document.querySelectorAll(".tecnico, .Home, .produto").forEach(el => el.style.display = "block");
-                } else if (userType === "professor") {
-                    document.querySelectorAll(".professor, .Home, .Horarios").forEach(el => el.style.display = "block");
-                }
-            } else {
-                setTimeout(atualizarMenu, 100);
-            }
-        };
-        atualizarMenu();
-
-    } catch (error) {
-        console.error("Erro ao carregar usuário logado:", error);
+    // Adiciona a classe ativa no botão clicado usando o evento global
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add("active-link");
     }
 }
 
