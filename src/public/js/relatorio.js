@@ -1,376 +1,97 @@
-
-
-var tablinks = document.getElementsByClassName("tab-links");
-var tabcontents = document.getElementsByClassName("tab-contents");
-
-function opentab(tabname) {
-    for (var i = 0; i < tablinks.length; i++) {
-        tablinks[i].classList.remove("active-link");
-    }
-    for (var i = 0; i < tabcontents.length; i++) {
-        tabcontents[i].classList.remove("active-tab");
-        if (tabcontents[i].id === tabname) {
-            tabcontents[i].classList.add("active-tab");
-        }
-    }
-    event.currentTarget.classList.add("active-link");
-}
-
-document.querySelectorAll('.submenu > a').forEach(menu => {
-    menu.addEventListener('click', function (e) {
-        e.preventDefault();
-        const submenuItems = this.nextElementSibling;
-        submenuItems.classList.toggle('open');
-        this.querySelector('.fas.fa-chevron-down').classList.toggle('rotate');
-    });
-});
-
-function geradorPdfEntrada() {
-    fetch('/generate-pdf-entrada', {
-        method: 'GET',
-    })
-        .then(response => {
-            if (response.ok) {
-                return response.blob();
-            }
-            throw new Error('Falha ao gerar o PDF.');
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'Relatorio_Entrada.pdf';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            alert('Erro ao gerar o PDF.');
-        });
-}
-
-function geradorPdfConsumo() {
-    const table = document.querySelector('table');
-    const originalStyle = table.style;
-
-    table.style.transform = 'scale(1)';
-    table.style.transformOrigin = 'top left';
-    table.style.width = '100%';
-
-    html2canvas(table, { scale: 1 }).then(canvas => {
-        table.style = originalStyle;
-
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-
-        const imgWidth = pdf.internal.pageSize.width;
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-        const pageHeight = pdf.internal.pageSize.height;
-
-        let heightLeft = imgHeight;
-        let position = 0;
-
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-
-        pdf.setFontSize(18);
-        pdf.text('Relatório de Laboratórios', imgWidth / 2, 15, { align: 'center' });
-
-        heightLeft -= pageHeight;
-
-        while (heightLeft > 0) {
-            pdf.addPage();
-            position = -heightLeft;
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-        }
-
-        pdf.save('relatorio_entrada.pdf');
-    }).catch(error => {
-        console.error('Erro ao gerar PDF:', error);
-    });
-}
-
-
-function formatDate(dateString) {
-    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', options); 
-}
-
+// ==========================================
+// 1. CARREGAMENTO INICIAL
+// ==========================================
 document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('filter-form').addEventListener('submit', function (event) {
-        event.preventDefault();
-        const startDate = document.getElementById('start-date').value;
-        const endDate = document.getElementById('end-date').value;
-        const laboratorio = document.getElementById('laboratorios-select2').value || 'todos'; 
-        loadConsumos(startDate, endDate, laboratorio);
-    });
+    // Carrega a sessão do usuário (com trava de espera)
+    loadLoggedInUser();
 
-    function loadConsumos(startDate = '', endDate = '', laboratorio = 'todos') {
-        const queryParams = new URLSearchParams({ startDate, endDate, laboratorio });
-        fetch(`/api/consumos?${queryParams}`)
-            .then(response => response.json())
-            .then(data => {
-                const tbody = document.getElementById('consumo-tbody');
-                tbody.innerHTML = '';
-                data.forEach(entry => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${entry.id_consumo || 'N/A'}</td>
-                        <td>${formatDate(entry.data_consumo) || 'N/A'}</td>
-                        <td>${entry.sigla || 'N/A'}</td>
-                        <td>${entry.nome_produto || 'N/A'}</td>
-                        <td>${entry.nome_laboratorio || 'N/A'}</td>
-                        <td>${entry.quantidade || 'N/A'}</td>
-                        <td>${entry.tipo_unidade_produto || 'N/A'}</td>
-                        <td>${entry.descricao || 'N/A'}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            })
-            .catch(error => console.error('Erro ao carregar consumos:', error));
-    }
-
-    function formatDate(dateString) {
-        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
-    }
-
-    loadConsumos();
-    loadtabelaregistraconsumos();
-});
-
-function loadLoggedInUser() {
-    fetch('/api/usuario-logado')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Falha ao buscar usuário. Status: ' + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            const userNameElement = document.getElementById('user-name-text');
-            userNameElement.innerHTML = data.nome;
-
-            const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
-
-            switch (userType) {
-                case 'admin':
-                    document.querySelector('.admin-menu').style.display = 'block';
-                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-
-                    break;
-                case 'tecnico':
-                    document.querySelector('.tecnico').style.display = 'block';
-                    document.querySelector('.Home').style.display = 'block';
-                    document.querySelector('#sidemenu > li.submenu.produto').style.display = 'block';
-
-                    break;
-                case 'professor':
-                    document.querySelector('.Home').style.display = 'block';
-                    document.querySelector('.professor').style.display = 'block';
-                    document.querySelector('.Horarios').style.display = 'block';
-
-                    break;
-            }
-        })
-        .catch(error => console.error('Erro ao carregar usuário logado:', error));
-}
-loadLoggedInUser();
-
-
-document.addEventListener('DOMContentLoaded', function () {
-    fetch('/api/tabelaregistraentradaInico')
-        .then(response => response.json())
-        .then(data => {
-            const tbody = document.getElementById('registro-entrada');
-            tbody.innerHTML = '';
-
-            data.forEach(entry => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${entry.id_entrada}</td>
-                    <td>${new Date(entry.data_entrada).toLocaleDateString()}</td>
-                    <td>${entry.quantidade}</td>
-                    <td>${entry.nome_produto}</td>
-                    <td>${entry.descricao || 'N/A'}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        })
-        .catch(error => console.error('Erro ao carregar registros de entrada:', error));
-});
-
-
-
-document.getElementById('filter-form2').addEventListener('submit', function (event) {
-    event.preventDefault(); 
-
-    const startDate = document.getElementById('entrada-start-date').value;
-    const endDate = document.getElementById('entrada-end-date').value;
-
-    if (!startDate || !endDate) {
-        alert('Por favor, selecione um período válido.');
-        return;
-    }
-
-    loadEntradas(1, startDate, endDate);
-});
-
-function loadEntradas(page = 1, startDate = '', endDate = '') {
-    const url = `/api/tabelaregistraentrada?page=${page}&limit=20&startDate=${startDate}&endDate=${endDate}`;
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            console.log('Dados recebidos da API:', data);
-
-            if (Array.isArray(data.data)) {
-                updateTable(data.data);
-                updatePagination(data.totalPages, data.currentPage, startDate, endDate);
-            } else {
-                console.error('Formato de resposta inesperado:', data);
-                alert('Erro ao carregar registros: Dados recebidos não são no formato esperado.');
-            }
-        })
-        .catch(error => console.error('Erro ao carregar registros de entrada:', error));
-}
-
-function updateTable(entries) {
-    const tbody = document.getElementById('registro-entrada');
-    tbody.innerHTML = '';
-
-    if (Array.isArray(entries)) {
-        entries.forEach(entry => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${entry.id_entrada || 'N/A'}</td>
-                <td>${formatDate(entry.data_entrada) || 'N/A'}</td>
-                <td>${entry.quantidade || 'N/A'}</td>
-                <td>${entry.nome_produto || 'N/A'}</td>
-                <td>${entry.descricao || 'N/A'}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    } else {
-        console.error('Esperava um array de entradas, mas recebeu:', entries);
-        alert('Erro ao atualizar tabela: Dados não são no formato esperado.');
-    }
-}
-
-function geradorPdfEntradatipo2() {
-    const startDate = document.getElementById('entrada-start-date').value;
-    const endDate = document.getElementById('entrada-end-date').value;
-
-    const url = `/generate-pdf-entradatipo2?start_date=${startDate || ''}&end_date=${endDate || ''}`;
-
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => {
-            if (response.ok) {
-                return response.blob();
-            }
-            throw new Error('Falha ao gerar o PDF.');
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'Relatorio_Entrada.pdf';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            alert('Erro ao gerar o PDF.');
-        });
-}
-
-function generatePDFConsumo() {
-    const startDate = document.getElementById('start-date').value;
-    const endDate = document.getElementById('end-date').value;
-    const laboratorio = document.getElementById('laboratorios-select2').value || 'todos';
-
-    const url = `/generate-pdf-consumo?start_date=${encodeURIComponent(startDate || '')}&end_date=${encodeURIComponent(endDate || '')}&laboratorio=${encodeURIComponent(laboratorio)}`;
-
-    console.log('URL da requisição:', url); 
-
-    fetch(url, {
-        method: 'GET',
-    })
-        .then(response => {
-            if (response.ok) {
-                return response.blob();
-            }
-            throw new Error('Falha ao gerar o PDF.');
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'Relatorio_Consumo.pdf';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            alert('Erro ao gerar o PDF.');
-        });
-}
-
-function updatePagination(totalPages, currentPage, startDate = '', endDate = '') {
-    const paginationDiv = document.getElementById('pagination');
-    paginationDiv.innerHTML = '';
-
-    for (let i = 1; i <= totalPages; i++) {
-        const button = document.createElement('button');
-        button.textContent = i;
-        button.classList.add('pagination-button');
-        if (i === currentPage) {
-            button.classList.add('active');
-        }
-        button.addEventListener('click', () => {
-            loadEntradas(i, startDate, endDate); 
-        });
-        paginationDiv.appendChild(button);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    loadEntradas(1); 
+    // Carrega as opções do select de laboratórios
     loadLaboratorios2();
+
+    // Carrega as tabelas iniciais
+    loadConsumos();
+    loadEntradas(1); 
 });
 
-function updatePaginationConsumos(totalPages, currentPage, startDate = '', endDate = '', laboratorio = 'todos') {
-    const paginationDiv = document.getElementById('pagination2');
-    paginationDiv.innerHTML = '';
+// Utilitário global para formatar data (DD/MM/AAAA)
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    return new Date(dateString).toLocaleDateString('pt-BR', options);
+}
 
-    for (let i = 1; i <= totalPages; i++) {
-        const button = document.createElement('button');
-        button.textContent = i;
-        button.classList.add('pagination-button');
+// ==========================================
+// 2. NAVEGAÇÃO E AUTENTICAÇÃO
+// ==========================================
+function opentab(tabname) {
+    const tablinks = document.getElementsByClassName("tab-links");
+    const tabcontents = document.getElementsByClassName("tab-contents");
 
-        if (i === currentPage) {
-            button.classList.add('active');
-        }
+    Array.from(tablinks).forEach(link => link.classList.remove("active-link"));
+    Array.from(tabcontents).forEach(content => content.classList.remove("active-tab"));
 
-        button.addEventListener('click', () => {
-            loadConsumos(i, startDate, endDate, laboratorio);
-        });
+    const targetTab = document.getElementById(tabname);
+    if (targetTab) targetTab.classList.add("active-tab");
 
-        paginationDiv.appendChild(button);
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add("active-link");
     }
 }
 
+async function loadLoggedInUser() {
+    try {
+        const response = await fetch('/api/usuario-logado');
+        if (!response.ok) {
+            window.location.href = '/login.html';
+            return;
+        }
+        const data = await response.json();
+
+        // Espera o menu carregar antes de inserir o nome
+        const preencherNome = () => {
+            const userNameElement = document.getElementById('user-name-text');
+            if (userNameElement) {
+                userNameElement.innerHTML = data.nome || "Usuário";
+            } else {
+                setTimeout(preencherNome, 100);
+            }
+        };
+        preencherNome();
+
+        // Controla a visibilidade do menu
+        const atualizarMenu = () => {
+            const adminMenu = document.querySelector('.admin-menu');
+            if (adminMenu || document.querySelector('.tecnico')) {
+                const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
+
+                if (userType === 'admin' || userType === 'administrador') {
+                    document.querySelectorAll('.admin-menu, .produto').forEach(el => el.style.display = 'block');
+                } else if (userType === 'tecnico') {
+                    document.querySelectorAll('.tecnico, .Home, .produto').forEach(el => el.style.display = 'block');
+                } else if (userType === 'professor') {
+                    document.querySelectorAll('.Home, .professor, .Horarios').forEach(el => el.style.display = 'block');
+                }
+            } else {
+                setTimeout(atualizarMenu, 100);
+            }
+        };
+        atualizarMenu();
+
+    } catch (error) {
+        console.error('Erro ao carregar usuário logado:', error);
+    }
+}
+
+// ==========================================
+// 3. BUSCA DE DADOS E FILTROS (CONSUMO)
+// ==========================================
 function loadLaboratorios2() {
     fetch('/api/laboratorios')
         .then(response => response.json())
         .then(data => {
             const select = document.getElementById('laboratorios-select2');
-            select.innerHTML = '<option value="">Todos os Laboratórios</option>'; 
+            if (!select) return;
+            select.innerHTML = '<option value="">Todos os Laboratórios</option>';
             data.forEach(laboratorio => {
                 const option = document.createElement('option');
                 option.value = laboratorio.id_laboratorio;
@@ -379,4 +100,180 @@ function loadLaboratorios2() {
             });
         })
         .catch(error => console.error('Erro ao carregar laboratórios:', error));
+}
+
+function loadConsumos(startDate = '', endDate = '', laboratorio = 'todos') {
+    const queryParams = new URLSearchParams({ startDate, endDate, laboratorio });
+    fetch(`/api/consumos?${queryParams}`)
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('consumo-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            
+            if (!Array.isArray(data) || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Nenhum registro encontrado.</td></tr>';
+                return;
+            }
+
+            data.forEach(entry => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${entry.id_consumo || 'N/A'}</td>
+                    <td>${formatDate(entry.data_consumo)}</td>
+                    <td>${entry.sigla || 'N/A'}</td>
+                    <td>${entry.nome_produto || 'N/A'}</td>
+                    <td>${entry.nome_laboratorio || 'N/A'}</td>
+                    <td>${entry.quantidade || 'N/A'}</td>
+                    <td>${entry.tipo_unidade_produto || 'N/A'}</td>
+                    <td>${entry.descricao || 'N/A'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        })
+        .catch(error => console.error('Erro ao carregar consumos:', error));
+}
+
+document.getElementById('filter-form')?.addEventListener('submit', function (event) {
+    event.preventDefault();
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
+    const laboratorio = document.getElementById('laboratorios-select2').value || 'todos';
+    
+    if (startDate && endDate && startDate > endDate) {
+        alert("A data inicial não pode ser maior que a final.");
+        return;
+    }
+    
+    loadConsumos(startDate, endDate, laboratorio);
+});
+
+// ==========================================
+// 4. BUSCA DE DADOS E FILTROS (ENTRADAS)
+// ==========================================
+function loadEntradas(page = 1, startDate = '', endDate = '') {
+    const url = `/api/tabelaregistraentrada?page=${page}&limit=20&startDate=${startDate}&endDate=${endDate}`;
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data && Array.isArray(data.data)) {
+                updateTableEntradas(data.data);
+                updatePaginationEntradas(data.totalPages, data.currentPage, startDate, endDate);
+            } else {
+                updateTableEntradas([]);
+            }
+        })
+        .catch(error => console.error('Erro ao carregar registros de entrada:', error));
+}
+
+function updateTableEntradas(entries) {
+    const tbody = document.getElementById('registro-entrada');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (entries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum registro encontrado.</td></tr>';
+        return;
+    }
+
+    entries.forEach(entry => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${entry.id_entrada || 'N/A'}</td>
+            <td>${formatDate(entry.data_entrada)}</td>
+            <td>${entry.quantidade || 'N/A'}</td>
+            <td>${entry.nome_produto || 'N/A'}</td>
+            <td>${entry.descricao || 'N/A'}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function updatePaginationEntradas(totalPages, currentPage, startDate = '', endDate = '') {
+    const paginationDiv = document.getElementById('pagination');
+    if (!paginationDiv) return;
+    paginationDiv.innerHTML = '';
+
+    for (let i = 1; i <= totalPages; i++) {
+        const button = document.createElement('button');
+        button.textContent = i;
+        button.classList.add('pagination-button');
+        if (i === currentPage) button.classList.add('active');
+        
+        button.addEventListener('click', () => loadEntradas(i, startDate, endDate));
+        paginationDiv.appendChild(button);
+    }
+}
+
+document.getElementById('filter-form2')?.addEventListener('submit', function (event) {
+    event.preventDefault();
+    const startDate = document.getElementById('entrada-start-date').value;
+    const endDate = document.getElementById('entrada-end-date').value;
+
+    if (!startDate || !endDate) {
+        alert('Por favor, selecione as datas de início e fim.');
+        return;
+    }
+    if (startDate > endDate) {
+        alert("A data inicial não pode ser maior que a final.");
+        return;
+    }
+
+    loadEntradas(1, startDate, endDate);
+});
+
+// ==========================================
+// 5. GERAÇÃO DE PDFs (BACKEND)
+// ==========================================
+function geradorPdfEntradatipo2() {
+    const startDate = document.getElementById('entrada-start-date')?.value || '';
+    const endDate = document.getElementById('entrada-end-date')?.value || '';
+
+    const url = `/generate-pdf-entradatipo2?start_date=${startDate}&end_date=${endDate}`;
+
+    fetch(url, { method: 'GET' })
+        .then(response => {
+            if (!response.ok) throw new Error('Falha ao gerar o PDF.');
+            return response.blob();
+        })
+        .then(blob => {
+            const urlBlob = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = urlBlob;
+            a.download = 'Relatorio_Entrada.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao gerar o PDF. Verifique sua conexão ou tente novamente.');
+        });
+}
+
+function generatePDFConsumo() {
+    const startDate = document.getElementById('start-date')?.value || '';
+    const endDate = document.getElementById('end-date')?.value || '';
+    const laboratorio = document.getElementById('laboratorios-select2')?.value || 'todos';
+
+    const url = `/generate-pdf-consumo?start_date=${encodeURIComponent(startDate)}&end_date=${encodeURIComponent(endDate)}&laboratorio=${encodeURIComponent(laboratorio)}`;
+
+    fetch(url, { method: 'GET' })
+        .then(response => {
+            if (!response.ok) throw new Error('Falha ao gerar o PDF.');
+            return response.blob();
+        })
+        .then(blob => {
+            const urlBlob = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = urlBlob;
+            a.download = 'Relatorio_Consumo.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao gerar o PDF. Verifique sua conexão ou tente novamente.');
+        });
 }
