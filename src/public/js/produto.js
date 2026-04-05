@@ -1,24 +1,4 @@
 
-
-function Autenticado() {
-    return fetch('/api/check-auth', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-        .then(response => response.json())
-        .then(data => data.Autenticado)
-        .catch(() => false);
-}
-
-function redirecionarSeNaoAutenticado() {
-    Autenticado().then(authenticated => {
-        if (!authenticated) {
-            window.location.href = 'login.html'; // Redireciona para a página de login
-        }
-    });
-}
 document.addEventListener('DOMContentLoaded', () => {
     const menuContainer = document.getElementById('menu-container');
     if (menuContainer) {
@@ -31,11 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-document.addEventListener('DOMContentLoaded', function () {
-    if (window.location.pathname !== '/login.html') {
-        redirecionarSeNaoAutenticado();
-    }
-});
+
 
 
 function opentab(tabname) {

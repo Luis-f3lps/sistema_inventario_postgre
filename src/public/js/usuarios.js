@@ -11,32 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function Autenticado() {
-    return fetch('/api/check-auth', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-        .then(response => response.json())
-        .then(data => data.Autenticado)
-        .catch(() => false);
-}
-
-function redirecionarSeNaoAutenticado() {
-    Autenticado().then(authenticated => {
-        if (!authenticated) {
-            window.location.href = 'login.html';
-        }
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    if (window.location.pathname !== '/login.html') {
-        redirecionarSeNaoAutenticado();
-    }
-});
-
 function opentab(tabname) {
     var tablinks = document.getElementsByClassName("tab-links");
     var tabcontents = document.getElementsByClassName("tab-contents");
