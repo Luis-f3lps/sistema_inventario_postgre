@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     loadLaboratorios();
     loadProdutosSiglas();
     loadsiglasEntrada();
-    
+
     // Carrega IDs para o form de edição (Aviso: A rota /api/entradas precisa ser criada no app.js!)
     loadIdsEntrada();
 
@@ -22,8 +22,8 @@ function opentab(tabname) {
     document.querySelectorAll('.tab-contents').forEach(content => content.classList.remove('active-tab'));
 
     const tab = document.getElementById(tabname);
-    if(tab) tab.classList.add('active-tab');
-    
+    if (tab) tab.classList.add('active-tab');
+
     event.currentTarget.classList.add('active-link');
 }
 
@@ -58,7 +58,7 @@ async function loadLoggedInUser() {
                     case 'administrador':
                         document.querySelectorAll('.admin-menu, #sidemenu > li.submenu.produto').forEach(el => el.style.display = 'block');
                         const abaEdicao = document.querySelector('.tab-links[onclick*="Aba02"]');
-                        if (abaEdicao) abaEdicao.style.display = 'contents';
+                        if (abaEdicao) abaEdicao.style.display = 'block'; // <--- SOLUÇÃO AQUI
                         break;
                     case 'tecnico':
                         document.querySelectorAll('.tecnico, .Home, #sidemenu > li.submenu.produto').forEach(el => el.style.display = 'block');
@@ -86,7 +86,7 @@ function loadLaboratorios() {
         .then(response => response.ok ? response.json() : Promise.reject('Erro na rede'))
         .then(data => {
             const select = document.getElementById('laboratorio-select');
-            if(!select) return;
+            if (!select) return;
             select.innerHTML = '<option value="">Selecione um laboratório</option>';
 
             data.forEach(lab => {
@@ -104,13 +104,13 @@ function loadProdutosSiglas() {
         .then(response => response.ok ? response.json() : Promise.reject('Erro na rede'))
         .then(data => {
             const select = document.getElementById('sigla-select');
-            if(!select) return;
+            if (!select) return;
             select.innerHTML = '<option value="">Selecione um produto</option>';
 
             data.forEach(produto => {
                 const option = document.createElement('option');
-                option.value = produto.id_produto; 
-                option.textContent = produto.sigla; 
+                option.value = produto.id_produto;
+                option.textContent = produto.sigla;
                 select.appendChild(option);
             });
         })
@@ -122,13 +122,13 @@ function loadsiglasEntrada() {
         .then(response => response.ok ? response.json() : Promise.reject('Erro na rede'))
         .then(data => {
             const select = document.getElementById('produto-entrada-select');
-            if(!select) return;
-            select.innerHTML = '<option value="">Selecione um produto</option>';   
+            if (!select) return;
+            select.innerHTML = '<option value="">Selecione um produto</option>';
 
             data.forEach(item => {
                 const option = document.createElement('option');
                 option.value = item.id_produto;
-                option.textContent = item.sigla; 
+                option.textContent = item.sigla;
                 select.appendChild(option);
             });
         })
@@ -140,7 +140,7 @@ function loadIdsEntrada() {
         .then(response => response.ok ? response.json() : Promise.reject('Rota /api/entradas não encontrada no backend.'))
         .then(data => {
             const idSelect = document.getElementById('id-select');
-            if(!idSelect) return;
+            if (!idSelect) return;
             idSelect.innerHTML = '<option value="">Selecione o ID</option>';
 
             data.forEach(entrada => {
@@ -198,7 +198,7 @@ document.getElementById('consumo-form')?.addEventListener('submit', function (ev
     const quantidade = parseInt(document.getElementById('quantidade').value, 10);
     const laboratorio = document.getElementById('laboratorio-select').value;
     const data_consumo = document.getElementById('data_consumo').value;
-    const descricao = document.getElementById('descricao_comsumo').value; 
+    const descricao = document.getElementById('descricao_comsumo').value;
 
     if (!idproduto || isNaN(quantidade) || quantidade <= 0 || !laboratorio || !data_consumo || !descricao) {
         alert('Por favor, preencha todos os campos e a quantidade deve ser maior que zero.');
@@ -226,12 +226,12 @@ document.getElementById('consumo-form')?.addEventListener('submit', function (ev
 
 // Editar Entrada Existente (Aviso: Requer alterar o ID no HTML para "editar-entrada-form")
 document.getElementById('editar-entrada-form')?.addEventListener('submit', function (event) {
-    event.preventDefault(); 
+    event.preventDefault();
 
-    const idEntrada = document.getElementById('id-select').value; 
+    const idEntrada = document.getElementById('id-select').value;
     const idProduto = document.getElementById('produto-entrada-select-edit').value; // Cuidado com IDs duplicados no HTML!
-    const quantidade = parseInt(document.getElementById('quantidade-entrada-edit').value); 
-    const dataEntrada = document.getElementById('data-entrada-edit').value; 
+    const quantidade = parseInt(document.getElementById('quantidade-entrada-edit').value);
+    const dataEntrada = document.getElementById('data-entrada-edit').value;
 
     if (!idEntrada || !idProduto || !quantidade || !dataEntrada) {
         alert('Todos os campos são obrigatórios.');
