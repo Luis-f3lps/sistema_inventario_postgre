@@ -1,11 +1,4 @@
 
-var sidemenu = document.getElementById("sidemenu");
-function openmenu() {
-    sidemenu.style.left = "0px";
-}
-function clossmenu() {
-    sidemenu.style.left = "-800px";
-}
 
 var tablinks = document.getElementsByClassName("tab-links");
 var tabcontents = document.getElementsByClassName("tab-contents");

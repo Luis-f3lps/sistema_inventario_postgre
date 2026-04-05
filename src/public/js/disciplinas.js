@@ -1,16 +1,4 @@
-function openmenu() {
-  const sidemenu = document.getElementById("sidemenu");
-  if (sidemenu) {
-    sidemenu.style.left = "0px";
-  }
-}
 
-function closemenu() {
-  const sidemenu = document.getElementById("sidemenu");
-  if (sidemenu) {
-    sidemenu.style.left = "-800px";
-  }
-}
 
 function opentab(event, tabname) {
   const tablinks = document.getElementsByClassName("tab-links");

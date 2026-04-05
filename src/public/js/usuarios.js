@@ -1,13 +1,4 @@
 
-var sidemenu = document.getElementById("sidemenu");
-function openmenu() {
-    sidemenu.style.left = "0px";
-}
-function clossmenu() {
-    sidemenu.style.left = "-800px";
-}
-
-
 document.addEventListener('DOMContentLoaded', () => {
     const menuContainer = document.getElementById('menu-container');
     if (menuContainer) {

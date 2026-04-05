@@ -1,11 +1,5 @@
 
-var sidemenu = document.getElementById("sidemenu");
-function openmenu() {
-    sidemenu.style.left = "0px";
-}
-function clossmenu() {
-    sidemenu.style.left = "-800px";
-}
+
 document.querySelectorAll('.submenu > a').forEach(menu => {
     menu.addEventListener('click', function (e) {
         e.preventDefault();
