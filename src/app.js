@@ -71,21 +71,35 @@ function Autenticado(req, res, next) {
   }
 }
 //  MIDDLEWARE Bloqueio por Cargo
+
 function AutorizadoPara(cargosPermitidos) {
   return (req, res, next) => {
     let tipoUser = req.session.user.tipo_usuario.trim().toLowerCase();
 
+    // Padroniza a nomenclatura do admin para evitar furos
     if (tipoUser === 'administrador') tipoUser = 'admin';
 
+    // Verifica se o cargo do usuário está na "lista VIP" daquela rota
     if (cargosPermitidos.includes(tipoUser)) {
-      next(); 
+      next(); // Passou! Pode acessar a rota.
     } else {
       console.warn(`Tentativa de acesso negado. Cargo: ${tipoUser}. Rota: ${req.originalUrl}`);
       
       if (req.originalUrl.startsWith('/api')) {
         return res.status(403).json({ error: "Acesso Negado: Seu cargo não tem permissão para realizar esta ação." });
       } else {
-        return res.redirect("/Inventario"); 
+        // Define a "rota de fuga" correta baseada no cargo do usuário
+        let rotaSegura = '/login.html';
+        if (tipoUser === 'admin') rotaSegura = '/Inventario';
+        if (tipoUser === 'tecnico' || tipoUser === 'professor') rotaSegura = '/Home';
+
+        // Trava absoluta de segurança: se ele já estiver na rota segura e mesmo assim for bloqueado, mostra tela de erro.
+        if (req.originalUrl === rotaSegura) {
+            return res.status(403).send("<h1 style='text-align:center; margin-top:50px;'>403 - Acesso Negado</h1><p style='text-align:center;'>Você não tem permissão para ver esta página.</p>");
+        }
+
+        // Redireciona para o lugar certo e quebra o loop!
+        return res.redirect(rotaSegura); 
       }
     }
   };
