@@ -201,7 +201,7 @@ app.get("/api/check-auth", (req, res) => {
 app.get("/api/usuarios", Autenticado, async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT nome_usuario, email, tipo_usuario, status FROM usuario ORDER BY nome_usuario ASC",
+      "SELECT nome_usuario, email, tipo_usuario, status FROM usuario ORDER BY tipo_usuario ASC, nome_usuario ASC"
     );
     res.json(result.rows); 
   } catch (error) {
