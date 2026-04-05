@@ -1,17 +1,31 @@
 // ==========================================
-// 1. CARREGAMENTO INICIAL
+// 1. CARREGAMENTO INICIAL (VIA MENU READY)
 // ==========================================
-document.addEventListener('DOMContentLoaded', function () {
-    // Carrega a sessão do usuário (com trava de espera)
-    loadLoggedInUser();
+document.addEventListener('menuReady', (event) => {
+    const { userData } = event.detail;
+    inicializarPaginaRelatorio(userData);
+});
+
+// Variável global para guardar o usuário logado, caso precise no futuro
+let loggedInUser = null;
+
+function inicializarPaginaRelatorio(userData) {
+    loggedInUser = userData;
+
+    // Configura a visibilidade das abas baseadas no cargo
+    configurarVisibilidadeAbas(userData.tipo_usuario);
 
     // Carrega as opções do select de laboratórios
     loadLaboratorios2();
 
     // Carrega as tabelas iniciais
     loadConsumos();
-    loadEntradas(1); 
-});
+    loadEntradas(1);
+}
+
+function configurarVisibilidadeAbas(tipoUsuarioStr) {
+    const userType = tipoUsuarioStr ? tipoUsuarioStr.trim().toLowerCase() : '';
+}
 
 // Utilitário global para formatar data (DD/MM/AAAA)
 function formatDate(dateString) {
@@ -21,7 +35,7 @@ function formatDate(dateString) {
 }
 
 // ==========================================
-// 2. NAVEGAÇÃO E AUTENTICAÇÃO
+// 2. NAVEGAÇÃO DE ABAS
 // ==========================================
 function opentab(tabname) {
     const tablinks = document.getElementsByClassName("tab-links");
@@ -38,49 +52,6 @@ function opentab(tabname) {
     }
 }
 
-async function loadLoggedInUser() {
-    try {
-        const response = await fetch('/api/usuario-logado');
-        if (!response.ok) {
-            window.location.href = '/login.html';
-            return;
-        }
-        const data = await response.json();
-
-        // Espera o menu carregar antes de inserir o nome
-        const preencherNome = () => {
-            const userNameElement = document.getElementById('user-name-text');
-            if (userNameElement) {
-                userNameElement.innerHTML = data.nome || "Usuário";
-            } else {
-                setTimeout(preencherNome, 100);
-            }
-        };
-        preencherNome();
-
-        // Controla a visibilidade do menu
-        const atualizarMenu = () => {
-            const adminMenu = document.querySelector('.admin-menu');
-            if (adminMenu || document.querySelector('.tecnico')) {
-                const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : '';
-
-                if (userType === 'admin' || userType === 'administrador') {
-                    document.querySelectorAll('.admin-menu, .produto').forEach(el => el.style.display = 'block');
-                } else if (userType === 'tecnico') {
-                    document.querySelectorAll('.tecnico, .Home, .produto').forEach(el => el.style.display = 'block');
-                } else if (userType === 'professor') {
-                    document.querySelectorAll('.Home, .professor, .Horarios').forEach(el => el.style.display = 'block');
-                }
-            } else {
-                setTimeout(atualizarMenu, 100);
-            }
-        };
-        atualizarMenu();
-
-    } catch (error) {
-        console.error('Erro ao carregar usuário logado:', error);
-    }
-}
 
 // ==========================================
 // 3. BUSCA DE DADOS E FILTROS (CONSUMO)
