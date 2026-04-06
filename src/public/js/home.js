@@ -97,42 +97,89 @@ async function carregarDadosDosPaineis(userType) {
   }
 }
 
+// 1. FUNÇÃO AJUDANTE: Junta as aulas recorrentes em pacotes
+function agruparSolicitacoes(requisicoes) {
+    const agrupado = [];
+    const mapaPedidos = new Map();
+
+    requisicoes.forEach((req) => {
+        // Se for recorrente e tiver id_pedido, nós agrupamos
+        if (req.tipo_aula === "recorrente" && req.id_pedido) {
+            if (mapaPedidos.has(req.id_pedido)) {
+                // Já existe o grupo, só adiciona a aula dentro dele
+                mapaPedidos.get(req.id_pedido).aulas.push(req);
+            } else {
+                // Cria um novo grupo
+                const novoGrupo = { ...req, is_grupo: true, aulas: [req] };
+                mapaPedidos.set(req.id_pedido, novoGrupo);
+                agrupado.push(novoGrupo);
+            }
+        } else {
+            // Se for aula normal, joga direto na lista
+            agrupado.push(req);
+        }
+    });
+
+    return agrupado;
+}
+
+
+// 2. RENDERIZAR OS CARDS (Painel)
 function renderTable(requests) {
-  // Agora apontamos para a nova div, não mais para o tbody
-  const container = document.getElementById("minhas-aulas-container");
-  if (!container) return;
+    const container = document.getElementById("minhas-aulas-container");
+    if (!container) return;
 
-  container.innerHTML = "";
+    container.innerHTML = "";
 
-  if (requests.length === 0) {
-    container.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">Você não tem nenhuma solicitação futura.</p>`;
-    return;
-  }
+    if (requests.length === 0) {
+        container.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">Você não tem nenhuma solicitação futura.</p>`;
+        return;
+    }
 
-  requests.forEach((r) => {
-    const dataFormatada = new Date(r.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
-    const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : "N/A";
-    const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : "N/A";
-    const linkRoteiroHtml = formatarLinkRoteiro(r.link_roteiro, "Ver Roteiro");
-    const textoStatus = formatarTextoStatus(r.status);
+    // Passa a lista original pelo "filtro" de agrupamento
+    const requisicoesAgrupadas = agruparSolicitacoes(requests);
 
-    const isDesativado = r.status === "nao_autorizado" || r.status === "cancelado";
-    const estiloBotao = isDesativado
-      ? "background-color: #f1f1f1; color: #a1a1a1; cursor: not-allowed; border: 1px solid #ddd;"
-      : "background-color: #ff4d4d; color: white; cursor: pointer; border: none;";
+    requisicoesAgrupadas.forEach((r) => {
+        let textoData = "";
+        let listaIdsParaCancelar = [];
+        let labelRecorrente = "";
 
-    // Criando o card
-    const card = document.createElement("div");
-    card.className = "aula-card";
+        // Se for um grupo de aulas recorrentes, mostra o período (Início até Fim)
+        if (r.is_grupo) {
+            const datas = r.aulas.map(a => new Date(a.data));
+            const dataMin = new Date(Math.min(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+            const dataMax = new Date(Math.max(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+            
+            textoData = dataMin === dataMax ? dataMin : `De ${dataMin} até ${dataMax}`;
+            labelRecorrente = `<span style="background: #e3f2fd; color: #0d6efd; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 10px;">🔄 ${r.aulas.length} Aulas</span>`;
+            listaIdsParaCancelar = r.aulas.map(a => a.id_aula); // Pega todos os IDs do pacote
+        } else {
+            // Aula normal
+            textoData = new Date(r.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+            listaIdsParaCancelar = [r.id_aula];
+        }
 
-    card.innerHTML = `
+        const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : "N/A";
+        const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : "N/A";
+        const linkRoteiroHtml = formatarLinkRoteiro(r.link_roteiro, "Ver Roteiro");
+        const textoStatus = formatarTextoStatus(r.status);
+
+        const isDesativado = r.status === "nao_autorizado" || r.status === "cancelado";
+        const estiloBotao = isDesativado
+            ? "background-color: #f1f1f1; color: #a1a1a1; cursor: not-allowed; border: 1px solid #ddd;"
+            : "background-color: #ff4d4d; color: white; cursor: pointer; border: none;";
+
+        const card = document.createElement("div");
+        card.className = "aula-card";
+
+        card.innerHTML = `
             <div class="aula-card-header">
-                <h3>${r.nome_disciplina}</h3>
+                <h3>${r.nome_disciplina} ${labelRecorrente}</h3>
                 <span class="etiqueta-status status-${r.status}">${textoStatus}</span>
             </div>
             <div class="aula-card-body">
                 <div class="aula-card-info-linha">
-                    <p><strong><i class="far fa-calendar-alt"></i> Data:</strong> ${dataFormatada}</p>
+                    <p><strong><i class="far fa-calendar-alt"></i> Data:</strong> ${textoData}</p>
                     <p><strong><i class="far fa-clock"></i> Horário:</strong> ${horaInicio} - ${horaFim}</p>
                     <p><strong><i class="fas fa-user-cog"></i> Técnico:</strong> ${r.precisa_tecnico ? "Sim" : "Não"}</p>
                     <p><strong><i class="fas fa-flask"></i> Laboratório:</strong> ${r.nome_laboratorio}</p>
@@ -142,13 +189,78 @@ function renderTable(requests) {
                 <div class="aula-card-roteiro">
                     ${linkRoteiroHtml}
                 </div>
-                <button class="btn-cancelar-card" onclick="cancelarAgendamento(${r.id_aula})" ${isDesativado ? "disabled" : ""} style="${estiloBotao}">
-                    <i class="fas fa-times"></i> Cancelar Aula
+                <button class="btn-cancelar-card" onclick='cancelarLote(${JSON.stringify(listaIdsParaCancelar)})' ${isDesativado ? "disabled" : ""} style="${estiloBotao}">
+                    <i class="fas fa-times"></i> Cancelar ${r.is_grupo ? "Pacote" : "Aula"}
                 </button>
             </div>
         `;
-    container.appendChild(card);
-  });
+        container.appendChild(card);
+    });
+}
+
+
+// 3. RENDERIZAR A TABELA
+function renderizarTabelaAgendamentos(requisicoes) {
+    const tbody = document.getElementById("corpo-tabela-agendamentos");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    if (requisicoes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">Nenhum agendamento futuro encontrado.</td></tr>`;
+        return;
+    }
+
+    // Passa a lista original pelo "filtro" de agrupamento
+    const requisicoesAgrupadas = agruparSolicitacoes(requisicoes);
+
+    requisicoesAgrupadas.forEach((req) => {
+        let textoData = "";
+        let listaIdsParaCancelar = [];
+        let iconeRecorrente = "";
+
+        if (req.is_grupo) {
+            const datas = req.aulas.map(a => new Date(a.data));
+            const dataMin = new Date(Math.min(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+            const dataMax = new Date(Math.max(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+            
+            textoData = dataMin === dataMax ? dataMin : `${dataMin} a ${dataMax}`;
+            iconeRecorrente = ` <span title="Pacote Recorrente de ${req.aulas.length} aulas">🔄</span>`;
+            listaIdsParaCancelar = req.aulas.map(a => a.id_aula);
+        } else {
+            textoData = new Date(req.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+            listaIdsParaCancelar = [req.id_aula];
+        }
+
+        const tr = document.createElement("tr");
+        const horaInicio = req.hora_inicio ? req.hora_inicio.slice(0, 5) : "N/A";
+        const horaFim = req.hora_fim ? req.hora_fim.slice(0, 5) : "N/A";
+        const linkMaterialHtml = formatarLinkRoteiro(req.link_roteiro, "Acessar");
+        const textoStatus = formatarTextoStatus(req.status);
+
+        const isDesativado = req.status === "nao_autorizado" || req.status === "cancelado";
+        const estiloBotao = isDesativado
+            ? "background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;"
+            : "";
+
+        tr.innerHTML = `
+            <td>${req.nome_laboratorio}</td>
+            <td>${req.nome_disciplina} ${iconeRecorrente}</td>
+            <td>${textoData}</td>
+            <td>${horaInicio} - ${horaFim}</td>
+            <td>${req.precisa_tecnico ? "Sim" : "Não"}</td>
+            <td><span class="badge-status status-${req.status}">${textoStatus}</span></td>
+            <td>${linkMaterialHtml}</td>
+            <td>
+                <button class="btn-cancelar" onclick='cancelarLote(${JSON.stringify(listaIdsParaCancelar)})' 
+                        ${isDesativado ? "disabled" : ""} 
+                        style="${estiloBotao}">
+                    Cancelar
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
 function renderizarAulasNosMeusLaboratorios(aulas) {
@@ -454,53 +566,6 @@ function formatarLinkRoteiro(url, textoLink = "Ver") {
   return `<a href="${linkCorrigido}" target="_blank" class="link-roteiro">${textoLink}</a>`;
 }
 
-
-function renderizarTabelaAgendamentos(requisicoes) {
-  const tbody = document.getElementById("corpo-tabela-agendamentos");
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-
-  if (requisicoes.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">Nenhum agendamento futuro encontrado.</td></tr>`;
-    return;
-  }
-
-  requisicoes.forEach((req) => {
-    const tr = document.createElement("tr");
-    const dataFormatada = new Date(req.data).toLocaleDateString("pt-BR", {
-      timeZone: "UTC",
-    });
-    const horaInicio = req.hora_inicio ? req.hora_inicio.slice(0, 5) : "N/A";
-    const horaFim = req.hora_fim ? req.hora_fim.slice(0, 5) : "N/A";
-    const linkMaterialHtml = formatarLinkRoteiro(req.link_roteiro, "Acessar");
-    const textoStatus = formatarTextoStatus(req.status);
-
-    const isDesativado =
-      req.status === "nao_autorizado" || req.status === "cancelado";
-    const estiloBotao = isDesativado
-      ? "background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;"
-      : "";
-
-    tr.innerHTML = `
-            <td>${req.nome_laboratorio}</td>
-            <td>${req.nome_disciplina}</td>
-            <td>${dataFormatada}</td>
-            <td>${horaInicio} - ${horaFim}</td>
-            <td>${req.precisa_tecnico ? "Sim" : "Não"}</td>
-            <td><span class="badge-status status-${req.status}">${textoStatus}</span></td>
-            <td>${linkMaterialHtml}</td>
-            <td>
-                <button class="btn-cancelar" onclick="cancelarAgendamento(${req.id_aula})" 
-                        ${isDesativado ? "disabled" : ""} 
-                        style="${estiloBotao}">
-                    Cancelar
-                </button>
-            </td>
-        `;
-    tbody.appendChild(tr);
-  });
-}
 function formatarTextoStatus(status) {
   switch (status) {
     case "autorizado":

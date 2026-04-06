@@ -320,11 +320,32 @@ app.patch("/api/usuarios/:email", Autenticado, async (req, res) => {
 app.patch("/api/usuarios/ativar/:email", Autenticado, async (req, res) => {
   const { email } = req.params;
   try {
-    await pool.query("UPDATE usuario SET status = $1 WHERE email = $2", ["ativado", email]);
+    // 1. Atualiza o status e já busca o nome do usuário para o email
+    const result = await pool.query(
+      "UPDATE usuario SET status = $1 WHERE email = $2 RETURNING nome_usuario", 
+      ["ativado", email]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    const nomeUsuario = result.rows[0].nome_usuario;
+
+    // 2. Tenta enviar o email de boas-vindas
+    try {
+      console.log(`\n⏳ Enviando confirmação de ativação para: ${email}...`);
+      await enviarEmailAtivacaoUsuario(email, nomeUsuario);
+      console.log("✅ Usuário notificado por email com sucesso!");
+    } catch (erroEmail) {
+      console.error("❌ Erro ao enviar email de ativação (mas o usuário foi ativado no banco):");
+      console.error(erroEmail);
+    }
+
     res.status(200).json({ message: "Usuário ativado com sucesso" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Erro no servidor" });
+    res.status(500).json({ error: "Erro no servidor ao ativar usuário" });
   }
 });
 
@@ -515,6 +536,25 @@ async function enviarEmailNovaSolicitacaoRecorrenteTecnico(emailDestino, dadosSo
         <li>🛠️ <strong>Precisa do seu apoio?</strong> ${dadosSolicitacao.precisa_tecnico ? '<span style="color: red;">SIM</span>' : 'NÃO'}</li>
       </ul>
       <p>Por favor, acesse o painel do técnico para analisar este pedido em lote.</p>
+    `
+  };
+  return transporter.sendMail(mailOptions);
+}
+
+async function enviarEmailAtivacaoUsuario(emailDestino, nomeUsuario) {
+  const mailOptions = {
+    from: `Sistema Merlin <${process.env.EMAIL_SISTEMA}>`,
+    to: emailDestino,
+    subject: 'Sua conta foi ativada! - Sistema Merlin',
+    html: `
+      <h2 style="color: #28a745;">Boas notícias, ${nomeUsuario}!</h2>
+      <p>Sua conta no <strong>Sistema Merlin</strong> foi analisada e <strong>ativada</strong> por um administrador.</p>
+      <p>Agora você já pode acessar o sistema com seu email e senha para realizar seus agendamentos e consultar o inventário.</p>
+      <div style="margin-top: 20px;">
+        <a href="https://sistema-merlin.vercel.app/" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Acessar o Sistema</a>
+      </div>
+      <br>
+      <p>Atenciosamente,<br>Equipe Sistema Merlin</p>
     `
   };
   return transporter.sendMail(mailOptions);
