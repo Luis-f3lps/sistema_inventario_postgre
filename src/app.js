@@ -2,11 +2,23 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
-import pkg from "pg"; 
+import pkg from "pg";
 import PDFDocument from "pdfkit";
 import fs from "fs";
 import bcrypt from "bcryptjs";
-import pool from "./database.js"; 
+import pool from "./database.js";
+
+
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_SISTEMA,
+    pass: process.env.SENHA_EMAIL_SISTEMA
+  }
+});
+
 
 // 1. NOVOS IMPORTS PARA O JWT E COOKIES
 import jwt from "jsonwebtoken";
@@ -15,7 +27,7 @@ import cookieParser from "cookie-parser";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.resolve(__dirname, "variaveis.env") }); 
+dotenv.config({ path: path.resolve(__dirname, "variaveis.env") });
 console.log({
   DB_HOST: process.env.DB_HOST,
   DB_USER: process.env.DB_USER,
@@ -30,7 +42,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "chaveSuperSecretaDoInventario2026"
 
 (async () => {
   try {
-    await pool.query("SELECT NOW()"); 
+    await pool.query("SELECT NOW()");
     console.log("Conexão bem-sucedida ao banco de dados!");
   } catch (err) {
     console.error("Erro ao conectar ao banco de dados:", err);
@@ -43,7 +55,7 @@ app.use(express.urlencoded({ extended: true }));
 // 3. ATIVANDO O LEITOR DE COOKIES
 app.use(cookieParser());
 
-// 4. NOVO MIDDLEWARE DE AUTENTICAÇÃO (Sem ir no banco de dados!)
+// 4. NOVO MIDDLEWARE DE AUTENTICAÇÃO 
 function Autenticado(req, res, next) {
   const token = req.cookies.token; // Pega o crachá digital do cookie
 
@@ -59,10 +71,10 @@ function Autenticado(req, res, next) {
   try {
     // Confere a assinatura matemática do token
     const decoded = jwt.verify(token, JWT_SECRET);
-    
-    // TRUQUE: Recria o req.session.user na memória rápida para não quebrar o resto do seu sistema!
-    req.session = { user: decoded }; 
-    
+
+    //  Recria o req.session.user na memória rápida para não quebrar o resto do seu sistema!
+    req.session = { user: decoded };
+
     next();
   } catch (err) {
     console.error("Token inválido ou expirado.");
@@ -84,7 +96,7 @@ function AutorizadoPara(cargosPermitidos) {
       next(); // Passou! Pode acessar a rota.
     } else {
       console.warn(`Tentativa de acesso negado. Cargo: ${tipoUser}. Rota: ${req.originalUrl}`);
-      
+
       if (req.originalUrl.startsWith('/api')) {
         return res.status(403).json({ error: "Acesso Negado: Seu cargo não tem permissão para realizar esta ação." });
       } else {
@@ -95,11 +107,11 @@ function AutorizadoPara(cargosPermitidos) {
 
         // Trava absoluta de segurança: se ele já estiver na rota segura e mesmo assim for bloqueado, mostra tela de erro.
         if (req.originalUrl === rotaSegura) {
-            return res.status(403).send("<h1 style='text-align:center; margin-top:50px;'>403 - Acesso Negado</h1><p style='text-align:center;'>Você não tem permissão para ver esta página.</p>");
+          return res.status(403).send("<h1 style='text-align:center; margin-top:50px;'>403 - Acesso Negado</h1><p style='text-align:center;'>Você não tem permissão para ver esta página.</p>");
         }
 
         // Redireciona para o lugar certo e quebra o loop!
-        return res.redirect(rotaSegura); 
+        return res.redirect(rotaSegura);
       }
     }
   };
@@ -174,7 +186,7 @@ app.listen(PORT, () => {
 // PÁGINAS LIVRES
 // ==========================================
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "login.html")));
-app.get("/novo-usuario", (req, res) => res.sendFile(path.join(__dirname, "public", "novo-usuario.html"))); 
+app.get("/novo-usuario", (req, res) => res.sendFile(path.join(__dirname, "public", "novo-usuario.html")));
 // ==========================================
 // PÁGINAS GERAIS & PROFESSOR/TÉCNICO
 // ==========================================
@@ -242,7 +254,7 @@ app.get("/api/check-auth", (req, res) => {
   if (!token) {
     return res.json({ Autenticado: false });
   }
-  
+
   try {
     jwt.verify(token, JWT_SECRET);
     res.json({ Autenticado: true });
@@ -257,7 +269,7 @@ app.get("/api/usuarios", Autenticado, async (req, res) => {
     const result = await pool.query(
       "SELECT nome_usuario, email, tipo_usuario, status FROM usuario ORDER BY tipo_usuario ASC, nome_usuario ASC"
     );
-    res.json(result.rows); 
+    res.json(result.rows);
   } catch (error) {
     console.error("Erro ao buscar usuários:", error);
     res.status(500).json({ error: "Erro no servidor" });
@@ -267,7 +279,7 @@ app.get("/api/usuarios", Autenticado, async (req, res) => {
 // Desativar Usuários
 app.patch("/api/usuarios/:email", Autenticado, async (req, res) => {
   const { email } = req.params;
-  const loggedUserEmail = req.session.user.email; 
+  const loggedUserEmail = req.session.user.email;
 
   try {
     if (email === loggedUserEmail) {
@@ -345,7 +357,7 @@ app.post("/api/usuarios", Autenticado, async (req, res) => {
       return res.status(400).json({ error: "Email já está em uso" });
     }
 
-    const hashedPassword = await bcrypt.hash(senha, 10); 
+    const hashedPassword = await bcrypt.hash(senha, 10);
 
     await pool.query(
       "INSERT INTO usuario (nome_usuario, email, senha, tipo_usuario) VALUES ($1, $2, $3, $4)",
@@ -386,10 +398,13 @@ app.post("/api/novo-usuario", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(senha, 10);
 
+    // 1. Salva o usuário no banco como desativado
     await pool.query(
       "INSERT INTO usuario (nome_usuario, email, senha, tipo_usuario, status) VALUES ($1, $2, $3, $4, 'desativado')",
       [nome_usuario, email, hashedPassword, tipo_usuario],
     );
+
+    await enviarEmailCriacaoConta(email, nome_usuario).catch(e => console.error("Erro ao enviar email de criação:", e));
 
     res.status(201).json({ message: "Usuário adicionado com sucesso" });
   } catch (error) {
@@ -398,13 +413,80 @@ app.post("/api/novo-usuario", async (req, res) => {
   }
 });
 
+/* --------------Email------------------*/
+
+async function enviarEmailAutorizacao(emailDestino, dadosAula) {
+  const mailOptions = {
+    from: `Sistema Merlin <${process.env.EMAIL_SISTEMA}>`,
+    to: emailDestino,
+    subject: 'Aula autorizada',
+    html: `
+      <h2 style="color: #28a745;">Sua aula foi autorizada!</h2>
+      <p><strong>Disciplina:</strong> ${dadosAula.disciplina}</p>
+      <p><strong>Laboratório:</strong> ${dadosAula.laboratorio}</p>
+      <p><strong>Data:</strong> ${dadosAula.data} às ${dadosAula.horario}</p>
+      <p>Bom trabalho!</p>
+    `
+  };
+  return transporter.sendMail(mailOptions);
+}
+
+async function enviarEmailRecusa(emailDestino, dadosAula, justificativa) {
+  const mailOptions = {
+    from: `Sistema Merlin <${process.env.EMAIL_SISTEMA}>`,
+    to: emailDestino,
+    subject: 'Aula não autorizada',
+    html: `
+      <h2 style="color: #dc3545;">Sua solicitação não foi autorizada</h2>
+      <p><strong>Disciplina:</strong> ${dadosAula.disciplina}</p>
+      <p><strong>Laboratório:</strong> ${dadosAula.laboratorio}</p>
+      <p><strong>Data:</strong> ${dadosAula.data} às ${dadosAula.horario}</p>
+      <p><strong>Motivo:</strong> ${justificativa}</p>
+      <p>Para dúvidas, entre em contato com o técnico responsável.</p>
+    `
+  };
+  return transporter.sendMail(mailOptions);
+}
+
+async function enviarEmailCancelamento(emailDestino, dadosAula) {
+  const mailOptions = {
+    from: `Sistema Merlin <${process.env.EMAIL_SISTEMA}>`,
+    to: emailDestino,
+    subject: 'Aula cancelada',
+    html: `
+      <h2 style="color: #6c757d;">Agendamento Cancelado</h2>
+      <p>Informamos que o agendamento da disciplina <strong>${dadosAula.disciplina}</strong> no laboratório <strong>${dadosAula.laboratorio}</strong>, programado para o dia ${dadosAula.data} às ${dadosAula.horario}, foi cancelado.</p>
+    `
+  };
+  return transporter.sendMail(mailOptions);
+}
+
+async function enviarEmailCriacaoConta(emailDestino, nomeUsuario) {
+  const mailOptions = {
+    from: `Sistema Merlin <${process.env.EMAIL_SISTEMA}>`,
+    to: emailDestino,
+    subject: 'Bem-vindo ao Sistema Merlin - Aguardando Ativação',
+    html: `
+      <h2 style="color: #0056b3;">Olá, ${nomeUsuario}!</h2>
+      <p>Sua conta no <strong>Sistema Merlin</strong> foi criada com sucesso.</p>
+      <p>No momento, o seu perfil está com o status <strong>em análise</strong>.</p>
+      <p>Por questões de segurança, você precisa aguardar que um administrador do sistema aprove e ative o seu acesso aos laboratórios.</p>
+      <p>Assim que o administrador liberar o seu perfil, você conseguirá fazer login no sistema.</p>
+      <br>
+      <p>Atenciosamente,<br>Equipe Sistema Merlin</p>
+    `
+  };
+  return transporter.sendMail(mailOptions);
+}
+
+
 // Rotas para produtos
 app.get("/api/produto", Autenticado, async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT sigla, nome_produto, concentracao, densidade, quantidade, tipo_unidade_produto, ncm FROM produto ORDER BY nome_produto ASC",
     );
-    res.json(result.rows); 
+    res.json(result.rows);
   } catch (error) {
     console.error("Erro ao obter produtos:", error);
     res.status(500).json({ error: "Erro no servidor ao obter produtos" });
@@ -614,7 +696,7 @@ app.get("/api/minhas-disciplinas", Autenticado, async (req, res) => {
   if (!req.session?.user?.email) {
     return res.status(401).json({ error: "Não autenticado." });
   }
-  
+
   try {
     // 2. Pega o email do professor a partir da sessão
     const professor_email = req.session.user.email;
@@ -890,20 +972,20 @@ app.get("/generate-pdf-produto", Autenticado, async (req, res) => {
       doc.text(
         "Tipo de Unidade",
         50 +
-          columnWidths[0] +
-          columnWidths[1] +
-          columnWidths[2] +
-          columnWidths[3],
+        columnWidths[0] +
+        columnWidths[1] +
+        columnWidths[2] +
+        columnWidths[3],
         yPosition,
       );
       doc.text(
         "NCM",
         50 +
-          columnWidths[0] +
-          columnWidths[1] +
-          columnWidths[2] +
-          columnWidths[3] +
-          columnWidths[4],
+        columnWidths[0] +
+        columnWidths[1] +
+        columnWidths[2] +
+        columnWidths[3] +
+        columnWidths[4],
         yPosition,
       );
       yPosition += itemHeight;
@@ -937,21 +1019,21 @@ app.get("/generate-pdf-produto", Autenticado, async (req, res) => {
       doc.text(
         item.tipo_unidade_produto,
         50 +
-          columnWidths[0] +
-          columnWidths[1] +
-          columnWidths[2] +
-          columnWidths[3],
+        columnWidths[0] +
+        columnWidths[1] +
+        columnWidths[2] +
+        columnWidths[3],
         yPosition,
         { width: columnWidths[4] },
       );
       doc.text(
         item.ncm,
         50 +
-          columnWidths[0] +
-          columnWidths[1] +
-          columnWidths[2] +
-          columnWidths[3] +
-          columnWidths[4],
+        columnWidths[0] +
+        columnWidths[1] +
+        columnWidths[2] +
+        columnWidths[3] +
+        columnWidths[4],
         yPosition,
         { width: columnWidths[5] },
       );
@@ -1195,31 +1277,31 @@ app.get("/generate-pdf-consumo", Autenticado, async (req, res) => {
       doc.text(
         "Quantidade",
         50 +
-          columnWidths[0] +
-          columnWidths[1] +
-          columnWidths[2] +
-          columnWidths[3],
+        columnWidths[0] +
+        columnWidths[1] +
+        columnWidths[2] +
+        columnWidths[3],
         yPosition,
       );
       doc.text(
         "Tipo de Unidade",
         50 +
-          columnWidths[0] +
-          columnWidths[1] +
-          columnWidths[2] +
-          columnWidths[3] +
-          columnWidths[4],
+        columnWidths[0] +
+        columnWidths[1] +
+        columnWidths[2] +
+        columnWidths[3] +
+        columnWidths[4],
         yPosition,
       );
       doc.text(
         "Descrição",
         50 +
-          columnWidths[0] +
-          columnWidths[1] +
-          columnWidths[2] +
-          columnWidths[3] +
-          columnWidths[4] +
-          columnWidths[5],
+        columnWidths[0] +
+        columnWidths[1] +
+        columnWidths[2] +
+        columnWidths[3] +
+        columnWidths[4] +
+        columnWidths[5],
         yPosition,
       );
       yPosition += itemHeight;
@@ -1255,33 +1337,33 @@ app.get("/generate-pdf-consumo", Autenticado, async (req, res) => {
       doc.text(
         item.quantidade,
         50 +
-          columnWidths[0] +
-          columnWidths[1] +
-          columnWidths[2] +
-          columnWidths[3],
+        columnWidths[0] +
+        columnWidths[1] +
+        columnWidths[2] +
+        columnWidths[3],
         yPosition,
         { width: columnWidths[4] },
       );
       doc.text(
         item.tipo_unidade_produto,
         50 +
-          columnWidths[0] +
-          columnWidths[1] +
-          columnWidths[2] +
-          columnWidths[3] +
-          columnWidths[4],
+        columnWidths[0] +
+        columnWidths[1] +
+        columnWidths[2] +
+        columnWidths[3] +
+        columnWidths[4],
         yPosition,
         { width: columnWidths[5] },
       );
       doc.text(
         item.descricao,
         50 +
-          columnWidths[0] +
-          columnWidths[1] +
-          columnWidths[2] +
-          columnWidths[3] +
-          columnWidths[4] +
-          columnWidths[5],
+        columnWidths[0] +
+        columnWidths[1] +
+        columnWidths[2] +
+        columnWidths[3] +
+        columnWidths[4] +
+        columnWidths[5],
         yPosition,
         { width: columnWidths[6] },
       );
@@ -2046,7 +2128,7 @@ app.post("/api/schedule-recurring", Autenticado, async (req, res) => {
 
     await client.query("BEGIN");
 
-const id_pedido = Math.floor(10000000 + Math.random() * 90000000);
+    const id_pedido = Math.floor(10000000 + Math.random() * 90000000);
 
     const datasParaAgendar = [];
     let dataAtual = new Date(dataInicio);
@@ -2158,22 +2240,47 @@ app.patch("/api/requests/:id", Autenticado, async (req, res) => {
     const { novoStatus, observacoes } = req.body;
 
     if (!["autorizado", "nao_autorizado", "analisando"].includes(novoStatus)) {
-      return res
-        .status(400)
-        .json({ error: "Ação ou status inválido fornecido." });
+      return res.status(400).json({ error: "Ação ou status inválido fornecido." });
     }
 
+    // 1. Atualiza no Banco
     await pool.query(
       "UPDATE aulas SET status = $1, observacoes = $3 WHERE id_aula = $2",
       [novoStatus, id, observacoes || null],
     );
 
+    // 👇 2. NOVA LÓGICA DE EMAIL
+    if (novoStatus === 'autorizado' || novoStatus === 'nao_autorizado') {
+      const emailQuery = await pool.query(`
+        SELECT a.professor_email, d.nome_disciplina, l.nome_laboratorio, a.data, h.hora_inicio 
+        FROM aulas a
+        JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+        JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+        JOIN horarios h ON a.id_horario = h.id_horario
+        WHERE a.id_aula = $1
+      `, [id]);
+
+      if (emailQuery.rowCount > 0) {
+        const info = emailQuery.rows[0];
+        const dadosAula = {
+          disciplina: info.nome_disciplina,
+          laboratorio: info.nome_laboratorio,
+          data: new Date(info.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' }),
+          horario: info.hora_inicio.slice(0, 5)
+        };
+
+        if (novoStatus === 'autorizado') {
+          await enviarEmailAutorizacao(info.professor_email, dadosAula).catch(e => console.error(e));
+        } else {
+          await enviarEmailRecusa(info.professor_email, dadosAula, observacoes).catch(e => console.error(e));
+        }
+      }
+    }
+
     res.json({ message: "Status da aula atualizado com sucesso!" });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({ error: "Erro interno ao atualizar o status da aula." });
+    res.status(500).json({ error: "Erro interno ao atualizar o status da aula." });
   }
 });
 
@@ -2392,7 +2499,7 @@ app.get("/api/calendario/aulas-autorizadas", Autenticado, async (req, res) => {
 app.get("/api/calendario/aulas-tecnico", Autenticado, async (req, res) => {
   if (!req.session?.user)
     return res.status(401).json({ error: "Não autenticado." });
-    
+
   try {
     const tecnico_email = req.session.user.email;
     const { ano, mes } = req.query;
@@ -2442,12 +2549,12 @@ app.get("/api/disciplinas", Autenticado, async (req, res) => {
 
     if (tipoUsuario === "admin") {
       query = 'SELECT * FROM "disciplina" ORDER BY nome_disciplina, status';
-    } 
+    }
     else if (tipoUsuario === "professor") {
       query =
         'SELECT * FROM "disciplina" WHERE professor_email_responsavel = $1 ORDER BY nome_disciplina, status';
       values = [usuarioEmail];
-    } 
+    }
     else {
       return res.json([]);
     }
@@ -2567,17 +2674,12 @@ app.put("/api/agendamentos/:id/status", Autenticado, async (req, res) => {
 
     const verifyQuery = await pool.query(
       `SELECT id_aula FROM aulas 
-             WHERE id_aula = $1 
-             AND professor_email = $2 
-             AND data >= CURRENT_DATE`,
+       WHERE id_aula = $1 AND professor_email = $2 AND data >= CURRENT_DATE`,
       [id, professor_email],
     );
 
     if (verifyQuery.rowCount === 0) {
-      return res.status(403).json({
-        error:
-          "Você não tem permissão para cancelar esta aula, ou ela já ocorreu.",
-      });
+      return res.status(403).json({ error: "Você não tem permissão para cancelar esta aula, ou ela já ocorreu." });
     }
 
     const updateQuery = await pool.query(
@@ -2585,15 +2687,93 @@ app.put("/api/agendamentos/:id/status", Autenticado, async (req, res) => {
       [status, id],
     );
 
-    res.json({
-      message: "Agendamento cancelado com sucesso!",
-      aula: updateQuery.rows[0],
-    });
+    // 👇 NOVA LÓGICA DE EMAIL DE CANCELAMENTO
+    if (status === 'cancelado') {
+      const emailQuery = await pool.query(`
+        SELECT a.professor_email, d.nome_disciplina, l.nome_laboratorio, l.usuario_email AS tecnico_email, a.data, h.hora_inicio 
+        FROM aulas a
+        JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+        JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+        JOIN horarios h ON a.id_horario = h.id_horario
+        WHERE a.id_aula = $1
+      `, [id]);
+
+      if (emailQuery.rowCount > 0) {
+        const info = emailQuery.rows[0];
+        const dadosAula = {
+          disciplina: info.nome_disciplina,
+          laboratorio: info.nome_laboratorio,
+          data: new Date(info.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' }),
+          horario: info.hora_inicio.slice(0, 5)
+        };
+
+        // Avisa o professor e o técnico sobre o cancelamento
+        await enviarEmailCancelamento(info.professor_email, dadosAula).catch(e => console.error(e));
+        await enviarEmailCancelamento(info.tecnico_email, dadosAula).catch(e => console.error(e));
+      }
+    }
+
+    res.json({ message: "Agendamento cancelado com sucesso!", aula: updateQuery.rows[0] });
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json({ error: "Erro interno ao processar o cancelamento." });
+    res.status(500).json({ error: "Erro interno ao processar o cancelamento." });
+  }
+});
+
+app.put("/api/agendamentos/:id/status", Autenticado, async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Você precisa estar logado." });
+  }
+
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const professor_email = req.session.user.email;
+
+    const verifyQuery = await pool.query(
+      `SELECT id_aula FROM aulas 
+       WHERE id_aula = $1 AND professor_email = $2 AND data >= CURRENT_DATE`,
+      [id, professor_email],
+    );
+
+    if (verifyQuery.rowCount === 0) {
+      return res.status(403).json({ error: "Você não tem permissão para cancelar esta aula, ou ela já ocorreu." });
+    }
+
+    const updateQuery = await pool.query(
+      "UPDATE aulas SET status = $1 WHERE id_aula = $2 RETURNING *",
+      [status, id],
+    );
+
+    if (status === 'cancelado') {
+      const emailQuery = await pool.query(`
+        SELECT a.professor_email, d.nome_disciplina, l.nome_laboratorio, l.usuario_email AS tecnico_email, a.data, h.hora_inicio 
+        FROM aulas a
+        JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+        JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+        JOIN horarios h ON a.id_horario = h.id_horario
+        WHERE a.id_aula = $1
+      `, [id]);
+
+      if (emailQuery.rowCount > 0) {
+        const info = emailQuery.rows[0];
+        const dadosAula = {
+          disciplina: info.nome_disciplina,
+          laboratorio: info.nome_laboratorio,
+          data: new Date(info.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' }),
+          horario: info.hora_inicio.slice(0, 5)
+        };
+
+        // Avisa o professor e o técnico sobre o cancelamento
+        await enviarEmailCancelamento(info.professor_email, dadosAula).catch(e => console.error(e));
+        await enviarEmailCancelamento(info.tecnico_email, dadosAula).catch(e => console.error(e));
+      }
+    }
+
+    res.json({ message: "Agendamento cancelado com sucesso!", aula: updateQuery.rows[0] });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro interno ao processar o cancelamento." });
   }
 });
 
