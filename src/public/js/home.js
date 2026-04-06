@@ -136,15 +136,15 @@ function renderTable(requests) {
         return;
     }
 
-    // Passa a lista original pelo "filtro" de agrupamento
     const requisicoesAgrupadas = agruparSolicitacoes(requests);
 
     requisicoesAgrupadas.forEach((r) => {
         let textoData = "";
+        let textoHorario = "";
         let listaIdsParaCancelar = [];
         let labelRecorrente = "";
 
-        // Se for um grupo de aulas recorrentes, mostra o período (Início até Fim)
+        // Se for um grupo de aulas recorrentes
         if (r.is_grupo) {
             const datas = r.aulas.map(a => new Date(a.data));
             const dataMin = new Date(Math.min(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
@@ -152,15 +152,23 @@ function renderTable(requests) {
             
             textoData = dataMin === dataMax ? dataMin : `De ${dataMin} até ${dataMax}`;
             labelRecorrente = `<span style="background: #e3f2fd; color: #0d6efd; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 10px;">🔄 ${r.aulas.length} Aulas</span>`;
-            listaIdsParaCancelar = r.aulas.map(a => a.id_aula); // Pega todos os IDs do pacote
+            listaIdsParaCancelar = r.aulas.map(a => a.id_aula);
+
+            // 👇 NOVO: Pega todos os horários do pacote e remove as repetições
+            const horariosUnicos = [...new Set(r.aulas.map(a => `${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}`))];
+            textoHorario = horariosUnicos.join(', '); // Ex: "07:20 - 08:10, 08:10 - 09:00"
+
         } else {
             // Aula normal
             textoData = new Date(r.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
             listaIdsParaCancelar = [r.id_aula];
+            
+            // 👇 NOVO: Horário normal
+            const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : "N/A";
+            const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : "N/A";
+            textoHorario = `${horaInicio} - ${horaFim}`;
         }
 
-        const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : "N/A";
-        const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : "N/A";
         const linkRoteiroHtml = formatarLinkRoteiro(r.link_roteiro, "Ver Roteiro");
         const textoStatus = formatarTextoStatus(r.status);
 
@@ -180,7 +188,7 @@ function renderTable(requests) {
             <div class="aula-card-body">
                 <div class="aula-card-info-linha">
                     <p><strong><i class="far fa-calendar-alt"></i> Data:</strong> ${textoData}</p>
-                    <p><strong><i class="far fa-clock"></i> Horário:</strong> ${horaInicio} - ${horaFim}</p>
+                    <p><strong><i class="far fa-clock"></i> Horário:</strong> ${textoHorario}</p>
                     <p><strong><i class="fas fa-user-cog"></i> Técnico:</strong> ${r.precisa_tecnico ? "Sim" : "Não"}</p>
                     <p><strong><i class="fas fa-flask"></i> Laboratório:</strong> ${r.nome_laboratorio}</p>
                 </div>
@@ -211,11 +219,11 @@ function renderizarTabelaAgendamentos(requisicoes) {
         return;
     }
 
-    // Passa a lista original pelo "filtro" de agrupamento
     const requisicoesAgrupadas = agruparSolicitacoes(requisicoes);
 
     requisicoesAgrupadas.forEach((req) => {
         let textoData = "";
+        let textoHorario = "";
         let listaIdsParaCancelar = [];
         let iconeRecorrente = "";
 
@@ -224,17 +232,25 @@ function renderizarTabelaAgendamentos(requisicoes) {
             const dataMin = new Date(Math.min(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
             const dataMax = new Date(Math.max(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
             
-            textoData = dataMin === dataMax ? dataMin : `${dataMin} a ${dataMax}`;
+            textoData = dataMin === dataMax ? dataMin : `De ${dataMin} até ${dataMax}`;
             iconeRecorrente = ` <span title="Pacote Recorrente de ${req.aulas.length} aulas">🔄</span>`;
             listaIdsParaCancelar = req.aulas.map(a => a.id_aula);
+
+            // 👇 NOVO: Pega todos os horários do pacote e remove as repetições
+            const horariosUnicos = [...new Set(req.aulas.map(a => `${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}`))];
+            textoHorario = horariosUnicos.join(', ');
+
         } else {
             textoData = new Date(req.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
             listaIdsParaCancelar = [req.id_aula];
+
+            // 👇 NOVO: Horário normal
+            const horaInicio = req.hora_inicio ? req.hora_inicio.slice(0, 5) : "N/A";
+            const horaFim = req.hora_fim ? req.hora_fim.slice(0, 5) : "N/A";
+            textoHorario = `${horaInicio} - ${horaFim}`;
         }
 
         const tr = document.createElement("tr");
-        const horaInicio = req.hora_inicio ? req.hora_inicio.slice(0, 5) : "N/A";
-        const horaFim = req.hora_fim ? req.hora_fim.slice(0, 5) : "N/A";
         const linkMaterialHtml = formatarLinkRoteiro(req.link_roteiro, "Acessar");
         const textoStatus = formatarTextoStatus(req.status);
 
@@ -247,7 +263,7 @@ function renderizarTabelaAgendamentos(requisicoes) {
             <td>${req.nome_laboratorio}</td>
             <td>${req.nome_disciplina} ${iconeRecorrente}</td>
             <td>${textoData}</td>
-            <td>${horaInicio} - ${horaFim}</td>
+            <td>${textoHorario}</td>
             <td>${req.precisa_tecnico ? "Sim" : "Não"}</td>
             <td><span class="badge-status status-${req.status}">${textoStatus}</span></td>
             <td>${linkMaterialHtml}</td>
