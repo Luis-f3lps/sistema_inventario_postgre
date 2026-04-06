@@ -2249,7 +2249,7 @@ app.patch("/api/requests/:id", Autenticado, async (req, res) => {
       [novoStatus, id, observacoes || null],
     );
 
-    // 👇 2. NOVA LÓGICA DE EMAIL
+    // 👇 2. NOVA LÓGICA DE EMAIL COM RASTREADOR DE ERROS
     if (novoStatus === 'autorizado' || novoStatus === 'nao_autorizado') {
       const emailQuery = await pool.query(`
         SELECT a.professor_email, d.nome_disciplina, l.nome_laboratorio, a.data, h.hora_inicio 
@@ -2269,10 +2269,18 @@ app.patch("/api/requests/:id", Autenticado, async (req, res) => {
           horario: info.hora_inicio.slice(0, 5)
         };
 
-        if (novoStatus === 'autorizado') {
-          await enviarEmailAutorizacao(info.professor_email, dadosAula).catch(e => console.error(e));
-        } else {
-          await enviarEmailRecusa(info.professor_email, dadosAula, observacoes).catch(e => console.error(e));
+        console.log(`\n⏳ Tentando enviar email para: ${info.professor_email}...`);
+        
+        try {
+          if (novoStatus === 'autorizado') {
+            await enviarEmailAutorizacao(info.professor_email, dadosAula);
+          } else {
+            await enviarEmailRecusa(info.professor_email, dadosAula, observacoes);
+          }
+          console.log("✅ SUCESSO ABSOLUTO: O email foi entregue ao servidor do Google!");
+        } catch (erroEmail) {
+          console.error("❌ ERRO GRAVE NO NODEMAILER:");
+          console.error(erroEmail);
         }
       }
     }
@@ -2688,63 +2696,6 @@ app.put("/api/agendamentos/:id/status", Autenticado, async (req, res) => {
     );
 
     // 👇 NOVA LÓGICA DE EMAIL DE CANCELAMENTO
-    if (status === 'cancelado') {
-      const emailQuery = await pool.query(`
-        SELECT a.professor_email, d.nome_disciplina, l.nome_laboratorio, l.usuario_email AS tecnico_email, a.data, h.hora_inicio 
-        FROM aulas a
-        JOIN disciplina d ON a.id_disciplina = d.id_disciplina
-        JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-        JOIN horarios h ON a.id_horario = h.id_horario
-        WHERE a.id_aula = $1
-      `, [id]);
-
-      if (emailQuery.rowCount > 0) {
-        const info = emailQuery.rows[0];
-        const dadosAula = {
-          disciplina: info.nome_disciplina,
-          laboratorio: info.nome_laboratorio,
-          data: new Date(info.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' }),
-          horario: info.hora_inicio.slice(0, 5)
-        };
-
-        // Avisa o professor e o técnico sobre o cancelamento
-        await enviarEmailCancelamento(info.professor_email, dadosAula).catch(e => console.error(e));
-        await enviarEmailCancelamento(info.tecnico_email, dadosAula).catch(e => console.error(e));
-      }
-    }
-
-    res.json({ message: "Agendamento cancelado com sucesso!", aula: updateQuery.rows[0] });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro interno ao processar o cancelamento." });
-  }
-});
-
-app.put("/api/agendamentos/:id/status", Autenticado, async (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).json({ error: "Você precisa estar logado." });
-  }
-
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-    const professor_email = req.session.user.email;
-
-    const verifyQuery = await pool.query(
-      `SELECT id_aula FROM aulas 
-       WHERE id_aula = $1 AND professor_email = $2 AND data >= CURRENT_DATE`,
-      [id, professor_email],
-    );
-
-    if (verifyQuery.rowCount === 0) {
-      return res.status(403).json({ error: "Você não tem permissão para cancelar esta aula, ou ela já ocorreu." });
-    }
-
-    const updateQuery = await pool.query(
-      "UPDATE aulas SET status = $1 WHERE id_aula = $2 RETURNING *",
-      [status, id],
-    );
-
     if (status === 'cancelado') {
       const emailQuery = await pool.query(`
         SELECT a.professor_email, d.nome_disciplina, l.nome_laboratorio, l.usuario_email AS tecnico_email, a.data, h.hora_inicio 
