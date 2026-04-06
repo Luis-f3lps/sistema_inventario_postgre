@@ -478,7 +478,47 @@ async function enviarEmailCriacaoConta(emailDestino, nomeUsuario) {
   };
   return transporter.sendMail(mailOptions);
 }
+async function enviarEmailNovaSolicitacaoTecnico(emailDestino, dadosSolicitacao) {
+  const mailOptions = {
+    from: `Sistema Merlin <${process.env.EMAIL_SISTEMA}>`,
+    to: emailDestino,
+    subject: '🚨 Nova Solicitação de Aula',
+    html: `
+      <h2 style="color: #0056b3;">Nova Solicitação de Agendamento</h2>
+      <p>Olá, <strong>${dadosSolicitacao.nome_tecnico}</strong>!</p>
+      <p>O professor <strong>${dadosSolicitacao.nome_professor}</strong> acabou de solicitar o uso do laboratório <strong>${dadosSolicitacao.laboratorio}</strong>.</p>
+      <ul style="font-size: 15px; background: #f8f9fa; padding: 15px; border-radius: 5px; list-style: none;">
+        <li>📅 <strong>Data:</strong> ${dadosSolicitacao.data}</li>
+        <li>⏰ <strong>Horário:</strong> ${dadosSolicitacao.horario}</li>
+        <li>📚 <strong>Disciplina:</strong> ${dadosSolicitacao.disciplina}</li>
+        <li>🛠️ <strong>Precisa do seu apoio?</strong> ${dadosSolicitacao.precisa_tecnico ? '<span style="color: red;">SIM</span>' : 'NÃO'}</li>
+      </ul>
+      <p>Por favor, acesse o painel do técnico no sistema para autorizar ou recusar esta solicitação.</p>
+    `
+  };
+  return transporter.sendMail(mailOptions);
+}
 
+async function enviarEmailNovaSolicitacaoRecorrenteTecnico(emailDestino, dadosSolicitacao) {
+  const mailOptions = {
+    from: `Sistema Merlin <${process.env.EMAIL_SISTEMA}>`,
+    to: emailDestino,
+    subject: '🚨 Nova Solicitação de Aula RECORRENTE',
+    html: `
+      <h2 style="color: #0056b3;">Nova Solicitação de Agendamento Recorrente</h2>
+      <p>Olá, <strong>${dadosSolicitacao.nome_tecnico}</strong>!</p>
+      <p>O professor <strong>${dadosSolicitacao.nome_professor}</strong> solicitou o uso do laboratório <strong>${dadosSolicitacao.laboratorio}</strong> para um período contínuo.</p>
+      <ul style="font-size: 15px; background: #f8f9fa; padding: 15px; border-radius: 5px; list-style: none;">
+        <li>📅 <strong>Período:</strong> De ${dadosSolicitacao.dataInicio} até ${dadosSolicitacao.dataFim}</li>
+        <li>⏰ <strong>Horários Selecionados:</strong> ${dadosSolicitacao.horarios}</li>
+        <li>📚 <strong>Disciplina:</strong> ${dadosSolicitacao.disciplina}</li>
+        <li>🛠️ <strong>Precisa do seu apoio?</strong> ${dadosSolicitacao.precisa_tecnico ? '<span style="color: red;">SIM</span>' : 'NÃO'}</li>
+      </ul>
+      <p>Por favor, acesse o painel do técnico para analisar este pedido em lote.</p>
+    `
+  };
+  return transporter.sendMail(mailOptions);
+}
 
 // Rotas para produtos
 app.get("/api/produto", Autenticado, async (req, res) => {
@@ -1981,23 +2021,15 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
     } = req.body;
 
     if (!labId || !date || !hour || !id_disciplina || !numero_discentes) {
-      return res
-        .status(400)
-        .json({ error: "Dados incompletos para o agendamento." });
+      return res.status(400).json({ error: "Dados incompletos para o agendamento." });
     }
 
     const statusProfessor = await pool.query(
       "SELECT status FROM usuario WHERE email = $1",
       [professor_email],
     );
-    if (
-      statusProfessor.rowCount > 0 &&
-      statusProfessor.rows[0].status === "desativado"
-    ) {
-      return res.status(403).json({
-        error:
-          "Sua conta está desativada. Você não tem permissão para solicitar agendamentos.",
-      });
+    if (statusProfessor.rowCount > 0 && statusProfessor.rows[0].status === "desativado") {
+      return res.status(403).json({ error: "Sua conta está desativada. Você não tem permissão para solicitar agendamentos." });
     }
 
     const statusLaboratorio = await pool.query(
@@ -2007,29 +2039,18 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
        WHERE l.id_laboratorio = $1`,
       [labId],
     );
-    if (
-      statusLaboratorio.rowCount > 0 &&
-      statusLaboratorio.rows[0].status === "desativado"
-    ) {
-      return res.status(403).json({
-        error:
-          "Não é possível agendar neste laboratório, pois o usuário responsável por ele está desativado.",
-      });
+    if (statusLaboratorio.rowCount > 0 && statusLaboratorio.rows[0].status === "desativado") {
+      return res.status(403).json({ error: "Não é possível agendar neste laboratório, pois o usuário responsável por ele está desativado." });
     }
 
     const dataAgendamento = new Date(`${date}T00:00:00`);
-
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
-
     const dataMinima = new Date(hoje);
     dataMinima.setDate(hoje.getDate() + 4);
 
     if (dataAgendamento < dataMinima) {
-      return res.status(400).json({
-        error:
-          "O agendamento deve ser feito com pelo menos 4 dias de antecedência.",
-      });
+      return res.status(400).json({ error: "O agendamento deve ser feito com pelo menos 4 dias de antecedência." });
     }
 
     const horario = await pool.query(
@@ -2050,49 +2071,76 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
            AND a.data = $2
            AND a.id_horario = $3
            AND a.precisa_tecnico = true
-           AND a.status IN ('analisando', 'autorizado') -- Ignora aulas canceladas ou negadas
+           AND a.status IN ('analisando', 'autorizado')
          LIMIT 1`,
         [labId, date, id_horario],
       );
 
       if (tecnicoOcupado.rowCount > 0) {
-        return res.status(400).json({
-          error:
-            "O técnico responsável por este laboratório já está agendado para auxiliar em outra aula neste mesmo horário.",
-        });
+        return res.status(400).json({ error: "O técnico responsável por este laboratório já está agendado para auxiliar em outra aula neste mesmo horário." });
       }
     }
 
+    // 1. INSERE A AULA NO BANCO
     const result = await pool.query(
       `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
-      [
-        professor_email,
-        labId,
-        date,
-        id_horario,
-        precisa_tecnico,
-        link_roteiro,
-        id_disciplina,
-        numero_discentes,
-      ],
+      [professor_email, labId, date, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes],
     );
 
-    res
-      .status(201)
-      .json({ message: "Aula solicitada com sucesso!", aula: result.rows[0] });
+    // 👇 2. NOVA LÓGICA DE AVISAR O TÉCNICO
+    try {
+      const emailQuery = await pool.query(`
+        SELECT 
+          prof.nome_usuario AS nome_professor,
+          tec.nome_usuario AS nome_tecnico,
+          tec.email AS email_tecnico,
+          l.nome_laboratorio,
+          d.nome_disciplina
+        FROM laboratorio l
+        JOIN usuario tec ON l.usuario_email = tec.email
+        JOIN usuario prof ON prof.email = $1
+        JOIN disciplina d ON d.id_disciplina = $2
+        WHERE l.id_laboratorio = $3
+      `, [professor_email, id_disciplina, labId]);
+
+      if (emailQuery.rowCount > 0) {
+        const info = emailQuery.rows[0];
+        
+        // Ajusta o formato da data para DD/MM/AAAA e evita erros de fuso horário
+        const [ano, mes, dia] = date.split('-');
+        const dataFormatada = `${dia}/${mes}/${ano}`;
+
+        const dadosEmail = {
+          nome_professor: info.nome_professor,
+          nome_tecnico: info.nome_tecnico,
+          laboratorio: info.nome_laboratorio,
+          disciplina: info.nome_disciplina,
+          data: dataFormatada,
+          horario: hour,
+          precisa_tecnico: precisa_tecnico
+        };
+
+        console.log(`\n⏳ Avisando o técnico ${info.email_tecnico} sobre nova solicitação...`);
+        await enviarEmailNovaSolicitacaoTecnico(info.email_tecnico, dadosEmail);
+        console.log("✅ Email de nova solicitação enviado!");
+      }
+    } catch (erroEmail) {
+      console.error("❌ ERRO AO AVISAR TÉCNICO NO EMAIL:");
+      console.error(erroEmail);
+    }
+
+    res.status(201).json({ message: "Aula solicitada com sucesso!", aula: result.rows[0] });
+
   } catch (err) {
     if (err.code === "23505") {
-      return res.status(400).json({
-        error: "Esse horário já está ocupado ou em análise neste laboratório",
-      });
+      return res.status(400).json({ error: "Esse horário já está ocupado ou em análise neste laboratório" });
     }
     console.error("Erro ao solicitar aula:", err);
     res.status(500).json({ error: "Erro ao solicitar aula" });
   }
 });
-
 app.post("/api/schedule-recurring", Autenticado, async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: "Você precisa estar logado." });
@@ -2179,10 +2227,57 @@ app.post("/api/schedule-recurring", Autenticado, async (req, res) => {
       }
     }
 
+    // 1. SALVA TUDO NO BANCO DE DADOS PRIMEIRO
     await client.query("COMMIT");
+    
+    // 👇 2. NOVA LÓGICA DE AVISAR O TÉCNICO (UM ÚNICO EMAIL DE RESUMO)
+    try {
+      const emailQuery = await pool.query(`
+        SELECT 
+          prof.nome_usuario AS nome_professor,
+          tec.nome_usuario AS nome_tecnico,
+          tec.email AS email_tecnico,
+          l.nome_laboratorio,
+          d.nome_disciplina
+        FROM laboratorio l
+        JOIN usuario tec ON l.usuario_email = tec.email
+        JOIN usuario prof ON prof.email = $1
+        JOIN disciplina d ON d.id_disciplina = $2
+        WHERE l.id_laboratorio = $3
+      `, [professor_email, disciplinaId, labId]);
+
+      if (emailQuery.rowCount > 0) {
+        const info = emailQuery.rows[0];
+        
+        // Formata as datas para o padrão brasileiro DD/MM/AAAA
+        const [anoI, mesI, diaI] = dataInicio.split('-');
+        const [anoF, mesF, diaF] = dataFim.split('-');
+        
+        const dadosEmail = {
+          nome_professor: info.nome_professor,
+          nome_tecnico: info.nome_tecnico,
+          laboratorio: info.nome_laboratorio,
+          disciplina: info.nome_disciplina,
+          dataInicio: `${diaI}/${mesI}/${anoI}`,
+          dataFim: `${diaF}/${mesF}/${anoF}`,
+          horarios: horarios.join(' e '), // Ex: "07:20 e 08:10"
+          precisa_tecnico: precisa_tecnico
+        };
+
+        console.log(`\n⏳ Avisando o técnico ${info.email_tecnico} sobre agendamento RECORRENTE...`);
+        await enviarEmailNovaSolicitacaoRecorrenteTecnico(info.email_tecnico, dadosEmail);
+        console.log("✅ Email de nova solicitação recorrente enviado!");
+      }
+    } catch (erroEmail) {
+      console.error("❌ ERRO AO AVISAR TÉCNICO NO EMAIL:");
+      console.error(erroEmail);
+    }
+
+    // 3. AVISA O FRONTEND QUE DEU TUDO CERTO
     res.status(201).json({
       message: `${datasParaAgendar.length * horarios.length} aula(s) solicitada(s) com sucesso!`,
     });
+
   } catch (err) {
     await client.query("ROLLBACK");
     if (err.code === "23505") {
