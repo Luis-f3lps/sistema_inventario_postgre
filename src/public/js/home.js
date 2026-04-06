@@ -290,28 +290,52 @@ function renderizarAulasNosMeusLaboratorios(aulas) {
         return;
     }
     
-    aulas.forEach((aula) => {
+    // Passa a lista pelo filtro de agrupamento que você já tem no código
+    const aulasAgrupadas = agruparSolicitacoes(aulas);
+    
+    aulasAgrupadas.forEach((aulaGroup) => {
+        let textoData = "";
+        let textoHorario = "";
+        let labelRecorrente = "";
+        
+        // Se for um grupo recorrente
+        if (aulaGroup.is_grupo) {
+            const datas = aulaGroup.aulas.map(a => new Date(a.data));
+            const dataMin = new Date(Math.min(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+            const dataMax = new Date(Math.max(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+            
+            textoData = dataMin === dataMax ? dataMin : `De ${dataMin} até ${dataMax}`;
+            labelRecorrente = `<span style="background: #e3f2fd; color: #0d6efd; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 10px;">🔄 ${aulaGroup.aulas.length} Aulas</span>`;
+            
+            // Pega horários sem repetição
+            const horariosUnicos = [...new Set(aulaGroup.aulas.map(a => `${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}`))];
+            textoHorario = horariosUnicos.join(', ');
+        } else {
+            // Aula normal
+            textoData = new Date(aulaGroup.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+            textoHorario = `${aulaGroup.hora_inicio.slice(0, 5)} - ${aulaGroup.hora_fim.slice(0, 5)}`;
+        }
+
+        const linkRoteiroHtml = aulaGroup.link_roteiro ? `<a href="${aulaGroup.link_roteiro}" target="_blank" class="link-roteiro">Acessar Link</a>` : 'Não exigido';
+
         const card = document.createElement("div");
         card.className = "aula-card"; 
 
-        const dataFormatada = new Date(aula.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
-        const linkRoteiroHtml = aula.link_roteiro ? `<a href="${aula.link_roteiro}" target="_blank" class="link-roteiro">Acessar Link</a>` : 'Não exigido';
-
         card.innerHTML = `
             <div class="aula-card-header">
-                <h3>${aula.nome_disciplina || 'Disciplina não informada'}</h3>
+                <h3>${aulaGroup.nome_disciplina || 'Disciplina não informada'} ${labelRecorrente}</h3>
                 <span class="etiqueta-status status-autorizado">Autorizado</span>
             </div>
             <div class="aula-card-body">
                 <div class="aula-card-info-linha">
-                    <p><strong><i class="fas fa-user-graduate"></i> Professor:</strong> ${aula.nome_professor}</p>
-                    <p><strong><i class="fas fa-flask"></i> Laboratório:</strong> ${aula.nome_laboratorio}</p>
-                    <p><strong><i class="far fa-calendar-alt"></i> Data:</strong> ${dataFormatada}</p>
-                    <p><strong><i class="far fa-clock"></i> Horário:</strong> ${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(0, 5)}</p>
-                    <p><strong><i class="fas fa-users"></i> Alunos:</strong> ${aula.numero_discentes || '-'}</p>
-                    <p><strong><i class="fas fa-user-cog"></i> Técnico:</strong> ${aula.precisa_tecnico ? "Sim" : "Não"}</p>
+                    <p><strong><i class="fas fa-user-graduate"></i> Professor:</strong> ${aulaGroup.nome_professor}</p>
+                    <p><strong><i class="fas fa-flask"></i> Laboratório:</strong> ${aulaGroup.nome_laboratorio}</p>
+                    <p><strong><i class="far fa-calendar-alt"></i> Data:</strong> ${textoData}</p>
+                    <p><strong><i class="far fa-clock"></i> Horário:</strong> ${textoHorario}</p>
+                    <p><strong><i class="fas fa-users"></i> Alunos:</strong> ${aulaGroup.numero_discentes || '-'}</p>
+                    <p><strong><i class="fas fa-user-cog"></i> Técnico:</strong> ${aulaGroup.precisa_tecnico ? "Sim" : "Não"}</p>
                 </div>
-                <p style="margin-top: 10px; font-size: 0.9em; color: #666;"><strong>Observações:</strong> ${aula.observacoes ? aula.observacoes : "Nenhuma observação."}</p>
+                <p style="margin-top: 10px; font-size: 0.9em; color: #666;"><strong>Observações:</strong> ${aulaGroup.observacoes ? aulaGroup.observacoes : "Nenhuma observação."}</p>
             </div>
             <div class="aula-card-footer" style="display: flex; justify-content: flex-start; margin-top: 15px; padding-top: 10px; border-top: 1px solid #eee;">
                 <div class="aula-card-roteiro">

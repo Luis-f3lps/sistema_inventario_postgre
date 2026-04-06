@@ -2562,7 +2562,9 @@ app.get("/api/aulas-meus-laboratorios", Autenticado, async (req, res) => {
                 h.hora_fim,
                 a.precisa_tecnico,
                 a.numero_discentes,
-                a.observacoes
+                a.observacoes,
+                a.tipo_aula, 
+                a.id_pedido  
             FROM aulas a
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
             JOIN horarios h ON a.id_horario = h.id_horario
