@@ -1761,8 +1761,10 @@ input[type="url"]::placeholder {
         font-size: 28px;
     }
 
-    .item-horario-info p {
-        font-size: 24px;
+    .item-horario-info p, .slot-horario h4,
+    p {
+        font-size: 26px;
+
     }
 }
 
