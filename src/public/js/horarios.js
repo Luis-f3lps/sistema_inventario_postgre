@@ -173,10 +173,12 @@ async function submeterAgendamento() {
     }
 
     const precisaTecnico = document.querySelector('input[name="precisaTecnico"]:checked').value === 'true';
+    // Captura os valores
     const linkRoteiro = document.getElementById('link_roteiro').value.trim();
 
-    if (precisaTecnico && linkRoteiro === '') {
-        msgEl.textContent = 'Por favor, insira o link do roteiro. Ele é obrigatório quando o acompanhamento do técnico é solicitado.';
+    // Verifica apenas se o campo está vazio
+    if (linkRoteiro === '') {
+        msgEl.textContent = 'Por favor, insira o link do roteiro. Ele é obrigatório para todos os agendamentos.';
         msgEl.className = 'mensagem-status erro';
         msgEl.style.display = 'block';
         return;
