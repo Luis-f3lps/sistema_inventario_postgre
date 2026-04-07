@@ -1975,6 +1975,24 @@ Pagina calendario
 }
 
 @media (max-width: 768px) {
+    .slot-horario h4 {
+        font-size: 26px;
+    }
+
+    .slot-horario p,
+    .aula-card-info-linha,
+    .aula-card-footer,
+    .aula-card-info-linha,
+    .aula-card-footer,
+    .aula-card-footer {
+        margin: 0;
+        font-size: 26px;
+    }
+
+    .painel-minhas-aulas h1 {
+        font-size: 30px;
+    }
+
     .painel-split {
         display: flex;
         flex-direction: column;
@@ -2097,8 +2115,9 @@ Pagina calendario
     .aula-card-info-linha {
         font-size: 28px;
     }
+
     .aula-card-body p {
-                font-size: 28px;
+        font-size: 28px;
 
     }
 }
