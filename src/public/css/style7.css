@@ -861,7 +861,7 @@ input[type="url"]::placeholder {
 
 .painel-minhas-aulas p,
 .painel-gestao-solicitacoes p {
-    margin-bottom: 30px;
+    margin: 5px 0;
     font-size: 15px;
     text-align: center;
 }
@@ -1692,6 +1692,7 @@ input[type="url"]::placeholder {
 
     .grade-horarios-recorrente {
         font-size: 28px;
+        grid-template-columns: repeat(4, 1fr);
     }
 
     .checkbox-item label {
@@ -2325,11 +2326,7 @@ Tela tecnico
     font-size: 1.1em;
 }
 
-.aula-card-body p {
-    margin: 5px 0;
-    color: #555;
-    font-size: 0.95em;
-}
+
 
 .aula-card-info-linha {
     display: flex;
