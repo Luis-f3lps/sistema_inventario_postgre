@@ -220,7 +220,7 @@ app.get("/Inventario", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, 
 // ==========================================
 // PÁGINAS RESTRITAS DO ADMIN (.admin-menu)
 // ==========================================
-app.get("/Relatorio", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "relatorio.html")));
+app.get("/Relatorio", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "relatorio.html")));
 app.get("/Usuarios", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "usuarios.html")));
 app.get("/Laboratorio", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "laboratorio.html")));
 // Novas telas de Sala de Aula
