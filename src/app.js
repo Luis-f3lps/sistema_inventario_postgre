@@ -223,7 +223,10 @@ app.get("/Inventario", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, 
 app.get("/Relatorio", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "relatorio.html")));
 app.get("/Usuarios", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "usuarios.html")));
 app.get("/Laboratorio", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "laboratorio.html")));
+// Novas telas de Sala de Aula
+app.get("/Salas", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "salas.html")));
 
+app.get("/agendamento-recorrente-salas", Autenticado, AutorizadoPara(['professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "agendamento-recorrente-salas.html")));
 app.get("/api/usuario-logado", (req, res) => {
   const token = req.cookies.token;
   if (!token) {
@@ -2911,4 +2914,280 @@ app.get("/api/aulas-hoje", Autenticado, async (req, res) => {
     res.status(500).json({ error: "Erro ao buscar aulas de hoje." });
   }
 });
+/* ========================================================= */
+/* -------------- SALAS DE AULA --------------------------- */
+/* ========================================================= */
+
+// 1. Obter todas as salas (Para carregar os selects sem paginação)
+app.get("/api/salas", Autenticado, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        s.id_sala, 
+        s.nome_sala, 
+        u.nome_usuario AS responsavel, 
+        u.email AS responsavel_email
+      FROM sala_de_aula s
+      LEFT JOIN usuario u ON s.responsavel_email = u.email
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Erro ao obter salas:", error);
+    res.status(500).json({ error: "Erro no servidor ao obter salas" });
+  }
+});
+
+// 2. Obter salas com Paginação (Para montar a tabela HTML principal)
+app.get("/api/salasPag", Autenticado, async (req, res) => {
+  const { page = 1, limit = 20 } = req.query;
+  const pageInt = parseInt(page, 10);
+  const limitInt = parseInt(limit, 10);
+
+  if (isNaN(pageInt) || isNaN(limitInt)) {
+    return res.status(400).json({ error: "Os parâmetros de página e limite devem ser inteiros." });
+  }
+
+  const offset = (pageInt - 1) * limitInt;
+
+  try {
+    const result = await pool.query(`
+        SELECT s.id_sala, s.nome_sala, u.email AS responsavel_email, u.nome_usuario
+        FROM sala_de_aula s
+        LEFT JOIN usuario u ON s.responsavel_email = u.email
+        LIMIT $1 OFFSET $2
+      `, [limitInt, offset]
+    );
+
+    const countResult = await pool.query("SELECT COUNT(*) as total FROM sala_de_aula");
+    const totalItems = countResult.rows[0].total;
+    const totalPages = Math.ceil(totalItems / limitInt);
+
+    res.json({
+      data: result.rows,
+      totalItems,
+      totalPages,
+      currentPage: pageInt,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro no servidor ao paginar salas" });
+  }
+});
+
+// 3. Adicionar nova sala
+app.post("/api/salas", Autenticado, async (req, res) => {
+  try {
+    const { nome_sala, responsavel_email } = req.body;
+
+    if (!nome_sala || !responsavel_email) {
+      return res.status(400).json({ error: "Nome da sala e email do responsável são obrigatórios." });
+    }
+
+    // Verificar se a sala já existe
+    const result = await pool.query("SELECT * FROM sala_de_aula WHERE nome_sala = $1", [nome_sala]);
+    if (result.rows.length > 0) {
+      return res.status(400).json({ error: "Esse nome de sala já está em uso." });
+    }
+
+    // Inserir nova sala
+    const insertResult = await pool.query(
+      "INSERT INTO sala_de_aula (nome_sala, responsavel_email) VALUES ($1, $2) RETURNING id_sala",
+      [nome_sala, responsavel_email]
+    );
+
+    res.status(201).json({
+      message: "Sala de aula adicionada com sucesso!",
+      id_sala: insertResult.rows[0].id_sala,
+    });
+  } catch (error) {
+    console.error("Erro ao adicionar sala:", error);
+    res.status(500).json({ error: "Erro ao adicionar sala." });
+  }
+});
+
+// 4. Remover sala
+app.delete("/api/salas/:id_sala", Autenticado, async (req, res) => {
+  try {
+    const { id_sala } = req.params;
+
+    // Verifica se a sala existe
+    const salaCheck = await pool.query("SELECT id_sala FROM sala_de_aula WHERE id_sala = $1", [id_sala]);
+    if (salaCheck.rows.length === 0) {
+      return res.status(404).json({ error: "Sala não encontrada." });
+    }
+
+    // Remove a sala
+    await pool.query("DELETE FROM sala_de_aula WHERE id_sala = $1", [id_sala]);
+    res.json({ message: "Sala de aula removida com sucesso!" });
+  } catch (error) {
+    console.error("Erro ao remover sala:", error);
+    res.status(500).json({ error: "Erro ao remover sala" });
+  }
+});
+
+// 5. Atualizar Responsável da Sala
+app.post("/api/atualizar-responsavel-sala", Autenticado, async (req, res) => {
+  const { idSala, responsavelEmail } = req.body;
+
+  if (!idSala || !responsavelEmail) {
+    return res.status(400).json({ error: "ID da sala e email do responsável são obrigatórios." });
+  }
+
+  try {
+    // Verificar se o usuário existe
+    const userResult = await pool.query("SELECT * FROM usuario WHERE email = $1", [responsavelEmail]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: "O email do usuário não existe." });
+    }
+
+    // Atualizar o responsável da sala
+    const result = await pool.query(
+      "UPDATE sala_de_aula SET responsavel_email = $1 WHERE id_sala = $2",
+      [responsavelEmail, idSala]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Sala não encontrada." });
+    }
+
+    res.json({ message: "Responsável atualizado com sucesso!" });
+  } catch (error) {
+    console.error("Erro ao atualizar responsável da sala:", error);
+    res.status(500).json({ error: "Erro no servidor ao atualizar responsável." });
+  }
+});
+
+app.post("/api/schedule-recurring-salas", Autenticado, async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Você precisa estar logado." });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    const professor_email = req.session.user.email;
+    const {
+      salaId,
+      disciplinaId,
+      diaDaSemana,
+      dataInicio,
+      dataFim,
+      horarios,
+      precisa_tecnico,
+      link_roteiro,
+      numero_discentes,
+    } = req.body;
+
+    if (!salaId || !disciplinaId || !diaDaSemana || !dataInicio || !dataFim || !horarios || horarios.length === 0) {
+      return res.status(400).json({ error: "Dados incompletos para agendar a sala." });
+    }
+
+    await client.query("BEGIN");
+
+    const id_pedido = Math.floor(10000000 + Math.random() * 90000000);
+    const datasParaAgendar = [];
+    let dataAtual = new Date(dataInicio);
+    const dataFinal = new Date(dataFim);
+
+    while (dataAtual <= dataFinal) {
+      if (dataAtual.getUTCDay() == diaDaSemana) {
+        datasParaAgendar.push(new Date(dataAtual));
+      }
+      dataAtual.setUTCDate(dataAtual.getUTCDate() + 1);
+    }
+
+    if (datasParaAgendar.length === 0) {
+      return res.status(400).json({ error: "Nenhum dia correspondente no período." });
+    }
+
+    for (const data of datasParaAgendar) {
+      for (const hora of horarios) {
+        const horarioRes = await client.query(
+          "SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1",
+          [hora]
+        );
+        if (horarioRes.rowCount === 0) {
+          await client.query("ROLLBACK");
+          return res.status(400).json({ error: `Horário inválido: ${hora}` });
+        }
+        const id_horario = horarioRes.rows[0].id_horario;
+
+        await client.query(
+          `INSERT INTO agendamento_salas (
+            professor_email, id_sala, data, id_horario, precisa_tecnico, 
+            link_roteiro, id_disciplina, numero_discentes, status, id_pedido, tipo_aula
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'analisando', $9, 'recorrente')`,
+          [
+            professor_email,
+            salaId,
+            data,
+            id_horario,
+            precisa_tecnico,
+            link_roteiro,
+            disciplinaId,
+            numero_discentes,
+            id_pedido
+          ]
+        );
+      }
+    }
+
+    await client.query("COMMIT");
+    
+    try {
+      const emailQuery = await pool.query(`
+        SELECT 
+          prof.nome_usuario AS nome_professor,
+          resp.nome_usuario AS nome_responsavel,
+          resp.email AS email_responsavel,
+          s.nome_sala,
+          d.nome_disciplina
+        FROM sala_de_aula s
+        JOIN usuario resp ON s.responsavel_email = resp.email
+        JOIN usuario prof ON prof.email = $1
+        JOIN disciplina d ON d.id_disciplina = $2
+        WHERE s.id_sala = $3
+      `, [professor_email, disciplinaId, salaId]);
+
+      if (emailQuery.rowCount > 0) {
+        const info = emailQuery.rows[0];
+        const [anoI, mesI, diaI] = dataInicio.split('-');
+        const [anoF, mesF, diaF] = dataFim.split('-');
+        
+        const dadosEmail = {
+          nome_professor: info.nome_professor,
+          nome_tecnico: info.nome_responsavel,
+          laboratorio: info.nome_sala, 
+          disciplina: info.nome_disciplina,
+          dataInicio: `${diaI}/${mesI}/${anoI}`,
+          dataFim: `${diaF}/${mesF}/${anoF}`,
+          horarios: horarios.join(' e '),
+          precisa_tecnico: precisa_tecnico
+        };
+
+        console.log(`\n⏳ Avisando o responsável ${info.email_responsavel} sobre reserva da sala...`);
+        await enviarEmailNovaSolicitacaoRecorrenteTecnico(info.email_responsavel, dadosEmail);
+      }
+    } catch (erroEmail) {
+      console.error("❌ ERRO AO AVISAR RESPONSÁVEL DA SALA:");
+      console.error(erroEmail);
+    }
+
+    res.status(201).json({
+      message: `${datasParaAgendar.length * horarios.length} reserva(s) de sala solicitada(s) com sucesso!`,
+    });
+
+  } catch (err) {
+    await client.query("ROLLBACK");
+    if (err.code === "23505") {
+      return res.status(409).json({ error: "Conflito: Um ou mais horários já estão ocupados nesta sala." });
+    }
+    console.error("Erro no agendamento de sala:", err);
+    res.status(500).json({ error: "Erro interno no servidor." });
+  } finally {
+    client.release();
+  }
+});
+
+
 export default app;

@@ -100,13 +100,13 @@ function preencherDadosDoMenu(userData) {
     .querySelectorAll(".cartao-painel")
     .forEach((card) => (card.style.display = "none"));
 
-  switch (userType) {
+switch (userType) {
     case "admin":
     case "administrador":
       showMenuItem(".admin-menu");
       showMenuItem(".produto");
       showMenuItem(".Disciplinas");
-
+      showMenuItem(".salas"); 
       break;
 
     case "tecnico":
@@ -114,6 +114,7 @@ function preencherDadosDoMenu(userData) {
       showMenuItem(".Calendario");
       showMenuItem(".Home");
       showMenuItem(".produto");
+      showMenuItem(".salas"); 
       showDashboardCard(".cartao-aulas-tecnico");
       showDashboardCard(".cartao-meus-laboratorios");
       break;
@@ -124,6 +125,7 @@ function preencherDadosDoMenu(userData) {
       showMenuItem(".professor");
       showMenuItem(".Disciplinas");
       showMenuItem(".Horarios");
+      showMenuItem(".agendar-sala"); 
       showDashboardCard(".cartao-aulas-autorizadas");
       showDashboardCard(".cartao-solicitacoes");
       break;
