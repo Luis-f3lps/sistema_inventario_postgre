@@ -107,6 +107,7 @@ switch (userType) {
       showMenuItem(".produto");
       showMenuItem(".Disciplinas");
       showMenuItem(".salas"); 
+      showMenuItem(".aprovar-salas");
       break;
 
     case "tecnico":

@@ -225,6 +225,7 @@ app.get("/Usuarios", Autenticado, AutorizadoPara(['admin']), (req, res) => res.s
 app.get("/Laboratorio", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "laboratorio.html")));
 // Novas telas de Sala de Aula
 app.get("/Salas", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "salas.html")));
+app.get("/Tela_Responsavel_Salas", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "tela_responsavel_salas.html")));
 
 app.get("/agendamento-recorrente-salas", Autenticado, AutorizadoPara(['professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "agendamento-recorrente-salas.html")));
 app.get("/api/usuario-logado", (req, res) => {
@@ -3189,5 +3190,97 @@ app.post("/api/schedule-recurring-salas", Autenticado, async (req, res) => {
   }
 });
 
+// ROTA PARA O RESPONSÁVEL VER AS SOLICITAÇÕES DE SALA
+app.get("/api/requests-salas", Autenticado, async (req, res) => {
+  try {
+    const { responsavel_email } = req.query;
+    const query = `
+            SELECT 
+                a.id_agendamento, 
+                u.nome_usuario AS professor, 
+                s.nome_sala, 
+                d.nome_disciplina,
+                a.link_roteiro,
+                a.numero_discentes,
+                a.data, 
+                h.hora_inicio, 
+                h.hora_fim,
+                a.precisa_tecnico, 
+                a.status,
+                a.observacoes,
+                a.tipo_aula, 
+                a.id_pedido 
+            FROM agendamento_salas a
+            JOIN usuario u ON a.professor_email = u.email
+            JOIN sala_de_aula s ON a.id_sala = s.id_sala
+            JOIN horarios h ON a.id_horario = h.id_horario
+            JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+            WHERE 
+                s.responsavel_email = $1 
+            ORDER BY 
+                a.id_pedido DESC, a.data ASC, h.hora_inicio ASC
+        `;
+    const result = await pool.query(query, [responsavel_email]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao buscar solicitações de salas" });
+  }
+});
+
+// ROTA PARA O RESPONSÁVEL AUTORIZAR/RECUSAR A SALA
+app.patch("/api/requests-salas/:id", Autenticado, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { novoStatus, observacoes } = req.body;
+
+    if (!["autorizado", "nao_autorizado", "analisando"].includes(novoStatus)) {
+      return res.status(400).json({ error: "Status inválido." });
+    }
+
+    // 1. Atualiza no Banco
+    await pool.query(
+      "UPDATE agendamento_salas SET status = $1, observacoes = $3 WHERE id_agendamento = $2",
+      [novoStatus, id, observacoes || null],
+    );
+
+    // 2. Dispara o Email para o Professor
+    if (novoStatus === 'autorizado' || novoStatus === 'nao_autorizado') {
+      const emailQuery = await pool.query(`
+        SELECT a.professor_email, d.nome_disciplina, s.nome_sala, a.data, h.hora_inicio 
+        FROM agendamento_salas a
+        JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+        JOIN sala_de_aula s ON a.id_sala = s.id_sala
+        JOIN horarios h ON a.id_horario = h.id_horario
+        WHERE a.id_agendamento = $1
+      `, [id]);
+
+      if (emailQuery.rowCount > 0) {
+        const info = emailQuery.rows[0];
+        const dadosAula = {
+          disciplina: info.nome_disciplina,
+          laboratorio: info.nome_sala, // Enviamos como laboratório para reaproveitar o template do email
+          data: new Date(info.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' }),
+          horario: info.hora_inicio.slice(0, 5)
+        };
+
+        try {
+          if (novoStatus === 'autorizado') {
+            await enviarEmailAutorizacao(info.professor_email, dadosAula);
+          } else {
+            await enviarEmailRecusa(info.professor_email, dadosAula, observacoes);
+          }
+        } catch (erroEmail) {
+          console.error("Erro ao enviar email de decisão da sala:", erroEmail);
+        }
+      }
+    }
+
+    res.json({ message: "Status da sala atualizado com sucesso!" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro interno ao atualizar a sala." });
+  }
+});
 
 export default app;
