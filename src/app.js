@@ -208,18 +208,14 @@ app.get("/Tela_Tecnico", Autenticado, AutorizadoPara(['tecnico']), (req, res) =>
 // ==========================================
 // PÁGINAS COMPARTILHADAS 
 // ==========================================
-// .Disciplinas aparece para Admin e Professor
 app.get("/Disciplinas", Autenticado, AutorizadoPara(['admin', 'professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "disciplinas.html")));
 
-// .produto aparece para Admin e Técnico
 app.get("/Produto", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "Produto.html")));
 app.get("/MovimentacaoProduto", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "MovimentacaoProduto.html")));
 app.get("/EditarMovimentacoes", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "EditarMovimentacoes.html")));
 app.get("/Inventario", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "Inventario.html")));
 
-// ==========================================
-// PÁGINAS RESTRITAS DO ADMIN (.admin-menu)
-// ==========================================
+
 app.get("/Relatorio", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "relatorio.html")));
 app.get("/Usuarios", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "usuarios.html")));
 app.get("/Laboratorio", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "laboratorio.html")));
