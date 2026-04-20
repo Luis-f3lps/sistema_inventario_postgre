@@ -129,6 +129,7 @@ switch (userType) {
       showMenuItem(".agendar-sala"); 
       showDashboardCard(".cartao-aulas-autorizadas");
       showDashboardCard(".cartao-solicitacoes");
+      showMenuItem(".aprovar-salas");
       break;
   }
 }
