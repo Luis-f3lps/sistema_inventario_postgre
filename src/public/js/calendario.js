@@ -21,12 +21,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     await carregarHorariosBase();
     await carregarLaboratorios();
 
-    if (userInfo && userInfo.tipo_usuario && userInfo.tipo_usuario.toLowerCase() === 'tecnico') {
-        const painelAgendamento = document.querySelector('.agendamento-container');
-        if (painelAgendamento) {
-            painelAgendamento.style.display = 'none';
-        }
-    }
+    //if (userInfo && userInfo.tipo_usuario && userInfo.tipo_usuario.toLowerCase() === 'tecnico') {
+      //  const painelAgendamento = document.querySelector('.agendamento-container');
+        //if (painelAgendamento) {
+          //  painelAgendamento.style.display = 'none';
+        //}
+    //}
 
     selectLab.addEventListener('change', () => atualizarPainelCompleto());
     inputData.addEventListener('change', () => {
