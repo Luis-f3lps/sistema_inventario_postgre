@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="images/icone.png" type="image/png" />
+    <title>Sistema Merlin - Grade de Salas</title>
+    <link rel="stylesheet" href="css/style7.css" />
+    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="tudo">
+        <div class="menu">
+            <header id="menu-container"></header>
+        </div>
+
+        <div class="conteudo" style="margin-top: 0px;">
+            <div class="painel-split">
+
+                <div class="coluna-calendario">
+                    <div class="controle-filtro">
+                        <label for="select-sala">Sala de Aula:</label>
+                        <select id="select-sala">
+                            <option value="">Selecione uma sala...</option>
+                        </select>
+                    </div>
+
+                    <div class="calendario-header">
+                        <button type="button" id="btn-mes-anterior">&lt;</button>
+                        <h2 id="calendario-titulo" style="border-bottom: none; margin: 0">Mês / Ano</h2>
+                        <button type="button" id="btn-proximo-mes">&gt;</button>
+                    </div>
+
+                    <div class="calendario-dias-semana">
+                        <div class="dia-semana">DOM</div>
+                        <div class="dia-semana">SEG</div>
+                        <div class="dia-semana">TER</div>
+                        <div class="dia-semana">QUA</div>
+                        <div class="dia-semana">QUI</div>
+                        <div class="dia-semana">SEX</div>
+                        <div class="dia-semana">SÁB</div>
+                    </div>
+
+                    <div class="calendario-grid" id="calendario-grid"></div>
+                </div>
+
+                <div class="coluna-horarios">
+                    <div class="controle-filtro">
+                        <label for="input-data">Data Selecionada:</label>
+                        <input type="date" id="input-data">
+                    </div>
+
+                    <h3 style="border-bottom: 2px solid #eee; padding-bottom: 10px;">Grade do Dia</h3>
+
+                    <div class="lista-horarios" id="lista-horarios">
+                        <p style="text-align: center; color: #888; padding: 20px;">
+                            Selecione uma sala e uma data para ver a grade.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="agendamento-container" style="margin-bottom: 0px; padding-bottom: 0px; padding-top: 10px; gap:10px">
+                <h1>Agendar Sala (Dia Único)</h1>
+                <div class="seletor-fila" style="margin-bottom: 0px;">
+                    <div class="campo-item">
+                        <label>Sala de Aula:</label>
+                        <select id="salas-select2" name="sala">
+                            <option value="">Selecione uma Sala</option>
+                        </select>
+                    </div>
+
+                    <div class="campo-item">
+                        <label>Disciplina:</label>
+                        <select id="disciplina-select2" name="disciplinas">
+                            <option value="">Selecione uma disciplina</option>
+                        </select>
+                    </div>
+
+                    <div class="campo-item">
+                        <label for="date">Data:</label>
+                        <input id="date" type="date" />
+                    </div>
+                </div>
+                
+                <div>
+                    <strong>Horários disponíveis:</strong>
+                    <div id="slots" class="grade-horarios"></div>
+                    <div class="texto-ajuda">Aulas de 50min</div>
+                </div>
+
+                <div class="opcao-tecnico-fila">
+                    <span>Precisa de apoio técnico (Projetor/Som)?</span>
+                    <div class="radio-options">
+                        <input type="radio" id="tecnicoSim" name="precisaTecnico" value="true">
+                        <label for="tecnicoSim">Sim</label>
+
+                        <input type="radio" id="tecnicoNao" name="precisaTecnico" value="false" checked>
+                        <label for="tecnicoNao">Não</label>
+                    </div>
+                </div>
+                
+                <div class="opcao-tecnico-fila">
+                    <label for="numero_discentes">Número de Alunos:</label>
+                    <input type="number" id="numero_discentes" name="numero_discentes" min="1" placeholder="Ex: 40" required />
+                </div>
+
+                <div class="opcao-tecnico-fila" id="roteiro-container">
+                    <label for="link_roteiro">Link do Material da Aula (Opcional)</label>
+                    <input type="url" id="link_roteiro" name="link_roteiro" placeholder="https://exemplo.com/material.pdf">
+                </div>
+                <div id="msg" class="mensagem-status"></div>
+                <button id="submitBtn" class="btn-principal" disabled>Solicitar Reserva</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/calendario_salas.js" defer></script>
+    <script src="js/menu.js" defer></script>
+    <script src="/js/auth-guard.js" defer></script>
+    <script src="js/horarios_salas.js" defer></script>
+
+</body>
+
+</html>

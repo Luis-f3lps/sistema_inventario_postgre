@@ -228,6 +228,10 @@ app.get("/Salas", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) 
 app.get("/Tela_Responsavel_Salas", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "tela_responsavel_salas.html")));
 
 app.get("/agendamento-recorrente-salas", Autenticado, AutorizadoPara(['professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "agendamento-recorrente-salas.html")));
+app.get("/CalendarioSalas", Autenticado, AutorizadoPara(['tecnico', 'admin', 'professor']), (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "calendario_salas.html"));
+});
+app.get("/DashboardSalas", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "Home_Salas.html")));
 app.get("/api/usuario-logado", (req, res) => {
   const token = req.cookies.token;
   if (!token) {
@@ -3283,4 +3287,252 @@ app.patch("/api/requests-salas/:id", Autenticado, async (req, res) => {
   }
 });
 
+/* ========================================================= */
+/* -------------- DASHBOARD DE SALAS DE AULA --------------- */
+/* ========================================================= */
+
+// 1. Mostrar as salas que a pessoa é responsável
+app.get("/api/dashboard/minhas-salas", Autenticado, async (req, res) => {
+  if (!req.session?.user) return res.status(401).json({ error: "Não autenticado." });
+  try {
+    const user_email = req.session.user.email;
+    const result = await pool.query(
+      `SELECT nome_sala FROM sala_de_aula WHERE responsavel_email = $1 ORDER BY nome_sala`,
+      [user_email]
+    );
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: "Erro ao buscar salas." }); }
+});
+
+// 2. Mostrar aulas nas salas que a pessoa é responsável (Lista)
+app.get("/api/aulas-minhas-salas", Autenticado, async (req, res) => {
+  if (!req.session?.user) return res.status(401).json({ error: "Não autenticado." });
+  try {
+    const responsavel_email = req.session.user.email;
+    const query = `
+        SELECT 
+            s.nome_sala, prof.nome_usuario AS nome_professor, d.nome_disciplina,
+            a.link_roteiro, a.data, h.hora_inicio, h.hora_fim, a.precisa_tecnico,
+            a.numero_discentes, a.observacoes, a.tipo_aula, a.id_pedido  
+        FROM agendamento_salas a
+        JOIN sala_de_aula s ON a.id_sala = s.id_sala
+        JOIN horarios h ON a.id_horario = h.id_horario
+        JOIN usuario prof ON a.professor_email = prof.email
+        JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+        WHERE s.responsavel_email = $1 AND a.data >= CURRENT_DATE AND a.status = 'autorizado' 
+        ORDER BY a.data ASC, h.hora_inicio ASC
+    `;
+    const result = await pool.query(query, [responsavel_email]);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: "Erro ao buscar as aulas." }); }
+});
+
+// 3. Calendário do Professor (Salas)
+app.get("/api/calendario/aulas-autorizadas-salas", Autenticado, async (req, res) => {
+  if (!req.session?.user) return res.status(401).json({ error: "Não autenticado." });
+  try {
+    const professor_email = req.session.user.email;
+    const { ano, mes } = req.query;
+    const result = await pool.query(`
+        SELECT s.nome_sala, d.nome_disciplina, a.data, h.hora_inicio, h.hora_fim, a.tipo_aula
+        FROM agendamento_salas a
+        JOIN sala_de_aula s ON a.id_sala = s.id_sala
+        JOIN horarios h ON a.id_horario = h.id_horario
+        JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+        WHERE a.professor_email = $1 AND a.status = 'autorizado' 
+          AND EXTRACT(YEAR FROM a.data) = $2 AND EXTRACT(MONTH FROM a.data) = $3
+        ORDER BY a.data ASC, h.hora_inicio ASC`,
+      [professor_email, ano, mes]
+    );
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: "Erro calendário do professor." }); }
+});
+
+// 4. Calendário do Responsável (Salas)
+app.get("/api/calendario/aulas-responsavel-salas", Autenticado, async (req, res) => {
+  if (!req.session?.user) return res.status(401).json({ error: "Não autenticado." });
+  try {
+    const responsavel_email = req.session.user.email;
+    const { ano, mes } = req.query;
+    const result = await pool.query(`
+        SELECT s.nome_sala, d.nome_disciplina, u.nome_usuario AS nome_professor,
+               h.hora_inicio, h.hora_fim, a.tipo_aula, a.data
+        FROM agendamento_salas a
+        JOIN sala_de_aula s ON a.id_sala = s.id_sala
+        JOIN horarios h ON a.id_horario = h.id_horario
+        JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+        JOIN usuario u ON a.professor_email = u.email
+        WHERE s.responsavel_email = $1 AND a.status = 'autorizado' 
+          AND EXTRACT(YEAR FROM a.data) = $2 AND EXTRACT(MONTH FROM a.data) = $3
+        ORDER BY a.data ASC, h.hora_inicio ASC`,
+      [responsavel_email, ano, mes]
+    );
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: "Erro calendário responsável." }); }
+});
+
+// 5. Aulas de Hoje do Professor (Salas)
+app.get("/api/aulas-hoje-salas", Autenticado, async (req, res) => {
+  try {
+    const email = req.session.user.email;
+    const result = await pool.query(`
+      SELECT h.hora_inicio, h.hora_fim, d.nome_disciplina, s.nome_sala
+      FROM agendamento_salas a
+      JOIN horarios h ON a.id_horario = h.id_horario
+      JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+      JOIN sala_de_aula s ON a.id_sala = s.id_sala
+      WHERE a.professor_email = $1 AND a.data = CURRENT_DATE AND a.status = 'autorizado'
+      ORDER BY h.hora_inicio ASC
+    `, [email]);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: "Erro aulas de hoje." }); }
+});
+
+// 6. Solicitacões do Professor (Salas)
+app.get("/api/minhas-solicitacoes-salas", Autenticado, async (req, res) => {
+  try {
+    const professor_email = req.session.user.email;
+    
+    // Auto-cancela as que ficaram no passado analisando
+    await pool.query(`UPDATE agendamento_salas SET status = 'nao_autorizado' 
+                      WHERE professor_email = $1 AND status = 'analisando' AND data < CURRENT_DATE`, [professor_email]);
+
+    const result = await pool.query(`
+        SELECT a.id_agendamento, a.id_pedido, a.tipo_aula, s.nome_sala, d.nome_disciplina,
+               a.link_roteiro, a.numero_discentes, a.observacoes, a.data, h.hora_inicio, h.hora_fim,
+               a.precisa_tecnico, a.status
+        FROM agendamento_salas a
+        JOIN sala_de_aula s ON a.id_sala = s.id_sala
+        JOIN horarios h ON a.id_horario = h.id_horario
+        JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+        WHERE a.professor_email = $1 AND a.data >= CURRENT_DATE
+        ORDER BY a.data ASC, h.hora_inicio ASC`,
+      [professor_email]
+    );
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: "Erro solicitações." }); }
+});
+
+// 7. Rota de Cancelamento do Professor (Salas)
+app.put("/api/agendamentos-salas/:id/status", Autenticado, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const professor_email = req.session.user.email;
+
+    const verifyQuery = await pool.query(
+      `SELECT id_agendamento FROM agendamento_salas WHERE id_agendamento = $1 AND professor_email = $2 AND data >= CURRENT_DATE`,
+      [id, professor_email],
+    );
+
+    if (verifyQuery.rowCount === 0) return res.status(403).json({ error: "Não permitido." });
+    
+    const updateQuery = await pool.query("UPDATE agendamento_salas SET status = $1 WHERE id_agendamento = $2 RETURNING *", [status, id]);
+    res.json({ message: "Agendamento cancelado com sucesso!" });
+  } catch (err) { res.status(500).json({ error: "Erro cancelamento." }); }
+});
+
+/* ========================================================= */
+/* -------------- CALENDÁRIO E AGENDAMENTO DE SALAS -------- */
+/* ========================================================= */
+
+// 2. Rota que o JavaScript chama para descobrir quais horários já estão ocupados no dia
+app.get("/api/availability-salas", Autenticado, async (req, res) => {
+  try {
+    const { date, salaId } = req.query;
+    
+    const result = await pool.query(
+      `SELECT h.hora_inicio 
+       FROM agendamento_salas a
+       JOIN horarios h ON a.id_horario = h.id_horario
+       WHERE a.data = $1 AND a.id_sala = $2 AND a.status != 'cancelado'`,
+      [date, salaId]
+    );
+    
+    // Devolve uma lista só com as horinhas (ex: ["07:20", "08:10"])
+    const occupied = result.rows.map((r) => r.hora_inicio.slice(0, 5));
+    res.json({ occupied });
+  } catch (err) {
+    console.error("Erro ao buscar disponibilidade da sala:", err);
+    res.status(500).json({ error: "Erro ao buscar disponibilidade" });
+  }
+});
+
+// 3. Rota para Salvar o Agendamento de Dia Único (O formulário debaixo do calendário)
+app.post("/api/schedule-salas", Autenticado, async (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Você precisa estar logado." });
+  }
+
+  try {
+    const professor_email = req.session.user.email;
+    const { salaId, date, hour, precisa_tecnico, link_roteiro, disciplinaId, numero_discentes } = req.body;
+
+    // 3.1. Descobre qual é o ID numérico desse horário (ex: "07:20" vira ID 1)
+    const horario = await pool.query("SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1", [hour]);
+    if (horario.rowCount === 0) {
+        return res.status(400).json({ error: "Horário inválido" });
+    }
+    const id_horario = horario.rows[0].id_horario;
+
+    // 3.2. Cria um número de pedido aleatório para manter o padrão do banco
+    const id_pedido = Math.floor(10000000 + Math.random() * 90000000); 
+
+    // 3.3. Salva na tabela exclusiva de salas
+    const result = await pool.query(
+      `INSERT INTO agendamento_salas (professor_email, id_sala, data, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes, status, id_pedido, tipo_aula)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'analisando', $9, 'individual') RETURNING *`,
+      [professor_email, salaId, date, id_horario, precisa_tecnico, link_roteiro, disciplinaId, numero_discentes, id_pedido]
+    );
+
+    // 3.4. Dispara o e-mail avisando o Responsável da Sala
+    try {
+      const emailQuery = await pool.query(`
+        SELECT 
+            prof.nome_usuario AS nome_professor, 
+            resp.nome_usuario AS nome_responsavel, 
+            resp.email AS email_responsavel, 
+            s.nome_sala, 
+            d.nome_disciplina
+        FROM sala_de_aula s
+        JOIN usuario resp ON s.responsavel_email = resp.email
+        JOIN usuario prof ON prof.email = $1
+        JOIN disciplina d ON d.id_disciplina = $2
+        WHERE s.id_sala = $3
+      `, [professor_email, disciplinaId, salaId]);
+
+      if (emailQuery.rowCount > 0) {
+        const info = emailQuery.rows[0];
+        const [ano, mes, dia] = date.split('-');
+        
+        // Montamos o pacote de dados do e-mail
+        const dadosEmail = {
+          nome_professor: info.nome_professor,
+          nome_tecnico: info.nome_responsavel,
+          laboratorio: info.nome_sala, // Mandamos na variável laboratório para o template do email funcionar
+          disciplina: info.nome_disciplina,
+          data: `${dia}/${mes}/${ano}`,
+          horario: hour,
+          precisa_tecnico: precisa_tecnico
+        };
+
+        console.log(`⏳ Avisando responsável da sala (${info.email_responsavel}) sobre a reserva...`);
+        await enviarEmailNovaSolicitacaoTecnico(info.email_responsavel, dadosEmail);
+      }
+    } catch (erroEmail) {
+      console.error("❌ Erro ao notificar responsável:", erroEmail);
+    }
+
+    // 3.5. Responde para o Frontend que deu tudo certo
+    res.status(201).json({ message: "Reserva de sala solicitada com sucesso!" });
+
+  } catch (err) {
+    // Se bater no erro 23505, é porque a sala já está ocupada e o banco bloqueou
+    if (err.code === "23505") {
+        return res.status(400).json({ error: "Esse horário já está ocupado nesta sala." });
+    }
+    console.error("Erro ao solicitar sala:", err);
+    res.status(500).json({ error: "Erro ao solicitar sala." });
+  }
+});
 export default app;

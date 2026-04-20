@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="images/icone.png" type="image/png" />
+    <title>Sistema Merlin - Dashboard Salas</title>
+    <link rel="stylesheet" href="css/style7.css" />
+    <script src="https://kit.fontawesome.com/915b45d802.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="tudo">
+        <div class="menu">
+            <header id="menu-container"></header>
+        </div>
+        <div class="conteudo">
+            <div class="painel-grelha" id="painel-grelha">
+                
+                <div class="cartao-painel cartao-aulas-autorizadas" style="display: none; width: 60%;">
+                    <div class="calendario-header">
+                        <button type="button" id="btn-mes-anterior" title="Mês Anterior">&lt;</button>
+                        <h2 id="calendario-titulo" style="border-bottom: none; margin: 0">Próximas Aulas (Salas)</h2>
+                        <button type="button" id="btn-proximo-mes" title="Próximo Mês">&gt;</button>
+                    </div>
+                    <div class="calendario-dias-semana">
+                        <div class="dia-semana">DOM</div><div class="dia-semana">SEG</div><div class="dia-semana">TER</div>
+                        <div class="dia-semana">QUA</div><div class="dia-semana">QUI</div><div class="dia-semana">SEX</div><div class="dia-semana">SÁB</div>
+                    </div>
+                    <div class="calendario-grid" id="calendario-grid"></div>
+                </div>
+
+                <div class="cartao-painel cartao-aulas-responsavel" style="display: none">
+                    <div class="calendario-header">
+                        <button type="button" id="btn-mes-anterior-responsavel" title="Mês Anterior">&lt;</button>
+                        <h2 id="calendario-titulo-responsavel" style="border-bottom: none; margin: 0">Aulas nas Minhas Salas</h2>
+                        <button type="button" id="btn-proximo-mes-responsavel" title="Próximo Mês">&gt;</button>
+                    </div>
+                    <div class="calendario-dias-semana">
+                        <div class="dia-semana">DOM</div><div class="dia-semana">SEG</div><div class="dia-semana">TER</div>
+                        <div class="dia-semana">QUA</div><div class="dia-semana">QUI</div><div class="dia-semana">SEX</div><div class="dia-semana">SÁB</div>
+                    </div>
+                    <div class="calendario-grid" id="calendario-grid-responsavel"></div>
+                </div>
+                
+                <div class="cartao-painel cartao-minhas-salas" style="display: none; height: 30vh; overflow-y: auto;">
+                    <h2>Minhas Salas de Aula</h2>
+                    <ul id="lista-minhas-salas" class="lista-painel"></ul>
+                </div>
+                
+                <div class="cartao-painel cartao-horarios-hoje" style="display: none; width: 40%;">
+                    <h2>Salas Reservadas Hoje</h2>
+                    <div id="lista-horarios-hoje" class="lista-horarios-timeline"></div>
+                </div>
+
+                <div class="cartao-painel painel-aulas-responsavel-lista" style="display: none; width: 100%; overflow-y: auto; height: 50vh;">
+                    <h2 style="margin-bottom: 20px;">Próximas Reservas nas Minhas Salas</h2>
+                    <div id="corpo-tabela-aulas-responsavel" class="lista-cards-aulas"></div>
+                </div>
+
+            </div>
+            
+            <div class="cartao-painel painel-minhas-aulas" style="display: none; width: 100%; overflow-y: auto; height: 50vh; padding-top: 30px;">
+                <h2 style="margin-bottom: 20px;">Minhas Solicitações de Salas</h2>
+                <div id="minhas-aulas-container" class="lista-cards-aulas"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/menu.js" defer></script>
+    <script src="js/home_salas.js" defer></script>
+    <script src="/js/auth-guard.js" defer></script>
+</body>
+
+</html>
