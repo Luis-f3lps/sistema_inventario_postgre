@@ -100,14 +100,14 @@ function preencherDadosDoMenu(userData) {
     .querySelectorAll(".cartao-painel")
     .forEach((card) => (card.style.display = "none"));
 
-switch (userType) {
+  switch (userType) {
     case "admin":
     case "administrador":
       showMenuItem(".admin-menu");
       showMenuItem(".produto");
       showMenuItem(".Disciplinas");
-      showMenuItem(".salas"); 
-      showMenuItem(".aprovar-salas");
+      //showMenuItem(".salas");
+      //showMenuItem(".aprovar-salas");
       break;
 
     case "tecnico":
@@ -115,10 +115,10 @@ switch (userType) {
       showMenuItem(".Calendario");
       showMenuItem(".Home");
       showMenuItem(".produto");
-      showMenuItem(".salas"); 
+      showMenuItem(".salas");
       showDashboardCard(".cartao-aulas-tecnico");
       showDashboardCard(".cartao-meus-laboratorios");
-            showMenuItem(".aprovar-salas");
+      //showMenuItem(".aprovar-salas");
 
       break;
 
@@ -128,10 +128,10 @@ switch (userType) {
       showMenuItem(".professor");
       showMenuItem(".Disciplinas");
       showMenuItem(".Horarios");
-      showMenuItem(".agendar-sala"); 
+      //showMenuItem(".agendar-sala");
       showDashboardCard(".cartao-aulas-autorizadas");
       showDashboardCard(".cartao-solicitacoes");
-      showMenuItem(".aprovar-salas");
+     // showMenuItem(".aprovar-salas");
       break;
   }
 }
