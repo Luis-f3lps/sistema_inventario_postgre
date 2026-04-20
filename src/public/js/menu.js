@@ -118,6 +118,8 @@ switch (userType) {
       showMenuItem(".salas"); 
       showDashboardCard(".cartao-aulas-tecnico");
       showDashboardCard(".cartao-meus-laboratorios");
+            showMenuItem(".aprovar-salas");
+
       break;
 
     case "professor":
