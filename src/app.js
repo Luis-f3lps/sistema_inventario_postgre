@@ -227,7 +227,7 @@ app.get("/agendamento-recorrente-salas", Autenticado, AutorizadoPara(['professor
 app.get("/CalendarioSalas", Autenticado, AutorizadoPara(['tecnico', 'admin', 'professor']), (req, res) => {
     res.sendFile(path.join(__dirname, "public", "calendario_salas.html"));
 });
-app.get("/DashboardSalas", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "Home_Salas.html")));
+app.get("/DashboardSalas", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "home_salas.html")));
 app.get("/api/usuario-logado", (req, res) => {
   const token = req.cookies.token;
   if (!token) {
