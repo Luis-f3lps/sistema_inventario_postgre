@@ -2365,15 +2365,16 @@ app.get("/api/requests", Autenticado, async (req, res) => {
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
             JOIN horarios h ON a.id_horario = h.id_horario
             LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+            JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio -- 👇 MÁGICA 1: Traz a tabela nova
             WHERE 
-                l.usuario_email = $1 
+                lu.usuario_email = $1 -- 👇 MÁGICA 2: Filtra usando o 'lu' em vez do antigo 'l'
             ORDER BY 
                 a.id_pedido DESC, a.data ASC, h.hora_inicio ASC
         `;
     const result = await pool.query(query, [tecnico_email]);
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
+    console.error("Erro na rota /api/requests:", err);
     res.status(500).json({ error: "Erro ao buscar solicitações" });
   }
 });
@@ -3179,44 +3180,7 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
   }
 });
 
-// ROTA PARA O RESPONSÁVEL VER AS SOLICITAÇÕES DE SALA
-app.get("/api/requests", Autenticado, async (req, res) => {
-  try {
-    const { tecnico_email } = req.query;
-    const query = `
-            SELECT 
-                a.id_aula, 
-                u.nome_usuario AS professor, 
-                l.nome_laboratorio, 
-                d.nome_disciplina,
-                a.link_roteiro,
-                a.numero_discentes,
-                a.data, 
-                h.hora_inicio, 
-                h.hora_fim,
-                a.precisa_tecnico, 
-                a.status,
-                a.observacoes,
-                a.tipo_aula,
-                a.id_pedido 
-            FROM aulas a
-            JOIN usuario u ON a.professor_email = u.email
-            JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-            JOIN horarios h ON a.id_horario = h.id_horario
-            LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
-            JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio -- 👇 AQUI: Conecta com a tabela nova
-            WHERE 
-                lu.usuario_email = $1 -- 👇 AQUI: Filtra usando o 'lu' em vez de 'l'
-            ORDER BY 
-                a.id_pedido DESC, a.data ASC, h.hora_inicio ASC
-        `;
-    const result = await pool.query(query, [tecnico_email]);
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao buscar solicitações" });
-  }
-});
+
 // ROTA PARA O RESPONSÁVEL AUTORIZAR/RECUSAR A SALA
 app.patch("/api/requests-salas/:id", Autenticado, async (req, res) => {
   try {
