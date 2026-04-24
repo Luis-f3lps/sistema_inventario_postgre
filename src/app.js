@@ -2064,7 +2064,7 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
       numero_discentes,
     } = req.body;
 
-    if (!labId || !date || !hour || !id_disciplina || !numero_discentes) {
+    if (!labId || !date || !hour || !numero_discentes) {
       return res.status(400).json({ error: "Dados incompletos para o agendamento." });
     }
 
