@@ -780,7 +780,6 @@ app.get("/api/lab32", Autenticado, async (req, res) => {
 });
 
 // Endpoint para buscar as disciplinas de um professor logado
-// 1. Coloque o "Autenticado" aqui 👇
 app.get("/api/minhas-disciplinas", Autenticado, async (req, res) => {
   if (!req.session?.user?.email) {
     return res.status(401).json({ error: "Não autenticado." });
