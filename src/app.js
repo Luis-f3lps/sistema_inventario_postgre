@@ -690,21 +690,23 @@ app.delete(
 
 app.get("/api/lab", Autenticado, async (req, res) => {
   try {
-    const { tipo_usuario, email } = req.session.user; // Obtém o tipo de usuário e o email do usuário logado
+    const { tipo_usuario, email } = req.session.user; 
 
     let query;
     let params = [];
 
-    // Caso seja administrador, retorna todos os laboratórios; caso contrário, retorna apenas os laboratórios atribuídos ao usuário
     if (tipo_usuario === "admin") {
       query = "SELECT id_laboratorio, nome_laboratorio FROM laboratorio";
     } else {
-      query =
-        "SELECT id_laboratorio, nome_laboratorio FROM laboratorio WHERE usuario_email = $1";
-      params.push(email); // Adiciona o email do usuário como parâmetro
+      query = `
+        SELECT l.id_laboratorio, l.nome_laboratorio 
+        FROM laboratorio l
+        JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
+        WHERE lu.usuario_email = $1
+      `;
+      params.push(email); 
     }
 
-    // Executa a consulta e pega as linhas retornadas
     const { rows: labs } = await pool.query(query, params);
     res.json(labs);
   } catch (error) {
@@ -716,21 +718,23 @@ app.get("/api/lab", Autenticado, async (req, res) => {
 // Obter laboratórios com base no tipo de usuário
 app.get("/api/lab32", Autenticado, async (req, res) => {
   try {
-    const { tipo_usuario, email } = req.session.user; // Obtém o tipo de usuário e o email do usuário logado
+    const { tipo_usuario, email } = req.session.user;
 
     let query;
     let params = [];
 
-    // Caso seja administrador, retorna todos os laboratórios; caso contrário, retorna apenas os laboratórios atribuídos ao usuário
     if (tipo_usuario === "professor") {
       query = "SELECT id_laboratorio, nome_laboratorio FROM laboratorio";
     } else {
-      query =
-        "SELECT id_laboratorio, nome_laboratorio FROM laboratorio WHERE usuario_email = $1";
-      params.push(email); // Adiciona o email do usuário como parâmetro
+      query = `
+        SELECT l.id_laboratorio, l.nome_laboratorio 
+        FROM laboratorio l
+        JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
+        WHERE lu.usuario_email = $1
+      `;
+      params.push(email); 
     }
 
-    // Executa a consulta e pega as linhas retornadas
     const { rows: labs } = await pool.query(query, params);
     res.json(labs);
   } catch (error) {
@@ -2534,9 +2538,10 @@ app.get("/api/aulas-meus-laboratorios", Autenticado, async (req, res) => {
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
             JOIN horarios h ON a.id_horario = h.id_horario
             JOIN usuario prof ON a.professor_email = prof.email
-            JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+            LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+            JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio -- 👇 ADICIONADO
             WHERE 
-                l.usuario_email = $1 
+                lu.usuario_email = $1 -- 👇 CORRIGIDO
                 AND a.data >= CURRENT_DATE
                 AND a.status = 'autorizado' 
             ORDER BY 
@@ -3154,14 +3159,14 @@ app.post("/api/schedule-recurring-salas", Autenticado, async (req, res) => {
 });
 
 // ROTA PARA O RESPONSÁVEL VER AS SOLICITAÇÕES DE SALA
-app.get("/api/requests-salas", Autenticado, async (req, res) => {
+app.get("/api/requests", Autenticado, async (req, res) => {
   try {
-    const { responsavel_email } = req.query;
+    const { tecnico_email } = req.query;
     const query = `
             SELECT 
-                a.id_agendamento, 
+                a.id_aula, 
                 u.nome_usuario AS professor, 
-                s.nome_sala, 
+                l.nome_laboratorio, 
                 d.nome_disciplina,
                 a.link_roteiro,
                 a.numero_discentes,
@@ -3171,23 +3176,24 @@ app.get("/api/requests-salas", Autenticado, async (req, res) => {
                 a.precisa_tecnico, 
                 a.status,
                 a.observacoes,
-                a.tipo_aula, 
+                a.tipo_aula,
                 a.id_pedido 
-            FROM agendamento_salas a
+            FROM aulas a
             JOIN usuario u ON a.professor_email = u.email
-            JOIN sala_de_aula s ON a.id_sala = s.id_sala
+            JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
             JOIN horarios h ON a.id_horario = h.id_horario
-            JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+            LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+            JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio -- 👇 ADICIONADO
             WHERE 
-                s.responsavel_email = $1 
+                lu.usuario_email = $1 -- 👇 CORRIGIDO PARA 'lu'
             ORDER BY 
                 a.id_pedido DESC, a.data ASC, h.hora_inicio ASC
         `;
-    const result = await pool.query(query, [responsavel_email]);
+    const result = await pool.query(query, [tecnico_email]);
     res.json(result.rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Erro ao buscar solicitações de salas" });
+    res.status(500).json({ error: "Erro ao buscar solicitações" });
   }
 });
 
