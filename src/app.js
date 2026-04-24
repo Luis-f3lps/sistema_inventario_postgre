@@ -584,16 +584,17 @@ app.get("/api/laboratorios", Autenticado, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT 
-        laboratorio.id_laboratorio, 
-        laboratorio.nome_laboratorio, 
-        usuario.nome_usuario AS responsavel, 
-        usuario.email
-      FROM laboratorio
-      LEFT JOIN usuario ON laboratorio.usuario_email = usuario.email
+        l.id_laboratorio, 
+        l.nome_laboratorio, 
+        string_agg(u.nome_usuario, ', ') AS responsavel, 
+        string_agg(u.email, ', ') AS usuario_email
+      FROM laboratorio l
+      LEFT JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
+      LEFT JOIN usuario u ON lu.usuario_email = u.email
+      GROUP BY l.id_laboratorio, l.nome_laboratorio
     `);
     res.json(result.rows);
   } catch (error) {
-    console.error("Erro ao obter laboratórios:", error);
     res.status(500).json({ error: "Erro no servidor ao obter laboratórios" });
   }
 });
@@ -603,79 +604,43 @@ app.get("/api/laboratoriosPag", Autenticado, async (req, res) => {
   const { page = 1, limit = 20 } = req.query;
   const pageInt = parseInt(page, 10);
   const limitInt = parseInt(limit, 10);
-
-  if (isNaN(pageInt) || isNaN(limitInt)) {
-    return res.status(400).json({ error: "Os parâmetros de página e limite devem ser inteiros." });
-  }
-
   const offset = (pageInt - 1) * limitInt;
 
   try {
-    const result = await pool.query(
-      `
-            SELECT l.id_laboratorio, l.nome_laboratorio, u.email AS usuario_email, u.nome_usuario
-            FROM laboratorio l
-            JOIN usuario u ON l.usuario_email = u.email
-            LIMIT $1 OFFSET $2
-        `,
-      [limitInt, offset],
+    const result = await pool.query(`
+        SELECT 
+            l.id_laboratorio, 
+            l.nome_laboratorio, 
+            string_agg(u.email, ', ') AS usuario_email, 
+            string_agg(u.nome_usuario, ', ') AS nome_usuario
+        FROM laboratorio l
+        LEFT JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
+        LEFT JOIN usuario u ON lu.usuario_email = u.email
+        GROUP BY l.id_laboratorio, l.nome_laboratorio
+        LIMIT $1 OFFSET $2
+      `, [limitInt, offset]
     );
 
-    const countResult = await pool.query(
-      "SELECT COUNT(*) as total FROM laboratorio",
-    );
-    const totalItems = countResult.rows[0].total;
-    const totalPages = Math.ceil(totalItems / limitInt);
+    const countResult = await pool.query("SELECT COUNT(*) as total FROM laboratorio");
+    const totalPages = Math.ceil(countResult.rows[0].total / limitInt);
 
-    res.json({
-      data: result.rows,
-      totalItems,
-      totalPages,
-      currentPage: pageInt,
-    });
+    res.json({ data: result.rows, totalItems: countResult.rows[0].total, totalPages, currentPage: pageInt });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: "Erro no servidor" });
   }
 });
 
 // Adicionar um laboratório
-app.post("/api/laboratorios", Autenticado, async (req, res) => {
+app.post("/api/atualizar-responsavel", Autenticado, async (req, res) => {
+  const { idLaboratorio, usuarioEmail } = req.body;
   try {
-    const { nome_laboratorio, usuario_email } = req.body;
-
-    if (!nome_laboratorio || !usuario_email) {
-      return res.status(400).json({
-        error: "Nome do laboratório e email do usuário são obrigatórios.",
-      });
-    }
-
-    // Verificar se o laboratório já existe
-    const result = await pool.query(
-      "SELECT * FROM laboratorio WHERE nome_laboratorio = $1",
-      [nome_laboratorio],
+    await pool.query(
+        "INSERT INTO laboratorio_usuario (id_laboratorio, usuario_email) VALUES ($1, $2) ON CONFLICT DO NOTHING", 
+        [idLaboratorio, usuarioEmail]
     );
-
-    if (result.rows.length > 0) {
-      return res.status(400).json({ error: "Nome do laboratório já em uso." });
-    }
-
-    // Inserir novo laboratório
-    const insertResult = await pool.query(
-      "INSERT INTO laboratorio (nome_laboratorio, usuario_email) VALUES ($1, $2) RETURNING id_laboratorio",
-      [nome_laboratorio, usuario_email],
-    );
-
-    // A consulta de inserção no PostgreSQL usa "RETURNING" para retornar o id do novo registro
-    const idLaboratorio = insertResult.rows[0].id_laboratorio;
-
-    res.status(201).json({
-      message: "Laboratório adicionado com sucesso!",
-      id_laboratorio: idLaboratorio,
-    });
+    res.json({ message: "Responsável vinculado com sucesso!" });
   } catch (error) {
-    console.error("Erro ao adicionar laboratório:", error);
-    res.status(500).json({ error: "Erro ao adicionar laboratório." });
+    res.status(500).json({ error: "Erro ao vincular responsável." });
   }
 });
 
@@ -2534,18 +2499,14 @@ app.get("/api/dashboard/aulas-autorizadas", Autenticado, async (req, res) => {
 });
 // Endpoint para o painel "Meus Laboratórios"
 app.get("/api/dashboard/meus-laboratorios", Autenticado, async (req, res) => {
-  if (!req.session?.user)
-    return res.status(401).json({ error: "Não autenticado." });
-  try {
-    const user_email = req.session.user.email;
-    const result = await pool.query(
-      `SELECT nome_laboratorio FROM laboratorio WHERE usuario_email = $1 ORDER BY nome_laboratorio`,
-      [user_email],
-    );
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json({ error: "Erro ao buscar laboratórios." });
-  }
+  const user_email = req.session.user.email;
+  const result = await pool.query(`
+      SELECT l.id_laboratorio, l.nome_laboratorio 
+      FROM laboratorio l
+      JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
+      WHERE lu.usuario_email = $1 ORDER BY l.nome_laboratorio`, 
+  [user_email]);
+  res.json(result.rows);
 });
 
 // Endpoint para o painel do Técnico "Aulas no meu laboratório"
@@ -2671,7 +2632,8 @@ app.get("/api/calendario/aulas-tecnico", Autenticado, async (req, res) => {
             JOIN horarios h ON a.id_horario = h.id_horario
             JOIN disciplina d ON a.id_disciplina = d.id_disciplina
             JOIN usuario u ON a.professor_email = u.email
-            WHERE l.usuario_email = $1 
+            JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
+            WHERE lu.usuario_email = $1 -- <<< ALTERADO DE l.usuario_email PARA lu.usuario_email
               AND a.status = 'autorizado' 
               AND EXTRACT(YEAR FROM a.data) = $2
               AND EXTRACT(MONTH FROM a.data) = $3
@@ -2881,7 +2843,8 @@ app.get("/api/solicitacoes-analise-tecnico", Autenticado, async (req, res) => {
       `SELECT COUNT(*) AS total 
        FROM aulas a
        JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-       WHERE l.usuario_email = $1 AND a.status = 'analisando'`,
+       JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
+       WHERE lu.usuario_email = $1 AND a.status = 'analisando'`, 
       [email_tecnico]
     );
 
