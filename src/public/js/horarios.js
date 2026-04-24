@@ -156,7 +156,10 @@ function updateSelectionUI() {
 async function submeterAgendamento() {
     if (!selectedSlot || !loggedInUser) return;
 
-    if (!disciplinaEl.value) {
+    const tipoUsuario = loggedInUser.tipo_usuario ? loggedInUser.tipo_usuario.toLowerCase().trim() : '';
+    const isTecnico = tipoUsuario === 'tecnico';
+
+    if (!isTecnico && !disciplinaEl.value) {
         msgEl.textContent = 'Por favor, selecione uma disciplina.';
         msgEl.className = 'mensagem-status erro';
         msgEl.style.display = 'block';
@@ -173,10 +176,8 @@ async function submeterAgendamento() {
     }
 
     const precisaTecnico = document.querySelector('input[name="precisaTecnico"]:checked').value === 'true';
-    // Captura os valores
     const linkRoteiro = document.getElementById('link_roteiro').value.trim();
 
-    // Verifica apenas se o campo está vazio
     if (linkRoteiro === '') {
         msgEl.textContent = 'Por favor, insira o link do roteiro. Ele é obrigatório para todos os agendamentos.';
         msgEl.className = 'mensagem-status erro';
@@ -184,13 +185,15 @@ async function submeterAgendamento() {
         return;
     }
 
+    const idDisciplinaFinal = (isTecnico && !disciplinaEl.value) ? null : disciplinaEl.value;
+
     const payload = {
         labId: labEl.value,
         date: dateEl.value,
         hour: selectedSlot,
         precisa_tecnico: precisaTecnico,
         link_roteiro: linkRoteiro,
-        id_disciplina: disciplinaEl.value,
+        id_disciplina: idDisciplinaFinal,
         numero_discentes: numeroDiscentes
     };
 
