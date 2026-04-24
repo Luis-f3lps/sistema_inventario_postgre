@@ -225,7 +225,7 @@ app.get("/Tela_Responsavel_Salas", Autenticado, (req, res) => res.sendFile(path.
 
 app.get("/agendamento-recorrente-salas", Autenticado, AutorizadoPara(['professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "agendamento-recorrente-salas.html")));
 app.get("/CalendarioSalas", Autenticado, AutorizadoPara(['tecnico', 'admin', 'professor']), (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "calendario_salas.html"));
+  res.sendFile(path.join(__dirname, "public", "calendario_salas.html"));
 });
 app.get("/DashboardSalas", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "home_salas.html")));
 app.get("/api/usuario-logado", (req, res) => {
@@ -326,7 +326,7 @@ app.patch("/api/usuarios/ativar/:email", Autenticado, async (req, res) => {
   try {
     // 1. Atualiza o status e já busca o nome do usuário para o email
     const result = await pool.query(
-      "UPDATE usuario SET status = $1 WHERE email = $2 RETURNING nome_usuario", 
+      "UPDATE usuario SET status = $1 WHERE email = $2 RETURNING nome_usuario",
       ["ativado", email]
     );
 
@@ -2151,7 +2151,7 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
 
       if (emailQuery.rowCount > 0) {
         const info = emailQuery.rows[0];
-        
+
         // Ajusta o formato da data para DD/MM/AAAA e evita erros de fuso horário
         const [ano, mes, dia] = date.split('-');
         const dataFormatada = `${dia}/${mes}/${ano}`;
@@ -2273,7 +2273,7 @@ app.post("/api/schedule-recurring", Autenticado, async (req, res) => {
 
     // 1. SALVA TUDO NO BANCO DE DADOS PRIMEIRO
     await client.query("COMMIT");
-    
+
     // 👇 2. NOVA LÓGICA DE AVISAR O TÉCNICO (UM ÚNICO EMAIL DE RESUMO)
     try {
       const emailQuery = await pool.query(`
@@ -2292,11 +2292,11 @@ app.post("/api/schedule-recurring", Autenticado, async (req, res) => {
 
       if (emailQuery.rowCount > 0) {
         const info = emailQuery.rows[0];
-        
+
         // Formata as datas para o padrão brasileiro DD/MM/AAAA
         const [anoI, mesI, diaI] = dataInicio.split('-');
         const [anoF, mesF, diaF] = dataFim.split('-');
-        
+
         const dadosEmail = {
           nome_professor: info.nome_professor,
           nome_tecnico: info.nome_tecnico,
@@ -2353,13 +2353,13 @@ app.get("/api/requests", Autenticado, async (req, res) => {
                 a.precisa_tecnico, 
                 a.status,
                 a.observacoes,
-                a.tipo_aula, -- ADICIONADO PARA O FRONTEND SEPARAR
-                a.id_pedido  -- ADICIONADO PARA O FRONTEND AGRUPAR
+                a.tipo_aula,
+                a.id_pedido 
             FROM aulas a
             JOIN usuario u ON a.professor_email = u.email
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
             JOIN horarios h ON a.id_horario = h.id_horario
-            JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+            LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
             WHERE 
                 l.usuario_email = $1 
             ORDER BY 
@@ -2409,7 +2409,7 @@ app.patch("/api/requests/:id", Autenticado, async (req, res) => {
         };
 
         console.log(`\n⏳ Tentando enviar email para: ${info.professor_email}...`);
-        
+
         try {
           if (novoStatus === 'autorizado') {
             await enviarEmailAutorizacao(info.professor_email, dadosAula);
@@ -3134,7 +3134,7 @@ app.post("/api/schedule-recurring-salas", Autenticado, async (req, res) => {
     }
 
     await client.query("COMMIT");
-    
+
     try {
       const emailQuery = await pool.query(`
         SELECT 
@@ -3154,11 +3154,11 @@ app.post("/api/schedule-recurring-salas", Autenticado, async (req, res) => {
         const info = emailQuery.rows[0];
         const [anoI, mesI, diaI] = dataInicio.split('-');
         const [anoF, mesF, diaF] = dataFim.split('-');
-        
+
         const dadosEmail = {
           nome_professor: info.nome_professor,
           nome_tecnico: info.nome_responsavel,
-          laboratorio: info.nome_sala, 
+          laboratorio: info.nome_sala,
           disciplina: info.nome_disciplina,
           dataInicio: `${diaI}/${mesI}/${anoI}`,
           dataFim: `${diaF}/${mesF}/${anoF}`,
@@ -3388,7 +3388,7 @@ app.get("/api/aulas-hoje-salas", Autenticado, async (req, res) => {
 app.get("/api/minhas-solicitacoes-salas", Autenticado, async (req, res) => {
   try {
     const professor_email = req.session.user.email;
-    
+
     // Auto-cancela as que ficaram no passado analisando
     await pool.query(`UPDATE agendamento_salas SET status = 'nao_autorizado' 
                       WHERE professor_email = $1 AND status = 'analisando' AND data < CURRENT_DATE`, [professor_email]);
@@ -3422,7 +3422,7 @@ app.put("/api/agendamentos-salas/:id/status", Autenticado, async (req, res) => {
     );
 
     if (verifyQuery.rowCount === 0) return res.status(403).json({ error: "Não permitido." });
-    
+
     const updateQuery = await pool.query("UPDATE agendamento_salas SET status = $1 WHERE id_agendamento = $2 RETURNING *", [status, id]);
     res.json({ message: "Agendamento cancelado com sucesso!" });
   } catch (err) { res.status(500).json({ error: "Erro cancelamento." }); }
@@ -3436,7 +3436,7 @@ app.put("/api/agendamentos-salas/:id/status", Autenticado, async (req, res) => {
 app.get("/api/availability-salas", Autenticado, async (req, res) => {
   try {
     const { date, salaId } = req.query;
-    
+
     const result = await pool.query(
       `SELECT h.hora_inicio 
        FROM agendamento_salas a
@@ -3444,7 +3444,7 @@ app.get("/api/availability-salas", Autenticado, async (req, res) => {
        WHERE a.data = $1 AND a.id_sala = $2 AND a.status != 'cancelado'`,
       [date, salaId]
     );
-    
+
     // Devolve uma lista só com as horinhas (ex: ["07:20", "08:10"])
     const occupied = result.rows.map((r) => r.hora_inicio.slice(0, 5));
     res.json({ occupied });
@@ -3467,12 +3467,12 @@ app.post("/api/schedule-salas", Autenticado, async (req, res) => {
     // 3.1. Descobre qual é o ID numérico desse horário (ex: "07:20" vira ID 1)
     const horario = await pool.query("SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1", [hour]);
     if (horario.rowCount === 0) {
-        return res.status(400).json({ error: "Horário inválido" });
+      return res.status(400).json({ error: "Horário inválido" });
     }
     const id_horario = horario.rows[0].id_horario;
 
     // 3.2. Cria um número de pedido aleatório para manter o padrão do banco
-    const id_pedido = Math.floor(10000000 + Math.random() * 90000000); 
+    const id_pedido = Math.floor(10000000 + Math.random() * 90000000);
 
     // 3.3. Salva na tabela exclusiva de salas
     const result = await pool.query(
@@ -3500,7 +3500,7 @@ app.post("/api/schedule-salas", Autenticado, async (req, res) => {
       if (emailQuery.rowCount > 0) {
         const info = emailQuery.rows[0];
         const [ano, mes, dia] = date.split('-');
-        
+
         // Montamos o pacote de dados do e-mail
         const dadosEmail = {
           nome_professor: info.nome_professor,
@@ -3525,7 +3525,7 @@ app.post("/api/schedule-salas", Autenticado, async (req, res) => {
   } catch (err) {
     // Se bater no erro 23505, é porque a sala já está ocupada e o banco bloqueou
     if (err.code === "23505") {
-        return res.status(400).json({ error: "Esse horário já está ocupado nesta sala." });
+      return res.status(400).json({ error: "Esse horário já está ocupado nesta sala." });
     }
     console.error("Erro ao solicitar sala:", err);
     res.status(500).json({ error: "Erro ao solicitar sala." });
