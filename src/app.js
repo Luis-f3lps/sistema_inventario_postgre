@@ -629,7 +629,43 @@ app.get("/api/laboratoriosPag", Autenticado, async (req, res) => {
     res.status(500).json({ error: "Erro no servidor" });
   }
 });
+// Adicionar um laboratório (Aceitando a tabela nova de relacionamentos)
+app.post("/api/laboratorios", Autenticado, async (req, res) => {
+  try {
+    const { nome_laboratorio, usuario_email } = req.body;
 
+    if (!nome_laboratorio || !usuario_email) {
+      return res.status(400).json({ error: "Nome do laboratório e email do responsável são obrigatórios." });
+    }
+
+    // 1. Verifica se o laboratório já existe
+    const check = await pool.query("SELECT * FROM laboratorio WHERE nome_laboratorio = $1", [nome_laboratorio]);
+    if (check.rows.length > 0) {
+      return res.status(400).json({ error: "Nome do laboratório já está em uso." });
+    }
+
+    // 2. Insere o laboratório na tabela principal e pega o ID gerado
+    const insertResult = await pool.query(
+      "INSERT INTO laboratorio (nome_laboratorio) VALUES ($1) RETURNING id_laboratorio", 
+      [nome_laboratorio]
+    );
+    const idLaboratorio = insertResult.rows[0].id_laboratorio;
+
+    // 3. Vincula o responsável na tabela nova (laboratorio_usuario)
+    await pool.query(
+      "INSERT INTO laboratorio_usuario (id_laboratorio, usuario_email) VALUES ($1, $2)", 
+      [idLaboratorio, usuario_email]
+    );
+
+    res.status(201).json({
+      message: "Laboratório adicionado com sucesso!",
+      id_laboratorio: idLaboratorio
+    });
+  } catch (error) {
+    console.error("Erro ao adicionar laboratório:", error);
+    res.status(500).json({ error: "Erro interno ao adicionar laboratório." });
+  }
+});
 // Adicionar um laboratório
 app.post("/api/atualizar-responsavel", Autenticado, async (req, res) => {
   const { idLaboratorio, usuarioEmail } = req.body;
@@ -3168,9 +3204,9 @@ app.get("/api/requests", Autenticado, async (req, res) => {
             JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
             JOIN horarios h ON a.id_horario = h.id_horario
             LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
-            JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio -- 👇 ADICIONADO
+            JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio -- 👇 AQUI: Conecta com a tabela nova
             WHERE 
-                lu.usuario_email = $1 -- 👇 CORRIGIDO PARA 'lu'
+                lu.usuario_email = $1 -- 👇 AQUI: Filtra usando o 'lu' em vez de 'l'
             ORDER BY 
                 a.id_pedido DESC, a.data ASC, h.hora_inicio ASC
         `;
@@ -3181,7 +3217,6 @@ app.get("/api/requests", Autenticado, async (req, res) => {
     res.status(500).json({ error: "Erro ao buscar solicitações" });
   }
 });
-
 // ROTA PARA O RESPONSÁVEL AUTORIZAR/RECUSAR A SALA
 app.patch("/api/requests-salas/:id", Autenticado, async (req, res) => {
   try {
