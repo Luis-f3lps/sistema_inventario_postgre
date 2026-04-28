@@ -3483,4 +3483,5 @@ app.post("/api/schedule-salas", Autenticado, async (req, res) => {
     res.status(500).json({ error: "Erro ao solicitar sala." });
   }
 });
+
 export default app;
