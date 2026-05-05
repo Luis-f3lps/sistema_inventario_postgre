@@ -2057,38 +2057,26 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
 
   try {
     const professor_email = req.session.user.email;
-
-    const {
-      labId,
-      date,
-      hour,
-      precisa_tecnico,
-      link_roteiro,
-      id_disciplina,
-      numero_discentes,
-    } = req.body;
+    const { labId, date, hour, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes } = req.body;
 
     if (!labId || !date || !hour || !numero_discentes) {
       return res.status(400).json({ error: "Dados incompletos para o agendamento." });
     }
 
-    const statusProfessor = await pool.query(
-      "SELECT status FROM usuario WHERE email = $1",
-      [professor_email],
-    );
+    const statusProfessor = await pool.query("SELECT status FROM usuario WHERE email = $1", [professor_email]);
     if (statusProfessor.rowCount > 0 && statusProfessor.rows[0].status === "desativado") {
       return res.status(403).json({ error: "Sua conta está desativada. Você não tem permissão para solicitar agendamentos." });
     }
 
     const statusLaboratorio = await pool.query(
       `SELECT u.status 
-       FROM laboratorio l
-       JOIN usuario u ON l.usuario_email = u.email
-       WHERE l.id_laboratorio = $1`,
-      [labId],
+       FROM laboratorio_usuario lu
+       JOIN usuario u ON lu.usuario_email = u.email
+       WHERE lu.id_laboratorio = $1`,
+      [labId]
     );
-    if (statusLaboratorio.rowCount > 0 && statusLaboratorio.rows[0].status === "desativado") {
-      return res.status(403).json({ error: "Não é possível agendar neste laboratório, pois o usuário responsável por ele está desativado." });
+    if (statusLaboratorio.rowCount > 0 && statusLaboratorio.rows.some(r => r.status === "desativado")) {
+      return res.status(403).json({ error: "Um dos responsáveis por este laboratório está desativado." });
     }
 
     const dataAgendamento = new Date(`${date}T00:00:00`);
@@ -2101,21 +2089,16 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
       return res.status(400).json({ error: "O agendamento deve ser feito com pelo menos 4 dias de antecedência." });
     }
 
-    const horario = await pool.query(
-      "SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1",
-      [hour],
-    );
-    if (horario.rowCount === 0) {
-      return res.status(400).json({ error: "Horário inválido" });
-    }
+    const horario = await pool.query("SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1", [hour]);
+    if (horario.rowCount === 0) return res.status(400).json({ error: "Horário inválido" });
     const id_horario = horario.rows[0].id_horario;
 
     if (precisa_tecnico === true) {
       const tecnicoOcupado = await pool.query(
         `SELECT 1
          FROM aulas a
-         JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-         WHERE l.usuario_email = (SELECT usuario_email FROM laboratorio WHERE id_laboratorio = $1)
+         JOIN laboratorio_usuario lu ON a.id_laboratorio = lu.id_laboratorio
+         WHERE lu.usuario_email IN (SELECT usuario_email FROM laboratorio_usuario WHERE id_laboratorio = $1)
            AND a.data = $2
            AND a.id_horario = $3
            AND a.precisa_tecnico = true
@@ -2125,19 +2108,16 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
       );
 
       if (tecnicoOcupado.rowCount > 0) {
-        return res.status(400).json({ error: "O técnico responsável por este laboratório já está agendado para auxiliar em outra aula neste mesmo horário." });
+        return res.status(400).json({ error: "O técnico responsável já está agendado para auxiliar em outra aula neste horário." });
       }
     }
 
-    // 1. INSERE A AULA NO BANCO
     const result = await pool.query(
       `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-       RETURNING *`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
       [professor_email, labId, date, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes],
     );
 
-    // 👇 2. NOVA LÓGICA DE AVISAR O TÉCNICO
     try {
       const emailQuery = await pool.query(`
         SELECT 
@@ -2147,44 +2127,38 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
           l.nome_laboratorio,
           d.nome_disciplina
         FROM laboratorio l
-        JOIN usuario tec ON l.usuario_email = tec.email
+        JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
+        JOIN usuario tec ON lu.usuario_email = tec.email
         JOIN usuario prof ON prof.email = $1
-        JOIN disciplina d ON d.id_disciplina = $2
+        LEFT JOIN disciplina d ON d.id_disciplina = $2
         WHERE l.id_laboratorio = $3
       `, [professor_email, id_disciplina, labId]);
 
       if (emailQuery.rowCount > 0) {
-        const info = emailQuery.rows[0];
-
-        // Ajusta o formato da data para DD/MM/AAAA e evita erros de fuso horário
         const [ano, mes, dia] = date.split('-');
         const dataFormatada = `${dia}/${mes}/${ano}`;
 
-        const dadosEmail = {
-          nome_professor: info.nome_professor,
-          nome_tecnico: info.nome_tecnico,
-          laboratorio: info.nome_laboratorio,
-          disciplina: info.nome_disciplina,
-          data: dataFormatada,
-          horario: hour,
-          precisa_tecnico: precisa_tecnico
-        };
-
-        console.log(`\n⏳ Avisando o técnico ${info.email_tecnico} sobre nova solicitação...`);
-        await enviarEmailNovaSolicitacaoTecnico(info.email_tecnico, dadosEmail);
-        console.log("✅ Email de nova solicitação enviado!");
+        for (const info of emailQuery.rows) {
+             const dadosEmail = {
+                 nome_professor: info.nome_professor,
+                 nome_tecnico: info.nome_tecnico,
+                 laboratorio: info.nome_laboratorio,
+                 disciplina: info.nome_disciplina || 'Não informada',
+                 data: dataFormatada,
+                 horario: hour,
+                 precisa_tecnico: precisa_tecnico
+             };
+             await enviarEmailNovaSolicitacaoTecnico(info.email_tecnico, dadosEmail);
+        }
       }
-    } catch (erroEmail) {
-      console.error("❌ ERRO AO AVISAR TÉCNICO NO EMAIL:");
-      console.error(erroEmail);
+    } catch (erroEmail) { 
+      console.error("Erro ao enviar email:", erroEmail); 
     }
 
     res.status(201).json({ message: "Aula solicitada com sucesso!", aula: result.rows[0] });
 
   } catch (err) {
-    if (err.code === "23505") {
-      return res.status(400).json({ error: "Esse horário já está ocupado ou em análise neste laboratório" });
-    }
+    if (err.code === "23505") return res.status(400).json({ error: "Esse horário já está ocupado ou em análise neste laboratório" });
     console.error("Erro ao solicitar aula:", err);
     res.status(500).json({ error: "Erro ao solicitar aula" });
   }
@@ -3064,121 +3038,6 @@ app.post("/api/atualizar-responsavel-sala", Autenticado, async (req, res) => {
     res.status(500).json({ error: "Erro no servidor ao atualizar responsável." });
   }
 });
-
-app.post("/api/schedule", Autenticado, async (req, res) => {
-  if (!req.session.user) {
-    return res.status(401).json({ error: "Você precisa estar logado." });
-  }
-
-  try {
-    const professor_email = req.session.user.email;
-    const { labId, date, hour, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes } = req.body;
-
-    if (!labId || !date || !hour || !numero_discentes) {
-      return res.status(400).json({ error: "Dados incompletos para o agendamento." });
-    }
-
-    const statusProfessor = await pool.query("SELECT status FROM usuario WHERE email = $1", [professor_email]);
-    if (statusProfessor.rowCount > 0 && statusProfessor.rows[0].status === "desativado") {
-      return res.status(403).json({ error: "Sua conta está desativada. Você não tem permissão para solicitar agendamentos." });
-    }
-
-    // 👇 CORREÇÃO: Status do(s) laboratório(s)
-    const statusLaboratorio = await pool.query(
-      `SELECT u.status 
-       FROM laboratorio_usuario lu
-       JOIN usuario u ON lu.usuario_email = u.email
-       WHERE lu.id_laboratorio = $1`,
-      [labId]
-    );
-    if (statusLaboratorio.rowCount > 0 && statusLaboratorio.rows.some(r => r.status === "desativado")) {
-      return res.status(403).json({ error: "Um dos responsáveis por este laboratório está desativado." });
-    }
-
-    const dataAgendamento = new Date(`${date}T00:00:00`);
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-    const dataMinima = new Date(hoje);
-    dataMinima.setDate(hoje.getDate() + 4);
-
-    if (dataAgendamento < dataMinima) {
-      return res.status(400).json({ error: "O agendamento deve ser feito com pelo menos 4 dias de antecedência." });
-    }
-
-    const horario = await pool.query("SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1", [hour]);
-    if (horario.rowCount === 0) return res.status(400).json({ error: "Horário inválido" });
-    const id_horario = horario.rows[0].id_horario;
-
-    // 👇 CORREÇÃO: Verificação de técnico ocupado
-    if (precisa_tecnico === true) {
-      const tecnicoOcupado = await pool.query(
-        `SELECT 1
-         FROM aulas a
-         JOIN laboratorio_usuario lu ON a.id_laboratorio = lu.id_laboratorio
-         WHERE lu.usuario_email IN (SELECT usuario_email FROM laboratorio_usuario WHERE id_laboratorio = $1)
-           AND a.data = $2
-           AND a.id_horario = $3
-           AND a.precisa_tecnico = true
-           AND a.status IN ('analisando', 'autorizado')
-         LIMIT 1`,
-        [labId, date, id_horario],
-      );
-
-      if (tecnicoOcupado.rowCount > 0) {
-        return res.status(400).json({ error: "O técnico responsável já está agendado para auxiliar em outra aula neste horário." });
-      }
-    }
-
-    const result = await pool.query(
-      `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [professor_email, labId, date, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes],
-    );
-
-    // 👇 CORREÇÃO: Avisar TODOS os técnicos no e-mail
-    try {
-      const emailQuery = await pool.query(`
-        SELECT 
-          prof.nome_usuario AS nome_professor,
-          tec.nome_usuario AS nome_tecnico,
-          tec.email AS email_tecnico,
-          l.nome_laboratorio,
-          d.nome_disciplina
-        FROM laboratorio l
-        JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
-        JOIN usuario tec ON lu.usuario_email = tec.email
-        JOIN usuario prof ON prof.email = $1
-        LEFT JOIN disciplina d ON d.id_disciplina = $2
-        WHERE l.id_laboratorio = $3
-      `, [professor_email, id_disciplina, labId]);
-
-      if (emailQuery.rowCount > 0) {
-        const [ano, mes, dia] = date.split('-');
-        const dataFormatada = `${dia}/${mes}/${ano}`;
-
-        for (const info of emailQuery.rows) {
-             const dadosEmail = {
-                 nome_professor: info.nome_professor,
-                 nome_tecnico: info.nome_tecnico,
-                 laboratorio: info.nome_laboratorio,
-                 disciplina: info.nome_disciplina || 'Não informada',
-                 data: dataFormatada,
-                 horario: hour,
-                 precisa_tecnico: precisa_tecnico
-             };
-             await enviarEmailNovaSolicitacaoTecnico(info.email_tecnico, dadosEmail);
-        }
-      }
-    } catch (erroEmail) { console.error(erroEmail); }
-
-    res.status(201).json({ message: "Aula solicitada com sucesso!", aula: result.rows[0] });
-
-  } catch (err) {
-    if (err.code === "23505") return res.status(400).json({ error: "Esse horário já está ocupado ou em análise neste laboratório" });
-    res.status(500).json({ error: "Erro ao solicitar aula" });
-  }
-});
-
 
 // ROTA PARA O RESPONSÁVEL AUTORIZAR/RECUSAR A SALA
 app.patch("/api/requests-salas/:id", Autenticado, async (req, res) => {

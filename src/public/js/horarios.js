@@ -169,18 +169,14 @@ async function submeterAgendamento() {
     const isTecnico = tipoUsuario === 'tecnico';
 
     if (!isTecnico && !disciplinaEl.value) {
-        msgEl.textContent = 'Por favor, selecione uma disciplina.';
-        msgEl.className = 'mensagem-status erro';
-        msgEl.style.display = 'block';
+        alert('❌ Por favor, selecione uma disciplina.');
         return;
     }
 
     const numeroDiscentesEl = document.getElementById('numero_discentes');
     const numeroDiscentes = numeroDiscentesEl.value;
     if (!numeroDiscentes || parseInt(numeroDiscentes) <= 0) {
-        msgEl.textContent = 'Por favor, insira um número válido de discentes.';
-        msgEl.className = 'mensagem-status erro';
-        msgEl.style.display = 'block';
+        alert('❌ Por favor, insira um número válido de discentes.');
         return;
     }
 
@@ -188,16 +184,14 @@ async function submeterAgendamento() {
     const linkRoteiro = document.getElementById('link_roteiro').value.trim();
 
     if (linkRoteiro === '') {
-        msgEl.textContent = 'Por favor, insira o link do roteiro. Ele é obrigatório para todos os agendamentos.';
-        msgEl.className = 'mensagem-status erro';
-        msgEl.style.display = 'block';
+        alert('❌ Por favor, insira o link do roteiro. Ele é obrigatório para todos os agendamentos.');
         return;
     }
 
     const idDisciplinaFinal = (isTecnico && !disciplinaEl.value) ? null : disciplinaEl.value;
 
     submitBtn.disabled = true;
-    msgEl.textContent = 'Enviando solicitações...';
+    msgEl.textContent = '⏳ Enviando solicitações... Aguarde.';
     msgEl.className = 'mensagem-status';
     msgEl.style.display = 'block';
 
@@ -234,16 +228,15 @@ async function submeterAgendamento() {
     numeroDiscentesEl.value = '';
     disciplinaEl.selectedIndex = 0;
     selectedSlots = []; 
+    msgEl.style.display = 'none'; 
 
     if (erroMensagens.length === 0) {
-        msgEl.textContent = `${sucessoCount} agendamento(s) solicitado(s) com sucesso!`;
-        msgEl.className = 'mensagem-status sucesso';
+        alert(`✅ Sucesso!\n${sucessoCount} agendamento(s) solicitado(s) para o laboratório.`);
+    } else if (sucessoCount > 0 && erroMensagens.length > 0) {
+        alert(`⚠️ Atenção:\n${sucessoCount} agendamento(s) deu certo, mas tivemos os seguintes erros:\n\n${erroMensagens.join('\n')}`);
     } else {
-        msgEl.innerHTML = `${sucessoCount} sucesso(s).<br>Erros:<br>${erroMensagens.join('<br>')}`;
-        msgEl.className = 'mensagem-status erro';
+        alert(`❌ Erro ao agendar:\n\n${erroMensagens.join('\n')}`);
     }
-    
-    msgEl.style.display = 'block';
     
     await loadAvailability();
     if(typeof atualizarPainelCompleto === 'function') {
