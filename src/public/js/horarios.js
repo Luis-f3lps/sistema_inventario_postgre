@@ -3,7 +3,6 @@ document.addEventListener('menuReady', (event) => {
     inicializarPaginaDeAgendamento(userData);
 });
 
-
 let loggedInUser = null;
 const slotsEl = document.getElementById('slots');
 const dateEl = document.getElementById('date');
@@ -12,7 +11,9 @@ const disciplinaEl = document.getElementById('disciplina-select2');
 const submitBtn = document.getElementById('submitBtn');
 const msgEl = document.getElementById('msg');
 let occupiedSlots = [];
-let selectedSlot = null;
+
+// A lista que guarda todos os horários que você clicou
+let selectedSlots = []; 
 let availableSlotsFromDB = [];
 
 async function inicializarPaginaDeAgendamento(userData) {
@@ -29,12 +30,11 @@ async function inicializarPaginaDeAgendamento(userData) {
     labEl.addEventListener('change', loadAvailability);
     submitBtn.addEventListener('click', submeterAgendamento);
 
-    await loadLaboratorios();
+    await loadLaboratoriosParaFormulario();
     await loadDisciplinas();
     await fetchHorariosFromAPI();
     await loadAvailability();
 }
-
 
 async function fetchHorariosFromAPI() {
     try {
@@ -47,7 +47,7 @@ async function fetchHorariosFromAPI() {
     }
 }
 
-async function loadLaboratorios() {
+async function loadLaboratoriosParaFormulario() {
     try {
         const response = await fetch('/api/lab32');
         if (!response.ok) throw new Error('Falha ao carregar laboratórios');
@@ -103,7 +103,9 @@ async function loadAvailability() {
     msgEl.style.display = 'none';
     slotsEl.innerHTML = '<p>Carregando horários...</p>';
     submitBtn.disabled = true;
-    selectedSlot = null;
+    
+    // Zera a lista de selecionados se trocar o dia
+    selectedSlots = []; 
 
     try {
         const res = await fetch(`/api/availability?date=${dateEl.value}&labId=${labIdParaBuscar}`);
@@ -116,7 +118,6 @@ async function loadAvailability() {
         slotsEl.innerHTML = '<p style="color: red;">Erro ao carregar horários.</p>';
     }
 }
-
 
 function renderSlots() {
     slotsEl.innerHTML = '';
@@ -133,8 +134,13 @@ function renderSlots() {
             btn.classList.add('occupied');
             btn.disabled = true;
         } else {
+            // Lógica que permite marcar vários ao mesmo tempo
             btn.addEventListener('click', () => {
-                selectedSlot = (selectedSlot === horario.inicio) ? null : horario.inicio;
+                if (selectedSlots.includes(horario.inicio)) {
+                    selectedSlots = selectedSlots.filter(h => h !== horario.inicio);
+                } else {
+                    selectedSlots.push(horario.inicio);
+                }
                 updateSelectionUI();
             });
         }
@@ -146,15 +152,18 @@ function renderSlots() {
 function updateSelectionUI() {
     document.querySelectorAll('.bloco-horario').forEach(el => {
         el.classList.remove('selected');
-        if (!el.disabled && el.dataset.hour === selectedSlot) {
+        
+        // Pinta de verde todos os botões que estão na lista de selecionados
+        if (!el.disabled && selectedSlots.includes(el.dataset.hour)) {
             el.classList.add('selected');
         }
     });
-    submitBtn.disabled = !selectedSlot;
+    
+    submitBtn.disabled = selectedSlots.length === 0;
 }
 
 async function submeterAgendamento() {
-    if (!selectedSlot || !loggedInUser) return;
+    if (selectedSlots.length === 0 || !loggedInUser) return;
 
     const tipoUsuario = loggedInUser.tipo_usuario ? loggedInUser.tipo_usuario.toLowerCase().trim() : '';
     const isTecnico = tipoUsuario === 'tecnico';
@@ -187,38 +196,58 @@ async function submeterAgendamento() {
 
     const idDisciplinaFinal = (isTecnico && !disciplinaEl.value) ? null : disciplinaEl.value;
 
-    const payload = {
-        labId: labEl.value,
-        date: dateEl.value,
-        hour: selectedSlot,
-        precisa_tecnico: precisaTecnico,
-        link_roteiro: linkRoteiro,
-        id_disciplina: idDisciplinaFinal,
-        numero_discentes: numeroDiscentes
-    };
+    submitBtn.disabled = true;
+    msgEl.textContent = 'Enviando solicitações...';
+    msgEl.className = 'mensagem-status';
+    msgEl.style.display = 'block';
 
-    try {
-        const res = await fetch('/api/schedule', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-        if (!res.ok) throw new Error(result.error || 'Ocorreu um erro');
+    let sucessoCount = 0;
+    let erroMensagens = [];
 
-        document.getElementById('link_roteiro').value = '';
-        numeroDiscentesEl.value = '';
-        disciplinaEl.selectedIndex = 0;
+    for (const slot of selectedSlots) {
+        const payload = {
+            labId: labEl.value,
+            date: dateEl.value,
+            hour: slot,
+            precisa_tecnico: precisaTecnico,
+            link_roteiro: linkRoteiro,
+            id_disciplina: idDisciplinaFinal,
+            numero_discentes: numeroDiscentes
+        };
 
-        msgEl.textContent = result.message;
+        try {
+            const res = await fetch('/api/schedule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            
+            if (!res.ok) throw new Error(result.error || 'Ocorreu um erro');
+            sucessoCount++;
+        } catch (err) {
+            erroMensagens.push(`Horário ${slot}: ${err.message}`);
+        }
+    }
+
+    document.getElementById('link_roteiro').value = '';
+    numeroDiscentesEl.value = '';
+    disciplinaEl.selectedIndex = 0;
+    selectedSlots = []; 
+
+    if (erroMensagens.length === 0) {
+        msgEl.textContent = `${sucessoCount} agendamento(s) solicitado(s) com sucesso!`;
         msgEl.className = 'mensagem-status sucesso';
-        msgEl.style.display = 'block';
-
-        await loadAvailability();
-    } catch (err) {
-        msgEl.textContent = 'Erro ao enviar: ' + err.message;
+    } else {
+        msgEl.innerHTML = `${sucessoCount} sucesso(s).<br>Erros:<br>${erroMensagens.join('<br>')}`;
         msgEl.className = 'mensagem-status erro';
-        msgEl.style.display = 'block';
+    }
+    
+    msgEl.style.display = 'block';
+    
+    await loadAvailability();
+    if(typeof atualizarPainelCompleto === 'function') {
+        atualizarPainelCompleto();
     }
 }
 
