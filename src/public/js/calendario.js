@@ -1,261 +1,210 @@
-document.addEventListener('menuReady', (event) => {
-    const { userData } = event.detail;
-    inicializarPaginaDeAgendamento(userData);
+let userInfo = null;
+let horariosBd = [];
+let aulasDoMes = [];
+let dataAtual = new Date();
+let mesExibido = dataAtual.getMonth();
+let anoExibido = dataAtual.getFullYear();
+
+const selectLab = document.getElementById('select-laboratorio');
+const inputData = document.getElementById('input-data');
+const grid = document.getElementById('calendario-grid');
+const tituloCalendario = document.getElementById('calendario-titulo');
+const listaHorarios = document.getElementById('lista-horarios');
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const dateStr = dataAtual.getFullYear() + '-' +
+        String(dataAtual.getMonth() + 1).padStart(2, '0') + '-' +
+        String(dataAtual.getDate()).padStart(2, '0');
+    inputData.value = dateStr;
+
+    await carregarUsuarioLogado();
+    await carregarHorariosBase();
+    await carregarLaboratorios();
+
+    if (userInfo && userInfo.tipo_usuario && userInfo.tipo_usuario.toLowerCase() === 'tecnico') {
+        const painelAgendamento = document.querySelector('.agendamento-container');
+      //  if (painelAgendamento) {
+        //    painelAgendamento.style.display = 'none';
+     //   }
+    }
+
+    selectLab.addEventListener('change', () => atualizarPainelCompleto());
+    inputData.addEventListener('change', () => {
+        sincronizarCalendarioComInputData();
+        renderizarHorariosDoDia(inputData.value);
+    });
+
+    document.getElementById('btn-mes-anterior').addEventListener('click', () => mudarMes(-1));
+    document.getElementById('btn-proximo-mes').addEventListener('click', () => mudarMes(1));
+
+    renderizarCalendario();
 });
 
-let loggedInUser = null;
-const slotsEl = document.getElementById('slots');
-const dateEl = document.getElementById('date');
-const labEl = document.getElementById('laboratorios-select2');
-const disciplinaEl = document.getElementById('disciplina-select2');
-const submitBtn = document.getElementById('submitBtn');
-const msgEl = document.getElementById('msg');
-let occupiedSlots = [];
-
-// Agora é uma lista (array) em vez de null
-let selectedSlots = []; 
-let availableSlotsFromDB = [];
-
-async function inicializarPaginaDeAgendamento(userData) {
-    loggedInUser = userData;
-
-    const dataFutura = new Date();
-    dataFutura.setDate(dataFutura.getDate() + 4);
-    const dataFuturaString = dataFutura.toISOString().slice(0, 10);
-
-    dateEl.value = dataFuturaString;
-    dateEl.min = dataFuturaString;
-
-    dateEl.addEventListener('change', loadAvailability);
-    labEl.addEventListener('change', loadAvailability);
-    submitBtn.addEventListener('click', submeterAgendamento);
-
-    await loadLaboratorios();
-    await loadDisciplinas();
-    await fetchHorariosFromAPI();
-    await loadAvailability();
+async function carregarUsuarioLogado() {
+    try {
+        const res = await fetch('/api/usuario-logado');
+        if (res.ok) userInfo = await res.json();
+    } catch (e) { }
 }
 
-async function fetchHorariosFromAPI() {
+async function carregarHorariosBase() {
     try {
-        const response = await fetch('/api/horarios');
-        if (!response.ok) throw new Error('Falha ao buscar lista de horários.');
-        availableSlotsFromDB = await response.json();
-    } catch (error) {
-        console.error("Erro ao buscar horários da API:", error);
-        slotsEl.innerHTML = '<p style="color: red;">Não foi possível carregar os horários.</p>';
-    }
+        const res = await fetch('/api/horarios');
+        if (res.ok) horariosBd = await res.json();
+    } catch (e) { }
 }
 
-async function loadLaboratorios() {
+async function carregarLaboratorios() {
     try {
-        const response = await fetch('/api/lab32');
-        if (!response.ok) throw new Error('Falha ao carregar laboratórios');
+        const isTecnico = userInfo && userInfo.tipo_usuario && userInfo.tipo_usuario.toLowerCase() === 'tecnico';
+        
+        const endpoint = isTecnico ? '/api/dashboard/meus-laboratorios' : '/api/lab32';
+
+        const response = await fetch(endpoint);
         const data = await response.json();
+        
+        selectLab.innerHTML = '<option value="">Selecione um laboratório...</option>';
 
-        labEl.innerHTML = '<option value="">Selecione um Laboratório</option>';
-        data.forEach(laboratorio => {
+        data.forEach(lab => {
             const option = document.createElement('option');
-            option.value = laboratorio.id_laboratorio;
-            option.textContent = laboratorio.nome_laboratorio;
-            labEl.appendChild(option);
+            option.value = lab.id_laboratorio;
+            option.textContent = lab.nome_laboratorio;
+            selectLab.appendChild(option);
         });
 
         if (data.length > 0) {
-            labEl.value = data[0].id_laboratorio;
+            selectLab.value = data[0].id_laboratorio; 
+            atualizarPainelCompleto(); 
         }
-
-    } catch (error) {
-        console.error('Erro ao carregar laboratórios:', error);
+    } catch (error) { 
+        console.error("Erro ao carregar os laboratórios:", error);
     }
 }
 
-async function loadDisciplinas() {
+async function buscarAulasDoMesAPI() {
+    if (!userInfo) return [];
     try {
-        const response = await fetch('/api/minhas-disciplinas');
-        if (!response.ok) throw new Error('Falha ao carregar disciplinas');
-        const data = await response.json();
+        const isTecnico = userInfo.tipo_usuario.toLowerCase() === 'tecnico';
+        const endpoint = isTecnico
+            ? `/api/calendario/aulas-tecnico?ano=${anoExibido}&mes=${mesExibido + 1}`
+            : `/api/calendario/aulas-autorizadas?ano=${anoExibido}&mes=${mesExibido + 1}`;
 
-        if (!disciplinaEl) return;
-        disciplinaEl.innerHTML = '<option value="">Selecione uma disciplina</option>';
-        data.forEach(disciplina => {
-            const option = document.createElement('option');
-            option.value = disciplina.id_disciplina;
-            option.textContent = disciplina.nome_disciplina;
-            disciplinaEl.appendChild(option);
+        const response = await fetch(endpoint);
+        if (response.ok) return await response.json();
+        return [];
+    } catch (error) {
+        return [];
+    }
+}
+
+async function atualizarPainelCompleto() {
+    if (!selectLab.value) {
+        aulasDoMes = [];
+        renderizarCalendario();
+        listaHorarios.innerHTML = '<p style="text-align: center; color: #888;">Selecione um laboratório.</p>';
+        return;
+    }
+
+    const todasAulas = await buscarAulasDoMesAPI();
+    const nomeLabSelecionado = selectLab.options[selectLab.selectedIndex].text;
+
+    aulasDoMes = todasAulas.filter(a => a.nome_laboratorio === nomeLabSelecionado);
+
+    renderizarCalendario();
+    renderizarHorariosDoDia(inputData.value);
+}
+
+function mudarMes(direcao) {
+    mesExibido += direcao;
+    if (mesExibido > 11) { mesExibido = 0; anoExibido++; }
+    if (mesExibido < 0) { mesExibido = 11; anoExibido--; }
+    atualizarPainelCompleto();
+}
+
+function sincronizarCalendarioComInputData() {
+    const partes = inputData.value.split('-');
+    anoExibido = parseInt(partes[0]);
+    mesExibido = parseInt(partes[1]) - 1;
+    atualizarPainelCompleto();
+}
+
+function renderizarCalendario() {
+    const dataBase = new Date(anoExibido, mesExibido, 1);
+    tituloCalendario.textContent = `${dataBase.toLocaleString('pt-BR', { month: 'long' }).toUpperCase()} • ${anoExibido}`;
+
+    const diasNoMes = new Date(anoExibido, mesExibido + 1, 0).getDate();
+    const primeiroDia = dataBase.getDay();
+
+    const diasComAula = {};
+    aulasDoMes.forEach(aula => {
+        const d = new Date(aula.data);
+        const diaUTC = d.getUTCDate();
+        diasComAula[diaUTC] = true;
+    });
+
+    grid.innerHTML = "";
+
+    for (let i = 0; i < primeiroDia; i++) {
+        grid.innerHTML += `<div class="dia-calendario dia-vazio"></div>`;
+    }
+
+    const dataInputSelecionada = inputData.value;
+
+    for (let dia = 1; dia <= diasNoMes; dia++) {
+        const diaStr = String(dia).padStart(2, '0');
+        const mesStr = String(mesExibido + 1).padStart(2, '0');
+        const diaFormatado = `${anoExibido}-${mesStr}-${diaStr}`;
+
+        let classes = "dia-calendario";
+        if (diasComAula[dia]) classes += " tem-aula";
+        if (diaFormatado === dataInputSelecionada) classes += " dia-selecionado";
+
+        const div = document.createElement('div');
+        div.className = classes;
+        div.innerHTML = `<span>${dia}</span>`;
+
+        div.addEventListener('click', () => {
+            inputData.value = diaFormatado;
+            renderizarCalendario();
+            renderizarHorariosDoDia(diaFormatado);
         });
-    } catch (error) {
-        console.error('Erro ao carregar disciplinas:', error);
+
+        grid.appendChild(div);
     }
 }
 
-async function loadAvailability() {
-    let labIdParaBuscar = labEl.value;
-    if (!labIdParaBuscar && labEl.options.length > 1) {
-        labIdParaBuscar = labEl.options[1].value;
-    }
-
-    if (!labIdParaBuscar) {
-        slotsEl.innerHTML = '<p>Selecione um laboratório para ver os horários.</p>';
+function renderizarHorariosDoDia(dataEscolhida) {
+    listaHorarios.innerHTML = "";
+    if (!selectLab.value) {
+        listaHorarios.innerHTML = '<p style="text-align: center; color: #888;">Selecione um laboratório para ver os horários.</p>';
         return;
     }
 
-    msgEl.style.display = 'none';
-    slotsEl.innerHTML = '<p>Carregando horários...</p>';
-    submitBtn.disabled = true;
-    
-    //  Zera a lista ao mudar de data/laboratório
-    selectedSlots = []; 
+    const aulasDoDia = aulasDoMes.filter(aula => {
+        const d = new Date(aula.data);
+        const diaDaAula = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+        return diaDaAula === dataEscolhida;
+    });
 
-    try {
-        const res = await fetch(`/api/availability?date=${dateEl.value}&labId=${labIdParaBuscar}`);
-        if (!res.ok) throw new Error('Falha ao buscar horários.');
-        const data = await res.json();
-        occupiedSlots = data.occupied || [];
-        renderSlots();
-    } catch (error) {
-        console.error('Erro ao carregar disponibilidade:', error);
-        slotsEl.innerHTML = '<p style="color: red;">Erro ao carregar horários.</p>';
-    }
-}
+    horariosBd.forEach(slot => {
+        const aulaEncontrada = aulasDoDia.find(a => a.hora_inicio.startsWith(slot.inicio));
+        const div = document.createElement('div');
 
-function renderSlots() {
-    slotsEl.innerHTML = '';
-
-    availableSlotsFromDB.forEach(horario => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'bloco-horario';
-
-        btn.textContent = `${horario.inicio} — ${horario.fim}`;
-        btn.dataset.hour = horario.inicio;
-
-        if (occupiedSlots.includes(horario.inicio)) {
-            btn.classList.add('occupied');
-            btn.disabled = true;
+        if (aulaEncontrada) {
+            div.className = "slot-horario slot-ocupado";
+            div.innerHTML = `
+                        <h4><i class="fas fa-clock"></i> ${slot.inicio} - ${slot.fim}</h4>
+                        <p><strong>Disciplina:</strong> ${aulaEncontrada.nome_disciplina}</p>
+                        ${aulaEncontrada.nome_professor ? `<p><strong>Professor:</strong> ${aulaEncontrada.nome_professor}</p>` : ''}
+                        <p style="color: #e74c3c; margin-top: 5px;"><strong><i class="fas fa-ban"></i> Reservado</strong></p>
+                    `;
         } else {
-            // Lógica para adicionar ou remover da lista ao clicar
-            btn.addEventListener('click', () => {
-                if (selectedSlots.includes(horario.inicio)) {
-                    // Se já estiver selecionado, tira da lista
-                    selectedSlots = selectedSlots.filter(h => h !== horario.inicio);
-                } else {
-                    // Se não estiver, adiciona na lista
-                    selectedSlots.push(horario.inicio);
-                }
-                updateSelectionUI();
-            });
+            div.className = "slot-horario slot-livre";
+            div.innerHTML = `
+                        <h4><i class="fas fa-clock"></i> ${slot.inicio} - ${slot.fim}</h4>
+                        <p style="color: #2ecc71;"><strong><i class="fas fa-check-circle"></i> Livre</strong></p>
+                    `;
         }
-        slotsEl.appendChild(btn);
+        listaHorarios.appendChild(div);
     });
-    updateSelectionUI();
-}
-
-function updateSelectionUI() {
-    document.querySelectorAll('.bloco-horario').forEach(el => {
-        el.classList.remove('selected');
-        
-        // Pinta de verde todos que estiverem na lista
-        if (!el.disabled && selectedSlots.includes(el.dataset.hour)) {
-            el.classList.add('selected');
-        }
-    });
-    
-    // Libera o botão apenas se tiver pelo menos 1 horário selecionado
-    submitBtn.disabled = selectedSlots.length === 0;
-}
-
-async function submeterAgendamento() {
-    if (selectedSlots.length === 0 || !loggedInUser) return;
-
-    const tipoUsuario = loggedInUser.tipo_usuario ? loggedInUser.tipo_usuario.toLowerCase().trim() : '';
-    const isTecnico = tipoUsuario === 'tecnico';
-
-    if (!isTecnico && !disciplinaEl.value) {
-        msgEl.textContent = 'Por favor, selecione uma disciplina.';
-        msgEl.className = 'mensagem-status erro';
-        msgEl.style.display = 'block';
-        return;
-    }
-
-    const numeroDiscentesEl = document.getElementById('numero_discentes');
-    const numeroDiscentes = numeroDiscentesEl.value;
-    if (!numeroDiscentes || parseInt(numeroDiscentes) <= 0) {
-        msgEl.textContent = 'Por favor, insira um número válido de discentes.';
-        msgEl.className = 'mensagem-status erro';
-        msgEl.style.display = 'block';
-        return;
-    }
-
-    const precisaTecnico = document.querySelector('input[name="precisaTecnico"]:checked').value === 'true';
-    const linkRoteiro = document.getElementById('link_roteiro').value.trim();
-
-    if (linkRoteiro === '') {
-        msgEl.textContent = 'Por favor, insira o link do roteiro. Ele é obrigatório para todos os agendamentos.';
-        msgEl.className = 'mensagem-status erro';
-        msgEl.style.display = 'block';
-        return;
-    }
-
-    const idDisciplinaFinal = (isTecnico && !disciplinaEl.value) ? null : disciplinaEl.value;
-
-    // Trava o botão para não enviar duplicado enquanto processa
-    submitBtn.disabled = true;
-    msgEl.textContent = 'Enviando solicitações...';
-    msgEl.className = 'mensagem-status';
-    msgEl.style.display = 'block';
-
-    let sucessoCount = 0;
-    let erroMensagens = [];
-
-    // Envia um pedido para cada horário selecionado
-    for (const slot of selectedSlots) {
-        const payload = {
-            labId: labEl.value,
-            date: dateEl.value,
-            hour: slot,
-            precisa_tecnico: precisaTecnico,
-            link_roteiro: linkRoteiro,
-            id_disciplina: idDisciplinaFinal,
-            numero_discentes: numeroDiscentes
-        };
-
-        try {
-            const res = await fetch('/api/schedule', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const result = await res.json();
-            
-            if (!res.ok) throw new Error(result.error || 'Ocorreu um erro');
-            sucessoCount++;
-        } catch (err) {
-            erroMensagens.push(`Horário ${slot}: ${err.message}`);
-        }
-    }
-
-    // Limpa os campos após o envio
-    document.getElementById('link_roteiro').value = '';
-    numeroDiscentesEl.value = '';
-    disciplinaEl.selectedIndex = 0;
-    selectedSlots = []; 
-
-    // Exibe a mensagem de resumo final
-    if (erroMensagens.length === 0) {
-        msgEl.textContent = `${sucessoCount} agendamento(s) solicitado(s) com sucesso!`;
-        msgEl.className = 'mensagem-status sucesso';
-    } else {
-        msgEl.innerHTML = `${sucessoCount} sucesso(s).<br>Erros:<br>${erroMensagens.join('<br>')}`;
-        msgEl.className = 'mensagem-status erro';
-    }
-    
-    msgEl.style.display = 'block';
-    await loadAvailability();
-}
-
-function formatHour(h) { return (h < 10 ? '0' : '') + h + ':00'; }
-function formatEnd(start) {
-    const endH = parseInt(start.split(':')[0]) + 1;
-    return formatHour(endH);
 }
