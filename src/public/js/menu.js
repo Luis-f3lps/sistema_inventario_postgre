@@ -115,10 +115,8 @@ function preencherDadosDoMenu(userData) {
       showMenuItem(".Calendario");
       showMenuItem(".Home");
       showMenuItem(".produto");
-      showMenuItem(".salas");
       showDashboardCard(".cartao-aulas-tecnico");
       showDashboardCard(".cartao-meus-laboratorios");
-      showMenuItem(".aprovar-salas");
 
       break;
 
