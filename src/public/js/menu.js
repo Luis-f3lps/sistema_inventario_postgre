@@ -117,19 +117,22 @@ function preencherDadosDoMenu(userData) {
       showMenuItem(".produto");
       showDashboardCard(".cartao-aulas-tecnico");
       showDashboardCard(".cartao-meus-laboratorios");
-
       break;
 
-    case "professor":
+case "professor":
       showMenuItem(".Home");
       showMenuItem(".Calendario");
       showMenuItem(".professor");
       showMenuItem(".Disciplinas");
       showMenuItem(".Horarios");
+      
+      showMenuItem(".salas");
+      showMenuItem(".aprovar-salas");
       showMenuItem(".agendar-sala");
+      showMenuItem(".calendario-salas");
+
       showDashboardCard(".cartao-aulas-autorizadas");
       showDashboardCard(".cartao-solicitacoes");
-      showMenuItem(".aprovar-salas");
       break;
   }
 }

@@ -220,11 +220,10 @@ app.get("/Relatorio", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, r
 app.get("/Usuarios", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "usuarios.html")));
 app.get("/Laboratorio", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "laboratorio.html")));
 // Novas telas de Sala de Aula
-app.get("/Salas", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "salas.html")));
-app.get("/Tela_Responsavel_Salas", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "tela_responsavel_salas.html")));
-
-app.get("/agendamento-recorrente-salas", Autenticado, AutorizadoPara(['professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "agendamento-recorrente-salas.html")));
-app.get("/CalendarioSalas", Autenticado, AutorizadoPara(['tecnico', 'admin', 'professor']), (req, res) => {
+app.get("/Salas", Autenticado, AutorizadoPara(['admin', 'professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "salas.html")));
+app.get("/Tela_Responsavel_Salas", Autenticado, AutorizadoPara(['admin', 'professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "tela_responsavel_salas.html")));
+app.get("/agendamento-recorrente-salas",Autenticado, AutorizadoPara(['admin', 'professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "agendamento-recorrente-salas.html")));
+app.get("/CalendarioSalas", Autenticado, AutorizadoPara(['admin', 'professor']), (req, res) => {
   res.sendFile(path.join(__dirname, "public", "calendario_salas.html"));
 });
 app.get("/DashboardSalas", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "home_salas.html")));
