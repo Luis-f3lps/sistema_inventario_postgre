@@ -8,17 +8,15 @@ import fs from "fs";
 import bcrypt from "bcryptjs";
 import pool from "./database.js";
 
-
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_SISTEMA,
-    pass: process.env.SENHA_EMAIL_SISTEMA
-  }
+    pass: process.env.SENHA_EMAIL_SISTEMA,
+  },
 });
-
 
 // 1. NOVOS IMPORTS PARA O JWT E COOKIES
 import jwt from "jsonwebtoken";
@@ -38,7 +36,8 @@ console.log({
 const app = express();
 
 // 2. CHAVE SECRETA DO JWT (Recomendo depois colocar no seu variaveis.env como JWT_SECRET)
-const JWT_SECRET = process.env.JWT_SECRET || "chaveSuperSecretaDoInventario2026";
+const JWT_SECRET =
+  process.env.JWT_SECRET || "chaveSuperSecretaDoInventario2026";
 
 (async () => {
   try {
@@ -55,13 +54,17 @@ app.use(express.urlencoded({ extended: true }));
 // 3. ATIVANDO O LEITOR DE COOKIES
 app.use(cookieParser());
 
-// 4. NOVO MIDDLEWARE DE AUTENTICAÇÃO 
+// 4. NOVO MIDDLEWARE DE AUTENTICAÇÃO
 function Autenticado(req, res, next) {
   const token = req.cookies.token; // Pega o crachá digital do cookie
 
   if (!token) {
     console.log("Usuário não autenticado, bloqueando acesso...");
-    if (req.originalUrl.startsWith('/api') || req.xhr || req.headers.accept.indexOf('json') > -1) {
+    if (
+      req.originalUrl.startsWith("/api") ||
+      req.xhr ||
+      req.headers.accept.indexOf("json") > -1
+    ) {
       return res.status(401).json({ error: "Não autorizado" });
     } else {
       return res.redirect("https://sistema-merlin.vercel.app/");
@@ -79,7 +82,9 @@ function Autenticado(req, res, next) {
   } catch (err) {
     console.error("Token inválido ou expirado.");
     res.clearCookie("token");
-    return res.status(401).json({ error: "Sessão expirada. Faça login novamente." });
+    return res
+      .status(401)
+      .json({ error: "Sessão expirada. Faça login novamente." });
   }
 }
 //  MIDDLEWARE Bloqueio por Cargo
@@ -89,25 +94,37 @@ function AutorizadoPara(cargosPermitidos) {
     let tipoUser = req.session.user.tipo_usuario.trim().toLowerCase();
 
     // Padroniza a nomenclatura do admin para evitar furos
-    if (tipoUser === 'administrador') tipoUser = 'admin';
+    if (tipoUser === "administrador") tipoUser = "admin";
 
     // Verifica se o cargo do usuário está na "lista VIP" daquela rota
     if (cargosPermitidos.includes(tipoUser)) {
       next(); // Passou! Pode acessar a rota.
     } else {
-      console.warn(`Tentativa de acesso negado. Cargo: ${tipoUser}. Rota: ${req.originalUrl}`);
+      console.warn(
+        `Tentativa de acesso negado. Cargo: ${tipoUser}. Rota: ${req.originalUrl}`,
+      );
 
-      if (req.originalUrl.startsWith('/api')) {
-        return res.status(403).json({ error: "Acesso Negado: Seu cargo não tem permissão para realizar esta ação." });
+      if (req.originalUrl.startsWith("/api")) {
+        return res
+          .status(403)
+          .json({
+            error:
+              "Acesso Negado: Seu cargo não tem permissão para realizar esta ação.",
+          });
       } else {
         // Define a "rota de fuga" correta baseada no cargo do usuário
-        let rotaSegura = '/login.html';
-        if (tipoUser === 'admin') rotaSegura = '/Inventario';
-        if (tipoUser === 'tecnico' || tipoUser === 'professor') rotaSegura = '/Home';
+        let rotaSegura = "/login.html";
+        if (tipoUser === "admin") rotaSegura = "/Inventario";
+        if (tipoUser === "tecnico" || tipoUser === "professor")
+          rotaSegura = "/Home";
 
         // Trava absoluta de segurança: se ele já estiver na rota segura e mesmo assim for bloqueado, mostra tela de erro.
         if (req.originalUrl === rotaSegura) {
-          return res.status(403).send("<h1 style='text-align:center; margin-top:50px;'>403 - Acesso Negado</h1><p style='text-align:center;'>Você não tem permissão para ver esta página.</p>");
+          return res
+            .status(403)
+            .send(
+              "<h1 style='text-align:center; margin-top:50px;'>403 - Acesso Negado</h1><p style='text-align:center;'>Você não tem permissão para ver esta página.</p>",
+            );
         }
 
         // Redireciona para o lugar certo e quebra o loop!
@@ -128,12 +145,14 @@ app.post("/login", async (req, res) => {
     const { email, senha } = req.body;
 
     if (!email || !senha) {
-      return res.status(400).json({ error: "Usuário e senha são obrigatórios" });
+      return res
+        .status(400)
+        .json({ error: "Usuário e senha são obrigatórios" });
     }
 
     const { rows } = await pool.query(
       "SELECT * FROM usuario WHERE email = $1",
-      [email]
+      [email],
     );
 
     if (rows.length === 0) {
@@ -144,7 +163,8 @@ app.post("/login", async (req, res) => {
 
     if (user.status === "desativado") {
       return res.status(403).json({
-        error: "Usuário desativado, entre em contato com o Administrador para ativação.",
+        error:
+          "Usuário desativado, entre em contato com o Administrador para ativação.",
       });
     }
 
@@ -161,13 +181,13 @@ app.post("/login", async (req, res) => {
     };
 
     // Assinando o Token válido por 8 horas
-    const token = jwt.sign(userData, JWT_SECRET, { expiresIn: '8h' });
+    const token = jwt.sign(userData, JWT_SECRET, { expiresIn: "8h" });
 
     // Enviando o Token como um Cookie seguro para o navegador
-    res.cookie('token', token, {
+    res.cookie("token", token, {
       httpOnly: true, // Impede roubo por hackers via Javascript
-      secure: process.env.NODE_ENV === 'production', // true na Vercel
-      maxAge: 8 * 60 * 60 * 1000 // 8 horas
+      secure: process.env.NODE_ENV === "production", // true na Vercel
+      maxAge: 8 * 60 * 60 * 1000, // 8 horas
     });
 
     res.json({ success: true, tipo_usuario: user.tipo_usuario });
@@ -185,48 +205,140 @@ app.listen(PORT, () => {
 // ==========================================
 // PÁGINAS LIVRES
 // ==========================================
-app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public", "login.html")));
-app.get("/novo-usuario", (req, res) => res.sendFile(path.join(__dirname, "public", "novo-usuario.html")));
+app.get("/", (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "login.html")),
+);
+app.get("/novo-usuario", (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "novo-usuario.html")),
+);
 // ==========================================
 // PÁGINAS GERAIS & PROFESSOR/TÉCNICO
 // ==========================================
-app.get("/Home", Autenticado, AutorizadoPara(['tecnico', 'professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "Home.html")));
-app.get("/Calendario", Autenticado, AutorizadoPara(['tecnico', 'professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "calendario.html")));
+app.get(
+  "/Home",
+  Autenticado,
+  AutorizadoPara(["tecnico", "professor"]),
+  (req, res) => res.sendFile(path.join(__dirname, "public", "Home.html")),
+);
+app.get(
+  "/Calendario",
+  Autenticado,
+  AutorizadoPara(["tecnico", "professor"]),
+  (req, res) => res.sendFile(path.join(__dirname, "public", "calendario.html")),
+);
 
 // ==========================================
 // PÁGINAS DO PROFESSOR (.professor, .Disciplinas, .Horarios)
 // ==========================================
-app.get("/Horario", Autenticado, AutorizadoPara(['professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "horarios.html")));
-app.get("/agendamento-recorrente", Autenticado, AutorizadoPara(['professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "agendamento-recorrente.html")));
-app.get("/Tela_Professor", Autenticado, AutorizadoPara(['professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "tela_professor.html")));
+app.get("/Horario", Autenticado, AutorizadoPara(["professor"]), (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "horarios.html")),
+);
+app.get(
+  "/agendamento-recorrente",
+  Autenticado,
+  AutorizadoPara(["professor"]),
+  (req, res) =>
+    res.sendFile(path.join(__dirname, "public", "agendamento-recorrente.html")),
+);
+app.get(
+  "/Tela_Professor",
+  Autenticado,
+  AutorizadoPara(["professor"]),
+  (req, res) =>
+    res.sendFile(path.join(__dirname, "public", "tela_professor.html")),
+);
 
 // ==========================================
 // PÁGINAS DO TÉCNICO (.tecnico)
 // ==========================================
-app.get("/Tela_Tecnico", Autenticado, AutorizadoPara(['tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "tela_tecnico.html")));
+app.get("/Tela_Tecnico", Autenticado, AutorizadoPara(["tecnico"]), (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "tela_tecnico.html")),
+);
 
 // ==========================================
-// PÁGINAS COMPARTILHADAS 
+// PÁGINAS COMPARTILHADAS
 // ==========================================
-app.get("/Disciplinas", Autenticado, AutorizadoPara(['admin', 'professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "disciplinas.html")));
+app.get(
+  "/Disciplinas",
+  Autenticado,
+  AutorizadoPara(["admin", "professor"]),
+  (req, res) =>
+    res.sendFile(path.join(__dirname, "public", "disciplinas.html")),
+);
 
-app.get("/Produto", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "Produto.html")));
-app.get("/MovimentacaoProduto", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "MovimentacaoProduto.html")));
-app.get("/EditarMovimentacoes", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "EditarMovimentacoes.html")));
-app.get("/Inventario", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "Inventario.html")));
+app.get(
+  "/Produto",
+  Autenticado,
+  AutorizadoPara(["admin", "tecnico"]),
+  (req, res) => res.sendFile(path.join(__dirname, "public", "Produto.html")),
+);
+app.get(
+  "/MovimentacaoProduto",
+  Autenticado,
+  AutorizadoPara(["admin", "tecnico"]),
+  (req, res) =>
+    res.sendFile(path.join(__dirname, "public", "MovimentacaoProduto.html")),
+);
+app.get(
+  "/EditarMovimentacoes",
+  Autenticado,
+  AutorizadoPara(["admin", "tecnico"]),
+  (req, res) =>
+    res.sendFile(path.join(__dirname, "public", "EditarMovimentacoes.html")),
+);
+app.get(
+  "/Inventario",
+  Autenticado,
+  AutorizadoPara(["admin", "tecnico"]),
+  (req, res) => res.sendFile(path.join(__dirname, "public", "Inventario.html")),
+);
 
-
-app.get("/Relatorio", Autenticado, AutorizadoPara(['admin', 'tecnico']), (req, res) => res.sendFile(path.join(__dirname, "public", "relatorio.html")));
-app.get("/Usuarios", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "usuarios.html")));
-app.get("/Laboratorio", Autenticado, AutorizadoPara(['admin']), (req, res) => res.sendFile(path.join(__dirname, "public", "laboratorio.html")));
+app.get(
+  "/Relatorio",
+  Autenticado,
+  AutorizadoPara(["admin", "tecnico"]),
+  (req, res) => res.sendFile(path.join(__dirname, "public", "relatorio.html")),
+);
+app.get("/Usuarios", Autenticado, AutorizadoPara(["admin"]), (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "usuarios.html")),
+);
+app.get("/Laboratorio", Autenticado, AutorizadoPara(["admin"]), (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "laboratorio.html")),
+);
 // Novas telas de Sala de Aula
-app.get("/Salas", Autenticado, AutorizadoPara(['admin', 'professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "salas.html")));
-app.get("/Tela_Responsavel_Salas", Autenticado, AutorizadoPara(['admin', 'professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "tela_responsavel_salas.html")));
-app.get("/agendamento-recorrente-salas",Autenticado, AutorizadoPara(['admin', 'professor']), (req, res) => res.sendFile(path.join(__dirname, "public", "agendamento-recorrente-salas.html")));
-app.get("/CalendarioSalas", Autenticado, AutorizadoPara(['admin', 'professor']), (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "calendario_salas.html"));
-});
-app.get("/DashboardSalas", Autenticado, (req, res) => res.sendFile(path.join(__dirname, "public", "home_salas.html")));
+app.get(
+  "/Salas",
+  Autenticado,
+  AutorizadoPara(["admin", "professor"]),
+  (req, res) => res.sendFile(path.join(__dirname, "public", "salas.html")),
+);
+app.get(
+  "/Tela_Responsavel_Salas",
+  Autenticado,
+  AutorizadoPara(["admin", "professor"]),
+  (req, res) =>
+    res.sendFile(path.join(__dirname, "public", "tela_responsavel_salas.html")),
+);
+app.get(
+  "/agendamento-recorrente-salas",
+  Autenticado,
+  AutorizadoPara(["admin", "professor"]),
+  (req, res) =>
+    res.sendFile(
+      path.join(__dirname, "public", "agendamento-recorrente-salas.html"),
+    ),
+);
+app.get(
+  "/CalendarioSalas",
+  Autenticado,
+  AutorizadoPara(["admin", "professor"]),
+  (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "calendario_salas.html"));
+  },
+);
+app.get("/DashboardSalas", Autenticado, (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "home_salas.html")),
+);
 app.get("/api/usuario-logado", (req, res) => {
   const token = req.cookies.token;
   if (!token) {
@@ -270,7 +382,7 @@ app.get("/api/check-auth", (req, res) => {
 app.get("/api/usuarios", Autenticado, async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT nome_usuario, email, tipo_usuario, status FROM usuario ORDER BY tipo_usuario ASC, nome_usuario ASC"
+      "SELECT nome_usuario, email, tipo_usuario, status FROM usuario ORDER BY tipo_usuario ASC, nome_usuario ASC",
     );
     res.json(result.rows);
   } catch (error) {
@@ -286,7 +398,9 @@ app.patch("/api/usuarios/:email", Autenticado, async (req, res) => {
 
   try {
     if (email === loggedUserEmail) {
-      return res.status(403).json({ error: "Você não pode desativar sua própria conta." });
+      return res
+        .status(403)
+        .json({ error: "Você não pode desativar sua própria conta." });
     }
 
     const resultUserToDeactivate = await pool.query(
@@ -307,11 +421,18 @@ app.patch("/api/usuarios/:email", Autenticado, async (req, res) => {
       );
 
       if (resultActiveAdmins.rows[0].count <= 1) {
-        return res.status(403).json({ error: "Não é possível desativar o único usuário admin ativo." });
+        return res
+          .status(403)
+          .json({
+            error: "Não é possível desativar o único usuário admin ativo.",
+          });
       }
     }
 
-    await pool.query("UPDATE usuario SET status = $1 WHERE email = $2", ["desativado", email]);
+    await pool.query("UPDATE usuario SET status = $1 WHERE email = $2", [
+      "desativado",
+      email,
+    ]);
     res.status(200).json({ message: "Usuário desativado com sucesso" });
   } catch (error) {
     console.error(error);
@@ -326,7 +447,7 @@ app.patch("/api/usuarios/ativar/:email", Autenticado, async (req, res) => {
     // 1. Atualiza o status e já busca o nome do usuário para o email
     const result = await pool.query(
       "UPDATE usuario SET status = $1 WHERE email = $2 RETURNING nome_usuario",
-      ["ativado", email]
+      ["ativado", email],
     );
 
     if (result.rowCount === 0) {
@@ -341,7 +462,9 @@ app.patch("/api/usuarios/ativar/:email", Autenticado, async (req, res) => {
       await enviarEmailAtivacaoUsuario(email, nomeUsuario);
       console.log("✅ Usuário notificado por email com sucesso!");
     } catch (erroEmail) {
-      console.error("❌ Erro ao enviar email de ativação (mas o usuário foi ativado no banco):");
+      console.error(
+        "❌ Erro ao enviar email de ativação (mas o usuário foi ativado no banco):",
+      );
       console.error(erroEmail);
     }
 
@@ -361,12 +484,15 @@ app.post("/api/usuarios", Autenticado, async (req, res) => {
   }
 
   if (senha.length > 12) {
-    return res.status(400).json({ error: "A senha deve ter no máximo 12 caracteres" });
+    return res
+      .status(400)
+      .json({ error: "A senha deve ter no máximo 12 caracteres" });
   }
 
   try {
     const { rows: existingUserByName } = await pool.query(
-      "SELECT email FROM usuario WHERE nome_usuario = $1", [nome_usuario]
+      "SELECT email FROM usuario WHERE nome_usuario = $1",
+      [nome_usuario],
     );
 
     if (existingUserByName.length > 0) {
@@ -374,7 +500,8 @@ app.post("/api/usuarios", Autenticado, async (req, res) => {
     }
 
     const { rows: existingUserByEmail } = await pool.query(
-      "SELECT email FROM usuario WHERE email = $1", [email]
+      "SELECT email FROM usuario WHERE email = $1",
+      [email],
     );
 
     if (existingUserByEmail.length > 0) {
@@ -404,16 +531,24 @@ app.post("/api/novo-usuario", async (req, res) => {
 
   const tiposPermitidos = ["professor", "tecnico"];
   if (!tiposPermitidos.includes(tipo_usuario)) {
-    return res.status(403).json({ error: "Apenas perfis de Professor ou Técnico são permitidos neste cadastro." });
+    return res
+      .status(403)
+      .json({
+        error:
+          "Apenas perfis de Professor ou Técnico são permitidos neste cadastro.",
+      });
   }
 
   if (senha.length > 12) {
-    return res.status(400).json({ error: "A senha deve ter no máximo 12 caracteres" });
+    return res
+      .status(400)
+      .json({ error: "A senha deve ter no máximo 12 caracteres" });
   }
 
   try {
     const { rows: existingUserByEmail } = await pool.query(
-      "SELECT email FROM usuario WHERE email = $1", [email]
+      "SELECT email FROM usuario WHERE email = $1",
+      [email],
     );
 
     if (existingUserByEmail.length > 0) {
@@ -428,7 +563,9 @@ app.post("/api/novo-usuario", async (req, res) => {
       [nome_usuario, email, hashedPassword, tipo_usuario],
     );
 
-    await enviarEmailCriacaoConta(email, nome_usuario).catch(e => console.error("Erro ao enviar email de criação:", e));
+    await enviarEmailCriacaoConta(email, nome_usuario).catch((e) =>
+      console.error("Erro ao enviar email de criação:", e),
+    );
 
     res.status(201).json({ message: "Usuário adicionado com sucesso" });
   } catch (error) {
@@ -443,14 +580,14 @@ async function enviarEmailAutorizacao(emailDestino, dadosAula) {
   const mailOptions = {
     from: `Sistema Merlin <${process.env.EMAIL_SISTEMA}>`,
     to: emailDestino,
-    subject: 'Aula autorizada',
+    subject: "Aula autorizada",
     html: `
       <h2 style="color: #28a745;">Sua aula foi autorizada!</h2>
       <p><strong>Disciplina:</strong> ${dadosAula.disciplina}</p>
       <p><strong>Laboratório:</strong> ${dadosAula.laboratorio}</p>
       <p><strong>Data:</strong> ${dadosAula.data} às ${dadosAula.horario}</p>
       <p>Bom trabalho!</p>
-    `
+    `,
   };
   return transporter.sendMail(mailOptions);
 }
@@ -459,7 +596,7 @@ async function enviarEmailRecusa(emailDestino, dadosAula, justificativa) {
   const mailOptions = {
     from: `Sistema Merlin <${process.env.EMAIL_SISTEMA}>`,
     to: emailDestino,
-    subject: 'Aula não autorizada',
+    subject: "Aula não autorizada",
     html: `
       <h2 style="color: #dc3545;">Sua solicitação não foi autorizada</h2>
       <p><strong>Disciplina:</strong> ${dadosAula.disciplina}</p>
@@ -467,7 +604,7 @@ async function enviarEmailRecusa(emailDestino, dadosAula, justificativa) {
       <p><strong>Data:</strong> ${dadosAula.data} às ${dadosAula.horario}</p>
       <p><strong>Motivo:</strong> ${justificativa}</p>
       <p>Para dúvidas, entre em contato com o técnico responsável.</p>
-    `
+    `,
   };
   return transporter.sendMail(mailOptions);
 }
@@ -476,11 +613,11 @@ async function enviarEmailCancelamento(emailDestino, dadosAula) {
   const mailOptions = {
     from: `Sistema Merlin <${process.env.EMAIL_SISTEMA}>`,
     to: emailDestino,
-    subject: 'Aula cancelada',
+    subject: "Aula cancelada",
     html: `
       <h2 style="color: #6c757d;">Agendamento Cancelado</h2>
       <p>Informamos que o agendamento da disciplina <strong>${dadosAula.disciplina}</strong> no laboratório <strong>${dadosAula.laboratorio}</strong>, programado para o dia ${dadosAula.data} às ${dadosAula.horario}, foi cancelado.</p>
-    `
+    `,
   };
   return transporter.sendMail(mailOptions);
 }
@@ -489,7 +626,7 @@ async function enviarEmailCriacaoConta(emailDestino, nomeUsuario) {
   const mailOptions = {
     from: `Sistema Merlin <${process.env.EMAIL_SISTEMA}>`,
     to: emailDestino,
-    subject: 'Bem-vindo ao Sistema Merlin - Aguardando Ativação',
+    subject: "Bem-vindo ao Sistema Merlin - Aguardando Ativação",
     html: `
       <h2 style="color: #0056b3;">Olá, ${nomeUsuario}!</h2>
       <p>Sua conta no <strong>Sistema Merlin</strong> foi criada com sucesso.</p>
@@ -498,15 +635,18 @@ async function enviarEmailCriacaoConta(emailDestino, nomeUsuario) {
       <p>Assim que o administrador liberar o seu perfil, você conseguirá fazer login no sistema.</p>
       <br>
       <p>Atenciosamente,<br>Equipe Sistema Merlin</p>
-    `
+    `,
   };
   return transporter.sendMail(mailOptions);
 }
-async function enviarEmailNovaSolicitacaoTecnico(emailDestino, dadosSolicitacao) {
+async function enviarEmailNovaSolicitacaoTecnico(
+  emailDestino,
+  dadosSolicitacao,
+) {
   const mailOptions = {
     from: `Sistema Merlin <${process.env.EMAIL_SISTEMA}>`,
     to: emailDestino,
-    subject: '🚨 Nova Solicitação de Aula',
+    subject: "🚨 Nova Solicitação de Aula",
     html: `
       <h2 style="color: #0056b3;">Nova Solicitação de Agendamento</h2>
       <p>Olá, <strong>${dadosSolicitacao.nome_tecnico}</strong>!</p>
@@ -515,19 +655,22 @@ async function enviarEmailNovaSolicitacaoTecnico(emailDestino, dadosSolicitacao)
         <li>📅 <strong>Data:</strong> ${dadosSolicitacao.data}</li>
         <li>⏰ <strong>Horário:</strong> ${dadosSolicitacao.horario}</li>
         <li>📚 <strong>Disciplina:</strong> ${dadosSolicitacao.disciplina}</li>
-        <li>🛠️ <strong>Precisa do seu apoio?</strong> ${dadosSolicitacao.precisa_tecnico ? '<span style="color: red;">SIM</span>' : 'NÃO'}</li>
+        <li>🛠️ <strong>Precisa do seu apoio?</strong> ${dadosSolicitacao.precisa_tecnico ? '<span style="color: red;">SIM</span>' : "NÃO"}</li>
       </ul>
       <p>Por favor, acesse o painel do técnico no sistema para autorizar ou recusar esta solicitação.</p>
-    `
+    `,
   };
   return transporter.sendMail(mailOptions);
 }
 
-async function enviarEmailNovaSolicitacaoRecorrenteTecnico(emailDestino, dadosSolicitacao) {
+async function enviarEmailNovaSolicitacaoRecorrenteTecnico(
+  emailDestino,
+  dadosSolicitacao,
+) {
   const mailOptions = {
     from: `Sistema Merlin <${process.env.EMAIL_SISTEMA}>`,
     to: emailDestino,
-    subject: '🚨 Nova Solicitação de Aula RECORRENTE',
+    subject: "🚨 Nova Solicitação de Aula RECORRENTE",
     html: `
       <h2 style="color: #0056b3;">Nova Solicitação de Agendamento Recorrente</h2>
       <p>Olá, <strong>${dadosSolicitacao.nome_tecnico}</strong>!</p>
@@ -536,10 +679,10 @@ async function enviarEmailNovaSolicitacaoRecorrenteTecnico(emailDestino, dadosSo
         <li>📅 <strong>Período:</strong> De ${dadosSolicitacao.dataInicio} até ${dadosSolicitacao.dataFim}</li>
         <li>⏰ <strong>Horários Selecionados:</strong> ${dadosSolicitacao.horarios}</li>
         <li>📚 <strong>Disciplina:</strong> ${dadosSolicitacao.disciplina}</li>
-        <li>🛠️ <strong>Precisa do seu apoio?</strong> ${dadosSolicitacao.precisa_tecnico ? '<span style="color: red;">SIM</span>' : 'NÃO'}</li>
+        <li>🛠️ <strong>Precisa do seu apoio?</strong> ${dadosSolicitacao.precisa_tecnico ? '<span style="color: red;">SIM</span>' : "NÃO"}</li>
       </ul>
       <p>Por favor, acesse o painel do técnico para analisar este pedido em lote.</p>
-    `
+    `,
   };
   return transporter.sendMail(mailOptions);
 }
@@ -548,7 +691,7 @@ async function enviarEmailAtivacaoUsuario(emailDestino, nomeUsuario) {
   const mailOptions = {
     from: `Sistema Merlin <${process.env.EMAIL_SISTEMA}>`,
     to: emailDestino,
-    subject: 'Sua conta foi ativada! - Sistema Merlin',
+    subject: "Sua conta foi ativada! - Sistema Merlin",
     html: `
       <h2 style="color: #28a745;">Boas notícias, ${nomeUsuario}!</h2>
       <p>Sua conta no <strong>Sistema Merlin</strong> foi analisada e <strong>ativada</strong> por um administrador.</p>
@@ -558,7 +701,7 @@ async function enviarEmailAtivacaoUsuario(emailDestino, nomeUsuario) {
       </div>
       <br>
       <p>Atenciosamente,<br>Equipe Sistema Merlin</p>
-    `
+    `,
   };
   return transporter.sendMail(mailOptions);
 }
@@ -606,7 +749,8 @@ app.get("/api/laboratoriosPag", Autenticado, async (req, res) => {
   const offset = (pageInt - 1) * limitInt;
 
   try {
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
         SELECT 
             l.id_laboratorio, 
             l.nome_laboratorio, 
@@ -617,13 +761,21 @@ app.get("/api/laboratoriosPag", Autenticado, async (req, res) => {
         LEFT JOIN usuario u ON lu.usuario_email = u.email
         GROUP BY l.id_laboratorio, l.nome_laboratorio
         LIMIT $1 OFFSET $2
-      `, [limitInt, offset]
+      `,
+      [limitInt, offset],
     );
 
-    const countResult = await pool.query("SELECT COUNT(*) as total FROM laboratorio");
+    const countResult = await pool.query(
+      "SELECT COUNT(*) as total FROM laboratorio",
+    );
     const totalPages = Math.ceil(countResult.rows[0].total / limitInt);
 
-    res.json({ data: result.rows, totalItems: countResult.rows[0].total, totalPages, currentPage: pageInt });
+    res.json({
+      data: result.rows,
+      totalItems: countResult.rows[0].total,
+      totalPages,
+      currentPage: pageInt,
+    });
   } catch (error) {
     res.status(500).json({ error: "Erro no servidor" });
   }
@@ -634,31 +786,40 @@ app.post("/api/laboratorios", Autenticado, async (req, res) => {
     const { nome_laboratorio, usuario_email } = req.body;
 
     if (!nome_laboratorio || !usuario_email) {
-      return res.status(400).json({ error: "Nome do laboratório e email do responsável são obrigatórios." });
+      return res
+        .status(400)
+        .json({
+          error: "Nome do laboratório e email do responsável são obrigatórios.",
+        });
     }
 
     // 1. Verifica se o laboratório já existe
-    const check = await pool.query("SELECT * FROM laboratorio WHERE nome_laboratorio = $1", [nome_laboratorio]);
+    const check = await pool.query(
+      "SELECT * FROM laboratorio WHERE nome_laboratorio = $1",
+      [nome_laboratorio],
+    );
     if (check.rows.length > 0) {
-      return res.status(400).json({ error: "Nome do laboratório já está em uso." });
+      return res
+        .status(400)
+        .json({ error: "Nome do laboratório já está em uso." });
     }
 
     // 2. Insere o laboratório na tabela principal e pega o ID gerado
     const insertResult = await pool.query(
-      "INSERT INTO laboratorio (nome_laboratorio) VALUES ($1) RETURNING id_laboratorio", 
-      [nome_laboratorio]
+      "INSERT INTO laboratorio (nome_laboratorio) VALUES ($1) RETURNING id_laboratorio",
+      [nome_laboratorio],
     );
     const idLaboratorio = insertResult.rows[0].id_laboratorio;
 
     // 3. Vincula o responsável na tabela nova (laboratorio_usuario)
     await pool.query(
-      "INSERT INTO laboratorio_usuario (id_laboratorio, usuario_email) VALUES ($1, $2)", 
-      [idLaboratorio, usuario_email]
+      "INSERT INTO laboratorio_usuario (id_laboratorio, usuario_email) VALUES ($1, $2)",
+      [idLaboratorio, usuario_email],
     );
 
     res.status(201).json({
       message: "Laboratório adicionado com sucesso!",
-      id_laboratorio: idLaboratorio
+      id_laboratorio: idLaboratorio,
     });
   } catch (error) {
     console.error("Erro ao adicionar laboratório:", error);
@@ -670,8 +831,8 @@ app.post("/api/atualizar-responsavel", Autenticado, async (req, res) => {
   const { idLaboratorio, usuarioEmail } = req.body;
   try {
     await pool.query(
-        "INSERT INTO laboratorio_usuario (id_laboratorio, usuario_email) VALUES ($1, $2) ON CONFLICT DO NOTHING", 
-        [idLaboratorio, usuarioEmail]
+      "INSERT INTO laboratorio_usuario (id_laboratorio, usuario_email) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+      [idLaboratorio, usuarioEmail],
     );
     res.json({ message: "Responsável vinculado com sucesso!" });
   } catch (error) {
@@ -725,7 +886,7 @@ app.delete(
 
 app.get("/api/lab", Autenticado, async (req, res) => {
   try {
-    const { tipo_usuario, email } = req.session.user; 
+    const { tipo_usuario, email } = req.session.user;
 
     let query;
     let params = [];
@@ -739,7 +900,7 @@ app.get("/api/lab", Autenticado, async (req, res) => {
         JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
         WHERE lu.usuario_email = $1
       `;
-      params.push(email); 
+      params.push(email);
     }
 
     const { rows: labs } = await pool.query(query, params);
@@ -767,7 +928,7 @@ app.get("/api/lab32", Autenticado, async (req, res) => {
         JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
         WHERE lu.usuario_email = $1
       `;
-      params.push(email); 
+      params.push(email);
     }
 
     const { rows: labs } = await pool.query(query, params);
@@ -2056,15 +2217,36 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
 
   try {
     const professor_email = req.session.user.email;
-    const { labId, date, hour, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes } = req.body;
+    const {
+      labId,
+      date,
+      hour,
+      precisa_tecnico,
+      link_roteiro,
+      id_disciplina,
+      numero_discentes,
+    } = req.body;
 
     if (!labId || !date || !hour || !numero_discentes) {
-      return res.status(400).json({ error: "Dados incompletos para o agendamento." });
+      return res
+        .status(400)
+        .json({ error: "Dados incompletos para o agendamento." });
     }
 
-    const statusProfessor = await pool.query("SELECT status FROM usuario WHERE email = $1", [professor_email]);
-    if (statusProfessor.rowCount > 0 && statusProfessor.rows[0].status === "desativado") {
-      return res.status(403).json({ error: "Sua conta está desativada. Você não tem permissão para solicitar agendamentos." });
+    const statusProfessor = await pool.query(
+      "SELECT status FROM usuario WHERE email = $1",
+      [professor_email],
+    );
+    if (
+      statusProfessor.rowCount > 0 &&
+      statusProfessor.rows[0].status === "desativado"
+    ) {
+      return res
+        .status(403)
+        .json({
+          error:
+            "Sua conta está desativada. Você não tem permissão para solicitar agendamentos.",
+        });
     }
 
     const statusLaboratorio = await pool.query(
@@ -2072,10 +2254,17 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
        FROM laboratorio_usuario lu
        JOIN usuario u ON lu.usuario_email = u.email
        WHERE lu.id_laboratorio = $1`,
-      [labId]
+      [labId],
     );
-    if (statusLaboratorio.rowCount > 0 && statusLaboratorio.rows.some(r => r.status === "desativado")) {
-      return res.status(403).json({ error: "Um dos responsáveis por este laboratório está desativado." });
+    if (
+      statusLaboratorio.rowCount > 0 &&
+      statusLaboratorio.rows.some((r) => r.status === "desativado")
+    ) {
+      return res
+        .status(403)
+        .json({
+          error: "Um dos responsáveis por este laboratório está desativado.",
+        });
     }
 
     const dataAgendamento = new Date(`${date}T00:00:00`);
@@ -2085,11 +2274,20 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
     dataMinima.setDate(hoje.getDate() + 4);
 
     if (dataAgendamento < dataMinima) {
-      return res.status(400).json({ error: "O agendamento deve ser feito com pelo menos 4 dias de antecedência." });
+      return res
+        .status(400)
+        .json({
+          error:
+            "O agendamento deve ser feito com pelo menos 4 dias de antecedência.",
+        });
     }
 
-    const horario = await pool.query("SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1", [hour]);
-    if (horario.rowCount === 0) return res.status(400).json({ error: "Horário inválido" });
+    const horario = await pool.query(
+      "SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1",
+      [hour],
+    );
+    if (horario.rowCount === 0)
+      return res.status(400).json({ error: "Horário inválido" });
     const id_horario = horario.rows[0].id_horario;
 
     if (precisa_tecnico === true) {
@@ -2107,18 +2305,33 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
       );
 
       if (tecnicoOcupado.rowCount > 0) {
-        return res.status(400).json({ error: "O técnico responsável já está agendado para auxiliar em outra aula neste horário." });
+        return res
+          .status(400)
+          .json({
+            error:
+              "O técnico responsável já está agendado para auxiliar em outra aula neste horário.",
+          });
       }
     }
 
     const result = await pool.query(
       `INSERT INTO aulas (professor_email, id_laboratorio, data, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [professor_email, labId, date, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes],
+      [
+        professor_email,
+        labId,
+        date,
+        id_horario,
+        precisa_tecnico,
+        link_roteiro,
+        id_disciplina,
+        numero_discentes,
+      ],
     );
 
     try {
-      const emailQuery = await pool.query(`
+      const emailQuery = await pool.query(
+        `
         SELECT 
           prof.nome_usuario AS nome_professor,
           tec.nome_usuario AS nome_tecnico,
@@ -2131,33 +2344,44 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
         JOIN usuario prof ON prof.email = $1
         LEFT JOIN disciplina d ON d.id_disciplina = $2
         WHERE l.id_laboratorio = $3
-      `, [professor_email, id_disciplina, labId]);
+      `,
+        [professor_email, id_disciplina, labId],
+      );
 
       if (emailQuery.rowCount > 0) {
-        const [ano, mes, dia] = date.split('-');
+        const [ano, mes, dia] = date.split("-");
         const dataFormatada = `${dia}/${mes}/${ano}`;
 
         for (const info of emailQuery.rows) {
-             const dadosEmail = {
-                 nome_professor: info.nome_professor,
-                 nome_tecnico: info.nome_tecnico,
-                 laboratorio: info.nome_laboratorio,
-                 disciplina: info.nome_disciplina || 'Não informada',
-                 data: dataFormatada,
-                 horario: hour,
-                 precisa_tecnico: precisa_tecnico
-             };
-             await enviarEmailNovaSolicitacaoTecnico(info.email_tecnico, dadosEmail);
+          const dadosEmail = {
+            nome_professor: info.nome_professor,
+            nome_tecnico: info.nome_tecnico,
+            laboratorio: info.nome_laboratorio,
+            disciplina: info.nome_disciplina || "Não informada",
+            data: dataFormatada,
+            horario: hour,
+            precisa_tecnico: precisa_tecnico,
+          };
+          await enviarEmailNovaSolicitacaoTecnico(
+            info.email_tecnico,
+            dadosEmail,
+          );
         }
       }
-    } catch (erroEmail) { 
-      console.error("Erro ao enviar email:", erroEmail); 
+    } catch (erroEmail) {
+      console.error("Erro ao enviar email:", erroEmail);
     }
 
-    res.status(201).json({ message: "Aula solicitada com sucesso!", aula: result.rows[0] });
-
+    res
+      .status(201)
+      .json({ message: "Aula solicitada com sucesso!", aula: result.rows[0] });
   } catch (err) {
-    if (err.code === "23505") return res.status(400).json({ error: "Esse horário já está ocupado ou em análise neste laboratório" });
+    if (err.code === "23505")
+      return res
+        .status(400)
+        .json({
+          error: "Esse horário já está ocupado ou em análise neste laboratório",
+        });
     console.error("Erro ao solicitar aula:", err);
     res.status(500).json({ error: "Erro ao solicitar aula" });
   }
@@ -2220,7 +2444,7 @@ app.post("/api/schedule-recurring", Autenticado, async (req, res) => {
       for (const hora of horarios) {
         const horarioRes = await client.query(
           "SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1",
-          [hora]
+          [hora],
         );
         if (horarioRes.rowCount === 0) {
           await client.query("ROLLBACK");
@@ -2242,8 +2466,8 @@ app.post("/api/schedule-recurring", Autenticado, async (req, res) => {
             link_roteiro,
             disciplinaId,
             numero_discentes,
-            id_pedido
-          ]
+            id_pedido,
+          ],
         );
       }
     }
@@ -2253,7 +2477,8 @@ app.post("/api/schedule-recurring", Autenticado, async (req, res) => {
 
     // 👇 2. NOVA LÓGICA DE AVISAR O TÉCNICO (UM ÚNICO EMAIL DE RESUMO)
     try {
-      const emailQuery = await pool.query(`
+      const emailQuery = await pool.query(
+        `
         SELECT 
           prof.nome_usuario AS nome_professor,
           tec.nome_usuario AS nome_tecnico,
@@ -2265,14 +2490,16 @@ app.post("/api/schedule-recurring", Autenticado, async (req, res) => {
         JOIN usuario prof ON prof.email = $1
         JOIN disciplina d ON d.id_disciplina = $2
         WHERE l.id_laboratorio = $3
-      `, [professor_email, disciplinaId, labId]);
+      `,
+        [professor_email, disciplinaId, labId],
+      );
 
       if (emailQuery.rowCount > 0) {
         const info = emailQuery.rows[0];
 
         // Formata as datas para o padrão brasileiro DD/MM/AAAA
-        const [anoI, mesI, diaI] = dataInicio.split('-');
-        const [anoF, mesF, diaF] = dataFim.split('-');
+        const [anoI, mesI, diaI] = dataInicio.split("-");
+        const [anoF, mesF, diaF] = dataFim.split("-");
 
         const dadosEmail = {
           nome_professor: info.nome_professor,
@@ -2281,12 +2508,17 @@ app.post("/api/schedule-recurring", Autenticado, async (req, res) => {
           disciplina: info.nome_disciplina,
           dataInicio: `${diaI}/${mesI}/${anoI}`,
           dataFim: `${diaF}/${mesF}/${anoF}`,
-          horarios: horarios.join(' e '), // Ex: "07:20 e 08:10"
-          precisa_tecnico: precisa_tecnico
+          horarios: horarios.join(" e "), // Ex: "07:20 e 08:10"
+          precisa_tecnico: precisa_tecnico,
         };
 
-        console.log(`\n⏳ Avisando o técnico ${info.email_tecnico} sobre agendamento RECORRENTE...`);
-        await enviarEmailNovaSolicitacaoRecorrenteTecnico(info.email_tecnico, dadosEmail);
+        console.log(
+          `\n⏳ Avisando o técnico ${info.email_tecnico} sobre agendamento RECORRENTE...`,
+        );
+        await enviarEmailNovaSolicitacaoRecorrenteTecnico(
+          info.email_tecnico,
+          dadosEmail,
+        );
         console.log("✅ Email de nova solicitação recorrente enviado!");
       }
     } catch (erroEmail) {
@@ -2298,7 +2530,6 @@ app.post("/api/schedule-recurring", Autenticado, async (req, res) => {
     res.status(201).json({
       message: `${datasParaAgendar.length * horarios.length} aula(s) solicitada(s) com sucesso!`,
     });
-
   } catch (err) {
     await client.query("ROLLBACK");
     if (err.code === "23505") {
@@ -2357,7 +2588,9 @@ app.patch("/api/requests/:id", Autenticado, async (req, res) => {
     const { novoStatus, observacoes } = req.body;
 
     if (!["autorizado", "nao_autorizado", "analisando"].includes(novoStatus)) {
-      return res.status(400).json({ error: "Ação ou status inválido fornecido." });
+      return res
+        .status(400)
+        .json({ error: "Ação ou status inválido fornecido." });
     }
 
     // 1. Atualiza no Banco
@@ -2367,34 +2600,47 @@ app.patch("/api/requests/:id", Autenticado, async (req, res) => {
     );
 
     // 👇 2. NOVA LÓGICA DE EMAIL COM RASTREADOR DE ERROS
-    if (novoStatus === 'autorizado' || novoStatus === 'nao_autorizado') {
-      const emailQuery = await pool.query(`
+    if (novoStatus === "autorizado" || novoStatus === "nao_autorizado") {
+      const emailQuery = await pool.query(
+        `
         SELECT a.professor_email, d.nome_disciplina, l.nome_laboratorio, a.data, h.hora_inicio 
         FROM aulas a
         JOIN disciplina d ON a.id_disciplina = d.id_disciplina
         JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
         JOIN horarios h ON a.id_horario = h.id_horario
         WHERE a.id_aula = $1
-      `, [id]);
+      `,
+        [id],
+      );
 
       if (emailQuery.rowCount > 0) {
         const info = emailQuery.rows[0];
         const dadosAula = {
           disciplina: info.nome_disciplina,
           laboratorio: info.nome_laboratorio,
-          data: new Date(info.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' }),
-          horario: info.hora_inicio.slice(0, 5)
+          data: new Date(info.data).toLocaleDateString("pt-BR", {
+            timeZone: "UTC",
+          }),
+          horario: info.hora_inicio.slice(0, 5),
         };
 
-        console.log(`\n⏳ Tentando enviar email para: ${info.professor_email}...`);
+        console.log(
+          `\n⏳ Tentando enviar email para: ${info.professor_email}...`,
+        );
 
         try {
-          if (novoStatus === 'autorizado') {
+          if (novoStatus === "autorizado") {
             await enviarEmailAutorizacao(info.professor_email, dadosAula);
           } else {
-            await enviarEmailRecusa(info.professor_email, dadosAula, observacoes);
+            await enviarEmailRecusa(
+              info.professor_email,
+              dadosAula,
+              observacoes,
+            );
           }
-          console.log("✅ SUCESSO ABSOLUTO: O email foi entregue ao servidor do Google!");
+          console.log(
+            "✅ SUCESSO ABSOLUTO: O email foi entregue ao servidor do Google!",
+          );
         } catch (erroEmail) {
           console.error("❌ ERRO GRAVE NO NODEMAILER:");
           console.error(erroEmail);
@@ -2405,7 +2651,9 @@ app.patch("/api/requests/:id", Autenticado, async (req, res) => {
     res.json({ message: "Status da aula atualizado com sucesso!" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Erro interno ao atualizar o status da aula." });
+    res
+      .status(500)
+      .json({ error: "Erro interno ao atualizar o status da aula." });
   }
 });
 
@@ -2514,12 +2762,14 @@ app.get("/api/dashboard/aulas-autorizadas", Autenticado, async (req, res) => {
 // Endpoint para o painel "Meus Laboratórios"
 app.get("/api/dashboard/meus-laboratorios", Autenticado, async (req, res) => {
   const user_email = req.session.user.email;
-  const result = await pool.query(`
+  const result = await pool.query(
+    `
       SELECT l.id_laboratorio, l.nome_laboratorio 
       FROM laboratorio l
       JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
-      WHERE lu.usuario_email = $1 ORDER BY l.nome_laboratorio`, 
-  [user_email]);
+      WHERE lu.usuario_email = $1 ORDER BY l.nome_laboratorio`,
+    [user_email],
+  );
   res.json(result.rows);
 });
 
@@ -2598,21 +2848,22 @@ app.get("/api/calendario/aulas-autorizadas", Autenticado, async (req, res) => {
 
     const result = await pool.query(
       `SELECT 
-                l.nome_laboratorio, 
-                d.nome_disciplina,
-                a.data, 
-                h.hora_inicio, 
-                h.hora_fim, 
-                a.tipo_aula
-            FROM aulas a
-            JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-            JOIN horarios h ON a.id_horario = h.id_horario
-            JOIN disciplina d ON a.id_disciplina = d.id_disciplina
-            WHERE a.professor_email = $1 
-              AND a.status = 'autorizado' 
-              AND EXTRACT(YEAR FROM a.data) = $2
-              AND EXTRACT(MONTH FROM a.data) = $3
-            ORDER BY a.data ASC, h.hora_inicio ASC`,
+    l.nome_laboratorio, 
+    d.nome_disciplina,
+    a.data, 
+    h.hora_inicio, 
+    h.hora_fim, 
+    a.tipo_aula,
+    a.status
+FROM aulas a
+JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+JOIN horarios h ON a.id_horario = h.id_horario
+LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+WHERE a.professor_email = $1 
+  AND a.status IN ('autorizado', 'analisando') 
+  AND EXTRACT(YEAR FROM a.data) = $2
+  AND EXTRACT(MONTH FROM a.data) = $3
+ORDER BY a.data ASC, h.hora_inicio ASC`,
       [professor_email, ano, mes],
     );
     res.json(result.rows);
@@ -2635,24 +2886,25 @@ app.get("/api/calendario/aulas-tecnico", Autenticado, async (req, res) => {
 
     const result = await pool.query(
       `SELECT 
-                l.nome_laboratorio, 
-                d.nome_disciplina,
-                u.nome_usuario AS nome_professor,
-                h.hora_inicio,
-                h.hora_fim,
-                a.tipo_aula,
-                a.data
-            FROM aulas a
-            JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-            JOIN horarios h ON a.id_horario = h.id_horario
-            JOIN disciplina d ON a.id_disciplina = d.id_disciplina
-            JOIN usuario u ON a.professor_email = u.email
-            JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
-            WHERE lu.usuario_email = $1 -- <<< ALTERADO DE l.usuario_email PARA lu.usuario_email
-              AND a.status = 'autorizado' 
-              AND EXTRACT(YEAR FROM a.data) = $2
-              AND EXTRACT(MONTH FROM a.data) = $3
-            ORDER BY a.data ASC, h.hora_inicio ASC`,
+    l.nome_laboratorio, 
+    d.nome_disciplina,
+    u.nome_usuario AS nome_professor,
+    h.hora_inicio,
+    h.hora_fim,
+    a.tipo_aula,
+    a.data,
+    a.status 
+FROM aulas a
+JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+JOIN horarios h ON a.id_horario = h.id_horario
+LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+JOIN usuario u ON a.professor_email = u.email
+JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
+WHERE lu.usuario_email = $1 
+  AND a.status IN ('autorizado', 'analisando') 
+  AND EXTRACT(YEAR FROM a.data) = $2
+  AND EXTRACT(MONTH FROM a.data) = $3
+ORDER BY a.data ASC, h.hora_inicio ASC`,
       [tecnico_email, ano, mes],
     );
     res.json(result.rows);
@@ -2675,13 +2927,11 @@ app.get("/api/disciplinas", Autenticado, async (req, res) => {
 
     if (tipoUsuario === "admin") {
       query = 'SELECT * FROM "disciplina" ORDER BY nome_disciplina, status';
-    }
-    else if (tipoUsuario === "professor") {
+    } else if (tipoUsuario === "professor") {
       query =
         'SELECT * FROM "disciplina" WHERE professor_email_responsavel = $1 ORDER BY nome_disciplina, status';
       values = [usuarioEmail];
-    }
-    else {
+    } else {
       return res.json([]);
     }
 
@@ -2805,7 +3055,12 @@ app.put("/api/agendamentos/:id/status", Autenticado, async (req, res) => {
     );
 
     if (verifyQuery.rowCount === 0) {
-      return res.status(403).json({ error: "Você não tem permissão para cancelar esta aula, ou ela já ocorreu." });
+      return res
+        .status(403)
+        .json({
+          error:
+            "Você não tem permissão para cancelar esta aula, ou ela já ocorreu.",
+        });
     }
 
     const updateQuery = await pool.query(
@@ -2813,8 +3068,9 @@ app.put("/api/agendamentos/:id/status", Autenticado, async (req, res) => {
       [status, id],
     );
 
-    if (status === 'cancelado') {
-      const emailQuery = await pool.query(`
+    if (status === "cancelado") {
+      const emailQuery = await pool.query(
+        `
         SELECT a.professor_email, d.nome_disciplina, l.nome_laboratorio, lu.usuario_email AS tecnico_email, a.data, h.hora_inicio 
         FROM aulas a
         LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
@@ -2822,29 +3078,42 @@ app.put("/api/agendamentos/:id/status", Autenticado, async (req, res) => {
         JOIN horarios h ON a.id_horario = h.id_horario
         JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio -- CORREÇÃO AQUI
         WHERE a.id_aula = $1
-      `, [id]);
+      `,
+        [id],
+      );
 
       if (emailQuery.rowCount > 0) {
         const info = emailQuery.rows[0];
         const dadosAula = {
-          disciplina: info.nome_disciplina || 'Não informada',
+          disciplina: info.nome_disciplina || "Não informada",
           laboratorio: info.nome_laboratorio,
-          data: new Date(info.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' }),
-          horario: info.hora_inicio.slice(0, 5)
+          data: new Date(info.data).toLocaleDateString("pt-BR", {
+            timeZone: "UTC",
+          }),
+          horario: info.hora_inicio.slice(0, 5),
         };
 
-        await enviarEmailCancelamento(info.professor_email, dadosAula).catch(e => console.error(e));
-        
+        await enviarEmailCancelamento(info.professor_email, dadosAula).catch(
+          (e) => console.error(e),
+        );
+
         for (const row of emailQuery.rows) {
-             await enviarEmailCancelamento(row.tecnico_email, dadosAula).catch(e => console.error(e));
+          await enviarEmailCancelamento(row.tecnico_email, dadosAula).catch(
+            (e) => console.error(e),
+          );
         }
       }
     }
 
-    res.json({ message: "Agendamento cancelado com sucesso!", aula: updateQuery.rows[0] });
+    res.json({
+      message: "Agendamento cancelado com sucesso!",
+      aula: updateQuery.rows[0],
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Erro interno ao processar o cancelamento." });
+    res
+      .status(500)
+      .json({ error: "Erro interno ao processar o cancelamento." });
   }
 });
 
@@ -2861,8 +3130,8 @@ app.get("/api/solicitacoes-analise-tecnico", Autenticado, async (req, res) => {
        FROM aulas a
        JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
        JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
-       WHERE lu.usuario_email = $1 AND a.status = 'analisando'`, 
-      [email_tecnico]
+       WHERE lu.usuario_email = $1 AND a.status = 'analisando'`,
+      [email_tecnico],
     );
 
     res.json({ total: parseInt(result.rows[0].total) });
@@ -2925,21 +3194,27 @@ app.get("/api/salasPag", Autenticado, async (req, res) => {
   const limitInt = parseInt(limit, 10);
 
   if (isNaN(pageInt) || isNaN(limitInt)) {
-    return res.status(400).json({ error: "Os parâmetros de página e limite devem ser inteiros." });
+    return res
+      .status(400)
+      .json({ error: "Os parâmetros de página e limite devem ser inteiros." });
   }
 
   const offset = (pageInt - 1) * limitInt;
 
   try {
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
         SELECT s.id_sala, s.nome_sala, u.email AS responsavel_email, u.nome_usuario
         FROM sala_de_aula s
         LEFT JOIN usuario u ON s.responsavel_email = u.email
         LIMIT $1 OFFSET $2
-      `, [limitInt, offset]
+      `,
+      [limitInt, offset],
     );
 
-    const countResult = await pool.query("SELECT COUNT(*) as total FROM sala_de_aula");
+    const countResult = await pool.query(
+      "SELECT COUNT(*) as total FROM sala_de_aula",
+    );
     const totalItems = countResult.rows[0].total;
     const totalPages = Math.ceil(totalItems / limitInt);
 
@@ -2961,19 +3236,28 @@ app.post("/api/salas", Autenticado, async (req, res) => {
     const { nome_sala, responsavel_email } = req.body;
 
     if (!nome_sala || !responsavel_email) {
-      return res.status(400).json({ error: "Nome da sala e email do responsável são obrigatórios." });
+      return res
+        .status(400)
+        .json({
+          error: "Nome da sala e email do responsável são obrigatórios.",
+        });
     }
 
     // Verificar se a sala já existe
-    const result = await pool.query("SELECT * FROM sala_de_aula WHERE nome_sala = $1", [nome_sala]);
+    const result = await pool.query(
+      "SELECT * FROM sala_de_aula WHERE nome_sala = $1",
+      [nome_sala],
+    );
     if (result.rows.length > 0) {
-      return res.status(400).json({ error: "Esse nome de sala já está em uso." });
+      return res
+        .status(400)
+        .json({ error: "Esse nome de sala já está em uso." });
     }
 
     // Inserir nova sala
     const insertResult = await pool.query(
       "INSERT INTO sala_de_aula (nome_sala, responsavel_email) VALUES ($1, $2) RETURNING id_sala",
-      [nome_sala, responsavel_email]
+      [nome_sala, responsavel_email],
     );
 
     res.status(201).json({
@@ -2992,7 +3276,10 @@ app.delete("/api/salas/:id_sala", Autenticado, async (req, res) => {
     const { id_sala } = req.params;
 
     // Verifica se a sala existe
-    const salaCheck = await pool.query("SELECT id_sala FROM sala_de_aula WHERE id_sala = $1", [id_sala]);
+    const salaCheck = await pool.query(
+      "SELECT id_sala FROM sala_de_aula WHERE id_sala = $1",
+      [id_sala],
+    );
     if (salaCheck.rows.length === 0) {
       return res.status(404).json({ error: "Sala não encontrada." });
     }
@@ -3011,12 +3298,17 @@ app.post("/api/atualizar-responsavel-sala", Autenticado, async (req, res) => {
   const { idSala, responsavelEmail } = req.body;
 
   if (!idSala || !responsavelEmail) {
-    return res.status(400).json({ error: "ID da sala e email do responsável são obrigatórios." });
+    return res
+      .status(400)
+      .json({ error: "ID da sala e email do responsável são obrigatórios." });
   }
 
   try {
     // Verificar se o usuário existe
-    const userResult = await pool.query("SELECT * FROM usuario WHERE email = $1", [responsavelEmail]);
+    const userResult = await pool.query(
+      "SELECT * FROM usuario WHERE email = $1",
+      [responsavelEmail],
+    );
     if (userResult.rows.length === 0) {
       return res.status(404).json({ error: "O email do usuário não existe." });
     }
@@ -3024,7 +3316,7 @@ app.post("/api/atualizar-responsavel-sala", Autenticado, async (req, res) => {
     // Atualizar o responsável da sala
     const result = await pool.query(
       "UPDATE sala_de_aula SET responsavel_email = $1 WHERE id_sala = $2",
-      [responsavelEmail, idSala]
+      [responsavelEmail, idSala],
     );
 
     if (result.rowCount === 0) {
@@ -3034,7 +3326,9 @@ app.post("/api/atualizar-responsavel-sala", Autenticado, async (req, res) => {
     res.json({ message: "Responsável atualizado com sucesso!" });
   } catch (error) {
     console.error("Erro ao atualizar responsável da sala:", error);
-    res.status(500).json({ error: "Erro no servidor ao atualizar responsável." });
+    res
+      .status(500)
+      .json({ error: "Erro no servidor ao atualizar responsável." });
   }
 });
 
@@ -3055,30 +3349,39 @@ app.patch("/api/requests-salas/:id", Autenticado, async (req, res) => {
     );
 
     // 2. Dispara o Email para o Professor
-    if (novoStatus === 'autorizado' || novoStatus === 'nao_autorizado') {
-      const emailQuery = await pool.query(`
+    if (novoStatus === "autorizado" || novoStatus === "nao_autorizado") {
+      const emailQuery = await pool.query(
+        `
         SELECT a.professor_email, d.nome_disciplina, s.nome_sala, a.data, h.hora_inicio 
         FROM agendamento_salas a
         JOIN disciplina d ON a.id_disciplina = d.id_disciplina
         JOIN sala_de_aula s ON a.id_sala = s.id_sala
         JOIN horarios h ON a.id_horario = h.id_horario
         WHERE a.id_agendamento = $1
-      `, [id]);
+      `,
+        [id],
+      );
 
       if (emailQuery.rowCount > 0) {
         const info = emailQuery.rows[0];
         const dadosAula = {
           disciplina: info.nome_disciplina,
           laboratorio: info.nome_sala, // Enviamos como laboratório para reaproveitar o template do email
-          data: new Date(info.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' }),
-          horario: info.hora_inicio.slice(0, 5)
+          data: new Date(info.data).toLocaleDateString("pt-BR", {
+            timeZone: "UTC",
+          }),
+          horario: info.hora_inicio.slice(0, 5),
         };
 
         try {
-          if (novoStatus === 'autorizado') {
+          if (novoStatus === "autorizado") {
             await enviarEmailAutorizacao(info.professor_email, dadosAula);
           } else {
-            await enviarEmailRecusa(info.professor_email, dadosAula, observacoes);
+            await enviarEmailRecusa(
+              info.professor_email,
+              dadosAula,
+              observacoes,
+            );
           }
         } catch (erroEmail) {
           console.error("Erro ao enviar email de decisão da sala:", erroEmail);
@@ -3096,7 +3399,7 @@ app.patch("/api/requests-salas/:id", Autenticado, async (req, res) => {
 app.get("/api/requests-salas", Autenticado, async (req, res) => {
   try {
     const { responsavel_email } = req.query;
-    
+
     // Usamos LEFT JOIN na disciplina caso haja agendamentos sem disciplina vinculada
     const query = `
             SELECT 
@@ -3137,20 +3440,24 @@ app.get("/api/requests-salas", Autenticado, async (req, res) => {
 
 // 1. Mostrar as salas que a pessoa é responsável
 app.get("/api/dashboard/minhas-salas", Autenticado, async (req, res) => {
-  if (!req.session?.user) return res.status(401).json({ error: "Não autenticado." });
+  if (!req.session?.user)
+    return res.status(401).json({ error: "Não autenticado." });
   try {
     const user_email = req.session.user.email;
     const result = await pool.query(
       `SELECT nome_sala FROM sala_de_aula WHERE responsavel_email = $1 ORDER BY nome_sala`,
-      [user_email]
+      [user_email],
     );
     res.json(result.rows);
-  } catch (err) { res.status(500).json({ error: "Erro ao buscar salas." }); }
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar salas." });
+  }
 });
 
 // 2. Mostrar aulas nas salas que a pessoa é responsável (Lista)
 app.get("/api/aulas-minhas-salas", Autenticado, async (req, res) => {
-  if (!req.session?.user) return res.status(401).json({ error: "Não autenticado." });
+  if (!req.session?.user)
+    return res.status(401).json({ error: "Não autenticado." });
   try {
     const responsavel_email = req.session.user.email;
     const query = `
@@ -3168,16 +3475,23 @@ app.get("/api/aulas-minhas-salas", Autenticado, async (req, res) => {
     `;
     const result = await pool.query(query, [responsavel_email]);
     res.json(result.rows);
-  } catch (err) { res.status(500).json({ error: "Erro ao buscar as aulas." }); }
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao buscar as aulas." });
+  }
 });
 
 // 3. Calendário do Professor (Salas)
-app.get("/api/calendario/aulas-autorizadas-salas", Autenticado, async (req, res) => {
-  if (!req.session?.user) return res.status(401).json({ error: "Não autenticado." });
-  try {
-    const professor_email = req.session.user.email;
-    const { ano, mes } = req.query;
-    const result = await pool.query(`
+app.get(
+  "/api/calendario/aulas-autorizadas-salas",
+  Autenticado,
+  async (req, res) => {
+    if (!req.session?.user)
+      return res.status(401).json({ error: "Não autenticado." });
+    try {
+      const professor_email = req.session.user.email;
+      const { ano, mes } = req.query;
+      const result = await pool.query(
+        `
         SELECT s.nome_sala, d.nome_disciplina, a.data, h.hora_inicio, h.hora_fim, a.tipo_aula
         FROM agendamento_salas a
         JOIN sala_de_aula s ON a.id_sala = s.id_sala
@@ -3186,19 +3500,27 @@ app.get("/api/calendario/aulas-autorizadas-salas", Autenticado, async (req, res)
         WHERE a.professor_email = $1 AND a.status = 'autorizado' 
           AND EXTRACT(YEAR FROM a.data) = $2 AND EXTRACT(MONTH FROM a.data) = $3
         ORDER BY a.data ASC, h.hora_inicio ASC`,
-      [professor_email, ano, mes]
-    );
-    res.json(result.rows);
-  } catch (err) { res.status(500).json({ error: "Erro calendário do professor." }); }
-});
+        [professor_email, ano, mes],
+      );
+      res.json(result.rows);
+    } catch (err) {
+      res.status(500).json({ error: "Erro calendário do professor." });
+    }
+  },
+);
 
 // 4. Calendário do Responsável (Salas)
-app.get("/api/calendario/aulas-responsavel-salas", Autenticado, async (req, res) => {
-  if (!req.session?.user) return res.status(401).json({ error: "Não autenticado." });
-  try {
-    const responsavel_email = req.session.user.email;
-    const { ano, mes } = req.query;
-    const result = await pool.query(`
+app.get(
+  "/api/calendario/aulas-responsavel-salas",
+  Autenticado,
+  async (req, res) => {
+    if (!req.session?.user)
+      return res.status(401).json({ error: "Não autenticado." });
+    try {
+      const responsavel_email = req.session.user.email;
+      const { ano, mes } = req.query;
+      const result = await pool.query(
+        `
         SELECT s.nome_sala, d.nome_disciplina, u.nome_usuario AS nome_professor,
                h.hora_inicio, h.hora_fim, a.tipo_aula, a.data
         FROM agendamento_salas a
@@ -3209,17 +3531,21 @@ app.get("/api/calendario/aulas-responsavel-salas", Autenticado, async (req, res)
         WHERE s.responsavel_email = $1 AND a.status = 'autorizado' 
           AND EXTRACT(YEAR FROM a.data) = $2 AND EXTRACT(MONTH FROM a.data) = $3
         ORDER BY a.data ASC, h.hora_inicio ASC`,
-      [responsavel_email, ano, mes]
-    );
-    res.json(result.rows);
-  } catch (err) { res.status(500).json({ error: "Erro calendário responsável." }); }
-});
+        [responsavel_email, ano, mes],
+      );
+      res.json(result.rows);
+    } catch (err) {
+      res.status(500).json({ error: "Erro calendário responsável." });
+    }
+  },
+);
 
 // 5. Aulas de Hoje do Professor (Salas)
 app.get("/api/aulas-hoje-salas", Autenticado, async (req, res) => {
   try {
     const email = req.session.user.email;
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
       SELECT h.hora_inicio, h.hora_fim, d.nome_disciplina, s.nome_sala
       FROM agendamento_salas a
       JOIN horarios h ON a.id_horario = h.id_horario
@@ -3227,9 +3553,13 @@ app.get("/api/aulas-hoje-salas", Autenticado, async (req, res) => {
       JOIN sala_de_aula s ON a.id_sala = s.id_sala
       WHERE a.professor_email = $1 AND a.data = CURRENT_DATE AND a.status = 'autorizado'
       ORDER BY h.hora_inicio ASC
-    `, [email]);
+    `,
+      [email],
+    );
     res.json(result.rows);
-  } catch (err) { res.status(500).json({ error: "Erro aulas de hoje." }); }
+  } catch (err) {
+    res.status(500).json({ error: "Erro aulas de hoje." });
+  }
 });
 
 // 6. Solicitacões do Professor (Salas)
@@ -3238,10 +3568,14 @@ app.get("/api/minhas-solicitacoes-salas", Autenticado, async (req, res) => {
     const professor_email = req.session.user.email;
 
     // Auto-cancela as que ficaram no passado analisando
-    await pool.query(`UPDATE agendamento_salas SET status = 'nao_autorizado' 
-                      WHERE professor_email = $1 AND status = 'analisando' AND data < CURRENT_DATE`, [professor_email]);
+    await pool.query(
+      `UPDATE agendamento_salas SET status = 'nao_autorizado' 
+                      WHERE professor_email = $1 AND status = 'analisando' AND data < CURRENT_DATE`,
+      [professor_email],
+    );
 
-    const result = await pool.query(`
+    const result = await pool.query(
+      `
         SELECT a.id_agendamento, a.id_pedido, a.tipo_aula, s.nome_sala, d.nome_disciplina,
                a.link_roteiro, a.numero_discentes, a.observacoes, a.data, h.hora_inicio, h.hora_fim,
                a.precisa_tecnico, a.status
@@ -3251,10 +3585,12 @@ app.get("/api/minhas-solicitacoes-salas", Autenticado, async (req, res) => {
         JOIN disciplina d ON a.id_disciplina = d.id_disciplina
         WHERE a.professor_email = $1 AND a.data >= CURRENT_DATE
         ORDER BY a.data ASC, h.hora_inicio ASC`,
-      [professor_email]
+      [professor_email],
     );
     res.json(result.rows);
-  } catch (err) { res.status(500).json({ error: "Erro solicitações." }); }
+  } catch (err) {
+    res.status(500).json({ error: "Erro solicitações." });
+  }
 });
 
 // 7. Rota de Cancelamento do Professor (Salas)
@@ -3269,11 +3605,17 @@ app.put("/api/agendamentos-salas/:id/status", Autenticado, async (req, res) => {
       [id, professor_email],
     );
 
-    if (verifyQuery.rowCount === 0) return res.status(403).json({ error: "Não permitido." });
+    if (verifyQuery.rowCount === 0)
+      return res.status(403).json({ error: "Não permitido." });
 
-    const updateQuery = await pool.query("UPDATE agendamento_salas SET status = $1 WHERE id_agendamento = $2 RETURNING *", [status, id]);
+    const updateQuery = await pool.query(
+      "UPDATE agendamento_salas SET status = $1 WHERE id_agendamento = $2 RETURNING *",
+      [status, id],
+    );
     res.json({ message: "Agendamento cancelado com sucesso!" });
-  } catch (err) { res.status(500).json({ error: "Erro cancelamento." }); }
+  } catch (err) {
+    res.status(500).json({ error: "Erro cancelamento." });
+  }
 });
 
 /* ========================================================= */
@@ -3290,7 +3632,7 @@ app.get("/api/availability-salas", Autenticado, async (req, res) => {
        FROM agendamento_salas a
        JOIN horarios h ON a.id_horario = h.id_horario
        WHERE a.data = $1 AND a.id_sala = $2 AND a.status != 'cancelado'`,
-      [date, salaId]
+      [date, salaId],
     );
 
     // Devolve uma lista só com as horinhas (ex: ["07:20", "08:10"])
@@ -3310,10 +3652,21 @@ app.post("/api/schedule-salas", Autenticado, async (req, res) => {
 
   try {
     const professor_email = req.session.user.email;
-    const { salaId, date, hour, precisa_tecnico, link_roteiro, disciplinaId, numero_discentes } = req.body;
+    const {
+      salaId,
+      date,
+      hour,
+      precisa_tecnico,
+      link_roteiro,
+      disciplinaId,
+      numero_discentes,
+    } = req.body;
 
     // 3.1. Descobre qual é o ID numérico desse horário (ex: "07:20" vira ID 1)
-    const horario = await pool.query("SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1", [hour]);
+    const horario = await pool.query(
+      "SELECT id_horario FROM horarios WHERE to_char(hora_inicio, 'HH24:MI') = $1",
+      [hour],
+    );
     if (horario.rowCount === 0) {
       return res.status(400).json({ error: "Horário inválido" });
     }
@@ -3326,12 +3679,23 @@ app.post("/api/schedule-salas", Autenticado, async (req, res) => {
     const result = await pool.query(
       `INSERT INTO agendamento_salas (professor_email, id_sala, data, id_horario, precisa_tecnico, link_roteiro, id_disciplina, numero_discentes, status, id_pedido, tipo_aula)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'analisando', $9, 'individual') RETURNING *`,
-      [professor_email, salaId, date, id_horario, precisa_tecnico, link_roteiro, disciplinaId, numero_discentes, id_pedido]
+      [
+        professor_email,
+        salaId,
+        date,
+        id_horario,
+        precisa_tecnico,
+        link_roteiro,
+        disciplinaId,
+        numero_discentes,
+        id_pedido,
+      ],
     );
 
     // 3.4. Dispara o e-mail avisando o Responsável da Sala
     try {
-      const emailQuery = await pool.query(`
+      const emailQuery = await pool.query(
+        `
         SELECT 
             prof.nome_usuario AS nome_professor, 
             resp.nome_usuario AS nome_responsavel, 
@@ -3343,11 +3707,13 @@ app.post("/api/schedule-salas", Autenticado, async (req, res) => {
         JOIN usuario prof ON prof.email = $1
         JOIN disciplina d ON d.id_disciplina = $2
         WHERE s.id_sala = $3
-      `, [professor_email, disciplinaId, salaId]);
+      `,
+        [professor_email, disciplinaId, salaId],
+      );
 
       if (emailQuery.rowCount > 0) {
         const info = emailQuery.rows[0];
-        const [ano, mes, dia] = date.split('-');
+        const [ano, mes, dia] = date.split("-");
 
         // Montamos o pacote de dados do e-mail
         const dadosEmail = {
@@ -3357,23 +3723,31 @@ app.post("/api/schedule-salas", Autenticado, async (req, res) => {
           disciplina: info.nome_disciplina,
           data: `${dia}/${mes}/${ano}`,
           horario: hour,
-          precisa_tecnico: precisa_tecnico
+          precisa_tecnico: precisa_tecnico,
         };
 
-        console.log(`⏳ Avisando responsável da sala (${info.email_responsavel}) sobre a reserva...`);
-        await enviarEmailNovaSolicitacaoTecnico(info.email_responsavel, dadosEmail);
+        console.log(
+          `⏳ Avisando responsável da sala (${info.email_responsavel}) sobre a reserva...`,
+        );
+        await enviarEmailNovaSolicitacaoTecnico(
+          info.email_responsavel,
+          dadosEmail,
+        );
       }
     } catch (erroEmail) {
       console.error("❌ Erro ao notificar responsável:", erroEmail);
     }
 
     // 3.5. Responde para o Frontend que deu tudo certo
-    res.status(201).json({ message: "Reserva de sala solicitada com sucesso!" });
-
+    res
+      .status(201)
+      .json({ message: "Reserva de sala solicitada com sucesso!" });
   } catch (err) {
     // Se bater no erro 23505, é porque a sala já está ocupada e o banco bloqueou
     if (err.code === "23505") {
-      return res.status(400).json({ error: "Esse horário já está ocupado nesta sala." });
+      return res
+        .status(400)
+        .json({ error: "Esse horário já está ocupado nesta sala." });
     }
     console.error("Erro ao solicitar sala:", err);
     res.status(500).json({ error: "Erro ao solicitar sala." });

@@ -211,20 +211,36 @@ function renderizarHorariosDoDia(dataEscolhida) {
         const div = document.createElement('div');
 
         if (aulaEncontrada) {
-            div.className = "slot-horario slot-ocupado";
-            div.innerHTML = `
-                        <h4><i class="fas fa-clock"></i> ${slot.inicio} - ${slot.fim}</h4>
-                        <p><strong>Disciplina:</strong> ${aulaEncontrada.nome_disciplina}</p>
-                        ${aulaEncontrada.nome_professor ? `<p><strong>Professor:</strong> ${aulaEncontrada.nome_professor}</p>` : ''}
-                        <p style="color: #e74c3c; margin-top: 5px;"><strong><i class="fas fa-ban"></i> Reservado</strong></p>
-                    `;
-        } else {
+            if (aulaEncontrada.status === 'analisando') {
+                div.className = "slot-horario";
+                div.style.backgroundColor = "#fffde7"; 
+                div.style.borderLeft = "4px solid #f1c40f"; 
+                
+                div.innerHTML = `
+                    <h4><i class="fas fa-clock"></i> ${slot.inicio} - ${slot.fim}</h4>
+                    <p><strong>Disciplina:</strong> ${aulaEncontrada.nome_disciplina || 'Não informada'}</p>
+                    ${aulaEncontrada.nome_professor ? `<p><strong>Professor:</strong> ${aulaEncontrada.nome_professor}</p>` : ''}
+                    <p style="color: #f39c12; margin-top: 5px;"><strong><i class="fas fa-hourglass-half"></i> Em Análise</strong></p>
+                `;
+            } 
+            else {
+                div.className = "slot-horario slot-ocupado";
+                div.innerHTML = `
+                    <h4><i class="fas fa-clock"></i> ${slot.inicio} - ${slot.fim}</h4>
+                    <p><strong>Disciplina:</strong> ${aulaEncontrada.nome_disciplina || 'Não informada'}</p>
+                    ${aulaEncontrada.nome_professor ? `<p><strong>Professor:</strong> ${aulaEncontrada.nome_professor}</p>` : ''}
+                    <p style="color: #e74c3c; margin-top: 5px;"><strong><i class="fas fa-ban"></i> Reservado</strong></p>
+                `;
+            }
+        } 
+        else {
             div.className = "slot-horario slot-livre";
             div.innerHTML = `
-                        <h4><i class="fas fa-clock"></i> ${slot.inicio} - ${slot.fim}</h4>
-                        <p style="color: #2ecc71;"><strong><i class="fas fa-check-circle"></i> Livre</strong></p>
-                    `;
+                <h4><i class="fas fa-clock"></i> ${slot.inicio} - ${slot.fim}</h4>
+                <p style="color: #2ecc71;"><strong><i class="fas fa-check-circle"></i> Livre</strong></p>
+            `;
         }
+        
         listaHorarios.appendChild(div);
     });
 }
