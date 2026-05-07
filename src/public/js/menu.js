@@ -106,8 +106,8 @@ function preencherDadosDoMenu(userData) {
       showMenuItem(".admin-menu");
       showMenuItem(".produto");
       showMenuItem(".Disciplinas");
-      //showMenuItem(".salas");
-      //showMenuItem(".aprovar-salas");
+      showMenuItem(".salas");
+      showMenuItem(".aprovar-salas");
       break;
 
     case "tecnico":
@@ -118,7 +118,7 @@ function preencherDadosDoMenu(userData) {
       showMenuItem(".salas");
       showDashboardCard(".cartao-aulas-tecnico");
       showDashboardCard(".cartao-meus-laboratorios");
-      //showMenuItem(".aprovar-salas");
+      showMenuItem(".aprovar-salas");
 
       break;
 
@@ -128,10 +128,10 @@ function preencherDadosDoMenu(userData) {
       showMenuItem(".professor");
       showMenuItem(".Disciplinas");
       showMenuItem(".Horarios");
-      //showMenuItem(".agendar-sala");
+      showMenuItem(".agendar-sala");
       showDashboardCard(".cartao-aulas-autorizadas");
       showDashboardCard(".cartao-solicitacoes");
-     // showMenuItem(".aprovar-salas");
+      showMenuItem(".aprovar-salas");
       break;
   }
 }
