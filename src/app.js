@@ -3093,7 +3093,45 @@ app.patch("/api/requests-salas/:id", Autenticado, async (req, res) => {
     res.status(500).json({ error: "Erro interno ao atualizar a sala." });
   }
 });
-
+// ROTA PARA O RESPONSÁVEL VER AS SOLICITAÇÕES DE SALA (GET)
+app.get("/api/requests-salas", Autenticado, async (req, res) => {
+  try {
+    const { responsavel_email } = req.query;
+    
+    // Usamos LEFT JOIN na disciplina caso haja agendamentos sem disciplina vinculada
+    const query = `
+            SELECT 
+                a.id_agendamento, 
+                u.nome_usuario AS professor, 
+                s.nome_sala, 
+                d.nome_disciplina,
+                a.link_roteiro,
+                a.numero_discentes,
+                a.data, 
+                h.hora_inicio, 
+                h.hora_fim,
+                a.precisa_tecnico, 
+                a.status,
+                a.observacoes,
+                a.tipo_aula, 
+                a.id_pedido 
+            FROM agendamento_salas a
+            JOIN usuario u ON a.professor_email = u.email
+            JOIN sala_de_aula s ON a.id_sala = s.id_sala
+            JOIN horarios h ON a.id_horario = h.id_horario
+            LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+            WHERE 
+                s.responsavel_email = $1 
+            ORDER BY 
+                a.id_pedido DESC, a.data ASC, h.hora_inicio ASC
+        `;
+    const result = await pool.query(query, [responsavel_email]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Erro na rota /api/requests-salas:", err);
+    res.status(500).json({ error: "Erro ao buscar solicitações de salas" });
+  }
+});
 /* ========================================================= */
 /* -------------- DASHBOARD DE SALAS DE AULA --------------- */
 /* ========================================================= */
