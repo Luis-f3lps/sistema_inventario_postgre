@@ -2368,3 +2368,6 @@ Tela tecnico
 .aula-card-roteiro a:hover {
     text-decoration: underline;
 }
+.grade-horarios button.occupied, .grade-horarios .slot.occupied{
+    background-color: #fbff00;
+}
