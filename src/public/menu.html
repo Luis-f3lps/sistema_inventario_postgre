@@ -7,72 +7,80 @@
 
         <li>
             <span id="user-name" style="border-bottom: 1px solid; display: flex; align-items: center;">
-                <i class="fas fa-user"></i>
+                <i class="fas fa-user-circle"></i>
                 <span id="user-name-text" style="margin: 10px;"></span>
             </span>
         </li>
         <br>
 
-        <li class="Home" style="display: none;"><a href="/Home"><i class="fas fa-home"></i> Home</a></li>
-
-        <li class="Calendario" style="display: none;"><a href="/Calendario"><i class="fa fa-calendar"></i>
-                Calendario</a>
+        <li class="Home" style="display: none;">
+            <a href="/Home"><i class="fas fa-home"></i> Início</a>
         </li>
 
-        <li class="Horarios" style="display: none;"><a href="/agendamento-recorrente"><i class="fas fa-clock"></i> Aulas
-                Semestrais</a></li>
+        <li class="Calendario" style="display: none;">
+            <a href="/Calendario"><i class="fas fa-calendar-days"></i> Calendario (Labs)</a>
+        </li>
+
+        <li class="Horarios" style="display: none;">
+            <a href="/agendamento-recorrente"><i class="fas fa-calendar-plus"></i> Agendamento Semestral (Labs)</a>
+        </li>
 
         <li class="tecnico" style="display: none;">
             <a href="/Tela_Tecnico" style="display: flex; align-items: center;">
                 <div style="position: relative; display: inline-flex;">
-                    <i class="fas fa-bell"></i>
+                    <i class="fas fa-clipboard-check"></i>
                     <span id="badge-solicitacoes-tecnico"
                         style="display: none; position: absolute; top: -8px; right: -1px; background-color: #e74c3c; color: white; font-size: 11px; font-weight: bold; width: 18px; height: 18px; justify-content: center; align-items: center; border-radius: 50%;"></span>
                 </div>
-                <span>Reservas de aulas</span>
+                <span>Aprovar Reservas (Labs)</span>
             </a>
         </li>
 
-        <li class="professor" style="display: none;"><a href="/Tela_Professor"><i class="fas fa-bell"></i> Minhas
-                Solicitações</a></li>
-        <li class="Disciplinas" style="display: none;"><a href="/Disciplinas"><i class="fas fa-flask"></i>
-                Disciplinas</a></li>
+        <li class="professor" style="display: none;">
+            <a href="/Tela_Professor"><i class="fas fa-list-alt"></i> Minhas Solicitações (Labs)</a>
+        </li>
+
+        <li class="Disciplinas" style="display: none;">
+            <a href="/Disciplinas"><i class="fas fa-book"></i> Minhas Disciplinas</a>
+        </li>
+
+        <li class="submenu menu-salas-ensino">
+            <a href="#"><i class="fas fa-school"></i> Salas de Aula <i class="fas fa-chevron-down"></i></a>
+            <ul class="submenu-items">
+                <li class="calendario-salas" style="display: none;">
+                    <a href="/CalendarioSalas"><i class="fas fa-calendar-week"></i> Calendario(Salas)</a>
+                </li>
+                <li class="salas" style="display: none;">
+                    <a href="/Salas"><i class="fas fa-door-open"></i> Gerenciar Salas</a>
+                </li>
+                <li class="aprovar-salas" style="display: none;">
+                    <a href="/Tela_Responsavel_Salas"><i class="fas fa-clipboard-list"></i> Aprovar Reservas(Salas)</a>
+                </li>
+                <li class="agendar-sala" style="display: none;">
+                    <a href="/agendamento-recorrente-salas"><i class="fas fa-calendar-plus"></i> Agendamento
+                        Semestral(Salas)</a>
+                </li>
+            </ul>
+        </li>
 
         <li class="submenu produto" style="display: none;">
-            <a href="#"><i class="fas fa-boxes"></i> Inventário <i class="fas fa-chevron-down"></i></a>
+            <a href="#"><i class="fas fa-boxes"></i> Almoxarifado dos Labs<i class="fas fa-chevron-down"></i></a>
             <ul class="submenu-items">
-                <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Movimentação</a></li>
-                <li><a href="/Inventario"><i class="fas fa-boxes"></i> Inventário</a></li>
-                <li><a href="/Relatorio"><i class="fas fa-chart-line"></i> Relatórios</a></li>
+                <li><a href="/MovimentacaoProduto"><i class="fas fa-exchange-alt"></i> Nova Movimentação</a></li>
+                <li><a href="/Inventario"><i class="fas fa-box-open"></i> Estoque Atual</a></li>
+                <li><a href="/Relatorio"><i class="fas fa-file-pdf"></i> Emitir Relatórios</a></li>
             </ul>
         </li>
 
         <li class="submenu admin-menu" style="display: none;">
-            <a href="#"><i class="fas fa-user-shield"></i> Administração <i class="fas fa-chevron-down"></i></a>
+            <a href="#"><i class="fas fa-user-cog"></i> Administração <i class="fas fa-chevron-down"></i></a>
             <ul class="submenu-items">
-                <li><a href="/Usuarios"><i class="fas fa-users"></i> Usuários</a></li>
-                <li><a href="/Produto"><i class="fas fa-tags"></i> Produtos</a></li>
-                <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Laboratórios</a></li>
+                <li><a href="/Usuarios"><i class="fas fa-users-cog"></i> Gestão de Usuários</a></li>
+                <li><a href="/Produto"><i class="fas fa-tags"></i> Cadastrar Produtos</a></li>
+                <li><a href="/Laboratorio"><i class="fas fa-flask"></i> Cadastrar Labs</a></li>
             </ul>
         </li>
 
-        <li class="submenu menu-salas-ensino">
-            <a href="#"><i class="fas fa-chalkboard"></i> Salas Ensino <i class="fas fa-chevron-down"></i></a>
-            <ul class="submenu-items">
-                <li class="salas" style="display: none;">
-                    <a href="/Salas"><i class="fas fa-chalkboard"></i> Salas de Aula</a>
-                </li>
-                <li class="aprovar-salas" style="display: none;">
-                    <a href="/Tela_Responsavel_Salas"><i class="fas fa-tasks"></i> Aprovar aula nas Salas</a>
-                </li>
-                <li class="agendar-sala" style="display: none;">
-                    <a href="/agendamento-recorrente-salas"><i class="fas fa-chalkboard-teacher"></i> Agendar Sala</a>
-                </li>
-                <li class="calendario-salas" style="display: none;">
-                    <a href="/CalendarioSalas"><i class="fa fa-calendar-alt"></i> Salas de Ensino</a>
-                </li>
-            </ul>
-        </li>
         <br>
 
         <li class="logout">
