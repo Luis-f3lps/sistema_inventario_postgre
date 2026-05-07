@@ -21,12 +21,37 @@ document.addEventListener("DOMContentLoaded", async () => {
     await carregarHorariosBase();
     await carregarLaboratorios();
 
+    selectLab.addEventListener('change', () => {
+        atualizarPainelCompleto();
+        sincronizarParaFormulario('select-laboratorio', 'laboratorios-select2');
+    });
 
-    selectLab.addEventListener('change', () => atualizarPainelCompleto());
     inputData.addEventListener('change', () => {
         sincronizarCalendarioComInputData();
         renderizarHorariosDoDia(inputData.value);
+        sincronizarParaFormulario('input-data', 'date');
     });
+
+    const formDate = document.getElementById('date');
+    if (formDate) {
+        formDate.addEventListener('change', () => {
+            if (inputData.value !== formDate.value) {
+                inputData.value = formDate.value;
+                sincronizarCalendarioComInputData();
+                renderizarHorariosDoDia(formDate.value);
+            }
+        });
+    }
+
+    const formLab = document.getElementById('laboratorios-select2');
+    if (formLab) {
+        formLab.addEventListener('change', () => {
+            if (selectLab.value !== formLab.value) {
+                selectLab.value = formLab.value;
+                atualizarPainelCompleto();
+            }
+        });
+    }
 
     document.getElementById('btn-mes-anterior').addEventListener('click', () => mudarMes(-1));
     document.getElementById('btn-proximo-mes').addEventListener('click', () => mudarMes(1));
@@ -161,6 +186,7 @@ function renderizarCalendario() {
             inputData.value = diaFormatado;
             renderizarCalendario();
             renderizarHorariosDoDia(diaFormatado);
+            sincronizarParaFormulario('input-data', 'date'); 
         });
 
         grid.appendChild(div);
@@ -201,4 +227,15 @@ function renderizarHorariosDoDia(dataEscolhida) {
         }
         listaHorarios.appendChild(div);
     });
+}
+
+function sincronizarParaFormulario(idOrigem, idDestino) {
+    const origem = document.getElementById(idOrigem);
+    const destino = document.getElementById(idDestino);
+    
+    if (origem && destino && destino.value !== origem.value) {
+        destino.value = origem.value;
+
+        destino.dispatchEvent(new Event('change')); 
+    }
 }
