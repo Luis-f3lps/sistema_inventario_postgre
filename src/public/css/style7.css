@@ -319,7 +319,11 @@ input:focus {
     color: var(--white);
     border-color: var(--primary-color);
 }
-
+.bloco-horario.selected {
+    background-color: #2ecc71 !important; 
+    color: white !important;
+    border-color: #27ae60 !important;
+}
 .texto-ajuda {
     font-size: 12px;
     color: #777;

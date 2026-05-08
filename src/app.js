@@ -3623,23 +3623,26 @@ app.put("/api/agendamentos-salas/:id/status", Autenticado, async (req, res) => {
 /* ========================================================= */
 
 // 2. Rota que o JavaScript chama para descobrir quais horários já estão ocupados no dia
-app.get("/api/availability-salas", Autenticado, async (req, res) => {
+app.get("/api/availability", Autenticado, async (req, res) => {
   try {
-    const { date, salaId } = req.query;
-
+    const { date, labId } = req.query;
     const result = await pool.query(
-      `SELECT h.hora_inicio 
-       FROM agendamento_salas a
+      `SELECT h.hora_inicio, a.status 
+       FROM aulas a
        JOIN horarios h ON a.id_horario = h.id_horario
-       WHERE a.data = $1 AND a.id_sala = $2 AND a.status != 'cancelado'`,
-      [date, salaId],
+       WHERE a.data = $1 AND a.id_laboratorio = $2 AND a.status IN ('autorizado', 'analisando')`,
+      [date, labId],
     );
-
-    // Devolve uma lista só com as horinhas (ex: ["07:20", "08:10"])
-    const occupied = result.rows.map((r) => r.hora_inicio.slice(0, 5));
+    
+    // Manda um array de objetos [{hora: '07:20', status: 'analisando'}, ...]
+    const occupied = result.rows.map((r) => ({
+        hora: r.hora_inicio.slice(0, 5),
+        status: r.status
+    }));
+    
     res.json({ occupied });
   } catch (err) {
-    console.error("Erro ao buscar disponibilidade da sala:", err);
+    console.error("Erro ao buscar disponibilidade:", err);
     res.status(500).json({ error: "Erro ao buscar disponibilidade" });
   }
 });

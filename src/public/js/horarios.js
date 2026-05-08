@@ -130,11 +130,24 @@ function renderSlots() {
         btn.textContent = `${horario.inicio} — ${horario.fim}`;
         btn.dataset.hour = horario.inicio;
 
-        if (occupiedSlots.includes(horario.inicio)) {
-            btn.classList.add('occupied');
+        const slotOcupado = occupiedSlots.find(s => s.hora === horario.inicio);
+
+        if (slotOcupado) {
             btn.disabled = true;
+            
+            if(slotOcupado.status === 'analisando') {
+                btn.style.backgroundColor = "#fffde7"; 
+                btn.style.border = "1px solid #f1c40f"; 
+                btn.style.color = "#f39c12";
+                btn.innerHTML += "<br><small style='font-size: 10px;'><i class='fas fa-hourglass-half'></i> Em Análise</small>";
+            } else {
+                btn.style.backgroundColor = "#ffebee";
+                btn.style.border = "1px solid #e74c3c";
+                btn.style.color = "#c0392b";
+                btn.innerHTML += "<br><small style='font-size: 10px;'><i class='fas fa-ban'></i> Reservado</small>";
+            }
+
         } else {
-            // Lógica que permite marcar vários ao mesmo tempo
             btn.addEventListener('click', () => {
                 if (selectedSlots.includes(horario.inicio)) {
                     selectedSlots = selectedSlots.filter(h => h !== horario.inicio);
