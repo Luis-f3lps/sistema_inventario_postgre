@@ -2219,14 +2219,14 @@ app.post("/api/schedule", Autenticado, async (req, res) => {
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
     const dataMinima = new Date(hoje);
-    dataMinima.setDate(hoje.getDate() + 4);
+    dataMinima.setDate(hoje.getDate() + 3);
 
     if (dataAgendamento < dataMinima) {
       return res
         .status(400)
         .json({
           error:
-            "O agendamento deve ser feito com pelo menos 4 dias de antecedência.",
+            "O agendamento deve ser feito com pelo menos 3 dias de antecedência.",
         });
     }
 

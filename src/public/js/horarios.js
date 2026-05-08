@@ -20,7 +20,7 @@ async function inicializarPaginaDeAgendamento(userData) {
     loggedInUser = userData;
 
     const dataFutura = new Date();
-    dataFutura.setDate(dataFutura.getDate() + 4);
+    dataFutura.setDate(dataFutura.getDate() + 3);
     const dataFuturaString = dataFutura.toISOString().slice(0, 10);
 
     dateEl.value = dataFuturaString;
