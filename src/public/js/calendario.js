@@ -200,6 +200,11 @@ function renderizarHorariosDoDia(dataEscolhida) {
         return;
     }
 
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0); // Zera a hora para comparar só o dia
+    const dataSelecionadaObj = new Date(dataEscolhida + "T00:00:00");
+    const diaPassou = dataSelecionadaObj < hoje;
+
     const aulasDoDia = aulasDoMes.filter(aula => {
         const d = new Date(aula.data);
         const diaDaAula = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
@@ -210,7 +215,18 @@ function renderizarHorariosDoDia(dataEscolhida) {
         const aulaEncontrada = aulasDoDia.find(a => a.hora_inicio.startsWith(slot.inicio));
         const div = document.createElement('div');
 
-        if (aulaEncontrada) {
+        if (diaPassou) {
+            // ⬛ Pinta de Cinza (Dia que já passou)
+            div.className = "slot-horario";
+            div.style.backgroundColor = "#e9ecef"; 
+            div.style.borderLeft = "4px solid #ced4da"; 
+            
+            div.innerHTML = `
+                <h4><i class="fas fa-clock"></i> ${slot.inicio} - ${slot.fim}</h4>
+                <p style="color: #6c757d; margin-top: 5px;"><strong><i class="fas fa-history"></i> Dia já passou</strong></p>
+            `;
+        }
+        else if (aulaEncontrada) {
             if (aulaEncontrada.status === 'analisando') {
                 div.className = "slot-horario";
                 div.style.backgroundColor = "#fffde7"; 
@@ -222,8 +238,7 @@ function renderizarHorariosDoDia(dataEscolhida) {
                     ${aulaEncontrada.nome_professor ? `<p><strong>Professor:</strong> ${aulaEncontrada.nome_professor}</p>` : ''}
                     <p style="color: #f39c12; margin-top: 5px;"><strong><i class="fas fa-hourglass-half"></i> Em Análise</strong></p>
                 `;
-            } 
-            else {
+            } else {
                 div.className = "slot-horario slot-ocupado";
                 div.innerHTML = `
                     <h4><i class="fas fa-clock"></i> ${slot.inicio} - ${slot.fim}</h4>

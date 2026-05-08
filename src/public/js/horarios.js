@@ -122,6 +122,11 @@ async function loadAvailability() {
 function renderSlots() {
     slotsEl.innerHTML = '';
 
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const dataSelecionadaObj = new Date(dateEl.value + "T00:00:00");
+    const diaPassou = dataSelecionadaObj < hoje;
+
     availableSlotsFromDB.forEach(horario => {
         const btn = document.createElement('button');
         btn.type = 'button';
@@ -130,20 +135,24 @@ function renderSlots() {
         btn.textContent = `${horario.inicio} — ${horario.fim}`;
         btn.dataset.hour = horario.inicio;
 
-        // Procura na nova estrutura de dados se esse horário está ocupado
         const slotOcupado = occupiedSlots.find(s => s.hora === horario.inicio);
 
-        if (slotOcupado) {
-            btn.disabled = true; // Bloqueia o clique
+        if (diaPassou) {
+            // ⬛ Bloqueia e pinta de Cinza se o dia já passou
+            btn.disabled = true;
+            btn.style.backgroundColor = "#e9ecef"; 
+            btn.style.border = "1px solid #ced4da"; 
+            btn.style.color = "#6c757d";
+            btn.innerHTML += "<br><small style='font-size: 10px; font-weight: bold;'><i class='fas fa-history'></i> Dia Passou</small>";
             
+        } else if (slotOcupado) {
+            btn.disabled = true; 
             if (slotOcupado.status === 'analisando') {
-                // 🟨 Pinta de Amarelo (Em Análise)
                 btn.style.backgroundColor = "#fffde7"; 
                 btn.style.border = "1px solid #f1c40f"; 
                 btn.style.color = "#f39c12";
                 btn.innerHTML += "<br><small style='font-size: 10px; font-weight: bold;'><i class='fas fa-hourglass-half'></i> Em Análise</small>";
             } else {
-                // 🟥 Pinta de Vermelho (Autorizado/Reservado)
                 btn.style.backgroundColor = "#ffebee";
                 btn.style.border = "1px solid #e74c3c";
                 btn.style.color = "#c0392b";

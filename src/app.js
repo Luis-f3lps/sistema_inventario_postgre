@@ -2817,10 +2817,8 @@ app.get("/api/horarios", Autenticado, async (req, res) => {
 // Endpoint para buscar aulas autorizadas para o calendário por mês/ano
 
 app.get("/api/calendario/aulas-autorizadas", Autenticado, async (req, res) => {
-  if (!req.session?.user)
-    return res.status(401).json({ error: "Não autenticado." });
+  if (!req.session?.user) return res.status(401).json({ error: "Não autenticado." });
   try {
-    const professor_email = req.session.user.email;
     const { ano, mes } = req.query;
 
     if (!ano || !mes) {
@@ -2829,23 +2827,24 @@ app.get("/api/calendario/aulas-autorizadas", Autenticado, async (req, res) => {
 
     const result = await pool.query(
       `SELECT 
-    l.nome_laboratorio, 
-    d.nome_disciplina,
-    a.data, 
-    h.hora_inicio, 
-    h.hora_fim, 
-    a.tipo_aula,
-    a.status
-FROM aulas a
-JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-JOIN horarios h ON a.id_horario = h.id_horario
-LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
-WHERE a.professor_email = $1 
-  AND a.status IN ('autorizado', 'analisando') 
-  AND EXTRACT(YEAR FROM a.data) = $2
-  AND EXTRACT(MONTH FROM a.data) = $3
-ORDER BY a.data ASC, h.hora_inicio ASC`,
-      [professor_email, ano, mes],
+        l.nome_laboratorio, 
+        d.nome_disciplina,
+        u.nome_usuario AS nome_professor,
+        a.data, 
+        h.hora_inicio, 
+        h.hora_fim, 
+        a.tipo_aula,
+        a.status
+      FROM aulas a
+      JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+      JOIN horarios h ON a.id_horario = h.id_horario
+      LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+      JOIN usuario u ON a.professor_email = u.email
+      WHERE a.status IN ('autorizado', 'analisando') 
+        AND EXTRACT(YEAR FROM a.data) = $1
+        AND EXTRACT(MONTH FROM a.data) = $2
+      ORDER BY a.data ASC, h.hora_inicio ASC`,
+      [ano, mes]
     );
     res.json(result.rows);
   } catch (err) {
@@ -2853,6 +2852,7 @@ ORDER BY a.data ASC, h.hora_inicio ASC`,
     res.status(500).json({ error: "Erro ao buscar aulas para o calendário." });
   }
 });
+
 app.get("/api/calendario/aulas-tecnico", Autenticado, async (req, res) => {
   if (!req.session?.user)
     return res.status(401).json({ error: "Não autenticado." });
