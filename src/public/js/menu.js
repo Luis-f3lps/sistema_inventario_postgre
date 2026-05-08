@@ -106,8 +106,6 @@ function preencherDadosDoMenu(userData) {
       showMenuItem(".admin-menu");
       showMenuItem(".produto");
       showMenuItem(".Disciplinas");
-      showMenuItem(".salas");
-      showMenuItem(".aprovar-salas");
       break;
 
     case "tecnico":
@@ -125,11 +123,6 @@ case "professor":
       showMenuItem(".professor");
       showMenuItem(".Disciplinas");
       showMenuItem(".Horarios");
-      
-      showMenuItem(".salas");
-      showMenuItem(".aprovar-salas");
-      showMenuItem(".agendar-sala");
-      showMenuItem(".calendario-salas");
 
       showDashboardCard(".cartao-aulas-autorizadas");
       showDashboardCard(".cartao-solicitacoes");
