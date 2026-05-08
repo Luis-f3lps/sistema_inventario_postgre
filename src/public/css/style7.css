@@ -313,17 +313,6 @@ input:focus {
     background-color: #e0e0e0;
 }
 
-.grade-horarios button.selected,
-.grade-horarios .slot.selected {
-    background-color: var(--primary-color);
-    color: var(--white);
-    border-color: var(--primary-color);
-}
-.bloco-horario.selected {
-    background-color: #2ecc71 !important; 
-    color: white !important;
-    border-color: #27ae60 !important;
-}
 .texto-ajuda {
     font-size: 12px;
     color: #777;
