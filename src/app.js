@@ -3118,7 +3118,41 @@ app.get("/api/aulas-hoje", Autenticado, async (req, res) => {
 /* -------------- CALENDÁRIO E AGENDAMENTO -------- */
 /* ========================================================= */
 
-// 2. Rota que o JavaScript chama para descobrir quais horários já estão ocupados no dia
+app.get("/api/calendario/minhas-aulas-mes", Autenticado, async (req, res) => {
+  if (!req.session?.user) return res.status(401).json({ error: "Não autenticado." });
+  try {
+    const professor_email = req.session.user.email;
+    const { ano, mes } = req.query;
+
+    if (!ano || !mes) return res.status(400).json({ error: "Ano e mês são obrigatórios." });
+
+    const result = await pool.query(
+      `SELECT 
+        l.nome_laboratorio, 
+        d.nome_disciplina,
+        a.data, 
+        h.hora_inicio, 
+        h.hora_fim, 
+        a.tipo_aula,
+        a.status
+      FROM aulas a
+      JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+      JOIN horarios h ON a.id_horario = h.id_horario
+      LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+      WHERE a.professor_email = $1 
+        AND a.status IN ('autorizado', 'analisando') 
+        AND EXTRACT(YEAR FROM a.data) = $2
+        AND EXTRACT(MONTH FROM a.data) = $3
+      ORDER BY a.data ASC, h.hora_inicio ASC`,
+      [professor_email, ano, mes]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Erro ao buscar minhas aulas do mês:", err);
+    res.status(500).json({ error: "Erro ao buscar aulas para o calendário." });
+  }
+});
+
 app.get("/api/availability", Autenticado, async (req, res) => {
   try {
     const { date, labId } = req.query;
