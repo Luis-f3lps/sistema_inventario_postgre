@@ -318,7 +318,16 @@ input:focus {
     color: #777;
     margin-top: 5px;
 }
-
+.bloco-horario.occupied,
+.bloco-horario:disabled {
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+.bloco-horario.selected {
+    background-color: #2ecc71 !important; 
+    color: white !important;
+    border-color: #27ae60 !important;
+}
 .radio-options {
     display: flex;
     align-items: center;
@@ -2360,7 +2369,4 @@ Tela tecnico
 
 .aula-card-roteiro a:hover {
     text-decoration: underline;
-}
-.grade-horarios button.occupied, .grade-horarios .slot.occupied{
-    background-color: #fbff00;
 }

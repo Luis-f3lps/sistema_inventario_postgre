@@ -2191,25 +2191,6 @@ app.post("/api/filter_records", Autenticado, async (req, res) => {
   }
 });
 
-app.get("/api/availability", Autenticado, async (req, res) => {
-  try {
-    const { date, labId } = req.query;
-    const result = await pool.query(
-      `SELECT h.hora_inicio 
-             FROM aulas a
-             JOIN horarios h ON a.id_horario = h.id_horario
-             WHERE 
-               a.data = $1 
-               AND a.id_laboratorio = $2`,
-      [date, labId],
-    );
-    const occupied = result.rows.map((r) => r.hora_inicio.slice(0, 5));
-    res.json({ occupied });
-  } catch (err) {
-    console.error("Erro ao buscar disponibilidade:", err);
-    res.status(500).json({ error: "Erro ao buscar disponibilidade" });
-  }
-});
 app.post("/api/schedule", Autenticado, async (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: "Você precisa estar logado." });
