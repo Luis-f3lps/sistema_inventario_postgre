@@ -3631,10 +3631,10 @@ app.get("/api/availability", Autenticado, async (req, res) => {
        FROM aulas a
        JOIN horarios h ON a.id_horario = h.id_horario
        WHERE a.data = $1 AND a.id_laboratorio = $2 AND a.status IN ('autorizado', 'analisando')`,
-      [date, labId],
+      [date, labId]
     );
     
-    // Manda um array de objetos [{hora: '07:20', status: 'analisando'}, ...]
+    // Formata o resultado para enviar a hora e o status juntos
     const occupied = result.rows.map((r) => ({
         hora: r.hora_inicio.slice(0, 5),
         status: r.status

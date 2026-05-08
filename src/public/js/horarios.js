@@ -130,23 +130,25 @@ function renderSlots() {
         btn.textContent = `${horario.inicio} — ${horario.fim}`;
         btn.dataset.hour = horario.inicio;
 
+        // Procura na nova estrutura de dados se esse horário está ocupado
         const slotOcupado = occupiedSlots.find(s => s.hora === horario.inicio);
 
         if (slotOcupado) {
-            btn.disabled = true;
+            btn.disabled = true; // Bloqueia o clique
             
-            if(slotOcupado.status === 'analisando') {
+            if (slotOcupado.status === 'analisando') {
+                // 🟨 Pinta de Amarelo (Em Análise)
                 btn.style.backgroundColor = "#fffde7"; 
                 btn.style.border = "1px solid #f1c40f"; 
                 btn.style.color = "#f39c12";
-                btn.innerHTML += "<br><small style='font-size: 10px;'><i class='fas fa-hourglass-half'></i> Em Análise</small>";
+                btn.innerHTML += "<br><small style='font-size: 10px; font-weight: bold;'><i class='fas fa-hourglass-half'></i> Em Análise</small>";
             } else {
+                // 🟥 Pinta de Vermelho (Autorizado/Reservado)
                 btn.style.backgroundColor = "#ffebee";
                 btn.style.border = "1px solid #e74c3c";
                 btn.style.color = "#c0392b";
-                btn.innerHTML += "<br><small style='font-size: 10px;'><i class='fas fa-ban'></i> Reservado</small>";
+                btn.innerHTML += "<br><small style='font-size: 10px; font-weight: bold;'><i class='fas fa-ban'></i> Reservado</small>";
             }
-
         } else {
             btn.addEventListener('click', () => {
                 if (selectedSlots.includes(horario.inicio)) {
