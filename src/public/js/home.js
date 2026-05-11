@@ -37,7 +37,7 @@ async function inicializarDashboard(userData) {
       showElement(".cartao-aulas-tecnico");
       showElement(".cartao-meus-laboratorios");
       showElement(".painel-aulas-tecnico-lista");
-
+      showElement(".cartao-horarios-hoje-tecnico");
       document
         .getElementById("btn-mes-anterior-tecnico")
         ?.addEventListener("click", mostrarSemanaAnteriorTecnico);
@@ -99,88 +99,88 @@ async function carregarDadosDosPaineis(userType) {
 
 // 1. FUNÇÃO AJUDANTE: Junta as aulas recorrentes em pacotes
 function agruparSolicitacoes(requisicoes) {
-    const agrupado = [];
-    const mapaPedidos = new Map();
+  const agrupado = [];
+  const mapaPedidos = new Map();
 
-    requisicoes.forEach((req) => {
-        // Se for recorrente e tiver id_pedido, nós agrupamos
-        if (req.tipo_aula === "recorrente" && req.id_pedido) {
-            if (mapaPedidos.has(req.id_pedido)) {
-                // Já existe o grupo, só adiciona a aula dentro dele
-                mapaPedidos.get(req.id_pedido).aulas.push(req);
-            } else {
-                // Cria um novo grupo
-                const novoGrupo = { ...req, is_grupo: true, aulas: [req] };
-                mapaPedidos.set(req.id_pedido, novoGrupo);
-                agrupado.push(novoGrupo);
-            }
-        } else {
-            // Se for aula normal, joga direto na lista
-            agrupado.push(req);
-        }
-    });
+  requisicoes.forEach((req) => {
+    // Se for recorrente e tiver id_pedido, nós agrupamos
+    if (req.tipo_aula === "recorrente" && req.id_pedido) {
+      if (mapaPedidos.has(req.id_pedido)) {
+        // Já existe o grupo, só adiciona a aula dentro dele
+        mapaPedidos.get(req.id_pedido).aulas.push(req);
+      } else {
+        // Cria um novo grupo
+        const novoGrupo = { ...req, is_grupo: true, aulas: [req] };
+        mapaPedidos.set(req.id_pedido, novoGrupo);
+        agrupado.push(novoGrupo);
+      }
+    } else {
+      // Se for aula normal, joga direto na lista
+      agrupado.push(req);
+    }
+  });
 
-    return agrupado;
+  return agrupado;
 }
 
 
 // 2. RENDERIZAR OS CARDS (Painel)
 function renderTable(requests) {
-    const container = document.getElementById("minhas-aulas-container");
-    if (!container) return;
+  const container = document.getElementById("minhas-aulas-container");
+  if (!container) return;
 
-    container.innerHTML = "";
+  container.innerHTML = "";
 
-    if (requests.length === 0) {
-        container.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">Você não tem nenhuma solicitação futura.</p>`;
-        return;
+  if (requests.length === 0) {
+    container.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">Você não tem nenhuma solicitação futura.</p>`;
+    return;
+  }
+
+  const requisicoesAgrupadas = agruparSolicitacoes(requests);
+
+  requisicoesAgrupadas.forEach((r) => {
+    let textoData = "";
+    let textoHorario = "";
+    let listaIdsParaCancelar = [];
+    let labelRecorrente = "";
+
+    // Se for um grupo de aulas recorrentes
+    if (r.is_grupo) {
+      const datas = r.aulas.map(a => new Date(a.data));
+      const dataMin = new Date(Math.min(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+      const dataMax = new Date(Math.max(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+
+      textoData = dataMin === dataMax ? dataMin : `De ${dataMin} até ${dataMax}`;
+      labelRecorrente = `<span style="background: #e3f2fd; color: #0d6efd; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 10px;">🔄 ${r.aulas.length} Aulas</span>`;
+      listaIdsParaCancelar = r.aulas.map(a => a.id_aula);
+
+      // 👇 NOVO: Pega todos os horários do pacote e remove as repetições
+      const horariosUnicos = [...new Set(r.aulas.map(a => `${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}`))];
+      textoHorario = horariosUnicos.join(', '); // Ex: "07:20 - 08:10, 08:10 - 09:00"
+
+    } else {
+      // Aula normal
+      textoData = new Date(r.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+      listaIdsParaCancelar = [r.id_aula];
+
+      // 👇 NOVO: Horário normal
+      const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : "N/A";
+      const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : "N/A";
+      textoHorario = `${horaInicio} - ${horaFim}`;
     }
 
-    const requisicoesAgrupadas = agruparSolicitacoes(requests);
+    const linkRoteiroHtml = formatarLinkRoteiro(r.link_roteiro, "Ver Roteiro");
+    const textoStatus = formatarTextoStatus(r.status);
 
-    requisicoesAgrupadas.forEach((r) => {
-        let textoData = "";
-        let textoHorario = "";
-        let listaIdsParaCancelar = [];
-        let labelRecorrente = "";
+    const isDesativado = r.status === "nao_autorizado" || r.status === "cancelado";
+    const estiloBotao = isDesativado
+      ? "background-color: #f1f1f1; color: #a1a1a1; cursor: not-allowed; border: 1px solid #ddd;"
+      : "background-color: #ff4d4d; color: white; cursor: pointer; border: none;";
 
-        // Se for um grupo de aulas recorrentes
-        if (r.is_grupo) {
-            const datas = r.aulas.map(a => new Date(a.data));
-            const dataMin = new Date(Math.min(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
-            const dataMax = new Date(Math.max(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
-            
-            textoData = dataMin === dataMax ? dataMin : `De ${dataMin} até ${dataMax}`;
-            labelRecorrente = `<span style="background: #e3f2fd; color: #0d6efd; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 10px;">🔄 ${r.aulas.length} Aulas</span>`;
-            listaIdsParaCancelar = r.aulas.map(a => a.id_aula);
+    const card = document.createElement("div");
+    card.className = "aula-card";
 
-            // 👇 NOVO: Pega todos os horários do pacote e remove as repetições
-            const horariosUnicos = [...new Set(r.aulas.map(a => `${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}`))];
-            textoHorario = horariosUnicos.join(', '); // Ex: "07:20 - 08:10, 08:10 - 09:00"
-
-        } else {
-            // Aula normal
-            textoData = new Date(r.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
-            listaIdsParaCancelar = [r.id_aula];
-            
-            // 👇 NOVO: Horário normal
-            const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : "N/A";
-            const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : "N/A";
-            textoHorario = `${horaInicio} - ${horaFim}`;
-        }
-
-        const linkRoteiroHtml = formatarLinkRoteiro(r.link_roteiro, "Ver Roteiro");
-        const textoStatus = formatarTextoStatus(r.status);
-
-        const isDesativado = r.status === "nao_autorizado" || r.status === "cancelado";
-        const estiloBotao = isDesativado
-            ? "background-color: #f1f1f1; color: #a1a1a1; cursor: not-allowed; border: 1px solid #ddd;"
-            : "background-color: #ff4d4d; color: white; cursor: pointer; border: none;";
-
-        const card = document.createElement("div");
-        card.className = "aula-card";
-
-        card.innerHTML = `
+    card.innerHTML = `
             <div class="aula-card-header">
                 <h3>${r.nome_disciplina} ${labelRecorrente}</h3>
                 <span class="etiqueta-status status-${r.status}">${textoStatus}</span>
@@ -202,64 +202,64 @@ function renderTable(requests) {
                 </button>
             </div>
         `;
-        container.appendChild(card);
-    });
+    container.appendChild(card);
+  });
 }
 
 
 // 3. RENDERIZAR A TABELA
 function renderizarTabelaAgendamentos(requisicoes) {
-    const tbody = document.getElementById("corpo-tabela-agendamentos");
-    if (!tbody) return;
+  const tbody = document.getElementById("corpo-tabela-agendamentos");
+  if (!tbody) return;
 
-    tbody.innerHTML = "";
+  tbody.innerHTML = "";
 
-    if (requisicoes.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">Nenhum agendamento futuro encontrado.</td></tr>`;
-        return;
+  if (requisicoes.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">Nenhum agendamento futuro encontrado.</td></tr>`;
+    return;
+  }
+
+  const requisicoesAgrupadas = agruparSolicitacoes(requisicoes);
+
+  requisicoesAgrupadas.forEach((req) => {
+    let textoData = "";
+    let textoHorario = "";
+    let listaIdsParaCancelar = [];
+    let iconeRecorrente = "";
+
+    if (req.is_grupo) {
+      const datas = req.aulas.map(a => new Date(a.data));
+      const dataMin = new Date(Math.min(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+      const dataMax = new Date(Math.max(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+
+      textoData = dataMin === dataMax ? dataMin : `De ${dataMin} até ${dataMax}`;
+      iconeRecorrente = ` <span title="Pacote Recorrente de ${req.aulas.length} aulas">🔄</span>`;
+      listaIdsParaCancelar = req.aulas.map(a => a.id_aula);
+
+      // 👇 NOVO: Pega todos os horários do pacote e remove as repetições
+      const horariosUnicos = [...new Set(req.aulas.map(a => `${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}`))];
+      textoHorario = horariosUnicos.join(', ');
+
+    } else {
+      textoData = new Date(req.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+      listaIdsParaCancelar = [req.id_aula];
+
+      // 👇 NOVO: Horário normal
+      const horaInicio = req.hora_inicio ? req.hora_inicio.slice(0, 5) : "N/A";
+      const horaFim = req.hora_fim ? req.hora_fim.slice(0, 5) : "N/A";
+      textoHorario = `${horaInicio} - ${horaFim}`;
     }
 
-    const requisicoesAgrupadas = agruparSolicitacoes(requisicoes);
+    const tr = document.createElement("tr");
+    const linkMaterialHtml = formatarLinkRoteiro(req.link_roteiro, "Acessar");
+    const textoStatus = formatarTextoStatus(req.status);
 
-    requisicoesAgrupadas.forEach((req) => {
-        let textoData = "";
-        let textoHorario = "";
-        let listaIdsParaCancelar = [];
-        let iconeRecorrente = "";
+    const isDesativado = req.status === "nao_autorizado" || req.status === "cancelado";
+    const estiloBotao = isDesativado
+      ? "background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;"
+      : "";
 
-        if (req.is_grupo) {
-            const datas = req.aulas.map(a => new Date(a.data));
-            const dataMin = new Date(Math.min(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
-            const dataMax = new Date(Math.max(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
-            
-            textoData = dataMin === dataMax ? dataMin : `De ${dataMin} até ${dataMax}`;
-            iconeRecorrente = ` <span title="Pacote Recorrente de ${req.aulas.length} aulas">🔄</span>`;
-            listaIdsParaCancelar = req.aulas.map(a => a.id_aula);
-
-            // 👇 NOVO: Pega todos os horários do pacote e remove as repetições
-            const horariosUnicos = [...new Set(req.aulas.map(a => `${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}`))];
-            textoHorario = horariosUnicos.join(', ');
-
-        } else {
-            textoData = new Date(req.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
-            listaIdsParaCancelar = [req.id_aula];
-
-            // 👇 NOVO: Horário normal
-            const horaInicio = req.hora_inicio ? req.hora_inicio.slice(0, 5) : "N/A";
-            const horaFim = req.hora_fim ? req.hora_fim.slice(0, 5) : "N/A";
-            textoHorario = `${horaInicio} - ${horaFim}`;
-        }
-
-        const tr = document.createElement("tr");
-        const linkMaterialHtml = formatarLinkRoteiro(req.link_roteiro, "Acessar");
-        const textoStatus = formatarTextoStatus(req.status);
-
-        const isDesativado = req.status === "nao_autorizado" || req.status === "cancelado";
-        const estiloBotao = isDesativado
-            ? "background-color: #cccccc; color: #666666; cursor: not-allowed; border: none;"
-            : "";
-
-        tr.innerHTML = `
+    tr.innerHTML = `
             <td>${req.nome_laboratorio}</td>
             <td>${req.nome_disciplina} ${iconeRecorrente}</td>
             <td>${textoData}</td>
@@ -275,53 +275,53 @@ function renderizarTabelaAgendamentos(requisicoes) {
                 </button>
             </td>
         `;
-        tbody.appendChild(tr);
-    });
+    tbody.appendChild(tr);
+  });
 }
 
 function renderizarAulasNosMeusLaboratorios(aulas) {
-    const container = document.getElementById("corpo-tabela-aulas-tecnico");
-    if (!container) return;
-    
-    container.innerHTML = "";
-    
-    if (!aulas || aulas.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Nenhuma aula futura autorizada nos seus laboratórios.</p>';
-        return;
+  const container = document.getElementById("corpo-tabela-aulas-tecnico");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (!aulas || aulas.length === 0) {
+    container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Nenhuma aula futura autorizada nos seus laboratórios.</p>';
+    return;
+  }
+
+  // Passa a lista pelo filtro de agrupamento que você já tem no código
+  const aulasAgrupadas = agruparSolicitacoes(aulas);
+
+  aulasAgrupadas.forEach((aulaGroup) => {
+    let textoData = "";
+    let textoHorario = "";
+    let labelRecorrente = "";
+
+    // Se for um grupo recorrente
+    if (aulaGroup.is_grupo) {
+      const datas = aulaGroup.aulas.map(a => new Date(a.data));
+      const dataMin = new Date(Math.min(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+      const dataMax = new Date(Math.max(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+
+      textoData = dataMin === dataMax ? dataMin : `De ${dataMin} até ${dataMax}`;
+      labelRecorrente = `<span style="background: #e3f2fd; color: #0d6efd; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 10px;">🔄 ${aulaGroup.aulas.length} Aulas</span>`;
+
+      // Pega horários sem repetição
+      const horariosUnicos = [...new Set(aulaGroup.aulas.map(a => `${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}`))];
+      textoHorario = horariosUnicos.join(', ');
+    } else {
+      // Aula normal
+      textoData = new Date(aulaGroup.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+      textoHorario = `${aulaGroup.hora_inicio.slice(0, 5)} - ${aulaGroup.hora_fim.slice(0, 5)}`;
     }
-    
-    // Passa a lista pelo filtro de agrupamento que você já tem no código
-    const aulasAgrupadas = agruparSolicitacoes(aulas);
-    
-    aulasAgrupadas.forEach((aulaGroup) => {
-        let textoData = "";
-        let textoHorario = "";
-        let labelRecorrente = "";
-        
-        // Se for um grupo recorrente
-        if (aulaGroup.is_grupo) {
-            const datas = aulaGroup.aulas.map(a => new Date(a.data));
-            const dataMin = new Date(Math.min(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
-            const dataMax = new Date(Math.max(...datas)).toLocaleDateString("pt-BR", { timeZone: "UTC" });
-            
-            textoData = dataMin === dataMax ? dataMin : `De ${dataMin} até ${dataMax}`;
-            labelRecorrente = `<span style="background: #e3f2fd; color: #0d6efd; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 10px;">🔄 ${aulaGroup.aulas.length} Aulas</span>`;
-            
-            // Pega horários sem repetição
-            const horariosUnicos = [...new Set(aulaGroup.aulas.map(a => `${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}`))];
-            textoHorario = horariosUnicos.join(', ');
-        } else {
-            // Aula normal
-            textoData = new Date(aulaGroup.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
-            textoHorario = `${aulaGroup.hora_inicio.slice(0, 5)} - ${aulaGroup.hora_fim.slice(0, 5)}`;
-        }
 
-        const linkRoteiroHtml = aulaGroup.link_roteiro ? `<a href="${aulaGroup.link_roteiro}" target="_blank" class="link-roteiro">Acessar Link</a>` : 'Não exigido';
+    const linkRoteiroHtml = aulaGroup.link_roteiro ? `<a href="${aulaGroup.link_roteiro}" target="_blank" class="link-roteiro">Acessar Link</a>` : 'Não exigido';
 
-        const card = document.createElement("div");
-        card.className = "aula-card"; 
+    const card = document.createElement("div");
+    card.className = "aula-card";
 
-        card.innerHTML = `
+    card.innerHTML = `
             <div class="aula-card-header">
                 <h3>${aulaGroup.nome_disciplina || 'Disciplina não informada'} ${labelRecorrente}</h3>
                 <span class="etiqueta-status status-autorizado">Autorizado</span>
@@ -343,8 +343,8 @@ function renderizarAulasNosMeusLaboratorios(aulas) {
                 </div>
             </div>
         `;
-        container.appendChild(card);
-    });
+    container.appendChild(card);
+  });
 }
 
 async function cancelarAgendamento(idAula) {
@@ -423,9 +423,9 @@ async function fetchAulasDoCalendarioProfessor(ano, mes) {
     );
     if (!response.ok)
       throw new Error("Falha ao buscar dados do calendário do professor");
-      
+
     const aulas = await response.json();
-    
+
     return aulas.filter(aula => aula.status === 'autorizado');
 
   } catch (error) {
@@ -444,7 +444,7 @@ async function fetchAulasDoCalendarioTecnico() {
 
     const mesInicio = inicioSemana.getMonth() + 1;
     const anoInicio = inicioSemana.getFullYear();
-    
+
     const mesFim = fimSemana.getMonth() + 1;
     const anoFim = fimSemana.getFullYear();
 
@@ -453,11 +453,11 @@ async function fetchAulasDoCalendarioTecnico() {
     let aulas = await response1.json();
 
     if (mesInicio !== mesFim) {
-        const response2 = await fetch(`/api/calendario/aulas-tecnico?ano=${anoFim}&mes=${mesFim}`);
-        if (response2.ok) {
-            const aulasMes2 = await response2.json();
-            aulas = [...aulas, ...aulasMes2]; 
-        }
+      const response2 = await fetch(`/api/calendario/aulas-tecnico?ano=${anoFim}&mes=${mesFim}`);
+      if (response2.ok) {
+        const aulasMes2 = await response2.json();
+        aulas = [...aulas, ...aulasMes2];
+      }
     }
 
     return aulas.filter(aula => aula.status === 'autorizado');
@@ -716,6 +716,42 @@ async function carregarAulasDeHoje() {
         <div class="item-horario-info">
             <h4>${aula.nome_disciplina}</h4>
             <p><i class="fas fa-flask"></i> ${aula.nome_laboratorio}</p>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  } catch (error) {
+    container.innerHTML = "<p style='color:red; text-align:center;'>Erro ao carregar horários.</p>";
+  }
+}
+
+async function carregarAulasDeHojeTecnico() {
+  const container = document.getElementById("lista-horarios-hoje-tecnico");
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/aulas-hoje-tecnico');
+    if (!res.ok) throw new Error();
+    const aulas = await res.json();
+
+    container.innerHTML = "";
+
+    if (aulas.length === 0) {
+      container.innerHTML = "<p style='text-align:center; color:#666; padding: 20px;'>Nenhuma aula agendada para hoje nos seus laboratórios.</p>";
+      return;
+    }
+
+    aulas.forEach(aula => {
+      const div = document.createElement("div");
+      div.className = "item-horario-hoje";
+      div.innerHTML = `
+        <div class="item-horario-hora">
+            <i class="fas fa-clock"></i> <strong>${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(0, 5)}</strong>
+        </div>
+        <div class="item-horario-info" style="margin-top: 5px;">
+            <h4 style="margin: 0 0 3px 0;">${aula.nome_disciplina || 'Disciplina não informada'}</h4>
+            <p style="margin: 0; color: #555; font-size: 13px;"><i class="fas fa-flask"></i> ${aula.nome_laboratorio}</p>
+            <p style="margin: 2px 0 0 0; color: #555; font-size: 13px;"><i class="fas fa-user-tie"></i> Prof: ${aula.nome_professor}</p>
         </div>
       `;
       container.appendChild(div);

@@ -2491,7 +2491,35 @@ app.post("/api/schedule-recurring", Autenticado, async (req, res) => {
     client.release();
   }
 });
-
+// Endpoint para buscar aulas de HOJE nos laboratórios do Técnico
+app.get("/api/aulas-hoje-tecnico", Autenticado, async (req, res) => {
+  try {
+    const email = req.session.user.email;
+    const query = `
+      SELECT 
+        h.hora_inicio, 
+        h.hora_fim, 
+        d.nome_disciplina, 
+        l.nome_laboratorio,
+        prof.nome_usuario AS nome_professor
+      FROM aulas a
+      JOIN horarios h ON a.id_horario = h.id_horario
+      LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+      JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+      JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
+      JOIN usuario prof ON a.professor_email = prof.email
+      WHERE lu.usuario_email = $1 
+        AND a.data = CURRENT_DATE
+        AND a.status = 'autorizado'
+      ORDER BY h.hora_inicio ASC
+    `;
+    const result = await pool.query(query, [email]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Erro ao buscar aulas de hoje tecnico:", err);
+    res.status(500).json({ error: "Erro ao buscar aulas de hoje." });
+  }
+});
 app.get("/api/requests", Autenticado, async (req, res) => {
   try {
     const { tecnico_email } = req.query;
