@@ -741,26 +741,45 @@ async function carregarAulasDeHojeTecnico() {
     container.innerHTML = "";
 
     if (aulas.length === 0) {
-      container.innerHTML = "<p style='text-align:center; color:#666; padding: 20px;'>Nenhuma aula agendada para hoje nos seus laboratórios.</p>";
+      container.innerHTML = "<p style='text-align:center; color:#666; padding: 30px;'>☕ Nenhuma aula agendada para hoje nos seus laboratórios.</p>";
       return;
     }
 
     aulas.forEach(aula => {
       const div = document.createElement("div");
-      div.className = "item-horario-hoje";
+      div.className = "aula-card"; 
+      div.style.marginBottom = "15px";
+
+      const linkRoteiroHtml = aula.link_roteiro 
+        ? `<a href="${aula.link_roteiro}" target="_blank" class="link-roteiro">Acessar Link</a>` 
+        : 'Não exigido';
+
       div.innerHTML = `
-        <div class="item-horario-hora">
-            <i class="fas fa-clock"></i> <strong>${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(0, 5)}</strong>
+        <div class="aula-card-header">
+            <h3>${aula.nome_disciplina || 'Disciplina não informada'}</h3>
+            <span class="etiqueta-status status-autorizado">Autorizado</span>
         </div>
-        <div class="item-horario-info" style="margin-top: 5px;">
-            <h4 style="margin: 0 0 3px 0;">${aula.nome_disciplina || 'Disciplina não informada'}</h4>
-            <p style="margin: 0; color: #555; font-size: 13px;"><i class="fas fa-flask"></i> ${aula.nome_laboratorio}</p>
-            <p style="margin: 2px 0 0 0; color: #555; font-size: 13px;"><i class="fas fa-user-tie"></i> Prof: ${aula.nome_professor}</p>
+        <div class="aula-card-body">
+            <div class="aula-card-info-linha">
+                <p><strong><i class="fas fa-user-graduate"></i> Professor:</strong> ${aula.nome_professor}</p>
+                <p><strong><i class="fas fa-flask"></i> Laboratório:</strong> ${aula.nome_laboratorio}</p>
+                <p><strong><i class="far fa-clock"></i> Horário:</strong> ${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(0, 5)}</p>
+                <p><strong><i class="fas fa-users"></i> Alunos:</strong> ${aula.numero_discentes || '-'}</p>
+                <p><strong><i class="fas fa-user-cog"></i> Técnico:</strong> ${aula.precisa_tecnico ? "Sim" : "Não"}</p>
+            </div>
+            <p style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                <strong>Observações:</strong> ${aula.observacoes ? aula.observacoes : "Nenhuma observação."}
+            </p>
+        </div>
+        <div class="aula-card-footer" style="display: flex; justify-content: flex-start; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
+            <div class="aula-card-roteiro">
+                <strong>Material:</strong> ${linkRoteiroHtml}
+            </div>
         </div>
       `;
       container.appendChild(div);
     });
   } catch (error) {
-    container.innerHTML = "<p style='color:red; text-align:center;'>Erro ao carregar horários.</p>";
+    container.innerHTML = "<p style='color:red; text-align:center;'>❌ Erro ao carregar as aulas de hoje.</p>";
   }
 }
