@@ -423,12 +423,13 @@ async function fetchAulasDoCalendarioProfessor(ano, mes) {
     );
     if (!response.ok)
       throw new Error("Falha ao buscar dados do calendário do professor");
-    return await response.json();
+      
+    const aulas = await response.json();
+    
+    return aulas.filter(aula => aula.status === 'autorizado');
+
   } catch (error) {
-    console.error(
-      "Erro ao buscar aulas para o calendário do professor:",
-      error,
-    );
+    console.error("Erro ao buscar aulas para o calendário do professor:", error);
     return [];
   }
 }
@@ -459,13 +460,13 @@ async function fetchAulasDoCalendarioTecnico() {
         }
     }
 
-    return aulas;
+    return aulas.filter(aula => aula.status === 'autorizado');
+
   } catch (error) {
     console.error("Erro ao buscar aulas para o calendário do técnico:", error);
     return [];
   }
 }
-
 async function loadMyRequests() {
   try {
     const res = await fetch(`/api/minhas-solicitacoes`);
