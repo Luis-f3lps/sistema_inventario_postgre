@@ -29,15 +29,19 @@ async function inicializarDashboard(userData) {
     case "tecnico":
       const grelha = document.querySelector(".painel-grelha");
       if (grelha) {
-        grelha.style.display = "block";
+        grelha.style.display = "flex"; 
+        grelha.style.flexWrap = "wrap"; 
         grelha.style.gap = "20px";
         grelha.style.marginBottom = "20px";
       }
 
       showElement(".cartao-aulas-tecnico");
       showElement(".cartao-meus-laboratorios");
+      showElement(".cartao-horarios-hoje-tecnico"); 
       showElement(".painel-aulas-tecnico-lista");
-      showElement(".cartao-horarios-hoje-tecnico");
+
+      carregarAulasDeHojeTecnico();
+
       document
         .getElementById("btn-mes-anterior-tecnico")
         ?.addEventListener("click", mostrarSemanaAnteriorTecnico);
