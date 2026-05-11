@@ -756,13 +756,12 @@ async function carregarAulasDeHojeTecnico() {
 
       div.innerHTML = `
         <div class="aula-card-header">
-            <h3>${aula.nome_disciplina || 'Disciplina não informada'}</h3>
-            <span class="etiqueta-status status-autorizado">Autorizado</span>
+            <h3>${aula.nome_laboratorio || 'Carregando....'}</h3>
         </div>
         <div class="aula-card-body">
             <div class="aula-card-info-linha">
                 <p><strong><i class="fas fa-user-graduate"></i> Professor:</strong> ${aula.nome_professor}</p>
-                <p><strong><i class="fas fa-flask"></i> Laboratório:</strong> ${aula.nome_laboratorio}</p>
+                <p><strong><i class="fas fa-flask"></i> Disciplina:</strong> ${aula.nome_disciplina}</p>
                 <p><strong><i class="far fa-clock"></i> Horário:</strong> ${aula.hora_inicio.slice(0, 5)} - ${aula.hora_fim.slice(0, 5)}</p>
                 <p><strong><i class="fas fa-users"></i> Alunos:</strong> ${aula.numero_discentes || '-'}</p>
                 <p><strong><i class="fas fa-user-cog"></i> Técnico:</strong> ${aula.precisa_tecnico ? "Sim" : "Não"}</p>
@@ -773,7 +772,7 @@ async function carregarAulasDeHojeTecnico() {
         </div>
         <div class="aula-card-footer" style="display: flex; justify-content: flex-start; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee;">
             <div class="aula-card-roteiro">
-                <strong>Material:</strong> ${linkRoteiroHtml}
+                <strong>Roteiro:</strong> ${linkRoteiroHtml}
             </div>
         </div>
       `;
