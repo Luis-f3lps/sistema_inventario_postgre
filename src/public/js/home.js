@@ -419,11 +419,15 @@ async function mostrarProximaSemanaTecnico() {
 async function fetchAulasDoCalendarioProfessor(ano, mes) {
   try {
     const response = await fetch(
-      `/api/calendario/minhas-aulas-mes?ano=${ano}&mes=${mes}`
+      `/api/calendario/aulas-autorizadas?ano=${ano}&mes=${mes}`
     );
     if (!response.ok)
       throw new Error("Falha ao buscar dados do calendário do professor");
-    return await response.json();
+      
+    const aulas = await response.json();
+    
+    return aulas.filter(aula => aula.status === 'autorizado');
+
   } catch (error) {
     console.error(
       "Erro ao buscar aulas para o calendário do professor:",
@@ -459,13 +463,13 @@ async function fetchAulasDoCalendarioTecnico() {
         }
     }
 
-    return aulas;
+    return aulas.filter(aula => aula.status === 'autorizado');
+
   } catch (error) {
     console.error("Erro ao buscar aulas para o calendário do técnico:", error);
     return [];
   }
 }
-
 async function loadMyRequests() {
   try {
     const res = await fetch(`/api/minhas-solicitacoes`);
