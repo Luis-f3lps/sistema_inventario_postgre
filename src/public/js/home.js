@@ -101,13 +101,13 @@ async function carregarDadosDosPaineis(userType) {
   }
 }
 
-// 1. FUNÇÃO AJUDANTE: Junta as aulas recorrentes em pacotes
+// 1. Junta as aulas recorrentes em pacotes
 function agruparSolicitacoes(requisicoes) {
   const agrupado = [];
   const mapaPedidos = new Map();
 
   requisicoes.forEach((req) => {
-    // Se for recorrente e tiver id_pedido, nós agrupamos
+    // Se for recorrente e tiver id_pedido, agrupamos
     if (req.tipo_aula === "recorrente" && req.id_pedido) {
       if (mapaPedidos.has(req.id_pedido)) {
         // Já existe o grupo, só adiciona a aula dentro dele
@@ -158,16 +158,16 @@ function renderTable(requests) {
       labelRecorrente = `<span style="background: #e3f2fd; color: #0d6efd; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 10px;">🔄 ${r.aulas.length} Aulas</span>`;
       listaIdsParaCancelar = r.aulas.map(a => a.id_aula);
 
-      // 👇 NOVO: Pega todos os horários do pacote e remove as repetições
+      // Pega todos os horários do pacote e remove as repetições
       const horariosUnicos = [...new Set(r.aulas.map(a => `${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}`))];
-      textoHorario = horariosUnicos.join(', '); // Ex: "07:20 - 08:10, 08:10 - 09:00"
+      textoHorario = horariosUnicos.join(', '); 
 
     } else {
       // Aula normal
       textoData = new Date(r.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
       listaIdsParaCancelar = [r.id_aula];
 
-      // 👇 NOVO: Horário normal
+      // Horário normal
       const horaInicio = r.hora_inicio ? r.hora_inicio.slice(0, 5) : "N/A";
       const horaFim = r.hora_fim ? r.hora_fim.slice(0, 5) : "N/A";
       textoHorario = `${horaInicio} - ${horaFim}`;
@@ -240,7 +240,7 @@ function renderizarTabelaAgendamentos(requisicoes) {
       iconeRecorrente = ` <span title="Pacote Recorrente de ${req.aulas.length} aulas">🔄</span>`;
       listaIdsParaCancelar = req.aulas.map(a => a.id_aula);
 
-      // 👇 NOVO: Pega todos os horários do pacote e remove as repetições
+      // Pega todos os horários do pacote e remove as repetições
       const horariosUnicos = [...new Set(req.aulas.map(a => `${a.hora_inicio.slice(0, 5)} - ${a.hora_fim.slice(0, 5)}`))];
       textoHorario = horariosUnicos.join(', ');
 
@@ -248,7 +248,7 @@ function renderizarTabelaAgendamentos(requisicoes) {
       textoData = new Date(req.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
       listaIdsParaCancelar = [req.id_aula];
 
-      // 👇 NOVO: Horário normal
+      // Horário normal
       const horaInicio = req.hora_inicio ? req.hora_inicio.slice(0, 5) : "N/A";
       const horaFim = req.hora_fim ? req.hora_fim.slice(0, 5) : "N/A";
       textoHorario = `${horaInicio} - ${horaFim}`;

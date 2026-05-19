@@ -1,5 +1,5 @@
 // ==========================================
-// 1. CARREGAMENTO INICIAL (VIA MENU READY)
+// CARREGAMENTO INICIAL (VIA MENU READY)
 // ==========================================
 document.addEventListener('menuReady', (event) => {
     const { userData } = event.detail;
@@ -18,7 +18,7 @@ function inicializarPaginaProduto(userData) {
 
 
 // ==========================================
-// 2. NAVEGAÇÃO DE ABAS
+// NAVEGAÇÃO DE ABAS
 // ==========================================
 function opentab(tabname) {
     const tablinks = document.getElementsByClassName("tab-links");
@@ -30,14 +30,13 @@ function opentab(tabname) {
     const targetTab = document.getElementById(tabname);
     if (targetTab) targetTab.classList.add("active-tab");
 
-    // Adiciona a classe ativa no botão clicado usando o evento global
     if (event && event.currentTarget) {
         event.currentTarget.classList.add("active-link");
     }
 }
 
 // ==========================================
-// 3. BUSCA E RENDERIZAÇÃO DE DADOS
+//  BUSCA E RENDERIZAÇÃO DE DADOS
 // ==========================================
 function loadproduto(page = 1, limit = 20) {
     fetch(`/api/produtoPag?page=${page}&limit=${limit}`)
@@ -142,7 +141,7 @@ function carregarsiglas() {
 }
 
 // ==========================================
-// 4. FORMULÁRIOS E AÇÕES (CRUD)
+// FORMULÁRIOS E AÇÕES (CRUD)
 // ==========================================
 document.getElementById('add-produto-form')?.addEventListener('submit', function (event) {
     event.preventDefault();
@@ -167,8 +166,8 @@ document.getElementById('add-produto-form')?.addEventListener('submit', function
             if (result.message) {
                 alert(result.message);
                 document.getElementById('add-produto-form').reset();
-                loadproduto(1); // Atualiza a tabela na página 1
-                carregarsiglas(); // Atualiza a lista de siglas
+                loadproduto(1); 
+                carregarsiglas(); 
             } else {
                 alert(result.error);
             }
@@ -214,7 +213,7 @@ function excluirproduto(idproduto) {
 }
 
 // ==========================================
-// 5. EXPORTAÇÃO
+//  EXPORTAÇÃO
 // ==========================================
 function geradorPdfproduto() {
     fetch('/generate-pdf-produto', {

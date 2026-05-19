@@ -1,12 +1,11 @@
 // ==========================================
-// 1. CARREGAMENTO INICIAL (VIA MENU READY)
+// CARREGAMENTO INICIAL (VIA MENU READY)
 // ==========================================
 document.addEventListener('menuReady', (event) => {
     const { userData } = event.detail;
     inicializarPaginaRelatorio(userData);
 });
 
-// Variável global para guardar o usuário logado, caso precise no futuro
 let loggedInUser = null;
 
 function inicializarPaginaRelatorio(userData) {
@@ -35,7 +34,7 @@ function formatDate(dateString) {
 }
 
 // ==========================================
-// 2. NAVEGAÇÃO DE ABAS
+// NAVEGAÇÃO DE ABAS
 // ==========================================
 function opentab(tabname) {
     const tablinks = document.getElementsByClassName("tab-links");
@@ -54,7 +53,7 @@ function opentab(tabname) {
 
 
 // ==========================================
-// 3. BUSCA DE DADOS E FILTROS (CONSUMO)
+// BUSCA DE DADOS E FILTROS (CONSUMO)
 // ==========================================
 function loadLaboratorios2() {
     fetch('/api/laboratorios')
@@ -120,7 +119,7 @@ document.getElementById('filter-form')?.addEventListener('submit', function (eve
 });
 
 // ==========================================
-// 4. BUSCA DE DADOS E FILTROS (ENTRADAS)
+// BUSCA DE DADOS E FILTROS (ENTRADAS)
 // ==========================================
 function loadEntradas(page = 1, startDate = '', endDate = '') {
     const url = `/api/tabelaregistraentrada?page=${page}&limit=20&startDate=${startDate}&endDate=${endDate}`;
@@ -194,7 +193,7 @@ document.getElementById('filter-form2')?.addEventListener('submit', function (ev
 });
 
 // ==========================================
-// 5. GERAÇÃO DE PDFs (BACKEND)
+// GERAÇÃO DE PDFs 
 // ==========================================
 function geradorPdfEntradatipo2() {
     const startDate = document.getElementById('entrada-start-date')?.value || '';

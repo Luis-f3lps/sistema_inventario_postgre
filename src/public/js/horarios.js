@@ -138,7 +138,6 @@ function renderSlots() {
         const slotOcupado = occupiedSlots.find(s => s.hora === horario.inicio);
 
         if (diaPassou) {
-            // ⬛ Bloqueia e pinta de Cinza se o dia já passou
             btn.disabled = true;
             btn.style.backgroundColor = "#e9ecef"; 
             btn.style.border = "1px solid #ced4da"; 
@@ -177,7 +176,6 @@ function updateSelectionUI() {
     document.querySelectorAll('.bloco-horario').forEach(el => {
         el.classList.remove('selected');
         
-        // Pinta de verde todos os botões que estão na lista de selecionados
         if (!el.disabled && selectedSlots.includes(el.dataset.hour)) {
             el.classList.add('selected');
         }

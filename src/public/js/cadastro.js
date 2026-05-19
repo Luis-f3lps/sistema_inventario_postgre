@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (formCadastro) {
         formCadastro.addEventListener('submit', async function (event) {
-            event.preventDefault(); // Evita o recarregamento padrão da página
+            event.preventDefault(); 
 
             const nome_usuario = document.getElementById('nome_usuario').value;
             const email = document.getElementById('email').value;

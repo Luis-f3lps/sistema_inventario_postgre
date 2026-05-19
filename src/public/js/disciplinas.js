@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSubmenuListeners();
 });
 
-// A nova função loadLoggedInUser com tempo de espera para evitar o erro de 'null'
+// A função loadLoggedInUser com tempo de espera para evitar o erro de 'null'
 async function loadLoggedInUser() {
   try {
       const response = await fetch("/api/usuario-logado");
@@ -50,26 +50,6 @@ async function loadLoggedInUser() {
           }
       };
       preencherNome();
-
-      // Função que libera os botões do menu baseado no cargo
-      const atualizarMenu = () => {
-          const adminMenu = document.querySelector(".admin-menu");
-          
-          if (adminMenu || document.querySelector(".tecnico")) {
-              const userType = data.tipo_usuario ? data.tipo_usuario.trim().toLowerCase() : "";
-              
-              if (userType === "admin" || userType === "administrador") {
-                  document.querySelectorAll(".admin-menu, .produto").forEach(el => el.style.display = "block");
-              } else if (userType === "tecnico") {
-                  document.querySelectorAll(".tecnico, .Home, .produto").forEach(el => el.style.display = "block");
-              } else if (userType === "professor") {
-                  document.querySelectorAll(".professor, .Home, .Horarios").forEach(el => el.style.display = "block");
-              }
-          } else {
-              setTimeout(atualizarMenu, 100);
-          }
-      };
-      atualizarMenu();
 
   } catch (error) {
       console.error("Erro ao carregar usuário logado:", error);
@@ -169,7 +149,6 @@ async function handleAddDisciplina(event) {
   event.preventDefault();
   const form = event.currentTarget;
 const nomeDisciplina = document.getElementById("disciplina-select2").value;
-  // const nomeDisciplina = document.getElementById("username").value;
   const emailProfessor = document.getElementById("usuarios-select").value;
 
   if (!nomeDisciplina || !emailProfessor) {

@@ -1,6 +1,3 @@
-// ==========================================
-// 1. CARREGAMENTO INICIAL
-// ==========================================
 document.addEventListener("DOMContentLoaded", () => {
     // Carrega a tabela principal (página 1)
     loadLaboratorios(1);
@@ -16,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// 2. NAVEGAÇÃO E AUTENTICAÇÃO
+// NAVEGAÇÃO E AUTENTICAÇÃO
 // ==========================================
 function opentab(tabname) {
     const tablinks = document.getElementsByClassName("tab-links");
@@ -77,7 +74,7 @@ async function loadLoggedInUser() {
 }
 
 // ==========================================
-// 3. BUSCA E RENDERIZAÇÃO DE DADOS (TABELA E SELECTS)
+// BUSCA E RENDERIZAÇÃO DE DADOS 
 // ==========================================
 function loadLaboratorios(page = 1, limit = 10) {
     fetch(`/api/laboratoriosPag?page=${page}&limit=${limit}`)
@@ -190,7 +187,7 @@ function loadUsuarios2() {
 }
 
 // ==========================================
-// 4. FORMULÁRIOS E AÇÕES (CRUD)
+// FORMULÁRIOS E AÇÕES (CRUD)
 // ==========================================
 document.getElementById("add-laboratorio-form")?.addEventListener("submit", function (event) {
     event.preventDefault();

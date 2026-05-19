@@ -1,6 +1,6 @@
 let loggedInUser = null;
 let allRequests = [];
-let filtroAtual = "analisando"; // Valor padrão inicial
+let filtroAtual = "analisando";
 
 function formatarTextoStatus(status) {
   switch (status) {
@@ -32,7 +32,6 @@ async function inicializarPagina() {
         loggedInUser.nome_usuario || loggedInUser.nome;
     }
 
-    // Listener para os botões de filtro
     const radiosFiltro = document.querySelectorAll(
       'input[name="filtroStatus"]',
     );
@@ -57,10 +56,8 @@ async function loadMyRequests() {
     const res = await fetch(`/api/minhas-solicitacoes`);
     if (!res.ok) throw new Error("Erro na rede ao buscar solicitações");
 
-    // Guarda todos os dados vindos do banco na variável global
     allRequests = await res.json();
 
-    // Aplica o filtro padrão e renderiza
     aplicarFiltroEDesenhar();
   } catch (error) {
     console.error("Falha ao carregar solicitações:", error);
@@ -76,7 +73,6 @@ async function loadMyRequests() {
 function aplicarFiltroEDesenhar() {
   let dadosParaTela = allRequests;
 
-  // Se o filtro estiver em "analisando", mostra apenas os pendentes
   if (filtroAtual === "analisando") {
     dadosParaTela = allRequests.filter((req) => req.status === "analisando");
   }
@@ -85,7 +81,6 @@ function aplicarFiltroEDesenhar() {
 }
 
 function renderTable(requests) {
-  // Apontamos para o novo container das individuais
   const containerInd = document.getElementById(
     "minhas-aulas-individuais-container",
   );
@@ -162,7 +157,7 @@ function renderTable(requests) {
     });
   }
 
-  // --- CARTÕES RECORRENTES (MANTIDO) ---
+  // --- CARTÕES RECORRENTES ---
   if (recorrentes.length === 0) {
     containerRec.innerHTML = `<p style="text-align:center; padding: 20px; color: #666;">Nenhuma solicitação recorrente.</p>`;
   } else {

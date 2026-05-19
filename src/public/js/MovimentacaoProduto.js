@@ -1,21 +1,16 @@
 // ==========================================
-// 1. CARREGAMENTO INICIAL
+// CARREGAMENTO INICIAL
 // ==========================================
 document.addEventListener('DOMContentLoaded', function () {
-    // Carrega dados dos selects
     loadLaboratorios();
     loadProdutosSiglas();
     loadsiglasEntrada();
-
-    // Carrega IDs para o form de edição (Aviso: A rota /api/entradas precisa ser criada no app.js!)
     loadIdsEntrada();
-
-    // Inicia controle de sessão
     loadLoggedInUser();
 });
 
 // ==========================================
-// 2. NAVEGAÇÃO E AUTENTICAÇÃO
+// NAVEGAÇÃO E AUTENTICAÇÃO
 // ==========================================
 function opentab(tabname) {
     document.querySelectorAll('.tab-links').forEach(link => link.classList.remove('active-link'));
@@ -58,7 +53,7 @@ async function loadLoggedInUser() {
                     case 'administrador':
                         document.querySelectorAll('.admin-menu, #sidemenu > li.submenu.produto').forEach(el => el.style.display = 'block');
                         const abaEdicao = document.querySelector('.tab-links[onclick*="Aba02"]');
-                        if (abaEdicao) abaEdicao.style.display = 'block'; // <--- SOLUÇÃO AQUI
+                        if (abaEdicao) abaEdicao.style.display = 'block'; 
                         break;
                     case 'tecnico':
                         document.querySelectorAll('.tecnico, .Home, #sidemenu > li.submenu.produto').forEach(el => el.style.display = 'block');
@@ -79,7 +74,7 @@ async function loadLoggedInUser() {
 }
 
 // ==========================================
-// 3. BUSCA DE DADOS (SELECTS)
+// BUSCA DE DADOS (SELECTS)
 // ==========================================
 function loadLaboratorios() {
     fetch('/api/lab')
@@ -150,14 +145,14 @@ function loadIdsEntrada() {
                 idSelect.appendChild(option);
             });
         })
-        .catch(error => console.warn('Aviso:', error)); // Alterado para alertar, mas não crashar
+        .catch(error => console.warn('Aviso:', error)); 
 }
 
 // ==========================================
-// 4. FORMULÁRIOS E AÇÕES (CRUD)
+// FORMULÁRIOS E AÇÕES (CRUD)
 // ==========================================
 
-// Registrar NOVA Entrada
+// Registrar Entrada
 document.getElementById('entrada-form')?.addEventListener('submit', function (event) {
     event.preventDefault();
 
@@ -190,7 +185,7 @@ document.getElementById('entrada-form')?.addEventListener('submit', function (ev
         .catch(error => console.error('Erro ao registrar entrada:', error));
 });
 
-// Registrar Consumo (Saída)
+// Registrar Consumo 
 document.getElementById('consumo-form')?.addEventListener('submit', function (event) {
     event.preventDefault();
 
@@ -224,12 +219,12 @@ document.getElementById('consumo-form')?.addEventListener('submit', function (ev
         .catch(error => console.error('Erro ao registrar consumo:', error));
 });
 
-// Editar Entrada Existente (Aviso: Requer alterar o ID no HTML para "editar-entrada-form")
+// Editar Entrada Existente
 document.getElementById('editar-entrada-form')?.addEventListener('submit', function (event) {
     event.preventDefault();
 
     const idEntrada = document.getElementById('id-select').value;
-    const idProduto = document.getElementById('produto-entrada-select-edit').value; // Cuidado com IDs duplicados no HTML!
+    const idProduto = document.getElementById('produto-entrada-select-edit').value; 
     const quantidade = parseInt(document.getElementById('quantidade-entrada-edit').value);
     const dataEntrada = document.getElementById('data-entrada-edit').value;
 

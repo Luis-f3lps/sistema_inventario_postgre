@@ -1194,7 +1194,6 @@ input[type="url"]::placeholder {
     text-decoration: line-through;
 }
 
-/* Estilos do Modal de Justificativa */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -1394,7 +1393,7 @@ input[type="url"]::placeholder {
 }
 
 /* =========================================
-   RESPONSIVIDADE PARA SMARTPHONES (Até 1024px)
+   RESPONSIVIDADE PARA SMARTPHONES Até 1024px
    ========================================= */
 @media (max-width: 1024px) {
     .conteudo {
@@ -2134,9 +2133,7 @@ Tela professor
     text-align: center;
     margin: 20px 0;
     padding: 15px;
-    /* background-color: #f8f9fa; */
     border-radius: 8px;
-    /* border: 1px solid #e0e0e0; */
 }
 
 .container-filtros label {
@@ -2308,7 +2305,6 @@ Tela tecnico
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     transition: box-shadow 0.2s;
     border-left: 5px solid #0056b3;
-    /* Cor de destaque lateral (azul) */
 }
 
 .aula-card:hover {

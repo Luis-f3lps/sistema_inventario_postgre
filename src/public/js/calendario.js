@@ -201,7 +201,7 @@ function renderizarHorariosDoDia(dataEscolhida) {
     }
 
     const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0); // Zera a hora para comparar só o dia
+    hoje.setHours(0, 0, 0, 0); 
     const dataSelecionadaObj = new Date(dataEscolhida + "T00:00:00");
     const diaPassou = dataSelecionadaObj < hoje;
 
@@ -216,7 +216,6 @@ function renderizarHorariosDoDia(dataEscolhida) {
         const div = document.createElement('div');
 
         if (diaPassou) {
-            // ⬛ Pinta de Cinza (Dia que já passou)
             div.className = "slot-horario";
             div.style.backgroundColor = "#e9ecef"; 
             div.style.borderLeft = "4px solid #ced4da"; 
