@@ -1,1 +1,24 @@
+# Dependências
 node_modules/
+
+# Variáveis de Ambiente (Segurança Crítica)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Arquivos de sistema e IDEs (Limpeza)
+.DS_Store
+.vscode/
+.idea/
+
+# Diretórios de build/distribuição (se você for compilar algo depois)
+dist/
+build/
