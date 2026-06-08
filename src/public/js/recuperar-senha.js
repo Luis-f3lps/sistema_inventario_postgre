@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
             exibirMensagem('', 'transparent');
 
             try {
-                const response = await fetch('/api/redefinir-senha-direto', {
+                const response = await fetch('/api/recuperar-senha-direto', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email, nova_senha: novaSenha })

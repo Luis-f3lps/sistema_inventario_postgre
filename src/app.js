@@ -3215,7 +3215,7 @@ app.get("/api/availability", Autenticado, async (req, res) => {
 
 
 // ROTA: Redefinir senha diretamente e desativar o usuário
-app.post("/api/redefinir-senha-direto", async (req, res) => {
+app.post("/api/recuperar-senha-direto", async (req, res) => {
   try {
     const { email, nova_senha } = req.body;
 
