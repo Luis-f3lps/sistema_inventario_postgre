@@ -233,6 +233,9 @@ app.get(
 app.get("/Horario", Autenticado, AutorizadoPara(["professor"]), (req, res) =>
   res.sendFile(path.join(__dirname, "public", "horarios.html")),
 );
+app.get("/recuperar-senha", (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "recuperar-senha.html")),
+);
 app.get(
   "/agendamento-recorrente",
   Autenticado,
@@ -3211,4 +3214,43 @@ app.get("/api/availability", Autenticado, async (req, res) => {
 });
 
 
+// ROTA: Redefinir senha diretamente e desativar o usuário
+app.post("/api/redefinir-senha-direto", async (req, res) => {
+  try {
+    const { email, nova_senha } = req.body;
+
+    if (!email || !nova_senha) {
+      return res.status(400).json({ error: "Email e nova senha são obrigatórios." });
+    }
+
+    if (nova_senha.length > 12) {
+      return res.status(400).json({ error: "A senha deve ter no máximo 12 caracteres." });
+    }
+
+    // 1. Verifica se o email realmente existe no banco
+    const checkUser = await pool.query("SELECT * FROM usuario WHERE email = $1", [email]);
+    
+    if (checkUser.rows.length === 0) {
+      return res.status(404).json({ error: "Email não encontrado no sistema." });
+    }
+
+    // 2. Criptografa a nova senha (igual ao seu cadastro atual)
+    const hashedPassword = await bcrypt.hash(nova_senha, 10);
+
+    // 3. Atualiza a senha e MUDA O STATUS PARA 'desativado'
+    await pool.query(
+      "UPDATE usuario SET senha = $1, status = 'desativado' WHERE email = $2",
+      [hashedPassword, email]
+    );
+
+    res.json({ 
+      success: true, 
+      message: "Senha alterada com sucesso. O usuário foi desativado." 
+    });
+
+  } catch (error) {
+    console.error("Erro ao redefinir senha direto:", error);
+    res.status(500).json({ error: "Erro interno no servidor." });
+  }
+});
 export default app;
