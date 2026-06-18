@@ -18,7 +18,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// 1. NOVOS IMPORTS PARA O JWT E COOKIES
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 
@@ -26,37 +25,28 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.resolve(__dirname, "variaveis.env") });
-console.log({
-  DB_HOST: process.env.DB_HOST,
-  DB_USER: process.env.DB_USER,
-  DB_PASSWORD: process.env.DB_PASSWORD,
-  DB_NAME: process.env.DB_NAME,
-});
-
 const app = express();
 
-// 2. CHAVE SECRETA DO JWT (Recomendo depois colocar no seu variaveis.env como JWT_SECRET)
-const JWT_SECRET =
-  process.env.JWT_SECRET || "chaveSuperSecretaDoInventario2026";
+const JWT_SECRET = process.env.JWT_SECRET;
 
-(async () => {
-  try {
-    await pool.query("SELECT NOW()");
-    console.log("Conexão bem-sucedida ao banco de dados!");
-  } catch (err) {
-    console.error("Erro ao conectar ao banco de dados:", err);
-  }
-})();
+if (!JWT_SECRET) {
+  console.error("❌ ERRO CRÍTICO: JWT_SECRET não está configurado na Vercel ou no .env!");
+  process.exit(1); 
+}
+
+if (!process.env.DATABASE_URL) {
+  console.error("❌ ERRO CRÍTICO: DATABASE_URL não está configurada.");
+} else {
+  console.log("✅ Variáveis de ambiente e Banco carregados com sucesso!");
+}
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 3. ATIVANDO O LEITOR DE COOKIES
 app.use(cookieParser());
 
-// 4. NOVO MIDDLEWARE DE AUTENTICAÇÃO
 function Autenticado(req, res, next) {
-  const token = req.cookies.token; // Pega o crachá digital do cookie
+  const token = req.cookies.token; 
 
   if (!token) {
     console.log("Usuário não autenticado, bloqueando acesso...");
@@ -96,9 +86,9 @@ function AutorizadoPara(cargosPermitidos) {
     // Padroniza a nomenclatura do admin para evitar furos
     if (tipoUser === "administrador") tipoUser = "admin";
 
-    // Verifica se o cargo do usuário está na "lista VIP" daquela rota
+    // Verifica se o cargo do usuário 
     if (cargosPermitidos.includes(tipoUser)) {
-      next(); // Passou! Pode acessar a rota.
+      next(); 
     } else {
       console.warn(
         `Tentativa de acesso negado. Cargo: ${tipoUser}. Rota: ${req.originalUrl}`,
@@ -327,13 +317,11 @@ app.get("/api/usuario-logado", (req, res) => {
   }
 });
 
-// 7. NOVA ROTA DE LOGOUT (Apaga o cookie)
 app.get("/logout", (req, res) => {
   res.clearCookie("token");
   res.redirect("/login.html");
 });
 
-// 8. ATUALIZADA: Checar Autenticação
 app.get("/api/check-auth", (req, res) => {
   const token = req.cookies.token;
   if (!token) {
@@ -1048,7 +1036,7 @@ app.post("/api/addproduto", Autenticado, async (req, res) => {
   }
 });
 
-// Rota para obter todos os produtos (id_produto e sigla)
+// Rota para obter todos os produtos
 app.get("/api/est", Autenticado, async (req, res) => {
   try {
     const { rows: labs } = await pool.query(
@@ -1082,7 +1070,6 @@ app.get("/api/produtoPag", Autenticado, async (req, res) => {
   const offset = (pageInt - 1) * finalLimit;
 
   try {
-    // Usando pool de conexões para consultas
     const { rows } = await pool.query(
       `
             SELECT sigla, concentracao, densidade, nome_produto, quantidade, tipo_unidade_produto, ncm
@@ -1214,8 +1201,8 @@ app.get("/generate-pdf-produto", Autenticado, async (req, res) => {
       if (yPosition + itemHeight > doc.page.height - 50) {
         // Verifica se precisa adicionar uma nova página
         doc.addPage();
-        yPosition = tableTop; // Reseta a posição Y
-        drawTableHeaders(); // Redesenha os cabeçalhos
+        yPosition = tableTop; 
+        drawTableHeaders(); 
       }
 
       doc.text(item.nome_produto, 50, yPosition, { width: columnWidths[0] });
@@ -1291,7 +1278,7 @@ app.get("/generate-pdf-entradatipo2", Autenticado, async (req, res) => {
   const queryParams = [];
   if (start_date && end_date) {
     sqlQuery += " WHERE re.data_entrada BETWEEN $1 AND $2";
-    queryParams.push(start_date, end_date); // No PostgreSQL, usamos $1, $2 para parâmetros
+    queryParams.push(start_date, end_date); 
   }
 
   sqlQuery += " ORDER BY re.data_entrada DESC";
@@ -1371,7 +1358,7 @@ app.get("/generate-pdf-entradatipo2", Autenticado, async (req, res) => {
         50 + columnWidths[0] + columnWidths[1] + columnWidths[2],
         yPosition,
         { width: columnWidths[3] },
-      ); // Adiciona Descrição
+      ); 
       yPosition += itemHeight;
     };
 
@@ -1599,7 +1586,7 @@ app.get("/generate-pdf-consumo", Autenticado, async (req, res) => {
   }
 });
 
-// Endpoint para registrar entrada (versão PostgreSQL com atualização de quantidade)
+// Endpoint para registrar entrada
 app.post("/api/registrar_entrada", Autenticado, async (req, res) => {
   const { id_produto, quantidade, data_entrada, descricao } = req.body;
 
@@ -1645,9 +1632,9 @@ app.post("/api/registrar_entrada", Autenticado, async (req, res) => {
   }
 });
 
-// Endpoint para registrar consumo com atualização da quantidade (PostgreSQL)
+// Endpoint para registrar consumo com atualização da quantidade
 app.post("/api/registrar_consumo", Autenticado, async (req, res) => {
-  console.log(req.body); // Log para depuração
+  console.log(req.body); 
 
   const { data_consumo, id_produto, id_laboratorio, quantidade, descricao } =
     req.body;
@@ -1886,8 +1873,7 @@ app.get("/api/produtoPag", Autenticado, async (req, res) => {
   }
 });
 
-// Obter registros de entrada com filtros de data
-// Obter registros de entrada sem paginação
+
 app.get("/api/tabelaregistraentradaInico", Autenticado, async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
@@ -1916,14 +1902,13 @@ app.get("/api/tabelaregistraentradaInico", Autenticado, async (req, res) => {
 
     const params = [];
     if (startDate && endDate) {
-      query += " WHERE r.data_entrada BETWEEN $1 AND $2"; // Usando placeholders do PostgreSQL
+      query += " WHERE r.data_entrada BETWEEN $1 AND $2";
       params.push(startDate, endDate);
     }
 
     query += " ORDER BY r.data_entrada DESC";
 
-    // Usando pool.query() para executar a consulta no PostgreSQL
-    const { rows } = await pool.query(query, params); // Correção aqui
+    const { rows } = await pool.query(query, params); 
 
     res.json(rows);
   } catch (error) {
@@ -2148,7 +2133,7 @@ app.post("/api/filter_records", Autenticado, async (req, res) => {
         ORDER BY r.data_entrada DESC
       `;
 
-    const [rows] = await pool.execute(query, [startDate, endDate]); // Alterado para usar pool
+    const [rows] = await pool.execute(query, [startDate, endDate]); 
 
     // Retorna os registros encontrados
     res.status(200).json({
@@ -2426,7 +2411,7 @@ app.post("/api/schedule-recurring", Autenticado, async (req, res) => {
     // 1. SALVA TUDO NO BANCO DE DADOS PRIMEIRO
     await client.query("COMMIT");
 
-    // 👇 2. NOVA LÓGICA DE AVISAR O TÉCNICO (UM ÚNICO EMAIL DE RESUMO)
+    // 2. LÓGICA DE AVISAR O TÉCNICO (UM ÚNICO EMAIL DE RESUMO)
     try {
       const emailQuery = await pool.query(
         `
@@ -2577,13 +2562,13 @@ app.patch("/api/requests/:id", Autenticado, async (req, res) => {
         .json({ error: "Ação ou status inválido fornecido." });
     }
 
-    // 1. Atualiza no Banco
+    // Atualiza no Banco
     await pool.query(
       "UPDATE aulas SET status = $1, observacoes = $3 WHERE id_aula = $2",
       [novoStatus, id, observacoes || null],
     );
 
-    // 👇 2. NOVA LÓGICA DE EMAIL COM RASTREADOR DE ERROS
+    // LÓGICA DE EMAIL COM RASTREADOR DE ERROS
     if (novoStatus === "autorizado" || novoStatus === "nao_autorizado") {
       const emailQuery = await pool.query(
         `
@@ -3213,8 +3198,10 @@ app.get("/api/availability", Autenticado, async (req, res) => {
   }
 });
 
+/* ========================================================= */
+/* -------------- Redefinir senha-------- */
+/* ========================================================= */
 
-// ROTA: Redefinir senha diretamente e desativar o usuário
 app.post("/api/recuperar-senha-direto", async (req, res) => {
   try {
     const { email, nova_senha } = req.body;
@@ -3227,17 +3214,16 @@ app.post("/api/recuperar-senha-direto", async (req, res) => {
       return res.status(400).json({ error: "A senha deve ter no máximo 12 caracteres." });
     }
 
-    // 1. Verifica se o email realmente existe no banco
+    //  Verifica se o email realmente existe no banco
     const checkUser = await pool.query("SELECT * FROM usuario WHERE email = $1", [email]);
     
     if (checkUser.rows.length === 0) {
       return res.status(404).json({ error: "Email não encontrado no sistema." });
     }
 
-    // 2. Criptografa a nova senha (igual ao seu cadastro atual)
     const hashedPassword = await bcrypt.hash(nova_senha, 10);
 
-    // 3. Atualiza a senha e MUDA O STATUS PARA 'desativado'
+    // Atualiza a senha e MUDA O STATUS PARA 'desativado'
     await pool.query(
       "UPDATE usuario SET senha = $1, status = 'desativado' WHERE email = $2",
       [hashedPassword, email]
