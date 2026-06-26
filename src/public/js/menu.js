@@ -106,7 +106,7 @@ function preencherDadosDoMenu(userData) {
       showMenuItem(".admin-menu");
       showMenuItem(".produto");
       showMenuItem(".Disciplinas");
-            showMenuItem(".Vizualizcao");
+      showMenuItem(".Vizualizacao");
 
       break;
 
