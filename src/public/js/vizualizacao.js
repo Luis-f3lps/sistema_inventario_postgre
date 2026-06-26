@@ -37,30 +37,58 @@ function contarOcorrencias(array, chave) {
 
         async function carregarDashboard() {
             try {
-                // Pegando os dados REAIS direto da sua API
+                // Pegando os dados do banco
                 const response = await fetch('/api/dashboard-dados');
                 
                 if (!response.ok) {
                     throw new Error(`Erro HTTP: ${response.status}`);
                 }
                 
-                const data = await response.json();
+                const dataBruta = await response.json();
 
-                // Processando os dados que vieram do banco
-                const contagemProfessores = contarOcorrencias(data, 'nome_professor');
-                const contagemStatus = contarOcorrencias(data, 'status');
-                const contagemLaboratorios = contarOcorrencias(data, 'nome_laboratorio');
-                const contagemDisciplinas = contarOcorrencias(data, 'nome_disciplina');
+                const dataFormatada = dataBruta.map(item => {
+                    
+                    // 1. Formatando o Status
+                    let statusBonito = item.status;
+                    if (item.status === 'autorizado') statusBonito = 'Autorizada';
+                    if (item.status === 'nao_autorizado') statusBonito = 'Não Autorizada';
+                    if (item.status === 'analisando') statusBonito = 'Em Análise';
 
-                // Desenhando os gráficos
+                    // 2. Formatando o Técnico (true -> Sim / false -> Não)
+                    let tecnicoBonito = item.precisa_tecnico ? 'Sim' : 'Não';
+
+                    // 3. Formatando o Horário (ex: "07:20 - 08:10")
+                    let inicio = item.hora_inicio ? item.hora_inicio.slice(0, 5) : '--:--';
+                    let fim = item.hora_fim ? item.hora_fim.slice(0, 5) : '--:--';
+                    let horarioLindo = `${inicio} - ${fim}`;
+
+                    return {
+                        ...item, 
+                        statusFormatado: statusBonito,
+                        tecnicoFormatado: tecnicoBonito,
+                        horarioFormatado: horarioLindo
+                    };
+                });
+
+                // Contando tudo usando a nova lista formatada
+                const contagemProfessores = contarOcorrencias(dataFormatada, 'nome_professor');
+                const contagemStatus = contarOcorrencias(dataFormatada, 'statusFormatado');
+                const contagemLaboratorios = contarOcorrencias(dataFormatada, 'nome_laboratorio');
+                const contagemDisciplinas = contarOcorrencias(dataFormatada, 'nome_disciplina');
+                const contagemHorarios = contarOcorrencias(dataFormatada, 'horarioFormatado');
+                const contagemTecnico = contarOcorrencias(dataFormatada, 'tecnicoFormatado');
+
+                // Desenhando todos os 6 gráficos
                 criarGraficoPie('graficoProfessor', contagemProfessores);
                 criarGraficoPie('graficoStatus', contagemStatus);
                 criarGraficoPie('graficoLaboratorio', contagemLaboratorios);
                 criarGraficoPie('graficoDisciplina', contagemDisciplinas);
+                criarGraficoPie('graficoHorario', contagemHorarios);
+                criarGraficoPie('graficoTecnico', contagemTecnico);
 
             } catch (error) {
                 console.error("Erro ao carregar os dados do banco:", error);
-                alert("Falha ao carregar os dados do dashboard.");
+                alert("Falha ao carregar os dados do dashboard. Verifique o console.");
             }
         }
 
