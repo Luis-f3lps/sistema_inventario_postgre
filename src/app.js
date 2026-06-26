@@ -3276,7 +3276,6 @@ app.get("/api/dashboard-dados", Autenticado, async (req, res) => {
   }
 });
 
-
 // =========================================================
 // ROTA: GERAR PDF DE AULAS (VISUALIZAÇÃO / DASHBOARD)
 // =========================================================
@@ -3284,11 +3283,11 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
   try {
     const { professor, laboratorio } = req.query;
 
-    // 1. Adicionado o a.numero_discentes no SELECT e no GROUP BY
     let sqlQuery = `
       SELECT 
           a.id_aula, 
           u.nome_usuario AS nome_professor, 
+          d.nome_disciplina,
           l.nome_laboratorio, 
           a.data, 
           h.hora_inicio, 
@@ -3301,6 +3300,7 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
       JOIN usuario u ON a.professor_email = u.email
       JOIN horarios h ON a.id_horario = h.id_horario
       JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+      LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina -- <<< PUXANDO A DISCIPLINA
       LEFT JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
       LEFT JOIN usuario tec ON lu.usuario_email = tec.email
       WHERE a.professor_email NOT IN ('luisphelps671@gmail.com', 'luisphelps6716@gmail.com')
@@ -3322,7 +3322,7 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
     }
 
     sqlQuery += `
-      GROUP BY a.id_aula, u.nome_usuario, l.nome_laboratorio, a.data, h.hora_inicio, h.hora_fim, a.numero_discentes, a.precisa_tecnico, a.status
+      GROUP BY a.id_aula, u.nome_usuario, d.nome_disciplina, l.nome_laboratorio, a.data, h.hora_inicio, h.hora_fim, a.numero_discentes, a.precisa_tecnico, a.status
       ORDER BY a.data ASC, h.hora_inicio ASC
     `;
 
@@ -3346,30 +3346,31 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
     const itemHeight = 25;
     let yPosition = tableTop;
     
-    // 2. Coordenadas reajustadas para caber a nova coluna
     const colunas = {
       id: 30,
-      prof: 65,
-      lab: 185,
-      resp: 305,
-      data: 425,
-      horaIn: 485,
-      horaFim: 530,
-      alunos: 575, // <-- Nova coluna
-      tec: 625,
-      status: 675
+      prof: 60,
+      disc: 155, 
+      lab: 250,
+      resp: 345,
+      data: 440,
+      horaIn: 495,
+      horaFim: 535,
+      alunos: 575,
+      tec: 615,
+      status: 655
     };
 
     const drawTableHeaders = () => {
       doc.font('Helvetica-Bold').fontSize(9);
       doc.text("ID", colunas.id, yPosition);
       doc.text("Professor", colunas.prof, yPosition);
+      doc.text("Disciplina", colunas.disc, yPosition);
       doc.text("Laboratório", colunas.lab, yPosition);
       doc.text("Responsável", colunas.resp, yPosition);
       doc.text("Data", colunas.data, yPosition);
       doc.text("Início", colunas.horaIn, yPosition);
       doc.text("Fim", colunas.horaFim, yPosition);
-      doc.text("Alunos", colunas.alunos, yPosition); // <-- Cabeçalho
+      doc.text("Alunos", colunas.alunos, yPosition);
       doc.text("Téc?", colunas.tec, yPosition);
       doc.text("Status", colunas.status, yPosition);
       
@@ -3391,18 +3392,20 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
       const statusText = item.status === 'autorizado' ? 'Autorizada' : 
                          item.status === 'nao_autorizado' ? 'Não Aut.' : 'Em Análise';
       const discentesText = item.numero_discentes ? item.numero_discentes.toString() : "-";
+      const discTexto = item.nome_disciplina || "-";
 
-      doc.text(item.id_aula.toString(), colunas.id, yPosition, { width: 30, ellipsis: true });
-      doc.text(item.nome_professor, colunas.prof, yPosition, { width: 115, height: 20, ellipsis: true });
-      doc.text(item.nome_laboratorio, colunas.lab, yPosition, { width: 115, height: 20, ellipsis: true });
-      doc.text(item.responsavel_lab, colunas.resp, yPosition, { width: 115, height: 20, ellipsis: true });
+      doc.text(item.id_aula.toString(), colunas.id, yPosition, { width: 25, ellipsis: true });
+      doc.text(item.nome_professor, colunas.prof, yPosition, { width: 90, height: 20, ellipsis: true });
+      
+      // 3. Imprime a disciplina
+      doc.text(discTexto, colunas.disc, yPosition, { width: 90, height: 20, ellipsis: true });
+      
+      doc.text(item.nome_laboratorio, colunas.lab, yPosition, { width: 90, height: 20, ellipsis: true });
+      doc.text(item.responsavel_lab, colunas.resp, yPosition, { width: 90, height: 20, ellipsis: true });
       doc.text(dtAula, colunas.data, yPosition);
       doc.text(item.hora_inicio ? item.hora_inicio.slice(0, 5) : "--", colunas.horaIn, yPosition);
       doc.text(item.hora_fim ? item.hora_fim.slice(0, 5) : "--", colunas.horaFim, yPosition);
-      
-      // 3. Imprime o número de alunos na tabela
-      doc.text(discentesText, colunas.alunos, yPosition, { width: 40, align: 'center' }); 
-      
+      doc.text(discentesText, colunas.alunos, yPosition, { width: 35, align: 'center' }); 
       doc.text(tec, colunas.tec, yPosition);
       doc.text(statusText, colunas.status, yPosition, { width: 85, ellipsis: true });
 
