@@ -318,16 +318,19 @@ input:focus {
     color: #777;
     margin-top: 5px;
 }
+
 .bloco-horario.occupied,
 .bloco-horario:disabled {
     cursor: not-allowed;
     opacity: 0.9;
 }
+
 .bloco-horario.selected {
-    background-color: #2ecc71 !important; 
+    background-color: #2ecc71 !important;
     color: white !important;
     border-color: #27ae60 !important;
 }
+
 .radio-options {
     display: flex;
     align-items: center;
@@ -1762,7 +1765,8 @@ input[type="url"]::placeholder {
         font-size: 28px;
     }
 
-    .item-horario-info p, .slot-horario h4,
+    .item-horario-info p,
+    .slot-horario h4,
     p {
         font-size: 26px;
 
@@ -2366,3 +2370,45 @@ Tela tecnico
 .aula-card-roteiro a:hover {
     text-decoration: underline;
 }
+
+/* =========================================
+Vizualizaçaõ de dados
+   ========================================= */
+
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.chart-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chart-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }}
