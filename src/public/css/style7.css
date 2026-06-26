@@ -2411,8 +2411,10 @@ Vizualizaçaõ de dados
 @media (max-width: 1102px) {
     .dashboard-container {
         grid-template-columns: 1fr;
-    }}
-    .row h1 {
+    }
+}
+
+.row h1 {
     font-size: 28px;
     color: #1e293b;
     font-weight: 700;
@@ -2428,6 +2430,8 @@ Vizualizaçaõ de dados
     gap: 20px;
     margin-bottom: 35px;
     flex-wrap: wrap;
+    margin: 0 auto;
+
 }
 
 .filtros-container select {
@@ -2451,7 +2455,6 @@ Vizualizaçaõ de dados
     background-repeat: no-repeat;
     background-position: right 1rem center;
     background-size: 1.2em;
-        margin: 0 auto;
 
 }
 
@@ -2464,12 +2467,14 @@ Vizualizaçaõ de dados
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
+
 .btn-pdf {
     padding: 12px 20px;
     font-size: 15px;
     font-weight: 600;
     color: #ffffff;
-    background-color: #ef4444; /* Vermelho padrão PDF */
+    background-color: #ef4444;
+    /* Vermelho padrão PDF */
     border: none;
     border-radius: 8px;
     cursor: pointer;

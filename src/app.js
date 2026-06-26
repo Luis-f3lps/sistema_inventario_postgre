@@ -3278,10 +3278,14 @@ app.get("/api/dashboard-dados", Autenticado, async (req, res) => {
 // =========================================================
 // ROTA: GERAR PDF DE AULAS (VISUALIZAÇÃO / DASHBOARD)
 // =========================================================
+// =========================================================
+// ROTA: GERAR PDF DE AULAS (VISUALIZAÇÃO / DASHBOARD)
+// =========================================================
 app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
   try {
     const { professor, laboratorio } = req.query;
 
+    // 1. Adicionado o a.numero_discentes no SELECT e no GROUP BY
     let sqlQuery = `
       SELECT 
           a.id_aula, 
@@ -3289,7 +3293,8 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
           l.nome_laboratorio, 
           a.data, 
           h.hora_inicio, 
-          h.hora_fim, 
+          h.hora_fim,
+          a.numero_discentes,
           a.precisa_tecnico, 
           a.status,
           COALESCE(string_agg(DISTINCT tec.nome_usuario, ', '), 'Sem Responsável') AS responsavel_lab
@@ -3317,15 +3322,13 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
       paramIndex++;
     }
 
-    // Agrupamento necessário por causa do string_agg do responsável
     sqlQuery += `
-      GROUP BY a.id_aula, u.nome_usuario, l.nome_laboratorio, a.data, h.hora_inicio, h.hora_fim, a.precisa_tecnico, a.status
+      GROUP BY a.id_aula, u.nome_usuario, l.nome_laboratorio, a.data, h.hora_inicio, h.hora_fim, a.numero_discentes, a.precisa_tecnico, a.status
       ORDER BY a.data ASC, h.hora_inicio ASC
     `;
 
     const { rows: aulas } = await pool.query(sqlQuery, queryParams);
 
-    // Configuração do PDF em formato Paisagem (Landscape)
     const doc = new PDFDocument({ margin: 30, layout: 'landscape' });
     const today = new Date();
     const formattedDate = today.toLocaleDateString("pt-BR");
@@ -3336,27 +3339,26 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
 
     doc.pipe(res);
 
-    // Cabeçalho do Documento
     doc.fontSize(16).text("Relatório Geral de Aulas - Sistema Merlin", { align: "center" });
     doc.fontSize(10).text(`Gerado em: ${formattedDate} | Filtros aplicados: Prof(${professor || 'Todos'}) - Lab(${laboratorio || 'Todos'})`, { align: "center" });
     doc.moveDown(2);
 
-    // Configurações da tabela (Largura total disponível no layout landscape: ~730px)
     const tableTop = 90;
     const itemHeight = 25;
     let yPosition = tableTop;
     
-    // Posições das colunas
+    // 2. Coordenadas reajustadas para caber a nova coluna
     const colunas = {
       id: 30,
-      prof: 70,
-      lab: 200,
-      resp: 330,
-      data: 460,
-      horaIn: 520,
-      horaFim: 580,
-      tec: 640,
-      status: 700
+      prof: 65,
+      lab: 185,
+      resp: 305,
+      data: 425,
+      horaIn: 485,
+      horaFim: 530,
+      alunos: 575, // <-- Nova coluna
+      tec: 625,
+      status: 675
     };
 
     const drawTableHeaders = () => {
@@ -3368,10 +3370,10 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
       doc.text("Data", colunas.data, yPosition);
       doc.text("Início", colunas.horaIn, yPosition);
       doc.text("Fim", colunas.horaFim, yPosition);
+      doc.text("Alunos", colunas.alunos, yPosition); // <-- Cabeçalho
       doc.text("Téc?", colunas.tec, yPosition);
       doc.text("Status", colunas.status, yPosition);
       
-      // Linha separadora
       doc.moveTo(30, yPosition + 12).lineTo(760, yPosition + 12).stroke();
       yPosition += itemHeight;
     };
@@ -3385,25 +3387,28 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
 
       doc.font('Helvetica').fontSize(8);
       
-      // Tratamento de dados para exibição amigável
       const dtAula = new Date(item.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
       const tec = item.precisa_tecnico ? "Sim" : "Não";
       const statusText = item.status === 'autorizado' ? 'Autorizada' : 
                          item.status === 'nao_autorizado' ? 'Não Aut.' : 'Em Análise';
+      const discentesText = item.numero_discentes ? item.numero_discentes.toString() : "-";
 
-      doc.text(item.id_aula.toString(), colunas.id, yPosition, { width: 35, ellipsis: true });
-      doc.text(item.nome_professor, colunas.prof, yPosition, { width: 125, height: 20, ellipsis: true });
-      doc.text(item.nome_laboratorio, colunas.lab, yPosition, { width: 125, height: 20, ellipsis: true });
-      doc.text(item.responsavel_lab, colunas.resp, yPosition, { width: 125, height: 20, ellipsis: true });
+      doc.text(item.id_aula.toString(), colunas.id, yPosition, { width: 30, ellipsis: true });
+      doc.text(item.nome_professor, colunas.prof, yPosition, { width: 115, height: 20, ellipsis: true });
+      doc.text(item.nome_laboratorio, colunas.lab, yPosition, { width: 115, height: 20, ellipsis: true });
+      doc.text(item.responsavel_lab, colunas.resp, yPosition, { width: 115, height: 20, ellipsis: true });
       doc.text(dtAula, colunas.data, yPosition);
       doc.text(item.hora_inicio ? item.hora_inicio.slice(0, 5) : "--", colunas.horaIn, yPosition);
       doc.text(item.hora_fim ? item.hora_fim.slice(0, 5) : "--", colunas.horaFim, yPosition);
+      
+      // 3. Imprime o número de alunos na tabela
+      doc.text(discentesText, colunas.alunos, yPosition, { width: 40, align: 'center' }); 
+      
       doc.text(tec, colunas.tec, yPosition);
-      doc.text(statusText, colunas.status, yPosition, { width: 60, ellipsis: true });
+      doc.text(statusText, colunas.status, yPosition, { width: 85, ellipsis: true });
 
-      // Linha sutil para separar itens
       doc.strokeColor('#e2e8f0').lineWidth(0.5).moveTo(30, yPosition + 18).lineTo(760, yPosition + 18).stroke();
-      doc.strokeColor('#000000').lineWidth(1); // Reseta a cor
+      doc.strokeColor('#000000').lineWidth(1); 
 
       yPosition += itemHeight;
     };
@@ -3421,5 +3426,4 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
     res.status(500).json({ error: "Erro ao gerar PDF" });
   }
 });
-
 export default app;
