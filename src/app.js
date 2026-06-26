@@ -3346,8 +3346,9 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
     const tableTop = 90;
     let yPosition = tableTop;
     
-    const pos = { id: 30, prof: 60, disc: 140, lab: 345, resp: 450, data: 560, horaIn: 615, horaFim: 650, alunos: 685, tec: 720, status: 750 };
-    const wid = { prof: 105, disc: 140, lab: 100, resp: 105 }; 
+    const pos = { id: 30, prof: 60, disc: 175, lab: 325, resp: 440, data: 560, horaIn: 615, horaFim: 650, alunos: 685, tec: 720, status: 750 };
+    
+    const wid = { prof: 110, disc: 145, lab: 110, resp: 110 };
 
     const drawTableHeaders = () => {
       doc.font('Helvetica-Bold').fontSize(9);
