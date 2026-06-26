@@ -2464,3 +2464,28 @@ Vizualizaçaõ de dados
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
+.btn-pdf {
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #ef4444; /* Vermelho padrão PDF */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-pdf:hover {
+    background-color: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(239, 68, 68, 0.4);
+}
+
+.btn-pdf:active {
+    transform: translateY(0);
+}

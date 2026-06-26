@@ -3274,4 +3274,152 @@ app.get("/api/dashboard-dados", Autenticado, async (req, res) => {
     res.status(500).json({ error: "Erro interno no servidor ao buscar dados." });
   }
 });
+
+// =========================================================
+// ROTA: GERAR PDF DE AULAS (VISUALIZAÇÃO / DASHBOARD)
+// =========================================================
+app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
+  try {
+    const { professor, laboratorio } = req.query;
+
+    let sqlQuery = `
+      SELECT 
+          a.id_aula, 
+          u.nome_usuario AS nome_professor, 
+          l.nome_laboratorio, 
+          a.data, 
+          h.hora_inicio, 
+          h.hora_fim, 
+          a.precisa_tecnico, 
+          a.status,
+          COALESCE(string_agg(DISTINCT tec.nome_usuario, ', '), 'Sem Responsável') AS responsavel_lab
+      FROM aulas a
+      JOIN usuario u ON a.professor_email = u.email
+      JOIN horarios h ON a.id_horario = h.id_horario
+      JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+      LEFT JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
+      LEFT JOIN usuario tec ON lu.usuario_email = tec.email
+      WHERE a.professor_email NOT IN ('luisphelps671@gmail.com', 'luisphelps6716@gmail.com')
+    `;
+
+    const queryParams = [];
+    let paramIndex = 1;
+
+    if (professor && professor !== 'todos') {
+      sqlQuery += ` AND u.nome_usuario = $${paramIndex}`;
+      queryParams.push(professor);
+      paramIndex++;
+    }
+
+    if (laboratorio && laboratorio !== 'todos') {
+      sqlQuery += ` AND l.nome_laboratorio = $${paramIndex}`;
+      queryParams.push(laboratorio);
+      paramIndex++;
+    }
+
+    // Agrupamento necessário por causa do string_agg do responsável
+    sqlQuery += `
+      GROUP BY a.id_aula, u.nome_usuario, l.nome_laboratorio, a.data, h.hora_inicio, h.hora_fim, a.precisa_tecnico, a.status
+      ORDER BY a.data ASC, h.hora_inicio ASC
+    `;
+
+    const { rows: aulas } = await pool.query(sqlQuery, queryParams);
+
+    // Configuração do PDF em formato Paisagem (Landscape)
+    const doc = new PDFDocument({ margin: 30, layout: 'landscape' });
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString("pt-BR");
+    const fileName = "Relatorio_Aulas_Merlin.pdf";
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+
+    doc.pipe(res);
+
+    // Cabeçalho do Documento
+    doc.fontSize(16).text("Relatório Geral de Aulas - Sistema Merlin", { align: "center" });
+    doc.fontSize(10).text(`Gerado em: ${formattedDate} | Filtros aplicados: Prof(${professor || 'Todos'}) - Lab(${laboratorio || 'Todos'})`, { align: "center" });
+    doc.moveDown(2);
+
+    // Configurações da tabela (Largura total disponível no layout landscape: ~730px)
+    const tableTop = 90;
+    const itemHeight = 25;
+    let yPosition = tableTop;
+    
+    // Posições das colunas
+    const colunas = {
+      id: 30,
+      prof: 70,
+      lab: 200,
+      resp: 330,
+      data: 460,
+      horaIn: 520,
+      horaFim: 580,
+      tec: 640,
+      status: 700
+    };
+
+    const drawTableHeaders = () => {
+      doc.font('Helvetica-Bold').fontSize(9);
+      doc.text("ID", colunas.id, yPosition);
+      doc.text("Professor", colunas.prof, yPosition);
+      doc.text("Laboratório", colunas.lab, yPosition);
+      doc.text("Responsável", colunas.resp, yPosition);
+      doc.text("Data", colunas.data, yPosition);
+      doc.text("Início", colunas.horaIn, yPosition);
+      doc.text("Fim", colunas.horaFim, yPosition);
+      doc.text("Téc?", colunas.tec, yPosition);
+      doc.text("Status", colunas.status, yPosition);
+      
+      // Linha separadora
+      doc.moveTo(30, yPosition + 12).lineTo(760, yPosition + 12).stroke();
+      yPosition += itemHeight;
+    };
+
+    const drawTableRow = (item) => {
+      if (yPosition + itemHeight > doc.page.height - 30) {
+        doc.addPage({ margin: 30, layout: 'landscape' });
+        yPosition = 30;
+        drawTableHeaders();
+      }
+
+      doc.font('Helvetica').fontSize(8);
+      
+      // Tratamento de dados para exibição amigável
+      const dtAula = new Date(item.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+      const tec = item.precisa_tecnico ? "Sim" : "Não";
+      const statusText = item.status === 'autorizado' ? 'Autorizada' : 
+                         item.status === 'nao_autorizado' ? 'Não Aut.' : 'Em Análise';
+
+      doc.text(item.id_aula.toString(), colunas.id, yPosition, { width: 35, ellipsis: true });
+      doc.text(item.nome_professor, colunas.prof, yPosition, { width: 125, height: 20, ellipsis: true });
+      doc.text(item.nome_laboratorio, colunas.lab, yPosition, { width: 125, height: 20, ellipsis: true });
+      doc.text(item.responsavel_lab, colunas.resp, yPosition, { width: 125, height: 20, ellipsis: true });
+      doc.text(dtAula, colunas.data, yPosition);
+      doc.text(item.hora_inicio ? item.hora_inicio.slice(0, 5) : "--", colunas.horaIn, yPosition);
+      doc.text(item.hora_fim ? item.hora_fim.slice(0, 5) : "--", colunas.horaFim, yPosition);
+      doc.text(tec, colunas.tec, yPosition);
+      doc.text(statusText, colunas.status, yPosition, { width: 60, ellipsis: true });
+
+      // Linha sutil para separar itens
+      doc.strokeColor('#e2e8f0').lineWidth(0.5).moveTo(30, yPosition + 18).lineTo(760, yPosition + 18).stroke();
+      doc.strokeColor('#000000').lineWidth(1); // Reseta a cor
+
+      yPosition += itemHeight;
+    };
+
+    drawTableHeaders();
+    if (aulas.length === 0) {
+      doc.font('Helvetica').fontSize(10).text("Nenhuma aula encontrada com os filtros atuais.", 30, yPosition + 10);
+    } else {
+      aulas.forEach((item) => drawTableRow(item));
+    }
+
+    doc.end();
+  } catch (error) {
+    console.error("Erro ao gerar PDF de Aulas:", error);
+    res.status(500).json({ error: "Erro ao gerar PDF" });
+  }
+});
+
 export default app;
