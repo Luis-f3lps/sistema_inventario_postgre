@@ -3257,7 +3257,8 @@ app.get("/api/dashboard-dados", Autenticado, async (req, res) => {
           h.hora_inicio, 
           h.hora_fim, 
           a.precisa_tecnico, 
-          a.status
+          a.status,
+          a.numero_discentes -- <<< O SEGREDO ESTÁ AQUI!
       FROM aulas a
       JOIN usuario u ON a.professor_email = u.email
       JOIN horarios h ON a.id_horario = h.id_horario
@@ -3275,9 +3276,7 @@ app.get("/api/dashboard-dados", Autenticado, async (req, res) => {
   }
 });
 
-// =========================================================
-// ROTA: GERAR PDF DE AULAS (VISUALIZAÇÃO / DASHBOARD)
-// =========================================================
+
 // =========================================================
 // ROTA: GERAR PDF DE AULAS (VISUALIZAÇÃO / DASHBOARD)
 // =========================================================
