@@ -17,20 +17,19 @@
     <div class="container">
         <div class="row">
             <h1 style="margin-right: 30px;">Visão Geral dos Laboratórios</h1>
+            <div class="filtros-container">
+                <select id="filtroProfessor" onchange="aplicarFiltros()">
+                    <option value="todos">👨‍🏫 Todos os Professores</option>
+                </select>
 
+                <select id="filtroLaboratorio" onchange="aplicarFiltros()">
+                    <option value="todos">🔬 Todos os Laboratórios</option>
+                </select>
+                <button id="btnBaixarPdf" onclick="baixarRelatorioAulas()" class="btn-pdf">
+                    <i class="fa-solid fa-file-pdf"></i> Baixar Relatório (PDF)
+                </button>
+            </div>
             <div class="dashboard-container">
-                <div class="filtros-container">
-                    <select id="filtroProfessor" onchange="aplicarFiltros()">
-                        <option value="todos">👨‍🏫 Todos os Professores</option>
-                    </select>
-
-                    <select id="filtroLaboratorio" onchange="aplicarFiltros()">
-                        <option value="todos">🔬 Todos os Laboratórios</option>
-                    </select>
-                    <button id="btnBaixarPdf" onclick="baixarRelatorioAulas()" class="btn-pdf">
-                        <i class="fa-solid fa-file-pdf"></i> Baixar Relatório (PDF)
-                    </button>
-                </div>
                 <div class="chart-card">
                     <div class="chart-title">Aulas por Professor</div>
                     <div class="chart-container"><canvas id="graficoProfessor"></canvas></div>
