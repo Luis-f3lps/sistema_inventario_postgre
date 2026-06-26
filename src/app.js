@@ -211,6 +211,12 @@ app.get(
   (req, res) => res.sendFile(path.join(__dirname, "public", "Home.html")),
 );
 app.get(
+  "/Vizualizacao",
+  Autenticado,
+  AutorizadoPara(["tecnico", "professor"]),
+  (req, res) => res.sendFile(path.join(__dirname, "public", "vizualizacao.html")),
+);
+app.get(
   "/Calendario",
   Autenticado,
   AutorizadoPara(["tecnico", "professor"]),
@@ -3237,6 +3243,35 @@ app.post("/api/recuperar-senha-direto", async (req, res) => {
   } catch (error) {
     console.error("Erro ao redefinir senha direto:", error);
     res.status(500).json({ error: "Erro interno no servidor." });
+  }
+});
+app.get("/api/dashboard-dados", Autenticado, async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+          a.id_aula, 
+          u.nome_usuario AS nome_professor, 
+          l.nome_laboratorio, 
+          d.nome_disciplina,
+          a.data, 
+          h.hora_inicio, 
+          h.hora_fim, 
+          a.precisa_tecnico, 
+          a.status
+      FROM aulas a
+      JOIN usuario u ON a.professor_email = u.email
+      JOIN horarios h ON a.id_horario = h.id_horario
+      JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
+      LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
+      WHERE a.professor_email NOT IN ('luisphelps671@gmail.com', 'luisphelps6716@gmail.com');
+    `;
+    
+    const result = await pool.query(query);
+    res.json(result.rows);
+    
+  } catch (err) {
+    console.error("Erro ao buscar dados reais para o dashboard:", err);
+    res.status(500).json({ error: "Erro interno no servidor ao buscar dados." });
   }
 });
 export default app;
