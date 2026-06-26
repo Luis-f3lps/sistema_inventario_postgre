@@ -3279,6 +3279,7 @@ app.get("/api/dashboard-dados", Autenticado, async (req, res) => {
 // =========================================================
 // ROTA: GERAR PDF DE AULAS (VISUALIZAÇÃO / DASHBOARD)
 // =========================================================
+
 app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
   try {
     const { professor, laboratorio } = req.query;
@@ -3300,7 +3301,7 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
       JOIN usuario u ON a.professor_email = u.email
       JOIN horarios h ON a.id_horario = h.id_horario
       JOIN laboratorio l ON a.id_laboratorio = l.id_laboratorio
-      LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina -- <<< PUXANDO A DISCIPLINA
+      LEFT JOIN disciplina d ON a.id_disciplina = d.id_disciplina
       LEFT JOIN laboratorio_usuario lu ON l.id_laboratorio = lu.id_laboratorio
       LEFT JOIN usuario tec ON lu.usuario_email = tec.email
       WHERE a.professor_email NOT IN ('luisphelps671@gmail.com', 'luisphelps6716@gmail.com')
@@ -3343,50 +3344,32 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
     doc.moveDown(2);
 
     const tableTop = 90;
-    const itemHeight = 25;
     let yPosition = tableTop;
     
-    const colunas = {
-      id: 30,
-      prof: 60,
-      disc: 155, 
-      lab: 250,
-      resp: 345,
-      data: 440,
-      horaIn: 495,
-      horaFim: 535,
-      alunos: 575,
-      tec: 615,
-      status: 655
-    };
+    const pos = { id: 30, prof: 60, disc: 170, lab: 345, resp: 450, data: 560, horaIn: 615, horaFim: 650, alunos: 685, tec: 720, status: 750 };
+    const wid = { prof: 105, disc: 170, lab: 100, resp: 105 }; 
 
     const drawTableHeaders = () => {
       doc.font('Helvetica-Bold').fontSize(9);
-      doc.text("ID", colunas.id, yPosition);
-      doc.text("Professor", colunas.prof, yPosition);
-      doc.text("Disciplina", colunas.disc, yPosition);
-      doc.text("Laboratório", colunas.lab, yPosition);
-      doc.text("Responsável", colunas.resp, yPosition);
-      doc.text("Data", colunas.data, yPosition);
-      doc.text("Início", colunas.horaIn, yPosition);
-      doc.text("Fim", colunas.horaFim, yPosition);
-      doc.text("Alunos", colunas.alunos, yPosition);
-      doc.text("Téc?", colunas.tec, yPosition);
-      doc.text("Status", colunas.status, yPosition);
+      doc.text("ID", pos.id, yPosition);
+      doc.text("Professor", pos.prof, yPosition);
+      doc.text("Disciplina", pos.disc, yPosition);
+      doc.text("Laboratório", pos.lab, yPosition);
+      doc.text("Responsável", pos.resp, yPosition);
+      doc.text("Data", pos.data, yPosition);
+      doc.text("Início", pos.horaIn, yPosition);
+      doc.text("Fim", pos.horaFim, yPosition);
+      doc.text("Alunos", pos.alunos, yPosition);
+      doc.text("Téc?", pos.tec, yPosition);
+      doc.text("Status", pos.status, yPosition);
       
-      doc.moveTo(30, yPosition + 12).lineTo(760, yPosition + 12).stroke();
-      yPosition += itemHeight;
+      doc.moveTo(30, yPosition + 12).lineTo(810, yPosition + 12).stroke();
+      yPosition += 25;
     };
 
     const drawTableRow = (item) => {
-      if (yPosition + itemHeight > doc.page.height - 30) {
-        doc.addPage({ margin: 30, layout: 'landscape' });
-        yPosition = 30;
-        drawTableHeaders();
-      }
-
       doc.font('Helvetica').fontSize(8);
-      
+
       const dtAula = new Date(item.data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
       const tec = item.precisa_tecnico ? "Sim" : "Não";
       const statusText = item.status === 'autorizado' ? 'Autorizada' : 
@@ -3394,28 +3377,44 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
       const discentesText = item.numero_discentes ? item.numero_discentes.toString() : "-";
       const discTexto = item.nome_disciplina || "-";
 
-      doc.text(item.id_aula.toString(), colunas.id, yPosition, { width: 25, ellipsis: true });
-      doc.text(item.nome_professor, colunas.prof, yPosition, { width: 90, height: 20, ellipsis: true });
+      const alturas = [
+        doc.heightOfString(item.nome_professor, { width: wid.prof }),
+        doc.heightOfString(discTexto, { width: wid.disc }),
+        doc.heightOfString(item.nome_laboratorio, { width: wid.lab }),
+        doc.heightOfString(item.responsavel_lab, { width: wid.resp })
+      ];
       
-      // 3. Imprime a disciplina
-      doc.text(discTexto, colunas.disc, yPosition, { width: 90, height: 20, ellipsis: true });
-      
-      doc.text(item.nome_laboratorio, colunas.lab, yPosition, { width: 90, height: 20, ellipsis: true });
-      doc.text(item.responsavel_lab, colunas.resp, yPosition, { width: 90, height: 20, ellipsis: true });
-      doc.text(dtAula, colunas.data, yPosition);
-      doc.text(item.hora_inicio ? item.hora_inicio.slice(0, 5) : "--", colunas.horaIn, yPosition);
-      doc.text(item.hora_fim ? item.hora_fim.slice(0, 5) : "--", colunas.horaFim, yPosition);
-      doc.text(discentesText, colunas.alunos, yPosition, { width: 35, align: 'center' }); 
-      doc.text(tec, colunas.tec, yPosition);
-      doc.text(statusText, colunas.status, yPosition, { width: 85, ellipsis: true });
+      const alturaMaxTexto = Math.max(...alturas);
+      const rowHeight = alturaMaxTexto + 12;
 
-      doc.strokeColor('#e2e8f0').lineWidth(0.5).moveTo(30, yPosition + 18).lineTo(760, yPosition + 18).stroke();
+      if (yPosition + rowHeight > doc.page.height - 30) {
+        doc.addPage({ margin: 30, layout: 'landscape' });
+        yPosition = 30;
+        drawTableHeaders();
+        doc.font('Helvetica').fontSize(8); 
+      }
+
+      doc.text(item.id_aula.toString(), pos.id, yPosition, { width: 25 });
+      doc.text(item.nome_professor, pos.prof, yPosition, { width: wid.prof });
+      doc.text(discTexto, pos.disc, yPosition, { width: wid.disc });
+      doc.text(item.nome_laboratorio, pos.lab, yPosition, { width: wid.lab });
+      doc.text(item.responsavel_lab, pos.resp, yPosition, { width: wid.resp });
+      
+      doc.text(dtAula, pos.data, yPosition);
+      doc.text(item.hora_inicio ? item.hora_inicio.slice(0, 5) : "--", pos.horaIn, yPosition);
+      doc.text(item.hora_fim ? item.hora_fim.slice(0, 5) : "--", pos.horaFim, yPosition);
+      doc.text(discentesText, pos.alunos, yPosition, { width: 35 }); 
+      doc.text(tec, pos.tec, yPosition);
+      doc.text(statusText, pos.status, yPosition, { width: 60 });
+
+      doc.strokeColor('#e2e8f0').lineWidth(0.5).moveTo(30, yPosition + rowHeight - 4).lineTo(810, yPosition + rowHeight - 4).stroke();
       doc.strokeColor('#000000').lineWidth(1); 
 
-      yPosition += itemHeight;
+      yPosition += rowHeight;
     };
 
     drawTableHeaders();
+    
     if (aulas.length === 0) {
       doc.font('Helvetica').fontSize(10).text("Nenhuma aula encontrada com os filtros atuais.", 30, yPosition + 10);
     } else {
@@ -3428,4 +3427,6 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
     res.status(500).json({ error: "Erro ao gerar PDF" });
   }
 });
+
+
 export default app;
