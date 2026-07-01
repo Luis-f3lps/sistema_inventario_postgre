@@ -3347,8 +3347,8 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
     let yPosition = tableTop;
     
     // Posições reajustadas para dar mais espaço à direita e combinar horários
-    const pos = { id: 30, prof: 60, disc: 175, lab: 325, resp: 440, data: 555, horario: 620, alunos: 690, tec: 730, status: 770 };
-    const wid = { prof: 110, disc: 145, lab: 110, resp: 110 }; 
+    const pos = { id: 30, prof: 55, disc: 145, lab: 265, resp: 370, data: 475, horario: 530, alunos: 590, tec: 640, status: 680 };
+    const wid = { prof: 85, disc: 115, lab: 100, resp: 100 };
 
     const drawTableHeaders = () => {
       doc.font('Helvetica-Bold').fontSize(9);
@@ -3403,13 +3403,10 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
       doc.text(item.nome_laboratorio, pos.lab, yPosition, { width: wid.lab });
       doc.text(item.responsavel_lab, pos.resp, yPosition, { width: wid.resp });
       doc.text(dtAula, pos.data, yPosition);
-      
-      // Imprime o horário combinado
-      doc.text(horarioTexto, pos.horario, yPosition, { width: 60 });
-      
+      doc.text(horarioTexto, pos.horario, yPosition, { width: 55 }); 
       doc.text(discentesText, pos.alunos, yPosition, { width: 35, align: 'center' }); 
       doc.text(tec, pos.tec, yPosition);
-      doc.text(statusText, pos.status, yPosition, { width: 60 });
+      doc.text(statusText, pos.status, yPosition, { width: 100 }); 
 
       doc.strokeColor('#e2e8f0').lineWidth(0.5).moveTo(30, yPosition + rowHeight - 4).lineTo(810, yPosition + rowHeight - 4).stroke();
       doc.strokeColor('#000000').lineWidth(1); 
