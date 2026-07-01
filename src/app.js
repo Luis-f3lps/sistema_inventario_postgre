@@ -213,7 +213,7 @@ app.get(
 app.get(
   "/Vizualizacao",
   Autenticado,
-  AutorizadoPara(["admin", "tecnico"]),
+  AutorizadoPara(["admin", "tecnico", "professor"]),
   (req, res) => res.sendFile(path.join(__dirname, "public", "vizualizacao.html")),
 );
 app.get(
