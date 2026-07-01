@@ -107,7 +107,6 @@ function preencherDadosDoMenu(userData) {
       showMenuItem(".produto");
       showMenuItem(".Disciplinas");
       showMenuItem(".Vizualizacao");
-
       break;
 
     case "tecnico":
@@ -117,15 +116,16 @@ function preencherDadosDoMenu(userData) {
       showMenuItem(".produto");
       showDashboardCard(".cartao-aulas-tecnico");
       showDashboardCard(".cartao-meus-laboratorios");
+      showMenuItem(".Vizualizacao");
       break;
 
-case "professor":
+    case "professor":
       showMenuItem(".Home");
       showMenuItem(".Calendario");
       showMenuItem(".professor");
       showMenuItem(".Disciplinas");
       showMenuItem(".Horarios");
-
+      showMenuItem(".Vizualizacao");
       showDashboardCard(".cartao-aulas-autorizadas");
       showDashboardCard(".cartao-solicitacoes");
       break;

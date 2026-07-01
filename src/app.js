@@ -3346,9 +3346,9 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
     const tableTop = 90;
     let yPosition = tableTop;
     
-    const pos = { id: 30, prof: 60, disc: 175, lab: 325, resp: 440, data: 560, horaIn: 615, horaFim: 650, alunos: 685, tec: 720, status: 750 };
-    
-    const wid = { prof: 110, disc: 145, lab: 110, resp: 110 };
+    // Posições reajustadas para dar mais espaço à direita e combinar horários
+    const pos = { id: 30, prof: 60, disc: 175, lab: 325, resp: 440, data: 555, horario: 620, alunos: 690, tec: 730, status: 770 };
+    const wid = { prof: 110, disc: 145, lab: 110, resp: 110 }; 
 
     const drawTableHeaders = () => {
       doc.font('Helvetica-Bold').fontSize(9);
@@ -3358,8 +3358,7 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
       doc.text("Laboratório", pos.lab, yPosition);
       doc.text("Responsável", pos.resp, yPosition);
       doc.text("Data", pos.data, yPosition);
-      doc.text("Início", pos.horaIn, yPosition);
-      doc.text("Fim", pos.horaFim, yPosition);
+      doc.text("Horário", pos.horario, yPosition); 
       doc.text("Alunos", pos.alunos, yPosition);
       doc.text("Téc?", pos.tec, yPosition);
       doc.text("Status", pos.status, yPosition);
@@ -3377,6 +3376,9 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
                          item.status === 'nao_autorizado' ? 'Não Aut.' : 'Em Análise';
       const discentesText = item.numero_discentes ? item.numero_discentes.toString() : "-";
       const discTexto = item.nome_disciplina || "-";
+      
+      // Combinação dos horários
+      const horarioTexto = `${item.hora_inicio ? item.hora_inicio.slice(0, 5) : "--"} - ${item.hora_fim ? item.hora_fim.slice(0, 5) : "--"}`;
 
       const alturas = [
         doc.heightOfString(item.nome_professor, { width: wid.prof }),
@@ -3400,11 +3402,12 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
       doc.text(discTexto, pos.disc, yPosition, { width: wid.disc });
       doc.text(item.nome_laboratorio, pos.lab, yPosition, { width: wid.lab });
       doc.text(item.responsavel_lab, pos.resp, yPosition, { width: wid.resp });
-      
       doc.text(dtAula, pos.data, yPosition);
-      doc.text(item.hora_inicio ? item.hora_inicio.slice(0, 5) : "--", pos.horaIn, yPosition);
-      doc.text(item.hora_fim ? item.hora_fim.slice(0, 5) : "--", pos.horaFim, yPosition);
-      doc.text(discentesText, pos.alunos, yPosition, { width: 35 }); 
+      
+      // Imprime o horário combinado
+      doc.text(horarioTexto, pos.horario, yPosition, { width: 60 });
+      
+      doc.text(discentesText, pos.alunos, yPosition, { width: 35, align: 'center' }); 
       doc.text(tec, pos.tec, yPosition);
       doc.text(statusText, pos.status, yPosition, { width: 60 });
 
@@ -3415,7 +3418,6 @@ app.get("/api/relatorio-aulas-pdf", Autenticado, async (req, res) => {
     };
 
     drawTableHeaders();
-    
     if (aulas.length === 0) {
       doc.font('Helvetica').fontSize(10).text("Nenhuma aula encontrada com os filtros atuais.", 30, yPosition + 10);
     } else {
